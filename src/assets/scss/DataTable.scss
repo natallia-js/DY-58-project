@@ -1,0 +1,98 @@
+// ----------------------------
+// Стили, общие для всех таблиц
+
+.dy58-table-title {
+  color: var(--dy58-tbl-title-text-color);
+  font-size: var(--dy58-tbl-title-font-size);
+  font-weight: bold;
+
+  text-align: center;
+}
+
+.dy58-table-upper-comment {
+  color: var(--dy58-tbl-comment-text-color) !important;
+  font-size: var(--dy58-tbl-comment-font-size) !important;
+
+  text-align: right;
+}
+
+.dy58-table-header-cell-class {
+  text-align: left !important;
+  vertical-align: middle !important;
+
+  background: var(--dy58-tbl-header-bg-color) !important;
+  color: var(--dy58-tbl-header-text-color) !important;
+  font-size: var(--dy58-tbl-header-font-size) !important;
+
+  padding: 5px 5px !important;
+
+  overflow: hidden;
+}
+
+.dy58-table-content-cell-class {
+  overflow: auto;
+  vertical-align: top !important;
+
+  color: var(--dy58-tbl-text-color) !important;
+  font-size: var(--dy58-tbl-text-font-size) !important;
+}
+
+// ---------------------------------------------------------------------
+// Стили для таблиц со входящими уведомлениями и распоряжениями в работе
+
+.dy58-order-state-img-style {
+  width: 10px !important;
+  height: 15px !important;
+}
+
+// ------------------------------------------------------------------------
+// Стили для таблиц с персоналом, которому необходимо передать распоряжение
+
+.dy58-send-original {
+  background-color: var(--dy58-send-original-color) !important;
+}
+
+.dy58-send-copy {
+  background-color: var(--dy58-send-copy-color) !important;
+}
+
+.dy58-do-not-send {
+  background-color: var(--dy58-do-not-send-color) !important;
+}
+
+.dy58-def-btn-color {
+  background-color: lightgray !important;
+}
+
+.dy58-tbl-send-btns-block {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 1px 0;
+}
+
+.dy58-send-status-btn {
+  min-width: 50px;
+  color: black !important;
+  border-radius: 3rem !important;
+  border: 1px solid var(--dy58-btn-bg-color) !important;
+  font-size: 0.8rem;
+  max-height: 20px !important;
+  line-height: 1.5 !important;
+}
+
+.dy58-shift-tbl-group-header {
+  text-align: center;
+  color: var(--dy58-nav-bar-bg-color) !important;
+  font-size: var(--dy58-tbl-text-font-size) !important;
+  font-weight: bold;
+  padding: 0 !important;
+  border: 2px solid var(--dy58-btn-bg-color);
+  text-transform: uppercase;
+}
+
+.dy58-send-btns-selectors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-row-gap: 5px;
+}

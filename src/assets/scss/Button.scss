@@ -1,0 +1,24 @@
+@mixin dy58-btn-general-style($bg-color, $border-color) {
+  border-radius: 3rem !important;
+  background-color: $bg-color !important;
+  border: 1px solid $border-color !important;
+}
+
+.dy58-button {
+  @include dy58-btn-general-style(var(--dy58-btn-bg-color), var(--dy58-btn-bg-color));
+}
+
+.dy58-button-non-active {
+  @include dy58-btn-general-style(transparent, var(--dy58-btn-bg-color));
+  color: var(--dy58-non-active-btn-text-color) !important;
+}
+
+.dy58-special-button {
+  @include dy58-btn-general-style(#00897b, #00897b);
+}
+
+.dy58-addon-button {
+  background-color: var(--surface-b) !important;
+  border-color: var(--surface-b) !important;
+  color: var(--text-color) !important;
+}

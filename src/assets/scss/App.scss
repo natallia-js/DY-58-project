@@ -1,0 +1,106 @@
+@import './vars.scss';
+@import './Button.scss';
+@import './DataTable.scss';
+@import './MainMenu.scss';
+@import './LeftMenu.scss';
+@import './Text.scss';
+@import './Footer.scss';
+
+
+/***************************************/
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-width: 80rem;
+}
+
+#app {
+  font-family: Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0.5rem;
+}
+
+/***************************************/
+
+.dy58-data-block {
+  padding-bottom: 10px;
+}
+
+.dy58-inline-block {
+  display: inline-block;
+}
+
+.dy58-row-flex-block {
+  display: flex;
+  flex-direction: row;
+}
+
+/***************************************/
+
+.no-uppercase {
+  text-transform: none !important;
+}
+
+/***************************************/
+
+.dy58-input-size-small {
+  width: 100px !important;
+}
+
+.dy58-input-size-50-percent {
+  width: 50% !important;
+}
+
+/***************************************/
+
+.dy58-padding-after {
+  padding-right: 10px !important;
+}
+
+.dy58-padding-before {
+  padding-left: 10px !important;
+}
+
+.dy58-margin-before {
+  margin-left: 10px !important;
+}
+
+.dy58-margin-after {
+  margin-right: 10px !important;
+}
+
+.dy58-margin-below {
+  margin-bottom: 10px !important;
+}
+
+.dy58-no-padding {
+  padding: 0 !important;
+}
+
+/***************************************/
+
+.is-today .datepicker-day-button {
+  border: 1px solid var(--dy58-datetime-pickers-bg-color) !important;
+  color: black !important;
+}
+
+.datepicker-date-display,
+.datepicker-row .is-selected,
+.timepicker-digital-display {
+  background-color: var(--dy58-datetime-pickers-bg-color) !important;
+}
+
+.datepicker-cancel, .datepicker-done, .timepicker-close {
+  color: var(--dy58-datetime-pickers-bg-color) !important;
+}
+
+/***************************************/
+
+.p-field {
+  margin-bottom: 0.5rem !important;
+}

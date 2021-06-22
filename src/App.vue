@@ -1,26 +1,44 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <nav-bar v-if="isUserAuthenticated && getUserCredential && getUserWorkPoligon" />
+  <router-view />
+  <footer-bar v-if="isUserAuthenticated && getUserCredential && getUserWorkPoligon" />
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+<script>
+  import NavBar from './components/NavBar';
+  import FooterBar from './components/FooterBar';
+  import { mapGetters, mapMutations } from 'vuex';
+
+  export default {
+    name: 'dy-58-app',
+
+    components: {
+      NavBar,
+      FooterBar,
+    },
+
+    computed: mapGetters([
+      'isUserAuthenticated',
+      'getUserCredential',
+      'getUserWorkPoligon',
+    ]),
+
+    mounted() {
+      setInterval(this.updateCurrDateTime, 1000);
+    },
+
+    methods: {
+      ...mapMutations(['setCurrDateTime']),
+
+      updateCurrDateTime() {
+        this.setCurrDateTime(new Date());
+      },
+    },
+  };
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
+<style lang="scss">
+  @import "./assets/scss/App.scss";
 </style>
