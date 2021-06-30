@@ -1,20 +1,38 @@
 <template>
-  <div class="dy58-title-small p-text-center p-mb-4">Предварительный просмотр</div>
+  <div class="dy58-title-small p-text-center p-mb-3">Предварительный просмотр</div>
   <div v-for="(array, index) of orderPatternArrays" :key="index" style="min-height:1.5rem">
     <template v-for="patternElement of array" :key="patternElement._id">
-      <order-pattern-element-view :element="patternElement" />
+      <span
+        v-if="patternElement.type === getOrderPatternElementTypes.TEXT"
+        class="p-mr-2 p-mb-2"
+        :style="{ display: 'inline-block' }"
+      >
+        <order-pattern-element-view :element="patternElement" />
+      </span>
+      <div
+        v-else
+        class="p-mr-2 p-mb-2"
+        :style="{
+          width: getElementSizesCorrespondence[patternElement.size],
+          display: 'inline-block'
+        }"
+      >
+        <order-pattern-element-view :element="patternElement" />
+      </div>
     </template>
   </div>
 </template>
 
 <script>
   import OrderPatternElementView from './OrderPatternElementView';
-  import { OrderPatternElementType } from '../../constants/orderPatterns';
+  import { OrderPatternElementType, ElementSizesCorrespondence } from '../../constants/orderPatterns';
 
   export default {
     name: 'dy58-order-pattern-preview',
 
-    props: ['orderPattern'],
+    props: {
+      orderPattern: Array,
+    },
 
     data() {
       return {
@@ -29,6 +47,10 @@
     computed: {
       getOrderPatternElementTypes() {
         return OrderPatternElementType;
+      },
+
+      getElementSizesCorrespondence() {
+        return ElementSizesCorrespondence;
       },
     },
 

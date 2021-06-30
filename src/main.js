@@ -36,6 +36,7 @@ import TreeSelect from 'primevue/treeselect';
 import Tree from 'primevue/tree';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmPopup from 'primevue/confirmpopup';
+import ContextMenu from 'primevue/contextmenu';
 
 const app = createApp(App);
 
@@ -69,5 +70,6 @@ app.component('Dialog', Dialog);
 app.component('TreeSelect', TreeSelect);
 app.component('Tree', Tree);
 app.component('ConfirmPopup', ConfirmPopup);
+app.component('ContextMenu', ContextMenu);
 
 app.mount('#app');

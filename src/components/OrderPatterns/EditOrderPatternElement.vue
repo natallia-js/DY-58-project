@@ -37,12 +37,19 @@
 <script>
   import SelectedPatternElementView from './SelectedPatternElementView';
   import ElementSizeChooser from './ElementSizeChooser';
-  import { OrderPatternElementType, OrderPatternElementTypeNames } from '../../constants/orderPatterns';
+  import {
+    OrderPatternElementType,
+    OrderPatternElementTypeNames,
+    PossibleElementSizes,
+  } from '../../constants/orderPatterns';
 
   export default {
     name: 'dy58-edit-order-pattern-element',
 
-    props: ['okButtonText'],
+    props: {
+      element: Object,
+      okButtonText: String,
+    },
 
     components: {
       ElementSizeChooser,
@@ -52,7 +59,7 @@
     data() {
       return {
         selectedPatternElementType: null,
-        selectedPatternElement: null,
+        //selectedPatternElement: null,
       };
     },
 
@@ -68,8 +75,33 @@
           };
         });
       },
-      getOrderPatternElementTypeName(type) {
+      getOrderPatternElementTypeName(type) {console.log(type)
         return OrderPatternElementTypeNames[type];
+      },
+      initialPatternElements() {
+        return Object.values(OrderPatternElementType).map((elType) => {
+          let elementSize = null;
+          if (this.element && this.element.size) {
+            elementSize = this.element.size;
+          } else if (elType === OrderPatternElementType.INPUT || elType === OrderPatternElementType.SELECT) {
+            elementSize = PossibleElementSizes.SMALL;
+          } else {
+            elementSize = PossibleElementSizes.AUTO;
+          }
+          return {
+            type: elType,
+            size: elementSize,
+            ref: this.element && this.element.ref ? this.element.ref : null,
+            value: this.element && this.element.value ? this.element.value : null,
+          };
+        });
+      },
+      selectedPatternElement() {
+        if (!this.element || !this.element.type || !Object.values(OrderPatternElementType).includes(this.element.type)) {
+          return this.initialPatternElements[0];
+        } else {
+          return this.initialPatternElements.find(el => el.type === this.element.type);
+        }
       },
     },
   };

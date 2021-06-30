@@ -1,0 +1,25 @@
+@mixin dy58-order-pattern-element-block($border-color) {
+  border-width: 2px;
+  border-style: solid;
+  border-color: $border-color;
+}
+
+.dy58-not-edited-order-pattern-element-block {
+  @include dy58-order-pattern-element-block(var(--surface-400));
+}
+
+.dy58-edited-order-pattern-element-block {
+  @include dy58-order-pattern-element-block(var(--primary-color));
+}
+
+.dy58-outer-cursor-block {
+  width: auto !important;
+  margin: 0 10px 10px 0;
+  display: flex;
+}
+
+.dy58-order-pattern-border {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--surface-400);
+}

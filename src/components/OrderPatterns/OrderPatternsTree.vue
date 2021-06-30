@@ -3,8 +3,14 @@
   <div v-if="!allOrderPatterns || !allOrderPatterns.length">
     Список шаблонов распоряжений пуст
   </div>
-  <div v-if="allOrderPatterns && allOrderPatterns.length" class="p-grid">
-    <div class="p-col-4">
+  <div v-else class="p-grid">
+    <div class="p-col-4 dy58-order-patterns-tree">
+      <Button
+        icon="pi pi-refresh"
+        class="p-button-rounded p-button-success dy58-refresh-orders-list-btn"
+        v-tooltip.right="'Обновить список распоряжений'"
+        @click="refreshOrderPatterns"
+      />
       <Tree
         :value="allOrderPatterns"
         selectionMode="single"
@@ -66,7 +72,7 @@
       </div>
 
       <div v-if="editedPattern && editedPattern.elements" class="dy58-order-pattern-border p-p-2">
-        <div class="dy58-title-small p-mb-4 p-text-center">
+        <div class="dy58-title-small p-mb-3 p-text-center">
           Редактирование распоряжения
         </div>
         <div class="p-text-bold p-mb-2">Наименование распоряжения</div>
@@ -75,6 +81,15 @@
             :value="editedPattern ? editedPattern.title : null"
             style="width:100%"
             @change="handleEditOrderPatternTitle"
+          />
+        </div>
+        <div class="p-mb-2">
+          <EditOrderPattern
+            :orderPattern="editedPattern.elements"
+            :insertOrderElementPos="insertOrderElementPos"
+            @deleteOrderPatternElement="delPatternElement"
+            @insertBeforeOrderPatternElement="setCursorBeforeElement"
+            @insertAfterOrderPatternElement="setCursorAfterElement"
           />
         </div>
       </div>
@@ -87,12 +102,14 @@
   import { mapGetters } from 'vuex';
   import { OrderPatternsNodeType } from '../../constants/orderPatterns';
   import OrderPatternPreview from './OrderPatternPreview';
+  import EditOrderPattern from './EditOrderPattern';
 
   export default {
     name: 'dy58-order-patterns-tree',
 
     components: {
       OrderPatternPreview,
+      EditOrderPattern,
     },
 
     data() {
@@ -120,6 +137,9 @@
     },
 
     methods: {
+      refreshOrderPatterns() {
+      },
+
       reset() {
         if (this.editedPattern) {
           this.editedPattern = null;
@@ -203,7 +223,7 @@
         this.insertOrderElementPos = this.selectedPattern.elements.length;
       },
 
-      handleEditOrderPatternTitle(e) {console.log(e)
+      handleEditOrderPatternTitle(e) {
         if (!this.editedPattern) {
           return;
         }
@@ -211,10 +231,46 @@
           ...this.editedPattern,
           title: e.target.value,
         };
-        console.log(this.editedPattern)
+        //console.log(this.editedPattern)
         if (!this.patternEdited) {
           this.patternEdited = true;
         }
+      },
+
+      setCursorBeforeElement(elementId) {
+        const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        this.insertOrderElementPos = elementIndex !== 0 ? elementIndex : -1;
+      },
+
+      setCursorAfterElement(elementId) {
+        const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        this.insertOrderElementPos = elementIndex + 1;
+      },
+
+      delPatternElement(elementId) {
+        const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        if (elementIndex < this.insertOrderElementPos) {
+          this.insertOrderElementPos -= 1;
+        }
+        this.editedPattern = {
+          ...this.editedPattern,
+          elements: this.editedPattern.elements.filter((el) => el._id !== elementId),
+        };
+        if (!this.patternEdited) {
+          this.patternEdited = true;
+        }
+      },
+
+      editPatternElement() {
       },
     },
   };
@@ -222,9 +278,13 @@
 
 
 <style scoped>
-  .dy58-order-pattern-border {
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--surface-400);
+  .dy58-order-patterns-tree {
+    position: relative;
+  }
+
+  .dy58-refresh-orders-list-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 </style>

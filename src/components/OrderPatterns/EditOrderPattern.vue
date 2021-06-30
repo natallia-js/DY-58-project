@@ -1,27 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Popover, Row, Col, Space } from 'antd';
-import { EditOrderPatternElement } from '../EditOrderPatternElement';
-import { OrderPatternElementType } from '../constants';
-import getOrderPatternElementView from '../getOrderPatternElementView';
-import { ORDER_PATTERN_ELEMENT_FIELDS } from '../../../constants';
-
-const { Title, Text } = Typography;
-
 <template>
-  <div class="dy58-title-small p-text-center p-mb-4">Редактирование шаблона</div>
-  <div v-for="(array, arrayIndex) of orderPatternArrays" :key="arrayIndex">
+  <div class="dy58-title-small p-text-center p-mb-3">
+    Редактирование шаблона
+  </div>
+
+  <div
+    v-for="(array, arrayIndex) of orderPatternArrays"
+    :key="arrayIndex"
+    class="p-d-flex p-flex-wrap"
+  >
     <template v-for="(patternElement, arrIndex) of array" :key="arrIndex">
       <Cursor
         v-if="(arrayIndex === 0 && arrIndex === 0 && insertOrderElementPos === -1) ||
               (arrIndex === 0 && patternElement.index === insertOrderElementPos)"
       />
 
-      <div :class="[
-        'outer-cursor-block': true,
-        'not-edited-order-pattern-element-block': patternElement.key !== editedPatternElementId,
-        'edited-order-pattern-element-block': patternElement.key === editedPatternElementId,
-      ]">
-        <!-- popover -->
+      <ContextMenu ref="menu" :model="orderPatternElementContextMenuItems">
+        <template #item="{item}">
+          <p class="p-m-2">
+            <a
+              href="#!"
+              class="dy58-context-menu-item"
+              @click="item.handler"
+            >
+              {{ item.label }}
+            </a>
+          </p>
+        </template>
+      </ContextMenu>
+
+      <div
+        :class="{
+          'dy58-outer-cursor-block p-d-flex p-jc-center p-ai-center': true,
+          'dy58-not-edited-order-pattern-element-block': patternElement._id !== editedPatternElementId,
+          'dy58-edited-order-pattern-element-block': patternElement._id === editedPatternElementId,
+        }"
+        @contextmenu="onShowOrderPatternElementContextMenu($event, patternElement)"
+      >
+        <order-pattern-element-view :element="patternElement" />
       </div>
 
       <Cursor
@@ -31,301 +46,146 @@ const { Title, Text } = Typography;
     </template>
   </div>
 
-  <div v-if="editedPatternElementId" class="order-pattern-border order-pattern-block">
-    <div>
-      <div class="p-text-bold">Редактирование элемента шаблона</div>
-      <EditOrderPatternElement
-        element={orderPattern.find((el) => el[ORDER_PATTERN_ELEMENT_FIELDS.KEY] === editedPatternElementId)}
-        submitOrderPatternElementCallback={
-          (editedPatternElement) => editPatternElementCallback(editedPatternElementId, editedPatternElement)
-        }
-        okButtonText="Применить редактирование"
-      />
-    </div>
+  <div
+    v-if="editedPatternElementId"
+    className="dy58-order-pattern-border"
+  >
+    <div class="dy58-title-small p-text-center p-mb-3">Редактирование элемента шаблона</div>
+    <EditOrderPatternElement
+      :element="orderPattern.find((el) => el._id === editedPatternElementId)"
+      @submitOrderPatternElement="handleSubmitOrderPatternElement"
+      okButtonText="Применить редактирование"
+    />
   </div>
-
-
-  {
-    orderPatternArrays.map((array, arraysIndex) => (
-      <Row key={arraysIndex}>
-      {
-        array.map((patternElement, arrIndex) => (
-          <React.Fragment key={patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY]}>
-            {
-              ((arraysIndex === 0 && arrIndex === 0 && insertOrderElementPos === -1) ||
-              (arrIndex === 0 && patternElement.index === insertOrderElementPos)) &&
-              <Cursor />
-            }
-            <Col
-              className={
-                patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                'not-edited-order-pattern-element-block' :
-                'edited-order-pattern-element-block'
-              }
-              style={{ width: 'auto', margin: '0 10px 10px 0' }}
-            >
-              {
-                <Popover
-                  content={
-                    <div>
-                      <p>
-                        <a href="#!" onClick={() =>
-                          patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                          setEditedPatternElementId(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY]) :
-                          setEditedPatternElementId(null)}
-                        >
-                          {
-                            patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                            'Редактировать' : 'Отменить редактирование'
-                          }
-                        </a>
-                      </p>
-                      <p>
-                        <a href="#!" onClick={() => delPatternElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                          Удалить
-                        </a>
-                      </p>
-                      <p>
-                        <a href="#!" onClick={() => setCursorBeforeElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                          Вставить элемент перед
-                        </a>
-                      </p>
-                      <p>
-                        <a href="#!" onClick={() => setCursorAfterElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                          Вставить элемент после
-                        </a>
-                      </p>
-                    </div>
-                  }
-                  trigger="click"
-                >
-                  <Row>
-                    <Col>
-                      {getOrderPatternElementView(patternElement)}
-                    </Col>
-                  </Row>
-                </Popover>
-              }
-            </Col>
-            {
-              (arrIndex !== array.length - 1 || arraysIndex === orderPatternArrays.length - 1) &&
-              (patternElement.index === insertOrderElementPos - 1) &&
-              <Cursor />
-            }
-          </React.Fragment>
-        ))
-      }
-      </Row>
-    ))
-  }
-  {
-    editedPatternElementId &&
-    <div className="order-pattern-border order-pattern-block">
-      <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Text strong>Редактирование элемента шаблона</Text>
-        <EditOrderPatternElement
-          element={orderPattern.find((el) => el[ORDER_PATTERN_ELEMENT_FIELDS.KEY] === editedPatternElementId)}
-          submitOrderPatternElementCallback={
-            (editedPatternElement) => editPatternElementCallback(editedPatternElementId, editedPatternElement)
-          }
-          okButtonText="Применить редактирование"
-        />
-      </Space>
-    </div>
-  }
 </template>
 
 
 <script>
   import Cursor from './Cursor';
+  import { OrderPatternElementType } from '../../constants/orderPatterns';
+  import OrderPatternElementView from './OrderPatternElementView';
+  import EditOrderPatternElement from './EditOrderPatternElement';
 
   export default {
     name: 'dy58-edit-order-pattern',
 
+    props: {
+      orderPattern: Array,
+      insertOrderElementPos: Number,
+    },
+
+    components: {
+      Cursor,
+      OrderPatternElementView,
+      EditOrderPatternElement,
+    },
+
     data() {
       return {
         orderPatternArrays: [],
+        editedPatternElementId: null,
+        orderPatternElementWithOpenContextMenu: null,
       };
     },
 
-    props: [
-      '',
-    ],
-  }
+    computed: {
+      orderPatternElementContextMenuItems() {
+        return [
+          {
+            label: !this.orderPatternElementWithOpenContextMenu ||
+                   this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId ?
+                   'Редактировать' : 'Отменить редактирование',
+            handler: () => {
+              if (this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId) {
+                this.editedPatternElementId = this.orderPatternElementWithOpenContextMenu._id;
+              } else {
+                this.editedPatternElementId = null;
+              }
+            },
+          },
+          {
+            label: 'Удалить',
+            handler: () => {
+              this.$emit('deleteOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
+            },
+          },
+          {
+            label: 'Вставить элемент перед',
+            handler: () => {
+              this.$emit('insertBeforeOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
+            },
+          },
+          {
+            label: 'Вставить элемент после',
+            handler: () => {
+              this.$emit('insertAfterOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
+            },
+          },
+        ];
+      },
+    },
+
+    mounted() {
+      this.formOrderPatternArrays(this.orderPattern);
+    },
+
+    watch: {
+      orderPattern: function(newVal) {
+        this.formOrderPatternArrays(newVal);
+      },
+    },
+
+    methods: {
+      formOrderPatternArrays(newOrderPattern) {
+        if (!newOrderPattern || !newOrderPattern.length) {
+          this.editedPatternElementId = null;
+          this.orderPatternArrays = [];
+          return;
+        }
+        if (!newOrderPattern.find((el) => el._id === this.editedPatternElementId)) {
+          this.editedPatternElementId = null;
+        }
+        const linebreakElementsIndexes = [];
+        const orderPatternForWork = [];
+        newOrderPattern.forEach((element, index) => {
+          if (element.type === OrderPatternElementType.LINEBREAK) {
+            linebreakElementsIndexes.push(index);
+          }
+          orderPatternForWork.push({
+            ...element,
+            index,
+          });
+        });
+        linebreakElementsIndexes.push(newOrderPattern.length);
+
+        let prevLinebreakIndex = 0;
+        const orderPatternToDraw = [];
+        linebreakElementsIndexes.forEach((element) => {
+          const arrayPart = orderPatternForWork.slice(prevLinebreakIndex, element + 1);
+          prevLinebreakIndex = element + 1;
+          if (arrayPart && arrayPart.length) {
+            orderPatternToDraw.push(arrayPart);
+          }
+        });
+        this.orderPatternArrays = orderPatternToDraw;
+      },
+
+      onShowOrderPatternElementContextMenu(event, patternElement) {
+        this.orderPatternElementWithOpenContextMenu = patternElement;
+        this.$refs.menu.show(event);
+      },
+
+      handleSubmitOrderPatternElement(editedElement) {
+        console.log(editedElement)
+      },
+    },
+  };
 </script>
 
 
-<style lang="scss" scoped>
-  @mixin order-pattern-element-block($border-color) {
-    border-width: 2px;
-    border-style: solid;
-    border-color: $border-color;
-  }
-
-  .not-edited-order-pattern-element-block {
-    @include order-pattern-element-block(var(--surface-400));
-  }
-
-  .edited-order-pattern-element-block {
-    @include order-pattern-element-block(var(--primary-color));
-  }
-
-  .outer-cursor-block {
-    width: auto;
-    margin: 0 10px 10px 0;
-  }
-
-  .order-pattern-border {
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--primary-color);
-  }
-
-  .order-pattern-block {
-    padding: 0.5rem;
+<style scoped>
+  .dy58-context-menu-item {
+    color: var(--primary-color);
+    text-decoration: none;
   }
 </style>
-
-
-  const {
-    orderPattern,
-    insertOrderElementPos,
-    setCursorBeforeElementCallback,
-    setCursorAfterElementCallback,
-    delPatternElementCallback,
-    editPatternElementCallback,
-  } = props;
-  const [orderPatternArrays, setOrderPatternArrays] = useState([]);
-  const [editedPatternElementId, setEditedPatternElementId] = useState(null);
-
-  useEffect(() => {
-    if (!orderPattern || !orderPattern.length) {
-      setEditedPatternElementId(null);
-      setOrderPatternArrays([]);
-      return;
-    }
-
-    if (!orderPattern.find((el) => el[ORDER_PATTERN_ELEMENT_FIELDS.KEY] === editedPatternElementId)) {
-      setEditedPatternElementId(null);
-    }
-
-    const linebreakElementsIndexes = [];
-    const orderPatternForWork = [];
-    orderPattern.forEach((element, index) => {
-      if (element[ORDER_PATTERN_ELEMENT_FIELDS.TYPE] === OrderPatternElementType.LINEBREAK) {
-        linebreakElementsIndexes.push(index);
-      }
-      orderPatternForWork.push({
-        ...element,
-        index,
-      });
-    });
-    linebreakElementsIndexes.push(orderPattern.length);
-
-    let prevLinebreakIndex = 0;
-    const orderPatternToDraw = [];
-    linebreakElementsIndexes.forEach((element) => {
-      const arrayPart = orderPatternForWork.slice(prevLinebreakIndex, element + 1);
-      prevLinebreakIndex = element + 1;
-      if (arrayPart && arrayPart.length) {
-        orderPatternToDraw.push(arrayPart);
-      }
-    });
-    setOrderPatternArrays(orderPatternToDraw);
-  }, [editedPatternElementId, orderPattern]);
-
-
-  return (
-    <>
-      <Title level={4} className="center">Редактирование шаблона</Title>
-      {
-        orderPatternArrays.map((array, arraysIndex) => (
-          <Row key={arraysIndex}>
-          {
-            array.map((patternElement, arrIndex) => (
-              <React.Fragment key={patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY]}>
-                {
-                  ((arraysIndex === 0 && arrIndex === 0 && insertOrderElementPos === -1) ||
-                  (arrIndex === 0 && patternElement.index === insertOrderElementPos)) &&
-                  <Cursor />
-                }
-                <Col
-                  className={
-                    patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                    'not-edited-order-pattern-element-block' :
-                    'edited-order-pattern-element-block'
-                  }
-                  style={{ width: 'auto', margin: '0 10px 10px 0' }}
-                >
-                  {
-                    <Popover
-                      content={
-                        <div>
-                          <p>
-                            <a href="#!" onClick={() =>
-                              patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                              setEditedPatternElementId(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY]) :
-                              setEditedPatternElementId(null)}
-                            >
-                              {
-                                patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY] !== editedPatternElementId ?
-                                'Редактировать' : 'Отменить редактирование'
-                              }
-                            </a>
-                          </p>
-                          <p>
-                            <a href="#!" onClick={() => delPatternElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                              Удалить
-                            </a>
-                          </p>
-                          <p>
-                            <a href="#!" onClick={() => setCursorBeforeElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                              Вставить элемент перед
-                            </a>
-                          </p>
-                          <p>
-                            <a href="#!" onClick={() => setCursorAfterElementCallback(patternElement[ORDER_PATTERN_ELEMENT_FIELDS.KEY])}>
-                              Вставить элемент после
-                            </a>
-                          </p>
-                        </div>
-                      }
-                      trigger="click"
-                    >
-                      <Row>
-                        <Col>
-                          {getOrderPatternElementView(patternElement)}
-                        </Col>
-                      </Row>
-                    </Popover>
-                  }
-                </Col>
-                {
-                  (arrIndex !== array.length - 1 || arraysIndex === orderPatternArrays.length - 1) &&
-                  (patternElement.index === insertOrderElementPos - 1) &&
-                  <Cursor />
-                }
-              </React.Fragment>
-            ))
-          }
-          </Row>
-        ))
-      }
-      {
-        editedPatternElementId &&
-        <div className="order-pattern-border order-pattern-block">
-          <Space direction="vertical" size={12} style={{ width: '100%' }}>
-            <Text strong>Редактирование элемента шаблона</Text>
-            <EditOrderPatternElement
-              element={orderPattern.find((el) => el[ORDER_PATTERN_ELEMENT_FIELDS.KEY] === editedPatternElementId)}
-              submitOrderPatternElementCallback={
-                (editedPatternElement) => editPatternElementCallback(editedPatternElementId, editedPatternElement)
-              }
-              okButtonText="Применить редактирование"
-            />
-          </Space>
-        </div>
-      }
-    </>
-  );
-};

@@ -4,20 +4,17 @@
   </span>
   <InputText
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
-    :style="{width:getElementSizesCorrespondence[element.size]}"
-    class="p-ml-1 p-mr-1 p-mb-2"
+    :style="{ width: getElementSizesCorrespondence[element.size] }"
   />
   <Dropdown
     v-else-if="element.type === getOrderPatternElementTypes.SELECT"
-    :style="{width:getElementSizesCorrespondence[element.size]}"
-    class="p-ml-1 p-mr-1 p-mb-2"
+    :style="{ width: getElementSizesCorrespondence[element.size] }"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
     :dateFormat="getDateFormat"
     :showIcon="true"
     placeholder="дата"
-    class="p-ml-1 p-mr-1 p-mb-2"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.TIME"
@@ -25,7 +22,6 @@
     :timeOnly="true"
     :showIcon="true"
     placeholder="время"
-    class="p-ml-1 p-mr-1 p-mb-2"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
@@ -33,11 +29,11 @@
     :showTime="true"
     :showIcon="true"
     placeholder="дата-время"
-    class="p-ml-1 p-mr-1 p-mb-2"
   />
   <i
     v-else-if="element.type === getOrderPatternElementTypes.LINEBREAK"
-    class="pi pi-reply p-ml-1 p-mr-1"
+    class="pi pi-reply"
+    style="transform: rotate(180deg)"
   ></i>
   <template v-else></template>
 </template>

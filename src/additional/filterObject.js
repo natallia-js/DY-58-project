@@ -1,3 +1,10 @@
+/**
+ * Позволяет отфильтровать поля объекта
+ *
+ * @param {*} obj - объект
+ * @param {*} predicate - условие фильтрации
+ * @returns - объект, созданный на основе obj, поля которого удовлетворяют predicate
+ */
 export function filterObj(obj, predicate) {
   let result = {}, key;
   for (key in obj) {
