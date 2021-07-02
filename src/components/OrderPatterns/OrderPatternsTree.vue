@@ -90,6 +90,7 @@
             @deleteOrderPatternElement="delPatternElement"
             @insertBeforeOrderPatternElement="setCursorBeforeElement"
             @insertAfterOrderPatternElement="setCursorAfterElement"
+            @submitEditOrderPatternElement="handleSubmitEditOrderPatternElement"
           />
         </div>
       </div>
@@ -231,7 +232,6 @@
           ...this.editedPattern,
           title: e.target.value,
         };
-        //console.log(this.editedPattern)
         if (!this.patternEdited) {
           this.patternEdited = true;
         }
@@ -270,7 +270,27 @@
         }
       },
 
-      editPatternElement() {
+      handleSubmitEditOrderPatternElement({ editedPatternElementId, editedElement }) {
+        const elementIndex = this.editedPattern.elements.findIndex((element) =>
+          element._id === editedPatternElementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        this.editedPattern = {
+          ...this.editedPattern,
+          elements: this.editedPattern.elements.map((el) => {
+            if (el._id !== editedPatternElementId) {
+              return el;
+            }
+            return {
+              _id: editedPatternElementId,
+              ...editedElement,
+            };
+          }),
+        };
+        if (!this.patternEdited) {
+          this.patternEdited = true;
+        }
       },
     },
   };

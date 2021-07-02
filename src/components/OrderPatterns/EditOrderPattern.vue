@@ -48,12 +48,12 @@
 
   <div
     v-if="editedPatternElementId"
-    className="dy58-order-pattern-border"
+    className="dy58-order-pattern-border p-p-2"
   >
-    <div class="dy58-title-small p-text-center p-mb-3">Редактирование элемента шаблона</div>
+    <div class="p-mb-3 p-text-bold">Редактирование элемента шаблона</div>
     <EditOrderPatternElement
       :element="orderPattern.find((el) => el._id === editedPatternElementId)"
-      @submitOrderPatternElement="handleSubmitOrderPatternElement"
+      @submitEditOrderPatternElement="handleSubmitEditOrderPatternElement"
       okButtonText="Применить редактирование"
     />
   </div>
@@ -82,8 +82,11 @@
 
     data() {
       return {
+        // Массив элементов шаблона либо несколько массивов, если исходный шаблон содержит переносы строк
         orderPatternArrays: [],
+        // id редактируемого элемента шаблона
         editedPatternElementId: null,
+        // элемент шаблона, для которого пользователь вызывает контекстное меню
         orderPatternElementWithOpenContextMenu: null,
       };
     },
@@ -136,6 +139,8 @@
     },
 
     methods: {
+      // Формирует массив(-ы, если шаблон содержит переносы строк) элементов шаблона,
+      // которые необходимо отобразить
       formOrderPatternArrays(newOrderPattern) {
         if (!newOrderPattern || !newOrderPattern.length) {
           this.editedPatternElementId = null;
@@ -175,8 +180,11 @@
         this.$refs.menu.show(event);
       },
 
-      handleSubmitOrderPatternElement(editedElement) {
-        console.log(editedElement)
+      handleSubmitEditOrderPatternElement(editedElement) {
+        this.$emit('submitEditOrderPatternElement', {
+          editedPatternElementId: this.editedPatternElementId,
+          editedElement
+        });
       },
     },
   };

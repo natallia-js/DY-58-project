@@ -4,37 +4,51 @@
       <SelectButton
         v-model="selectedPatternElementType"
         :options="getOrderPatternElementTypes"
-        optionLabel="value"
       >
         <template #option="slotProps">
-          <div>{{ getOrderPatternElementTypeName(slotProps.option.name) }}</div>
+          <div>{{ getOrderPatternElementTypeNames[slotProps.option.name] }}</div>
         </template>
       </SelectButton>
     </div>
-    <div>
+    <div v-if="selectedPatternElement" class="p-mt-2">
       <div class="p-mb-2">
-        <span v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.TEXT">Введите текст:</span>
-        <span v-else>Образец:</span>
-        <selected-pattern-element-view :element="selectedPatternElement" />
+        <div
+          v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.TEXT"
+          class="p-mb-1"
+        >
+          Введите текст:
+        </div>
+        <div v-else class="p-mb-1">Образец:</div>
+        <selected-pattern-element-view
+          :element="selectedPatternElement"
+          @changePatternElementValue="handleChangePatternElementValue"
+        />
       </div>
-    </div>
-    <div
-      v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.INPUT ||
-        selectedPatternElement.type === getOrderPatternElementTypesObject.SELECT"
-      class="p-grid"
-    >
-      <div class="p-col">
-        <element-size-chooser :chosenSize="selectedPatternElement.size" />
+      <div
+        v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.INPUT ||
+          selectedPatternElement.type === getOrderPatternElementTypesObject.SELECT"
+        class="p-grid"
+      >
+        <div class="p-col">
+          <span class="p-mr-2">Размер:</span>
+          <element-size-chooser
+            :chosenSize="selectedPatternElement.size"
+            @changeSize="(value) => handleChangePatternElementSize(value)"
+          />
+        </div>
       </div>
-    </div>
-    <div>
-      <Button type="button" :label="okButtonText" />
+      <div>
+        <Button type="button" :label="okButtonText" @click="handleSubmitOrderPatternElement" />
+      </div>
     </div>
   </div>
 </template>
 
 
 <script>
+  /**
+   * Данный компонент озволяет создать новый либо отредактировать существующий элемент шаблона распоряжения
+   */
   import SelectedPatternElementView from './SelectedPatternElementView';
   import ElementSizeChooser from './ElementSizeChooser';
   import {
@@ -47,7 +61,9 @@
     name: 'dy58-edit-order-pattern-element',
 
     props: {
+      // null (если необходимо создать новый элемент шаблона) либо объект со свойствами type, width, ref, value
       element: Object,
+      // текст, отображаемый на кнопке, нажатие на которую означает согласие пользователя с произведенными изменениями
       okButtonText: String,
     },
 
@@ -58,9 +74,42 @@
 
     data() {
       return {
+        // привязка к текущему выбранному значению типа элемента шаблона распоряжения
         selectedPatternElementType: null,
-        //selectedPatternElement: null,
+        // массив объектов допустимых элементов шаблона распоряжения
+        availablePatternElements: null,
+        // элемент шаблона, с которым работает пользователь (если element не задан, то выбирается первый допустимый элемент)
+        selectedPatternElement: null,
       };
+    },
+
+    watch: {
+      element: function(newVal) {
+        this.selectedPatternElementType = newVal ?
+          this.getOrderPatternElementTypes.find((type) => type.value === newVal.type) : null;
+        this.selectedPatternElement = this.getSelectedPatternElement(newVal);
+      },
+
+      // Реакция на изменение типа элемента шаблона: меняем выбранный элемент шаблона, запоминая
+      // перед этим состояние текущего элемента шаблона
+      selectedPatternElementType: function(newVal) {
+        this.availablePatternElements = this.availablePatternElements.map((el) => {
+          if (el.type !== this.selectedPatternElement.type) {
+            return el;
+          }
+          return {
+            ...this.selectedPatternElement,
+          };
+        });
+        this.selectedPatternElement = this.availablePatternElements.find(el => el.type === newVal.value);
+      },
+    },
+
+    mounted() {
+      this.selectedPatternElementType = this.element ?
+        this.getOrderPatternElementTypes.find((type) => type.value === this.element.type) : null;
+      this.availablePatternElements = this.initialPatternElements;
+      this.selectedPatternElement = this.getSelectedPatternElement(this.element);
     },
 
     computed: {
@@ -75,8 +124,8 @@
           };
         });
       },
-      getOrderPatternElementTypeName(type) {console.log(type)
-        return OrderPatternElementTypeNames[type];
+      getOrderPatternElementTypeNames() {
+        return OrderPatternElementTypeNames;
       },
       initialPatternElements() {
         return Object.values(OrderPatternElementType).map((elType) => {
@@ -96,12 +145,42 @@
           };
         });
       },
-      selectedPatternElement() {
-        if (!this.element || !this.element.type || !Object.values(OrderPatternElementType).includes(this.element.type)) {
+    },
+
+    methods: {
+      getSelectedPatternElement(el) {
+        if (!el || !el.type || !Object.values(OrderPatternElementType).includes(el.type)) {
           return this.initialPatternElements[0];
         } else {
-          return this.initialPatternElements.find(el => el.type === this.element.type);
+          return this.initialPatternElements.find((elem) => elem.type === el.type);
         }
+      },
+
+      // Обрабатываем событие подтверждения окончания редактирования текущего элемента шаблона
+      // (передаем данный элемент "наверх")
+      handleSubmitOrderPatternElement() {
+        if ((this.selectedPatternElement.type === OrderPatternElementType.TEXT) &&
+            (!this.selectedPatternElement.value || this.selectedPatternElement.value.trim() === '')) {
+          return;
+        }
+        if (this.selectedPatternElement.type !== OrderPatternElementType.TEXT) {
+          this.selectedPatternElement.value = null;
+        }
+        this.$emit('submitEditOrderPatternElement', this.selectedPatternElement);
+      },
+
+      handleChangePatternElementValue(newVal) {
+        this.selectedPatternElement = {
+          ...this.selectedPatternElement,
+          value: newVal,
+        };
+      },
+
+      handleChangePatternElementSize(newSize) {
+        this.selectedPatternElement = {
+          ...this.selectedPatternElement,
+          size: newSize,
+        };
       },
     },
   };

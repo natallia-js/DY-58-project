@@ -32,7 +32,11 @@
     :showIcon="true"
     placeholder="дата-время"
   />
-  <i v-else-if="element.type === getOrderPatternElementTypes.LINEBREAK"></i>
+  <i
+    v-else-if="element.type === getOrderPatternElementTypes.LINEBREAK"
+    class="pi pi-reply"
+    style="transform: rotate(180deg)"
+  ></i>
   <template v-else></template>
 </template>
 
@@ -49,11 +53,26 @@
 
     data() {
       return {
-        elementValue: this.element.value,
+        elementValue: null,
       };
     },
 
-    props: ['element'],
+    props: {
+      element: Object,
+    },
+
+    watch: {
+      element(newVal) {
+        this.elementValue = newVal ? newVal.value : null;
+      },
+      elementValue(newVal) {
+        this.$emit('changePatternElementValue', newVal);
+      },
+    },
+
+    mounted() {
+      this.elementValue = this.element ? this.element.value : null;
+    },
 
     computed: {
       getOrderPatternElementTypes() {

@@ -4,7 +4,6 @@
     v-model="selectedSize"
     :options="getPossibleElementSizes"
     placeholder="Выберите размер элемента"
-    @change="handleChangeSize"
   />
 </template>
 
@@ -15,7 +14,9 @@
   export default {
     name: 'dy58-element-size-chooser',
 
-    props: ['chosenSize'],
+    props: {
+      chosenSize: String,
+    },
 
     data() {
       return {
@@ -29,9 +30,9 @@
       },
     },
 
-    methods: {
-      handleChangeSize(e) {
-        console.log(e)
+    watch: {
+      selectedSize(newVal) {
+        this.$emit('changeSize', newVal);
       },
     },
   };
