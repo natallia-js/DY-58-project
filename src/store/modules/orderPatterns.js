@@ -7,6 +7,7 @@ export const orderPatterns = {
   state: {
     patterns: [],
     errorLoadingPatterns: null,
+    modifyOrderCategoryTitleResult: null,
   },
 
   getters: {
@@ -24,7 +25,6 @@ export const orderPatterns = {
 
     getOrderPatternsToDisplayInTreeSelect(state) {
       // data is grouped by order category
-      console.log(state.patterns)
       const orders = state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.ORDER);
       const groupedOrders = [];
       orders.forEach((order) => {
@@ -44,6 +44,15 @@ export const orderPatterns = {
       return groupedOrders;
     },
 
+    getOrderPatternsTreeNodeKey() {
+      return (treeNodeAttrsArray) => {
+        if (!treeNodeAttrsArray || !treeNodeAttrsArray.length) {
+          return null;
+        }
+        return treeNodeAttrsArray.reduce((accumulator, currentValue) => `${accumulator}${currentValue}`, '');
+      };
+    },
+
     getOrderPatternsToDisplayInTreeComponent(state) {
       if (!state.patterns || !state.patterns.length) {
         return [];
@@ -57,12 +66,10 @@ export const orderPatterns = {
             label: orderPattern.service,
             key: orderPattern.service,
             type: OrderPatternsNodeType.SERVICE,
-            //icon: 'pi pi-folder',
             children: [{
               label: orderPattern.type,
               key: `${orderPattern.service}${orderPattern.type}`,
               type: OrderPatternsNodeType.ORDER_TYPE,
-              //icon: 'pi pi-folder',
               children: [{
                 label: orderPattern.category,
                 key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
@@ -71,7 +78,6 @@ export const orderPatterns = {
                   service: orderPattern.service,
                   orderType: orderPattern.type,
                 },
-                //icon: 'pi pi-folder',
                 children: [{
                   label: orderPattern.title,
                   key: orderPattern._id,
@@ -89,7 +95,6 @@ export const orderPatterns = {
               label: orderPattern.type,
               key: `${orderPattern.service}${orderPattern.type}`,
               type: OrderPatternsNodeType.ORDER_TYPE,
-              //icon: 'pi pi-folder',
               children: [{
                 label: orderPattern.category,
                 key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
@@ -98,7 +103,6 @@ export const orderPatterns = {
                   service: orderPattern.service,
                   orderType: orderPattern.type,
                 },
-                //icon: 'pi pi-folder',
                 children: [{
                   label: orderPattern.title,
                   key: orderPattern._id,
@@ -119,7 +123,6 @@ export const orderPatterns = {
                   service: orderPattern.service,
                   orderType: orderPattern.type,
                 },
-                //icon: 'pi pi-folder',
                 children: [{
                   label: orderPattern.title,
                   key: orderPattern._id,
@@ -152,6 +155,10 @@ export const orderPatterns = {
       // data is grouped by order category
       return state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.NOTIFICATION);
     },
+
+    getOrderCategoryModifyResult(state) {
+      return state.modifyOrderCategoryTitleResult;
+    },
   },
 
   actions: {
@@ -167,6 +174,37 @@ export const orderPatterns = {
         context.state.patterns = response.data || [];
       } catch (err) {
         context.state.errorLoadingPatterns = err;
+      }
+    },
+
+    async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
+      try {
+        const headers = {
+          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
+        };
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
+          { service, orderType, title, newTitle },
+          { headers }
+        );
+        context.state.modifyOrderCategoryTitleResult = {
+          error: false,
+          message: response.data.message,
+          newTitle: response.data.newTitle,
+        };
+        context.state.patterns = context.state.patterns.map((pattern) => {
+          if (pattern.service === service && pattern.type === orderType && pattern.category === title) {
+            return {
+              ...pattern,
+              category: response.data.newTitle,
+            };
+          }
+          return pattern;
+        });
+      } catch (err) {
+        context.state.modifyOrderCategoryTitleResult = {
+          error: true,
+          message: err,
+        };
       }
     },
   },

@@ -1,5 +1,6 @@
 <template>
   <ConfirmPopup></ConfirmPopup>
+  <Toast />
   <div v-if="!allOrderPatterns || !allOrderPatterns.length">
     Список шаблонов распоряжений пуст
   </div>
@@ -38,7 +39,7 @@
         <div v-if="editedOrderCategoryTitle !== selectedOrderCategory.category">
           <Button
             type="button"
-            @click="editOrderCategoryTitle"
+            @click="handleEditOrderCategoryTitle"
           >
             Сохранить
           </Button>
@@ -130,6 +131,8 @@
     computed: {
       ...mapGetters([
         'getOrderPatternsToDisplayInTreeComponent',
+        'getOrderCategoryModifyResult',
+        'getOrderPatternsTreeNodeKey',
       ]),
     },
 
@@ -137,8 +140,49 @@
       this.allOrderPatterns = this.getOrderPatternsToDisplayInTreeComponent;
     },
 
+    watch: {
+      getOrderPatternsToDisplayInTreeComponent(newVal) {
+        this.allOrderPatterns = newVal;
+        if (this.selectedOrderCategory) {
+          const selectedNodeKey = this.getOrderPatternsTreeNodeKey([
+            this.selectedOrderCategory.service,
+            this.selectedOrderCategory.orderType,
+            this.selectedOrderCategory.category,
+          ]);
+          this.selectedNode = { [selectedNodeKey]: true };
+        }
+      },
+
+      getOrderCategoryModifyResult(newVal) {
+        if (!newVal) {
+          return;
+        }
+        if (!newVal.error) {
+          this.$toast.add({
+            severity: 'success',
+            summary: 'Информация',
+            detail: newVal.message,
+            life: 3000,
+          });
+          this.selectedOrderCategory = {
+            ...this.selectedOrderCategory,
+            category: newVal.newTitle,
+          };
+          this.editedOrderCategoryTitle = newVal.newTitle;
+        } else {
+          this.$toast.add({
+            severity: 'error',
+            summary: 'Ошибка',
+            detail: newVal.message,
+            life: 3000,
+          });
+        }
+      },
+    },
+
     methods: {
       refreshOrderPatterns() {
+
       },
 
       reset() {
@@ -192,8 +236,18 @@
         this.reset();
       },
 
-      editOrderCategoryTitle() {
-        //
+      handleEditOrderCategoryTitle() {
+        if (!this.editedOrderCategoryTitle) {
+          return;
+        }
+        this.recsBeingProcessed += 1;
+        this.$store.dispatch('editOrderCategoryTitle', {
+          service: this.selectedOrderCategory.service,
+          orderType: this.selectedOrderCategory.orderType,
+          title: this.selectedOrderCategory.category,
+          newTitle: this.editedOrderCategoryTitle,
+        });
+        this.recsBeingProcessed -= 1;
       },
 
       deleteOrderPattern(event) {
