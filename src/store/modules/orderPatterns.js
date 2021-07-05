@@ -6,8 +6,10 @@ import { ORDER_PATTERN_TYPES, OrderPatternsNodeType } from '../../constants/orde
 export const orderPatterns = {
   state: {
     patterns: [],
+    loadingOrderPatterns: false,
     errorLoadingPatterns: null,
     modifyOrderCategoryTitleResult: null,
+    modifyOrderCategoryTitleRecsBeingProcessed: 0,
   },
 
   getters: {
@@ -17,6 +19,10 @@ export const orderPatterns = {
 
     getCurrentUserToken(_state, getters) {
       return getters.getUserToken;
+    },
+
+    getLoadingOrderPatternsStatus(state) {
+      return state.loadingOrderPatterns;
     },
 
     getErrorLoadingPatterns(state) {
@@ -159,10 +165,16 @@ export const orderPatterns = {
     getOrderCategoryModifyResult(state) {
       return state.modifyOrderCategoryTitleResult;
     },
+
+    getModifyOrderCategoryTitleRecsBeingProcessed(state) {
+      return state.modifyOrderCategoryTitleRecsBeingProcessed;
+    },
   },
 
   actions: {
     async loadOrderPatterns(context) {
+      context.state.errorLoadingPatterns = null;
+      context.state.loadingOrderPatterns = true;
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -175,14 +187,17 @@ export const orderPatterns = {
       } catch (err) {
         context.state.errorLoadingPatterns = err;
       }
+      context.state.loadingOrderPatterns = false;
     },
 
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
+      context.state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
+      let response;
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
+        response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
           { service, orderType, title, newTitle },
           { headers }
         );
@@ -200,12 +215,13 @@ export const orderPatterns = {
           }
           return pattern;
         });
-      } catch (err) {
+      } catch ({ response }) {
         context.state.modifyOrderCategoryTitleResult = {
           error: true,
-          message: err,
+          message: response.data.message,
         };
       }
+      context.state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
     },
   },
 };

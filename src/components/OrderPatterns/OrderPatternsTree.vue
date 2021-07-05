@@ -1,7 +1,10 @@
 <template>
   <ConfirmPopup></ConfirmPopup>
   <Toast />
-  <div v-if="!allOrderPatterns || !allOrderPatterns.length">
+  <div v-if="getLoadingOrderPatternsStatus">
+    <ProgressSpinner />
+  </div>
+  <div v-else-if="!allOrderPatterns || !allOrderPatterns.length">
     Список шаблонов распоряжений пуст
   </div>
   <div v-else class="p-grid">
@@ -21,8 +24,8 @@
       ></Tree>
     </div>
     <div class="p-col-8">
-      <div v-if="recsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ recsBeingProcessed }} запросов. Ожидаю ответ...
+      <div v-if="getModifyOrderCategoryTitleRecsBeingProcessed > 0" class="dy58-warning">
+        На сервер отправлено {{ getModifyOrderCategoryTitleRecsBeingProcessed }} запросов. Ожидаю ответ...
       </div>
 
       <div v-if="selectedOrderCategory">
@@ -118,7 +121,6 @@
       return {
         allOrderPatterns: [],
         selectedNode: null,
-        recsBeingProcessed: 0,
         selectedOrderCategory: null,
         editedOrderCategoryTitle: null,
         selectedPattern: null,
@@ -133,6 +135,8 @@
         'getOrderPatternsToDisplayInTreeComponent',
         'getOrderCategoryModifyResult',
         'getOrderPatternsTreeNodeKey',
+        'getModifyOrderCategoryTitleRecsBeingProcessed',
+        'getLoadingOrderPatternsStatus',
       ]),
     },
 
@@ -182,7 +186,14 @@
 
     methods: {
       refreshOrderPatterns() {
-
+        this.$store.dispatch('loadOrderPatterns');
+        this.selectedNode = null;
+        this.selectedOrderCategory = null;
+        this.editedOrderCategoryTitle = null;
+        this.selectedPattern = null;
+        this.editedPattern = null;
+        this.patternEdited = false;
+        this.insertOrderElementPos = 0;
       },
 
       reset() {
@@ -240,14 +251,12 @@
         if (!this.editedOrderCategoryTitle) {
           return;
         }
-        this.recsBeingProcessed += 1;
         this.$store.dispatch('editOrderCategoryTitle', {
           service: this.selectedOrderCategory.service,
           orderType: this.selectedOrderCategory.orderType,
           title: this.selectedOrderCategory.category,
           newTitle: this.editedOrderCategoryTitle,
         });
-        this.recsBeingProcessed -= 1;
       },
 
       deleteOrderPattern(event) {
