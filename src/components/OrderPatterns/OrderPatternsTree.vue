@@ -9,23 +9,33 @@
   </div>
   <div v-else class="p-grid">
     <div class="p-col-4 dy58-order-patterns-tree">
+      <Tree
+        :value="allOrderPatterns"
+        selectionMode="single"
+        v-model:selectionKeys="selectedNode"
+        :filter="true"
+        filterMode="lenient"
+        @nodeSelect="handleTreeNodeSelect"
+        @nodeUnselect="handleTreeNodeUnselect"
+        @nodeExpand="expandAll"
+        @nodeCollapse="collapseAll"
+      ></Tree>
       <Button
         icon="pi pi-refresh"
         class="p-button-rounded p-button-success dy58-refresh-orders-list-btn"
         v-tooltip.right="'Обновить список распоряжений'"
         @click="refreshOrderPatterns"
       />
-      <Tree
-        :value="allOrderPatterns"
-        selectionMode="single"
-        v-model:selectionKeys="selectedNode"
-        @nodeSelect="handleTreeNodeSelect"
-        @nodeUnselect="handleTreeNodeUnselect"
-      ></Tree>
     </div>
     <div class="p-col-8">
       <div v-if="getModifyOrderCategoryTitleRecsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getModifyOrderCategoryTitleRecsBeingProcessed }} запросов. Ожидаю ответ...
+        На сервер отправлено {{ getModifyOrderCategoryTitleRecsBeingProcessed }} запросов на редактирование наименования категории распоряжений. Ожидаю ответ...
+      </div>
+      <div v-if="getDelOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
+        На сервер отправлено {{ getDelOrderPatternRecsBeingProcessed }} запросов на удаление шаблона распоряжения. Ожидаю ответ...
+      </div>
+      <div v-if="getModOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
+        На сервер отправлено {{ getModOrderPatternRecsBeingProcessed }} запросов на редактирование шаблона распоряжения. Ожидаю ответ...
       </div>
 
       <div v-if="selectedOrderCategory">
@@ -54,7 +64,7 @@
           <div className="p-col-12">
             <div class="dy58-order-pattern-border p-p-2">
               <OrderPatternPreview :orderPattern="selectedPattern.elements" />
-              <div class="p-mb-4 p-mt-3">
+              <div class="p-mb-3 p-mt-3">
                 <Button
                   v-if="!editedPattern"
                   type="button"
@@ -84,7 +94,7 @@
           <InputText
             :value="editedPattern ? editedPattern.title : null"
             style="width:100%"
-            @change="handleEditOrderPatternTitle"
+            @input="handleEditOrderPatternTitle"
           />
         </div>
         <div class="p-mb-2">
@@ -97,6 +107,29 @@
             @submitEditOrderPatternElement="handleSubmitEditOrderPatternElement"
           />
         </div>
+        <div class="p-mb-4">
+          <div class="p-text-bold p-mb-2">Определите элементы шаблона</div>
+          <EditOrderPatternElement
+            :element="null"
+            @submitEditOrderPatternElement="handleAddOrderPatternElement"
+            okButtonText="Добавить в шаблон"
+          />
+        </div>
+        <div v-if="patternEdited">
+          <Button
+            type="button"
+            @click="handleEditOrderPattern"
+            class="p-mr-2"
+          >
+            Сохранить изменения
+          </Button>
+          <Button
+            type="button"
+            @click="handleCancelEditOrderPattern"
+          >
+            Отменить все изменения
+          </Button>
+        </div>
       </div>
     </div>
   </div>
@@ -108,6 +141,8 @@
   import { OrderPatternsNodeType } from '../../constants/orderPatterns';
   import OrderPatternPreview from './OrderPatternPreview';
   import EditOrderPattern from './EditOrderPattern';
+  import EditOrderPatternElement from './EditOrderPatternElement';
+  import objectId from '../../additional/objectId.generator';
 
   export default {
     name: 'dy58-order-patterns-tree',
@@ -115,6 +150,7 @@
     components: {
       OrderPatternPreview,
       EditOrderPattern,
+      EditOrderPatternElement,
     },
 
     data() {
@@ -127,6 +163,7 @@
         editedPattern: null,
         patternEdited: false,
         insertOrderElementPos: 0,
+        expandedKeys: {},
       };
     },
 
@@ -137,6 +174,10 @@
         'getOrderPatternsTreeNodeKey',
         'getModifyOrderCategoryTitleRecsBeingProcessed',
         'getLoadingOrderPatternsStatus',
+        'getDelOrderPatternResult',
+        'getDelOrderPatternRecsBeingProcessed',
+        'getModOrderPatternResult',
+        'getModOrderPatternRecsBeingProcessed',
       ]),
     },
 
@@ -162,29 +203,80 @@
           return;
         }
         if (!newVal.error) {
-          this.$toast.add({
-            severity: 'success',
-            summary: 'Информация',
-            detail: newVal.message,
-            life: 3000,
-          });
+          this.showSuccessMessage(newVal.message);
           this.selectedOrderCategory = {
             ...this.selectedOrderCategory,
             category: newVal.newTitle,
           };
           this.editedOrderCategoryTitle = newVal.newTitle;
         } else {
-          this.$toast.add({
-            severity: 'error',
-            summary: 'Ошибка',
-            detail: newVal.message,
-            life: 3000,
-          });
+          this.showErrMessage(newVal.message);
+        }
+      },
+
+      getDelOrderPatternResult(newVal) {
+        if (!newVal) {
+          return;
+        }
+        if (!newVal.error) {
+          this.showSuccessMessage(newVal.message);
+          this.selectedPattern = null;
+          this.editedPattern = null;
+          this.patternEdited = false;
+          this.insertOrderElementPos = 0;
+        } else {
+          this.showErrMessage(newVal.message);
+        }
+      },
+
+      getModOrderPatternResult(newVal) {
+        if (!newVal) {
+          return;
+        }
+        if (!newVal.error) {
+          this.showSuccessMessage(newVal.message);
+          this.selectedPattern = {
+            ...this.selectedPattern,
+            label: newVal.orderPattern.title,
+            elements: newVal.orderPattern.elements,
+          };
+          this.editedPattern = null;
+          this.patternEdited = false;
+          this.insertOrderElementPos = 0;
+        } else {
+          this.showErrMessage(newVal.message);
         }
       },
     },
 
     methods: {
+      /**
+       *
+       */
+      showSuccessMessage(message) {
+        this.$toast.add({
+          severity: 'success',
+          summary: 'Информация',
+          detail: message,
+          life: 3000,
+        });
+      },
+
+      /**
+       *
+       */
+      showErrMessage(message) {
+        this.$toast.add({
+          severity: 'error',
+          summary: 'Ошибка',
+          detail: message,
+          life: 3000,
+        });
+      },
+
+      /**
+       *
+       */
       refreshOrderPatterns() {
         this.$store.dispatch('loadOrderPatterns');
         this.selectedNode = null;
@@ -196,6 +288,9 @@
         this.insertOrderElementPos = 0;
       },
 
+      /**
+       *
+       */
       reset() {
         if (this.editedPattern) {
           this.editedPattern = null;
@@ -206,6 +301,9 @@
         this.insertOrderElementPos = 0;
       },
 
+      /**
+       *
+       */
       handleTreeNodeUnselect() {
         if (this.selectedOrderCategory) {
           this.changeSelectedOrderCategory(null);
@@ -216,11 +314,17 @@
         this.reset();
       },
 
+      /**
+       *
+       */
       changeSelectedOrderCategory(newValue) {
         this.selectedOrderCategory = newValue;
         this.editedOrderCategoryTitle = !newValue ? newValue : newValue.category;
       },
 
+      /**
+       *
+       */
       handleTreeNodeSelect(node) {
         if (node.type === OrderPatternsNodeType.ORDER_PATTERN) {
           this.selectedPattern = {
@@ -247,6 +351,38 @@
         this.reset();
       },
 
+      /**
+       *
+       */
+      expandAll() {
+        for (let node of this.allOrderPatterns) {
+          this.expandNode(node);
+        }
+        this.expandedKeys = { ...this.expandedKeys };
+      },
+
+      /**
+       *
+       */
+      collapseAll() {
+        this.expandedKeys = {};
+      },
+
+      /**
+       *
+       */
+      expandNode(node) {
+        this.expandedKeys[node.key] = true;
+        if (node.children && node.children.length) {
+          for (let child of node.children) {
+            this.expandNode(child);
+          }
+        }
+      },
+
+      /**
+       *
+       */
       handleEditOrderCategoryTitle() {
         if (!this.editedOrderCategoryTitle) {
           return;
@@ -259,20 +395,28 @@
         });
       },
 
+      /**
+       *
+       */
       deleteOrderPattern(event) {
         this.$confirm.require({
           target: event.currentTarget,
           message: 'Удалить шаблон?',
           icon: 'pi pi-exclamation-circle',
+          acceptLabel: 'Да',
+          rejectLabel: 'Нет',
           accept: () => {
-            //
-          },
-          reject: () => {
-            //
+            if (!this.selectedPattern || !this.selectedPattern.key) {
+              return;
+            }
+            this.$store.dispatch('delOrderPattern', this.selectedPattern.key);
           },
         });
       },
 
+      /**
+       *
+       */
       startEditOrderPattern() {
         if (!this.selectedPattern || !this.selectedPattern.key) {
           return;
@@ -287,6 +431,9 @@
         this.insertOrderElementPos = this.selectedPattern.elements.length;
       },
 
+      /**
+       *
+       */
       handleEditOrderPatternTitle(e) {
         if (!this.editedPattern) {
           return;
@@ -300,6 +447,9 @@
         }
       },
 
+      /**
+       *
+       */
       setCursorBeforeElement(elementId) {
         const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
         if (elementIndex === -1) {
@@ -308,6 +458,9 @@
         this.insertOrderElementPos = elementIndex !== 0 ? elementIndex : -1;
       },
 
+      /**
+       *
+       */
       setCursorAfterElement(elementId) {
         const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
         if (elementIndex === -1) {
@@ -316,6 +469,9 @@
         this.insertOrderElementPos = elementIndex + 1;
       },
 
+      /**
+       *
+       */
       delPatternElement(elementId) {
         const elementIndex = this.editedPattern.elements.findIndex((element) => element._id === elementId);
         if (elementIndex === -1) {
@@ -354,6 +510,62 @@
         if (!this.patternEdited) {
           this.patternEdited = true;
         }
+      },
+
+      /**
+       * Добавляет заданный элемент в редактируемый шаблон распоряжения на текущую позицию
+       * (т.е. позицию, на которой находится курсор).
+       */
+      handleAddOrderPatternElement(selectedPatternElement) {
+        if (!selectedPatternElement) {
+          return;
+        }
+        const newElement = {
+          _id: objectId(),
+          type: selectedPatternElement.type,
+          ref: selectedPatternElement.ref,
+          value: selectedPatternElement.value,
+          size: selectedPatternElement.size,
+        };
+        this.editedPattern = {
+          ...this.editedPattern,
+          elements: [
+            ...this.editedPattern.elements.slice(0, this.insertOrderElementPos < 0 ? 0 : this.insertOrderElementPos),
+            newElement,
+            ...this.editedPattern.elements.slice(this.insertOrderElementPos < 0 ? 0 : this.insertOrderElementPos)
+          ],
+        };
+        if (this.insertOrderElementPos !== -1) {
+          this.insertOrderElementPos += 1;
+        } else {
+          this.insertOrderElementPos = 1;
+        }
+        if (!this.patternEdited) {
+          this.patternEdited = true;
+        }
+      },
+
+      /**
+       * Отправляет правки, сделанные пользователем в отношении шаблона распоряжений, на сервер.
+       */
+      handleEditOrderPattern() {
+        if (!this.editedPattern) {
+          return;
+        }
+        this.$store.dispatch('modOrderPattern', {
+          id: this.selectedPattern.key,
+          title: this.editedPattern.title,
+          elements: this.editedPattern.elements,
+        });
+      },
+
+      /**
+       * Отменяет редактирование текущего шаблона распоряжения.
+       */
+      handleCancelEditOrderPattern() {
+        this.editedPattern = null;
+        this.patternEdited = false;
+        this.insertOrderElementPos = 0;
       },
     },
   };

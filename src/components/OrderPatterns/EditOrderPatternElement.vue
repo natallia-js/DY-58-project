@@ -86,7 +86,8 @@
     watch: {
       element: function(newVal) {
         this.selectedPatternElementType = newVal ?
-          this.getOrderPatternElementTypes.find((type) => type.value === newVal.type) : null;
+          this.getOrderPatternElementTypes.find((type) => type.value === newVal.type) :
+          this.getOrderPatternElementTypes.find((type) => type.value === OrderPatternElementType.TEXT);
         this.selectedPatternElement = this.getSelectedPatternElement(newVal);
       },
 
@@ -107,7 +108,8 @@
 
     mounted() {
       this.selectedPatternElementType = this.element ?
-        this.getOrderPatternElementTypes.find((type) => type.value === this.element.type) : null;
+        this.getOrderPatternElementTypes.find((type) => type.value === this.element.type) :
+        this.getOrderPatternElementTypes.find((type) => type.value === OrderPatternElementType.TEXT);
       this.availablePatternElements = this.initialPatternElements;
       this.selectedPatternElement = this.getSelectedPatternElement(this.element);
     },

@@ -48,7 +48,7 @@
 
   <div
     v-if="editedPatternElementId"
-    className="dy58-order-pattern-border p-p-2"
+    className="dy58-order-pattern-border p-p-2 dy58-edit-order-pattern-element-block"
   >
     <div class="p-mb-3 p-text-bold">Редактирование элемента шаблона</div>
     <EditOrderPatternElement
@@ -70,8 +70,12 @@
     name: 'dy58-edit-order-pattern',
 
     props: {
-      orderPattern: Array,
-      insertOrderElementPos: Number,
+      orderPattern: {
+        type: Array,
+      },
+      insertOrderElementPos: {
+        type: Number,
+      },
     },
 
     components: {
@@ -183,7 +187,7 @@
       handleSubmitEditOrderPatternElement(editedElement) {
         this.$emit('submitEditOrderPatternElement', {
           editedPatternElementId: this.editedPatternElementId,
-          editedElement
+          editedElement,
         });
       },
     },

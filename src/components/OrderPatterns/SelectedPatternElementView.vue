@@ -1,8 +1,9 @@
 <template>
-  <InputText
+  <AllowClearInputText
     v-if="element.type === getOrderPatternElementTypes.TEXT"
+    :value="elementValue"
     style="width:100%"
-    v-model="elementValue"
+    @changeValue="(val) => { elementValue = val; }"
   />
   <InputText
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
@@ -47,6 +48,7 @@
     ElementSizesCorrespondence,
     DateFormat,
   } from '../../constants/orderPatterns';
+  import AllowClearInputText from '../AllowClearInputText';
 
   export default {
     name: 'dy58-selected-pattern-element-view',
@@ -59,6 +61,10 @@
 
     props: {
       element: Object,
+    },
+
+    components: {
+      AllowClearInputText,
     },
 
     watch: {
@@ -83,6 +89,12 @@
       },
       getDateFormat() {
         return DateFormat;
+      },
+    },
+
+    methods: {
+      handleClearElementValue() {
+        this.elementValue = null;
       },
     },
   };

@@ -10,6 +10,10 @@ export const orderPatterns = {
     errorLoadingPatterns: null,
     modifyOrderCategoryTitleResult: null,
     modifyOrderCategoryTitleRecsBeingProcessed: 0,
+    delOrderPatternResult: null,
+    delOrderPatternRecsBeingProcessed: 0,
+    modOrderPatternRecsBeingProcessed: 0,
+    modOrderPatternResult: null,
   },
 
   getters: {
@@ -169,6 +173,22 @@ export const orderPatterns = {
     getModifyOrderCategoryTitleRecsBeingProcessed(state) {
       return state.modifyOrderCategoryTitleRecsBeingProcessed;
     },
+
+    getDelOrderPatternRecsBeingProcessed(state) {
+      return state.delOrderPatternRecsBeingProcessed;
+    },
+
+    getDelOrderPatternResult(state) {
+      return state.delOrderPatternResult;
+    },
+
+    getModOrderPatternRecsBeingProcessed(state) {
+      return state.modOrderPatternRecsBeingProcessed;
+    },
+
+    getModOrderPatternResult(state) {
+      return state.modOrderPatternResult;
+    },
   },
 
   actions: {
@@ -192,12 +212,11 @@ export const orderPatterns = {
 
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
       context.state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
-      let response;
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
           { service, orderType, title, newTitle },
           { headers }
         );
@@ -222,6 +241,66 @@ export const orderPatterns = {
         };
       }
       context.state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
+    },
+
+    async delOrderPattern(context, orderPatternId) {
+      context.state.delOrderPatternRecsBeingProcessed += 1;
+      try {
+        const headers = {
+          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
+        };
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.delOrderPattern,
+          { id: orderPatternId },
+          { headers }
+        );
+        context.state.delOrderPatternResult = {
+          error: false,
+          message: response.data.message,
+        };
+        context.state.patterns = context.state.patterns.filter((pattern) => pattern._id !== orderPatternId);
+      } catch ({ response }) {
+        context.state.delOrderPatternResult = {
+          error: true,
+          message: response.data.message,
+        };
+      }
+      context.state.delOrderPatternRecsBeingProcessed -= 1;
+    },
+
+    /**
+     *
+     */
+    async modOrderPattern(context, { id, title, elements }) {
+      context.state.modOrderPatternRecsBeingProcessed += 1;
+      try {
+        const headers = {
+          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
+        };
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderPattern,
+          { id, title, elements },
+          { headers }
+        );
+        context.state.modOrderPatternResult = {
+          error: false,
+          message: response.data.message,
+          orderPattern: response.data.orderPattern,
+        };
+        context.state.patterns = context.state.patterns.map((pattern) => {
+          if (pattern._id !== response.data.orderPattern._id) {
+            return pattern;
+          }
+          return {
+            ...pattern,
+            ...response.data.orderPattern,
+          };
+        });
+      } catch ({ response }) {
+        context.state.modOrderPatternResult = {
+          error: true,
+          message: response.data.message,
+        };
+      }
+      context.state.modOrderPatternRecsBeingProcessed -= 1;
     },
   },
 };

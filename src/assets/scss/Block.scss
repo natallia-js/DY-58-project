@@ -1,15 +1,15 @@
-@mixin dy58-order-pattern-element-block($border-color) {
-  border-width: 2px;
+@mixin dy58-order-pattern-element-block($border-color, $border-width) {
+  border-width: $border-width;
   border-style: solid;
   border-color: $border-color;
 }
 
 .dy58-not-edited-order-pattern-element-block {
-  @include dy58-order-pattern-element-block(var(--surface-400));
+  @include dy58-order-pattern-element-block(var(--surface-400), 2px);
 }
 
 .dy58-edited-order-pattern-element-block {
-  @include dy58-order-pattern-element-block(var(--primary-color));
+  @include dy58-order-pattern-element-block(var(--primary-color), 4px);
 }
 
 .dy58-outer-cursor-block {
@@ -22,4 +22,8 @@
   border-width: 1px;
   border-style: solid;
   border-color: var(--surface-400);
+}
+
+.dy58-edit-order-pattern-element-block {
+  background-color: var(--surface-c);
 }
