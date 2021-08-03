@@ -69,6 +69,13 @@
   export default {
     name: 'dy58-edit-order-pattern',
 
+    emits: [
+      'deleteOrderPatternElement',
+      'insertBeforeOrderPatternElement',
+      'insertAfterOrderPatternElement',
+      'submitEditOrderPatternElement',
+    ],
+
     props: {
       orderPattern: {
         type: Array,

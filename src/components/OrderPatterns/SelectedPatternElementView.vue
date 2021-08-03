@@ -1,5 +1,5 @@
 <template>
-  <AllowClearInputText
+  <allow-clear-input-text
     v-if="element.type === getOrderPatternElementTypes.TEXT"
     :value="elementValue"
     style="width:100%"
@@ -53,6 +53,8 @@
   export default {
     name: 'dy58-selected-pattern-element-view',
 
+    emits: ['changePatternElementValue'],
+
     data() {
       return {
         elementValue: null,
@@ -68,10 +70,10 @@
     },
 
     watch: {
-      element(newVal) {
+      element(newVal) {console.log('***',newVal, this.elementValue)
         this.elementValue = newVal ? newVal.value : null;
       },
-      elementValue(newVal) {
+      elementValue(newVal) {console.log('el val', newVal)
         this.$emit('changePatternElementValue', newVal);
       },
     },

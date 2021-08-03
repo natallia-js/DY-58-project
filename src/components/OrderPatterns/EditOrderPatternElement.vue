@@ -60,6 +60,8 @@
   export default {
     name: 'dy58-edit-order-pattern-element',
 
+    emits: ['submitEditOrderPatternElement'],
+
     props: {
       // null (если необходимо создать новый элемент шаблона) либо объект со свойствами type, width, ref, value
       element: Object,
@@ -172,6 +174,9 @@
       },
 
       handleChangePatternElementValue(newVal) {
+        if (this.selectedPatternElement.value === newVal) {
+          return;
+        }
         this.selectedPatternElement = {
           ...this.selectedPatternElement,
           value: newVal,
@@ -179,6 +184,9 @@
       },
 
       handleChangePatternElementSize(newSize) {
+        if (this.selectedPatternElement.size === newSize) {
+          return;
+        }
         this.selectedPatternElement = {
           ...this.selectedPatternElement,
           size: newSize,

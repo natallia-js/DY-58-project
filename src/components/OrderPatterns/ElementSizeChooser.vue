@@ -14,6 +14,8 @@
   export default {
     name: 'dy58-element-size-chooser',
 
+    emits: ['changeSize'],
+
     props: {
       chosenSize: String,
     },

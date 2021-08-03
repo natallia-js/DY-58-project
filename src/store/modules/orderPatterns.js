@@ -33,6 +33,18 @@ export const orderPatterns = {
       return state.errorLoadingPatterns;
     },
 
+    getCurrentUserOrderCategories(state, getters) {
+      const orderCategories = [];
+      state.patterns
+        .filter((pattern) => pattern.service === getters.getUserService)
+        .forEach((pattern) => {
+          if (!orderCategories.includes(pattern.category)) {
+            orderCategories.push(pattern.category);
+          }
+        });
+      return orderCategories;
+    },
+
     getOrderPatternsToDisplayInTreeSelect(state) {
       // data is grouped by order category
       const orders = state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.ORDER);

@@ -9,9 +9,11 @@
   export default {
     name: 'dy58-allow-clear-input-text',
 
+    emits: ['changeValue'],
+
     props: {
       value: String,
-      style: String,
+      style: Object,
     },
 
     data() {
@@ -21,7 +23,7 @@
     },
 
     watch: {
-      value(newVal) {
+      value(newVal) {console.log('!!!',newVal)
         this.elementValue = newVal;
       },
       elementValue(newVal) {
