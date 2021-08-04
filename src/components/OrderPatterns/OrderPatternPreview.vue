@@ -5,7 +5,7 @@
       <span
         v-if="patternElement.type === getOrderPatternElementTypes.TEXT"
         class="p-mr-2 p-mb-2"
-        :style="{ display: 'inline-block' }"
+        :style="{ display: 'inline' }"
       >
         <order-pattern-element-view :element="patternElement" />
       </span>

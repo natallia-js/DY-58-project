@@ -1,5 +1,6 @@
 <template>
   <Toast />
+  <ConfirmPopup></ConfirmPopup>
   <div class="p-grid">
     <div class="p-col-4">
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
@@ -23,7 +24,7 @@
             v-if="(v$.service.$invalid && submitted) || v$.service.$pending.$response"
             class="p-error"
           >
-            {{'Пожалуйста, определите службу'}}
+            Пожалуйста, определите службу
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -43,7 +44,7 @@
             v-if="(v$.orderType.$invalid && submitted) || v$.orderType.$pending.$response"
             class="p-error"
           >
-            {{'Пожалуйста, выберите тип распоряжения'}}
+            Пожалуйста, выберите тип распоряжения
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -60,7 +61,7 @@
             v-if="(v$.orderCategory.$invalid && submitted) || v$.orderCategory.$pending.$response"
             class="p-error"
           >
-            {{'Пожалуйста, определите категорию распоряжения'}}
+            Пожалуйста, определите категорию распоряжения
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -76,7 +77,7 @@
             v-if="(v$.orderTitle.$invalid && submitted) || v$.orderTitle.$pending.$response"
             class="p-error"
           >
-            {{'Пожалуйста, введите наименование распоряжения'}}
+            Пожалуйста, введите наименование распоряжения
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -90,6 +91,26 @@
       </form>
     </div>
     <div class="p-col-8">
+      <div class="dy58-order-pattern-border p-p-2 p-mb-2">
+        <edit-order-pattern
+          :orderPattern="state.orderPattern"
+          :insertOrderElementPos="state.insertOrderElementPos"
+          @deleteOrderPatternElement="handleDelOrderPatternElement"
+          @insertBeforeOrderPatternElement="handleSetCursorBeforeElement"
+          @insertAfterOrderPatternElement="handleSetCursorAfterElement"
+          @submitEditOrderPatternElement="handleSubmitEditOrderPatternElement"
+        />
+        <Button
+          v-if="state.orderPattern && state.orderPattern.length"
+          type="button"
+          @click="handleClearOrderPattern($event)"
+        >
+          Очистить шаблон
+        </Button>
+      </div>
+      <div class="dy58-order-pattern-border p-p-2">
+        <order-pattern-preview :orderPattern="state.orderPattern" />
+      </div>
     </div>
   </div>
 </template>
@@ -101,7 +122,11 @@
   import { useVuelidate } from '@vuelidate/core';
   import OrderCategoryChooser from './OrderCategoryChooser';
   import EditOrderPatternElement from './EditOrderPatternElement';
+  import EditOrderPattern from './EditOrderPattern';
+  import OrderPatternPreview from './OrderPatternPreview';
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
+  import objectId from '../../additional/objectId.generator';
+  import { useConfirm } from 'primevue/useconfirm';
 
   export default {
     name: 'dy58-create-order-pattern',
@@ -109,16 +134,21 @@
     components: {
       OrderCategoryChooser,
       EditOrderPatternElement,
+      EditOrderPattern,
+      OrderPatternPreview,
     },
 
     setup() {
       const store = useStore();
+      const confirm = useConfirm();
 
       const state = reactive({
         service: computed(() => store.state.currUser.service),
         orderType: '',
         orderCategory: '',
         orderTitle: '',
+        orderPattern: [],
+        insertOrderElementPos: 0,
       });
 
       const rules = {
@@ -149,6 +179,95 @@
         if (!newPatternElement) {
           return;
         }
+        const newElement = {
+          _id: objectId(),
+          type: newPatternElement.type,
+          ref: newPatternElement.ref,
+          value: newPatternElement.value,
+          size: newPatternElement.size,
+        };
+        state.orderPattern = [
+          ...state.orderPattern.slice(0, state.insertOrderElementPos < 0 ? 0 : state.insertOrderElementPos),
+          newElement,
+          ...state.orderPattern.slice(state.insertOrderElementPos < 0 ? 0 : state.insertOrderElementPos),
+        ]
+        if (state.insertOrderElementPos !== -1) {
+          state.insertOrderElementPos += 1;
+        } else {
+          state.insertOrderElementPos = 1;
+        }
+      };
+
+      /**
+       * Позволяет удалить элемент шаблона с id = elementId.
+       */
+      const handleDelOrderPatternElement = (elementId) => {
+        const elementIndex = state.orderPattern.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        if (elementIndex < state.insertOrderElementPos) {
+          state.insertOrderElementPos -= 1;
+        }
+        state.orderPattern = state.orderPattern.filter((el) => el._id !== elementId);
+      };
+
+      /**
+       *
+       */
+      const handleSetCursorBeforeElement = (elementId) => {
+        const elementIndex = state.orderPattern.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        state.insertOrderElementPos = elementIndex !== 0 ? elementIndex : -1;
+      };
+
+      /**
+       *
+       */
+      const handleSetCursorAfterElement = (elementId) => {
+        const elementIndex = state.orderPattern.findIndex((element) => element._id === elementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        state.insertOrderElementPos = elementIndex + 1;
+      };
+
+      /**
+       *
+       */
+      const handleSubmitEditOrderPatternElement = ({ editedPatternElementId, editedElement }) => {
+        const elementIndex = state.orderPattern.findIndex((element) => element._id === editedPatternElementId);
+        if (elementIndex === -1) {
+          return;
+        }
+        state.orderPattern = state.orderPattern.map((el) => {
+          if (el._id !== editedPatternElementId) {
+            return el;
+          }
+          return {
+            _id: editedPatternElementId,
+            ...editedElement,
+          };
+        });
+      };
+
+      /**
+       *
+       */
+      const handleClearOrderPattern = (event) => {
+        confirm.require({
+          target: event.currentTarget,
+          message: 'Очистить шаблон?',
+          icon: 'pi pi-exclamation-circle',
+          acceptLabel: 'Да',
+          rejectLabel: 'Нет',
+          accept: () => {
+            state.orderPattern = [];
+            state.insertOrderElementPos = 0;
+          },
+        });
       };
 
       return {
@@ -156,10 +275,15 @@
         orderPatternTypes: Object.values(ORDER_PATTERN_TYPES).map((name) => { return { label: name }; }),
         orderCategories: computed(() => store.getters.getCurrentUserOrderCategories),
         v$,
-        handleSubmit,
-        handleAddOrderPatternElement,
         submitted,
         waitingForServerResponse,
+        handleSubmit,
+        handleAddOrderPatternElement,
+        handleDelOrderPatternElement,
+        handleSetCursorBeforeElement,
+        handleSetCursorAfterElement,
+        handleSubmitEditOrderPatternElement,
+        handleClearOrderPattern,
       };
     },
   };

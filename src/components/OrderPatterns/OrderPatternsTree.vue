@@ -63,7 +63,7 @@
         <div class="p-grid">
           <div className="p-col-12">
             <div class="dy58-order-pattern-border p-p-2">
-              <OrderPatternPreview :orderPattern="selectedPattern.elements" />
+              <order-pattern-preview :orderPattern="selectedPattern.elements" />
               <div class="p-mb-3 p-mt-3">
                 <Button
                   v-if="!editedPattern"
@@ -98,7 +98,7 @@
           />
         </div>
         <div class="p-mb-2">
-          <EditOrderPattern
+          <edit-order-pattern
             :orderPattern="editedPattern.elements"
             :insertOrderElementPos="insertOrderElementPos"
             @deleteOrderPatternElement="delPatternElement"
@@ -109,7 +109,7 @@
         </div>
         <div class="p-mb-4">
           <div class="p-text-bold p-mb-2">Определите элементы шаблона</div>
-          <EditOrderPatternElement
+          <edit-order-pattern-element
             :element="null"
             @submitEditOrderPatternElement="handleAddOrderPatternElement"
             okButtonText="Добавить в шаблон"

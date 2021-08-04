@@ -19,7 +19,7 @@
             v-if="(v$.userName.$invalid && submitted) || v$.userName.$pending.$response"
             class="p-error"
           >
-            {{'Введите имя пользователя'}}
+            Введите имя пользователя
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -36,7 +36,7 @@
             v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response"
             class="p-error"
           >
-            {{'Введите пароль'}}
+            Введите пароль
           </small>
         </div>
         <div v-if="!waitingForServerResponse" class="p-col-12">
