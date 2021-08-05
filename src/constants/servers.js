@@ -11,4 +11,5 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   modOrderCategoryTitle: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/modCategoryTitle`,
   delOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/del`,
   modOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/mod`,
+  createOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/add`,
 });

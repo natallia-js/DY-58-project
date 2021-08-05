@@ -14,6 +14,7 @@ export const orderPatterns = {
     delOrderPatternRecsBeingProcessed: 0,
     modOrderPatternRecsBeingProcessed: 0,
     modOrderPatternResult: null,
+    createOrderPatternResult: null,
   },
 
   getters: {
@@ -201,9 +202,16 @@ export const orderPatterns = {
     getModOrderPatternResult(state) {
       return state.modOrderPatternResult;
     },
+
+    getCreateOrderPatternResult(state) {
+      return state.createOrderPatternResult;
+    },
   },
 
   actions: {
+    /**
+     *
+     */
     async loadOrderPatterns(context) {
       context.state.errorLoadingPatterns = null;
       context.state.loadingOrderPatterns = true;
@@ -222,6 +230,9 @@ export const orderPatterns = {
       context.state.loadingOrderPatterns = false;
     },
 
+    /**
+     *
+     */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
       context.state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
       try {
@@ -255,6 +266,9 @@ export const orderPatterns = {
       context.state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
     },
 
+    /**
+     *
+     */
     async delOrderPattern(context, orderPatternId) {
       context.state.delOrderPatternRecsBeingProcessed += 1;
       try {
@@ -313,6 +327,35 @@ export const orderPatterns = {
         };
       }
       context.state.modOrderPatternRecsBeingProcessed -= 1;
+    },
+
+    /**
+     *
+     */
+    async createOrderPattern(context, { service, type, category, title, elements }) {
+      try {
+        const headers = {
+          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
+        };
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
+          { service, type, category, title, elements },
+          { headers }
+        );
+        context.state.createOrderPatternResult = {
+          error: false,
+          message: response.data.message,
+          orderPattern: response.data.orderPattern,
+        };
+        context.state.patterns = [
+          ...context.state.patterns,
+          response.data.orderPattern,
+        ];
+      } catch ({ response }) {
+        context.state.createOrderPatternResult = {
+          error: true,
+          message: response.data.message,
+        };
+      }
     },
   },
 };

@@ -4,10 +4,10 @@
   <div class="p-grid">
     <div class="p-col-4">
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
-        <div v-if="!waitingForServerResponse" class="p-col-12 p-text-right">
+        <div v-if="!state.waitingForServerResponse" class="p-col-12 p-text-right">
           <Button type="submit" label="Создать шаблон" />
         </div>
-        <div v-if="waitingForServerResponse" class="p-col-12">
+        <div v-else class="p-col-12">
           <ProgressSpinner />
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -116,7 +116,7 @@
 </template>
 
 <script>
-  import { reactive, ref, computed } from 'vue';
+  import { reactive, ref, computed, watch } from 'vue';
   import { useStore } from 'vuex';
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
@@ -127,6 +127,7 @@
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
   import objectId from '../../additional/objectId.generator';
   import { useConfirm } from 'primevue/useconfirm';
+  import showMessage from '../../hooks/showMessage.hook';
 
   export default {
     name: 'dy58-create-order-pattern',
@@ -149,6 +150,11 @@
         orderTitle: '',
         orderPattern: [],
         insertOrderElementPos: 0,
+        // true - ожидается ответ сервера на запрос о создании шаблона, false - запроса не ожидается
+        waitingForServerResponse: false,
+        // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
+        // запроса о создании нового шаблона распоряжения
+        orderPatternFieldsErrs: null,
       });
 
       const rules = {
@@ -159,16 +165,48 @@
       };
 
       const submitted = ref(false);
-      const waitingForServerResponse = ref(false);
 
       const v$ = useVuelidate(rules, state);
 
-      const handleSubmit = (isFormValid) => {console.log(state)
+      watch(store.getCreateOrderPatternResult, (newVal, prevVal) => {
+        console.log(newVal, prevVal)
+        if (!newVal) {
+          return;
+        }
+        /*
+        if (!newVal.error) {
+          this.showSuccessMessage(newVal.message);
+          this.selectedOrderCategory = {
+            ...this.selectedOrderCategory,
+            category: newVal.newTitle,
+          };
+          this.editedOrderCategoryTitle = newVal.newTitle;
+        } else {
+          this.showErrMessage(newVal.message);
+        }*/
+        showMessage.showSuccessMessage('sdfsd');
+        showMessage.showErrMessage('sdfsdf');
+      });
+
+      /**
+       *
+       */
+      const handleSubmit = (isFormValid) => {console.log(isFormValid, state)
         submitted.value = true;
 
         if (!isFormValid) {
-            return;
+          return;
         }
+
+        state.waitingForServerResponse = true;
+        store.dispatch('createOrderPattern', {
+          service: state.service,
+          type: state.orderType,
+          category: state.orderCategory,
+          title: state.orderTitle,
+          elements: state.orderPattern,
+        });
+        state.waitingForServerResponse = false;
       };
 
       /**
@@ -276,7 +314,6 @@
         orderCategories: computed(() => store.getters.getCurrentUserOrderCategories),
         v$,
         submitted,
-        waitingForServerResponse,
         handleSubmit,
         handleAddOrderPatternElement,
         handleDelOrderPatternElement,
