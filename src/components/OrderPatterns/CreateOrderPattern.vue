@@ -142,6 +142,7 @@
     setup() {
       const store = useStore();
       const confirm = useConfirm();
+      const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
         service: computed(() => store.state.currUser.service),
@@ -168,30 +169,35 @@
 
       const v$ = useVuelidate(rules, state);
 
-      watch(store.getCreateOrderPatternResult, (newVal, prevVal) => {
-        console.log(newVal, prevVal)
-        if (!newVal) {
-          return;
-        }
-        /*
-        if (!newVal.error) {
-          this.showSuccessMessage(newVal.message);
-          this.selectedOrderCategory = {
-            ...this.selectedOrderCategory,
-            category: newVal.newTitle,
-          };
-          this.editedOrderCategoryTitle = newVal.newTitle;
-        } else {
-          this.showErrMessage(newVal.message);
-        }*/
-        showMessage.showSuccessMessage('sdfsd');
-        showMessage.showErrMessage('sdfsdf');
+      const orderCategories = computed(() =>
+        store.getters.getCurrentUserOrderCategories
+          .filter((item) => item.orderType === state.orderType)
+          .map((item) => item.category)
+      );
+
+      const createOrderPatternResult = computed(() => {
+        return store.getters.getCreateOrderPatternResult;
       });
 
       /**
        *
        */
-      const handleSubmit = (isFormValid) => {console.log(isFormValid, state)
+      watch(createOrderPatternResult, (newVal) => {
+        state.waitingForServerResponse = false;
+        if (!newVal) {
+          return;
+        }
+        if (!newVal.error) {
+          showSuccessMessage(newVal.message);
+        } else {
+          showErrMessage(newVal.message);
+        }
+      });
+
+      /**
+       *
+       */
+      const handleSubmit = (isFormValid) => {
         submitted.value = true;
 
         if (!isFormValid) {
@@ -206,7 +212,6 @@
           title: state.orderTitle,
           elements: state.orderPattern,
         });
-        state.waitingForServerResponse = false;
       };
 
       /**
@@ -311,7 +316,7 @@
       return {
         state,
         orderPatternTypes: Object.values(ORDER_PATTERN_TYPES).map((name) => { return { label: name }; }),
-        orderCategories: computed(() => store.getters.getCurrentUserOrderCategories),
+        orderCategories,
         v$,
         submitted,
         handleSubmit,

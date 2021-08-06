@@ -30,6 +30,18 @@
     :showIcon="true"
     placeholder="дата-время"
   />
+  <DataTable
+    v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
+    :value="[]"
+  >
+    <Column
+      v-for="col of getDRTrainTableColumns"
+      :field="col.field"
+      :header="col.header"
+      :key="col.field"
+    >
+    </Column>
+  </DataTable>
   <i
     v-else-if="element.type === getOrderPatternElementTypes.LINEBREAK"
     class="pi pi-reply"
@@ -44,6 +56,7 @@
     OrderPatternElementType,
     ElementSizesCorrespondence,
     DateFormat,
+    DRTrainTableColumns,
   } from '../../constants/orderPatterns';
 
   export default {
@@ -60,6 +73,9 @@
       },
       getDateFormat() {
         return DateFormat;
+      },
+      getDRTrainTableColumns() {
+        return DRTrainTableColumns;
       },
     },
   };

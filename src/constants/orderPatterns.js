@@ -27,6 +27,7 @@ export const OrderPatternElementType = Object.freeze({
   DATE: 'date',
   TIME: 'time',
   DATETIME: 'datetime',
+  DR_TRAIN_TABLE: 'drTrainTable',
   LINEBREAK: 'linebreak',
 });
 
@@ -37,6 +38,7 @@ export const OrderPatternElementTypeNames = Object.freeze({
   DATE: 'Дата',
   TIME: 'Время',
   DATETIME: 'Дата-время',
+  DR_TRAIN_TABLE: 'Таблица "Поезд ДР"',
   LINEBREAK: 'Перенос строки',
 });
 
@@ -46,3 +48,10 @@ export const PossibleElementSizes = Object.freeze({
   LARGE: 'LARGE',
   AUTO: 'AUTO',
 });
+
+export const DRTrainTableColumns = [
+  { field: 'OrderNumber', header: '№ п/п' },
+  { field: 'Station', header: 'Станция' },
+  { field: 'DepartureTime', header: 'Время отправления' },
+  { field: 'ArrivalTime', header: 'Время прибытия' },
+];

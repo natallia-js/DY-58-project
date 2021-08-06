@@ -13,7 +13,7 @@ export default function showMessage() {
   }
 
   function showErrMessage(message) {
-    this.$toast.add({
+    toast.add({
       severity: 'error',
       summary: 'Ошибка',
       detail: message,

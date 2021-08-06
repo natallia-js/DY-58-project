@@ -39,8 +39,8 @@ export const orderPatterns = {
       state.patterns
         .filter((pattern) => pattern.service === getters.getUserService)
         .forEach((pattern) => {
-          if (!orderCategories.includes(pattern.category)) {
-            orderCategories.push(pattern.category);
+          if (!orderCategories.find((item) => item.orderType === pattern.type && item.category === pattern.category)) {
+            orderCategories.push({ orderType: pattern.type, category: pattern.category });
           }
         });
       return orderCategories;
