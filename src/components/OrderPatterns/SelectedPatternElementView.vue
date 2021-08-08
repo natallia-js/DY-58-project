@@ -3,7 +3,7 @@
     v-if="element.type === getOrderPatternElementTypes.TEXT"
     :value="elementValue"
     style="width:100%"
-    @changeValue="(val) => { elementValue = val; }"
+    @input="elementValue = $event"
   />
   <InputText
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
@@ -36,6 +36,7 @@
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
     :value="[]"
+    class="p-datatable-responsive p-datatable-gridlines p-datatable-sm z-depth-1"
   >
     <Column
       v-for="col of getDRTrainTableColumns"

@@ -33,6 +33,7 @@
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
     :value="[]"
+    class="p-datatable-responsive p-datatable-gridlines p-datatable-sm z-depth-1"
   >
     <Column
       v-for="col of getDRTrainTableColumns"

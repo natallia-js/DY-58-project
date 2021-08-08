@@ -68,10 +68,12 @@
           <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
             <span style="color:red">*</span> <span class="p-text-bold">Наименование распоряжения</span>
           </label>
-          <InputText
+          <allow-clear-input-text
             id="orderTitle"
-            v-model="v$.orderTitle.$model"
-            :class="{'p-invalid':v$.orderTitle.$invalid && submitted}"
+            :value="v$.orderTitle.$model"
+            @input="v$.orderTitle.$model = $event"
+            style="width:100%"
+            :inputClass="{'p-invalid':v$.orderTitle.$invalid && submitted}"
           />
           <small
             v-if="(v$.orderTitle.$invalid && submitted) || v$.orderTitle.$pending.$response"
@@ -104,6 +106,7 @@
           v-if="state.orderPattern && state.orderPattern.length"
           type="button"
           @click="handleClearOrderPattern($event)"
+          class="p-mt-2"
         >
           Очистить шаблон
         </Button>
@@ -128,6 +131,7 @@
   import objectId from '../../additional/objectId.generator';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '../../hooks/showMessage.hook';
+  import AllowClearInputText from '../AllowClearInputText';
 
   export default {
     name: 'dy58-create-order-pattern',
@@ -137,6 +141,7 @@
       EditOrderPatternElement,
       EditOrderPattern,
       OrderPatternPreview,
+      AllowClearInputText,
     },
 
     setup() {

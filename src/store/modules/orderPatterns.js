@@ -80,6 +80,41 @@ export const orderPatterns = {
       if (!state.patterns || !state.patterns.length) {
         return [];
       }
+      const orderPatternNodeObject = (orderPattern) => {
+        return {
+          label: orderPattern.title,
+          key: orderPattern._id,
+          pattern: orderPattern.elements,
+          type: OrderPatternsNodeType.ORDER_PATTERN,
+          personalPattern: Boolean(orderPattern.personalPattern),
+          icon: orderPattern.personalPattern ? 'pi pi-file' : 'pi pi-file-excel',
+        };
+      };
+      const orderCategoryNodeObject = (orderPattern) => {
+        return {
+          label: orderPattern.category,
+          key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
+          type: OrderPatternsNodeType.ORDER_CATEGORY,
+          additionalInfo: {
+            service: orderPattern.service,
+            orderType: orderPattern.type,
+          },
+          personalCategory: state.patterns.find((item) =>
+            item.service === orderPattern.service && item.type === orderPattern.type &&
+            item.category === orderPattern.category && item.personalPattern !== orderPattern.personalPattern
+          ) ? false : true,
+          children: [orderPatternNodeObject(orderPattern)],
+        };
+      };
+      const serviceNodeObject = (orderPattern) => {
+        return {
+          label: orderPattern.type,
+          key: `${orderPattern.service}${orderPattern.type}`,
+          type: OrderPatternsNodeType.ORDER_TYPE,
+          children: [orderCategoryNodeObject(orderPattern)],
+        };
+      };
+
       const treeData = [];
       state.patterns.forEach((orderPattern) => {
         const theSameServiceElement = treeData.find((service) => service.label === orderPattern.service);
@@ -89,79 +124,18 @@ export const orderPatterns = {
             label: orderPattern.service,
             key: orderPattern.service,
             type: OrderPatternsNodeType.SERVICE,
-            children: [{
-              label: orderPattern.type,
-              key: `${orderPattern.service}${orderPattern.type}`,
-              type: OrderPatternsNodeType.ORDER_TYPE,
-              children: [{
-                label: orderPattern.category,
-                key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
-                type: OrderPatternsNodeType.ORDER_CATEGORY,
-                additionalInfo: {
-                  service: orderPattern.service,
-                  orderType: orderPattern.type,
-                },
-                children: [{
-                  label: orderPattern.title,
-                  key: orderPattern._id,
-                  pattern: orderPattern.elements,
-                  type: OrderPatternsNodeType.ORDER_PATTERN,
-                  icon: 'pi pi-file',
-                }],
-              }],
-            }],
+            children: [serviceNodeObject(orderPattern)],
           });
         } else {
           const theSameTypeElement = theSameServiceElement.children.find((type) => type.label === orderPattern.type);
           if (!theSameTypeElement) {
-            theSameServiceElement.children.push({
-              label: orderPattern.type,
-              key: `${orderPattern.service}${orderPattern.type}`,
-              type: OrderPatternsNodeType.ORDER_TYPE,
-              children: [{
-                label: orderPattern.category,
-                key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
-                type: OrderPatternsNodeType.ORDER_CATEGORY,
-                additionalInfo: {
-                  service: orderPattern.service,
-                  orderType: orderPattern.type,
-                },
-                children: [{
-                  label: orderPattern.title,
-                  key: orderPattern._id,
-                  pattern: orderPattern.elements,
-                  type: OrderPatternsNodeType.ORDER_PATTERN,
-                  icon: 'pi pi-file',
-                }],
-              }],
-            });
+            theSameServiceElement.children.push(serviceNodeObject(orderPattern));
           } else {
             const theSameCategoryElement = theSameTypeElement.children.find((category) => category.label === orderPattern.category);
             if (!theSameCategoryElement) {
-              theSameTypeElement.children.push({
-                label: orderPattern.category,
-                key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
-                type: OrderPatternsNodeType.ORDER_CATEGORY,
-                additionalInfo: {
-                  service: orderPattern.service,
-                  orderType: orderPattern.type,
-                },
-                children: [{
-                  label: orderPattern.title,
-                  key: orderPattern._id,
-                  pattern: orderPattern.elements,
-                  type: OrderPatternsNodeType.ORDER_PATTERN,
-                  icon: 'pi pi-file',
-                }],
-              });
+              theSameTypeElement.children.push(orderCategoryNodeObject(orderPattern));
             } else {
-              theSameCategoryElement.children.push({
-                label: orderPattern.title,
-                key: orderPattern._id,
-                pattern: orderPattern.elements,
-                type: OrderPatternsNodeType.ORDER_PATTERN,
-                icon: 'pi pi-file',
-              });
+              theSameCategoryElement.children.push(orderPatternNodeObject(orderPattern));
             }
           }
         }
@@ -338,7 +312,7 @@ export const orderPatterns = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
-          { service, type, category, title, elements },
+          { service, type, category, title, elements, isPersonalPattern: true },
           { headers }
         );
         context.state.createOrderPatternResult = {

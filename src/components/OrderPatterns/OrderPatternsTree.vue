@@ -19,7 +19,8 @@
         @nodeUnselect="handleTreeNodeUnselect"
         @nodeExpand="expandAll"
         @nodeCollapse="collapseAll"
-      ></Tree>
+      >
+      </Tree>
       <Button
         icon="pi pi-refresh"
         class="p-button-rounded p-button-success dy58-refresh-orders-list-btn"
@@ -38,7 +39,7 @@
         На сервер отправлено {{ getModOrderPatternRecsBeingProcessed }} запросов на редактирование шаблона распоряжения. Ожидаю ответ...
       </div>
 
-      <div v-if="selectedOrderCategory">
+      <div v-if="selectedOrderCategory && selectedOrderCategory.personalCategory">
         <div class="dy58-title-small p-mb-4">
           Вы можете отредактировать наименование категории распоряжений
         </div>
@@ -64,7 +65,7 @@
           <div className="p-col-12">
             <div class="dy58-order-pattern-border p-p-2">
               <order-pattern-preview :orderPattern="selectedPattern.elements" />
-              <div class="p-mb-3 p-mt-3">
+              <div v-if="selectedPattern.personalPattern" class="p-mb-3 p-mt-3">
                 <Button
                   v-if="!editedPattern"
                   type="button"
@@ -331,6 +332,7 @@
             key: node.key,
             label: node.label,
             elements: node.pattern,
+            personalPattern: node.personalPattern,
           };
           if (this.selectedOrderCategory) {
             this.changeSelectedOrderCategory(null);
@@ -343,6 +345,7 @@
             this.changeSelectedOrderCategory({
               ...node.additionalInfo,
               category: node.label,
+              personalCategory: node.personalCategory,
             });
           } else if (this.selectedOrderCategory) {
             this.changeSelectedOrderCategory(null);

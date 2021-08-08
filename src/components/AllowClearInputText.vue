@@ -1,7 +1,13 @@
 <template>
   <span class="p-input-icon-right" :style="style">
-    <i class="pi pi-times" @click="handleClearValue" />
-    <InputText type="text" style="width:100%" v-model="elementValue" />
+    <i class="pi pi-times" @click="handleClearInputTextValue" />
+    <InputText
+      type="text"
+      style="width:100%"
+      :value="value"
+      @input="handleChangeInputTextValue"
+      :class="inputClass"
+    />
   </span>
 </template>
 
@@ -9,31 +15,26 @@
   export default {
     name: 'dy58-allow-clear-input-text',
 
-    emits: ['changeValue'],
+    emits: ['input'],
 
     props: {
-      value: String,
-      style: Object,
-    },
-
-    data() {
-      return {
-        elementValue: null,
-      };
-    },
-
-    watch: {
-      value(newVal) {console.log('!!!',newVal)
-        this.elementValue = newVal;
+      value: {
+        type: String,
       },
-      elementValue(newVal) {
-        this.$emit('changeValue', newVal);
+      style: {
+        type: Object,
+      },
+      inputClass: {
+        type: Object,
       },
     },
 
     methods: {
-      handleClearValue() {
-        this.elementValue = null;
+      handleClearInputTextValue() {
+        this.$emit('input', null);
+      },
+      handleChangeInputTextValue(event) {
+        this.$emit('input', event.target.value);
       },
     },
   };
