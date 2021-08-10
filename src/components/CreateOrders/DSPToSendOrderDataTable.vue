@@ -173,7 +173,8 @@
   import {
     CurrShiftGetOrderStatus,
     CurrShiftTblColumnNames,
-    CurrShiftTblColumns } from '../store/modules/currShift';
+    CurrShiftTblColumns,
+  } from '../../store/modules/currShift';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',

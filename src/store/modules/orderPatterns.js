@@ -153,6 +153,10 @@ export const orderPatterns = {
       return state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.NOTIFICATION);
     },
 
+    getOrderPatternById: (state) => (patternId) => {
+      return state.patterns.find((pattern) => pattern._id === patternId);
+    },
+
     getOrderCategoryModifyResult(state) {
       return state.modifyOrderCategoryTitleResult;
     },

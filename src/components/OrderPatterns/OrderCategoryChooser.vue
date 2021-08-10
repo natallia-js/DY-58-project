@@ -60,8 +60,8 @@
 
     setup(_props, { emit }) {
       const ORDER_CATEGORY_VALUES = {
-        existing: "existing",
-        new: "new",
+        existing: 'existing',
+        new: 'new',
       };
 
       const state = reactive({

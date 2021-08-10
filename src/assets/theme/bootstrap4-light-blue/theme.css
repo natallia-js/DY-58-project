@@ -649,6 +649,7 @@
   border: 1px solid #ced4da;
   transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   border-radius: 4px;
+  overflow: hidden;
 }
 .p-dropdown:not(.p-disabled):hover {
   border-color: #ced4da;
@@ -1479,6 +1480,7 @@
   border: 1px solid #ced4da;
   transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   border-radius: 4px;
+  overflow: hidden;
 }
 .p-treeselect:not(.p-disabled):hover {
   border-color: #ced4da;

@@ -14,9 +14,9 @@
 
 
 <script>
-  import NewOrder from '../components/NewOrder';
-  import NewRequest from '../components/NewRequest';
-  import NewNotification from '../components/NewNotification';
+  import NewOrder from '../components/CreateOrders/NewOrder';
+  import NewRequest from '../components/CreateOrders/NewRequest';
+  import NewNotification from '../components/CreateOrders/NewNotification';
   // import internationalizationDateTimeOptions from '../constants/internationalizationDateTimeOptions';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
 

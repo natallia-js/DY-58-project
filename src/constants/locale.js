@@ -39,4 +39,6 @@ export default {
   dayNamesShort: [ 'Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб' ],
   dayNamesMin:	['В','П','В','С','Ч','П','С'],
   today: 'Сегодня',
+
+  dateFormat: 'dd.mm.yy',
 };

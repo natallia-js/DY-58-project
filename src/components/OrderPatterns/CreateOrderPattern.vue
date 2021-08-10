@@ -12,7 +12,7 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="service" :class="{'p-error': v$.service.$invalid && submitted}">
-            <span style="color:red">*</span> <span class="p-text-bold">Служба</span>
+            <span class="p-text-bold"><span style="color:red">*</span> Служба</span>
           </label>
           <InputText
             id="service"
@@ -29,7 +29,7 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="orderType" :class="{'p-error': v$.orderType.$invalid && submitted}">
-            <span style="color:red">*</span> <span class="p-text-bold">Тип распоряжения</span>
+            <span class="p-text-bold"><span style="color:red">*</span> Тип распоряжения</span>
           </label>
           <Dropdown
             id="orderType"
@@ -49,7 +49,7 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="orderCategory" :class="{'p-error': v$.orderCategory.$invalid && submitted}">
-            <span style="color:red">*</span> <span class="p-text-bold">Категория распоряжения</span>
+            <span class="p-text-bold"><span style="color:red">*</span> Категория распоряжения</span>
           </label>
           <order-category-chooser
             id="orderCategory"
@@ -66,7 +66,7 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
-            <span style="color:red">*</span> <span class="p-text-bold">Наименование распоряжения</span>
+            <span class="p-text-bold"><span style="color:red">*</span> Наименование распоряжения</span>
           </label>
           <allow-clear-input-text
             id="orderTitle"

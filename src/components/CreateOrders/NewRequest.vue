@@ -10,10 +10,11 @@
 
 
 <script>
-  import { OrderInputTypes } from '../constants/orderInputTypes';
+  import { mapGetters } from 'vuex';
+  import { OrderInputTypes } from '../../constants/orderInputTypes';
 
   export default {
-    name: 'dy58-new-notification-block',
+    name: 'dy58-new-request-block',
 
     data() {
       return {
@@ -22,9 +23,17 @@
     },
 
     computed: {
+      ...mapGetters([
+        'getRequestPatterns',
+      ]),
+
       getOrderInputTypes() {
         return OrderInputTypes;
       },
+    },
+
+    created() {
+      //console.log(this.getRequestPatterns)
     },
   }
 </script>

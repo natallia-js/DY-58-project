@@ -158,7 +158,8 @@
   import {
     CurrSectorsShiftGetOrderStatus,
     CurrSectorsShiftTblColumnNames,
-    CurrSectorsShiftTblColumns } from '../store/modules/currSectorsShift';
+    CurrSectorsShiftTblColumns,
+  } from '../../store/modules/currSectorsShift';
 
   export default {
     name: 'dy58-dnc-to-send-order-data-table',
