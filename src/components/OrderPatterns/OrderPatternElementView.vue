@@ -5,30 +5,44 @@
   <InputText
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
+    :modelValue="element.value"
+    @input="handleChangeInputText"
   />
   <Dropdown
     v-else-if="element.type === getOrderPatternElementTypes.SELECT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
+    :modelValue="element.value"
+    @input="handleChangeInputText"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
-    :dateFormat="getDateFormat"
     :showIcon="true"
     placeholder="дата"
+    :hideOnDateTimeSelect="true"
+    :manualInput="false"
+    v-model="elementModelValue"
+    @dateSelect="handleChangeDateTime"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.TIME"
     :showTime="true"
     :timeOnly="true"
     :showIcon="true"
+    :hideOnDateTimeSelect="true"
+    :manualInput="false"
     placeholder="время"
+    v-model="elementModelValue"
+    @dateSelect="handleChangeDateTime"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
-    :dateFormat="getDateFormat"
     :showTime="true"
     :showIcon="true"
     placeholder="дата-время"
+    :hideOnDateTimeSelect="true"
+    :manualInput="false"
+    v-model="elementModelValue"
+    @dateSelect="handleChangeDateTime"
   />
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
@@ -56,7 +70,6 @@
   import {
     OrderPatternElementType,
     ElementSizesCorrespondence,
-    DateFormat,
     DRTrainTableColumns,
   } from '../../constants/orderPatterns';
 
@@ -65,6 +78,15 @@
 
     props: ['element'],
 
+    emits: ['input'],
+
+    data() {
+      return {
+        orderPatternArrays: [],
+        elementModelValue: null,
+      };
+    },
+
     computed: {
       getOrderPatternElementTypes() {
         return OrderPatternElementType;
@@ -72,11 +94,24 @@
       getElementSizesCorrespondence() {
         return ElementSizesCorrespondence;
       },
-      getDateFormat() {
-        return DateFormat;
-      },
       getDRTrainTableColumns() {
         return DRTrainTableColumns;
+      },
+    },
+
+    mounted() {
+      if (this.element) {
+        this.elementModelValue = this.element.value;
+      }
+    },
+
+    methods: {
+      handleChangeInputText(event) {
+        this.$emit('input', { elementId: this.element._id, value: event.target.value });
+      },
+
+      handleChangeDateTime(value) {
+        this.$emit('input', { elementId: this.element._id, value });
       },
     },
   };

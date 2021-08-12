@@ -16,7 +16,10 @@
           display: 'inline-block'
         }"
       >
-        <order-pattern-element-view :element="patternElement" />
+        <order-pattern-element-view
+          :element="patternElement"
+          @input="handleChangeElementValue"
+        />
       </div>
     </template>
   </div>
@@ -30,7 +33,7 @@
     name: 'dy58-order-pattern-preview',
 
     props: {
-      orderPattern: Array,
+      // массив элементов шаблона распоряжения
       value: Array,
     },
 
@@ -57,11 +60,11 @@
     },
 
     mounted() {
-      this.analyzeNewOrderPattern(this.orderPattern);
+      this.analyzeNewOrderPattern(this.value);
     },
 
     watch: {
-      orderPattern: function(newVal) {
+      value: function(newVal) {
         this.analyzeNewOrderPattern(newVal);
       },
     },
@@ -92,6 +95,10 @@
           }
         });
         this.orderPatternArrays = orderPatternToDraw;
+      },
+
+      handleChangeElementValue(event) {
+        this.$emit('input', event);
       },
     },
   };

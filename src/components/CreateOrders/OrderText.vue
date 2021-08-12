@@ -45,9 +45,8 @@
     </div>
     <div v-else-if="state.orderPattern" class="dy58-order-pattern-border p-col-12">
       <order-pattern-text
-        :orderPattern="getSelectedOrderPattern.elements"
         :value="state.orderPatternText"
-        @input="state.orderPatternText = $event"
+        @input="handleChangeOrderPatternElementValue"
       />
     </div>
   </div>
@@ -83,9 +82,12 @@
       };
 
       const state = reactive({
+        // источник текста распоряжения (шаблон либо не шаблон)
         orderTextSource: '',
+        // для шаблонного распоряжения
         orderPattern: null,
         orderPatternText: null,
+        // для распоряжения без шаблона
         orderTitle: '',
         orderText: '',
       });
@@ -94,9 +96,9 @@
         state.orderPattern ? store.getters.getOrderPatternById(Object.keys(state.orderPattern)[0]) : {}
       );
 
-      const getOrderText = computed(() => state.orderText);
+      const getCurrentOrderText = computed(() => state.orderText);
 
-      watch(getOrderText, (newVal) =>
+      watch(getCurrentOrderText, (newVal) =>
         emit('input', {
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,
           orderTitle: state.orderTitle,
@@ -105,15 +107,20 @@
       );
 
       const handleFocusDropdown = () => {
-        state.orderTextSource = ORDER_TEXT_SOURCE.pattern;
-        emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.pattern,
-          orderTitle: getSelectedOrderPattern.value.title,
-          orderText: state.orderPatternText,
-        });
+        if (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) {
+          state.orderTextSource = ORDER_TEXT_SOURCE.pattern;
+          emit('input', {
+            orderTextSource: ORDER_TEXT_SOURCE.pattern,
+            orderTitle: getSelectedOrderPattern.value.title,
+            orderText: state.orderPatternText,
+          });
+        }
       };
 
       const handleChooseOrderPattern = () => {
+        state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => {
+          return { ...element };
+        });
         emit('input', {
           orderTextSource: ORDER_TEXT_SOURCE.pattern,
           orderTitle: getSelectedOrderPattern.value.title,
@@ -122,12 +129,14 @@
       };
 
       const handleFocusInput = () => {
-        state.orderTextSource = ORDER_TEXT_SOURCE.nopattern;
-        emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.nopattern,
-          orderTitle: state.orderTitle,
-          orderText: state.orderText,
-        });
+        if (state.orderTextSource !== ORDER_TEXT_SOURCE.nopattern) {
+          state.orderTextSource = ORDER_TEXT_SOURCE.nopattern;
+          emit('input', {
+            orderTextSource: ORDER_TEXT_SOURCE.nopattern,
+            orderTitle: state.orderTitle,
+            orderText: state.orderText,
+          });
+        }
       };
 
       const handleChangeOrderTitle = (event) => {
@@ -135,6 +144,19 @@
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,
           orderTitle: event.target.value,
           orderText: state.orderText,
+        });
+      };
+
+      const handleChangeOrderPatternElementValue = (event) => {
+        state.orderPatternText.forEach((element) => {
+          if (element._id === event.elementId) {
+            element.value = event.value;
+          }
+        });
+        emit('input', {
+          orderTextSource: ORDER_TEXT_SOURCE.pattern,
+          orderTitle: getSelectedOrderPattern.value.title,
+          orderText: state.orderPatternText,
         });
       };
 
@@ -146,6 +168,7 @@
         handleChooseOrderPattern,
         handleFocusInput,
         handleChangeOrderTitle,
+        handleChangeOrderPatternElementValue,
       };
     },
   };

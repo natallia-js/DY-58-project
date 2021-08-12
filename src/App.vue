@@ -29,7 +29,9 @@
     },
 
     methods: {
-      ...mapMutations(['setCurrDateTime']),
+      ...mapMutations([
+        'setCurrDateTime',
+      ]),
 
       updateCurrDateTime() {
         this.setCurrDateTime(new Date());

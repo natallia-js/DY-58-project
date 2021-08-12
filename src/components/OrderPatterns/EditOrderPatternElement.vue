@@ -170,6 +170,10 @@
         if (this.selectedPatternElement.type !== OrderPatternElementType.TEXT) {
           this.selectedPatternElement.value = null;
         }
+        if ([OrderPatternElementType.DATE, OrderPatternElementType.TIME, OrderPatternElementType.DATETIME]
+          .includes(this.selectedPatternElement.type) && this.selectedPatternElement.size !== PossibleElementSizes.AUTO) {
+          this.selectedPatternElement.size = PossibleElementSizes.AUTO;
+        }
         this.$emit('submitEditOrderPatternElement', this.selectedPatternElement);
       },
 

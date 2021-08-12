@@ -146,6 +146,7 @@
         timeSpan: {
           start: '',
           end: '',
+          tillCancellation: '',
         },
         orderText: {
           orderTextSource: '',
@@ -171,9 +172,15 @@
         orderFieldsErrs: null,
       });
 
+      const getSelectedOrderInputType = computed(() => state.selectedOrderInputType);
+
+      watch(getSelectedOrderInputType, (newVal) => store.commit('setCurrentOrderInputType', newVal));
+
       const endDateNoLessStartDate = (value) =>
         !value ? true :
           !state.timeSpan.start ? true : value >= state.timeSpan.start;
+
+      const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
       const rules = {
         number: { required },
@@ -185,6 +192,7 @@
         timeSpan: {
           start: { required },
           end: { endDateNoLessStartDate },
+          tillCancellation: { cancelOrEndDate },
         },
         orderText: {
           orderTextSource: { required },
@@ -212,10 +220,6 @@
         state.allOrderPatterns = getOrderPatternsToDisplayInTreeSelect;
       });
 
-      const setCurrInputType = (inputType) => {
-        store.commit('setCurrentOrderInputType', inputType);
-      };
-
       const handleSubmit = (isFormValid) => {console.log(isFormValid, state)
         submitted.value = true;
 
@@ -236,7 +240,6 @@
         getCurrTimeString,
         getOrderPatternsToDisplayInTreeSelect,
         getOrderInputTypes,
-        setCurrInputType,
         handleSubmit,
       }
     },

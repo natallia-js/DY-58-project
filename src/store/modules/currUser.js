@@ -13,7 +13,9 @@ import {
  * и которые текущее приложение "знает". Также, возвращает список рабочих полигонов, определенных для пользователя
  * и связанных с выбранными полномочиями.
  */
-function checkUserAuthData({ userId, jtwToken, userInfo, credentials, workPoligons }) {
+function checkUserAuthData(payload) {
+  const { userId, jtwToken, userInfo, credentials, workPoligons } = payload;
+
   if (!userId) {
     throw new Error('Не указан id пользователя для входа в Систему. Обратитесь к Администратору Системы');
   }
@@ -51,7 +53,7 @@ function checkUserAuthData({ userId, jtwToken, userInfo, credentials, workPoligo
   }
 
   // Осталось проверить рабочие полигоны. Причем во взаимосвязи с полномочиями пользователя: конкретный тип полномочия
-  // подразумевает коекретный тип рабочего полигона.
+  // подразумевает конкретный тип рабочего полигона.
   if (!workPoligons || !workPoligons.length) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
@@ -140,25 +142,78 @@ export const currUser = {
     setUserCredential(state, credential) {
       if (credential) {
         state.credential = credential;
+
+        const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+        locStorUserData.lastCredential = credential;
+        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
       }
     },
 
     setUserWorkPoligon(state, workPoligon) {
       if (workPoligon) {
         state.workPoligon = workPoligon;
+
+        const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+        locStorUserData.lastWorkPoligon = workPoligon;
+        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
       }
     },
 
-    login(state, { userId, jtwToken, userInfo, credentials, workPoligons }) {
-      // Проверяем полученную информацию, предназначенную для входа пользователя в систему
-      const userCredsWithPoligons = checkUserAuthData({ userId, jtwToken, userInfo, credentials, workPoligons });
+    /**
+     *
+     */
+    login(state, payload) {
+      const {
+        userId,
+        jtwToken,
+        userInfo,
+        credentials,
+        workPoligons,
+        lastCredential,
+        lastWorkPoligon,
+      } = payload;
 
+      // Проверяем полученную информацию, предназначенную для входа пользователя в систему
+      const userCredsWithPoligons = checkUserAuthData(payload);
+
+      // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon, проверяем,
+      // если данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
+      let trueLastCredential = false;
+      let trueLastWorkPoligon = false;
+      const credWithPoligons = !lastCredential ? null : userCredsWithPoligons.find((cred) => cred.cred === lastCredential);
+      if (credWithPoligons) {
+        trueLastCredential = true;
+        const credPoligon = !lastWorkPoligon ? null : credWithPoligons.poligons.find((poligon) =>
+          (poligon.type === lastWorkPoligon.type) && poligon.workPoligons.includes(lastWorkPoligon.code));
+        if (credPoligon) {
+          trueLastWorkPoligon = true;
+        } else {
+          // если полигон явно не удалось определить, то и полномочие считаем неопределенным
+          // (нам нужно, чтобы определены/неопределены были оба одновременно)
+          trueLastCredential = false;
+        }
+      }
+
+      // полномочие, с которым будет работать пользователь (если удалось однозначно определить)
+      const userCredential = trueLastCredential ? lastCredential :
+        (userCredsWithPoligons && userCredsWithPoligons.length === 1 ? userCredsWithPoligons[0].cred : null);
+console.log(userCredential)
+      // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
+      const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
+        (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
+        {
+          type: userCredsWithPoligons[0].poligons[0].type,
+          code: userCredsWithPoligons[0].poligons[0].workPoligons[0],
+        };
+console.log(userWorkPoligon)
       localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
         userId,
         userToken: jtwToken,
         userInfo,
         userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
         userWorkPoligons: workPoligons,
+        lastCredential: userCredential,
+        lastWorkPoligon: userWorkPoligon,
       }));
 
       state.id = userId;
@@ -169,15 +224,15 @@ export const currUser = {
       state.post = userInfo.post;
       state.service = userInfo.service;
       state.possibleCredentialsWithPoligons = userCredsWithPoligons; // именно все возможные полномочия в данном приложении!
-      state.credential = userCredsWithPoligons && userCredsWithPoligons.length === 1 ? userCredsWithPoligons[0].cred : null;
-      state.workPoligon = !state.credential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1 ? null : {
-        type: userCredsWithPoligons[0].poligons[0].type,
-        code: userCredsWithPoligons[0].poligons[0].workPoligons[0],
-      };
+      state.credential = userCredential;
+      state.workPoligon = userWorkPoligon;
 
       state.isAuthenticated = true;
     },
 
+    /**
+     *
+     */
     tryLoginViaLocalStorage(state) {
       if (state.isAuthenticated) {
         return;
@@ -191,12 +246,14 @@ export const currUser = {
       }
 
       try {
-        this.login(state, {
+        this.commit('login', {
           userId: locStorUserData.userId,
           jtwToken: locStorUserData.userToken,
           userInfo: locStorUserData.userInfo,
           credentials: locStorUserData.userCredentials,
-          userWorkPoligons: locStorUserData.userWorkPoligons,
+          workPoligons: locStorUserData.userWorkPoligons,
+          lastCredential: locStorUserData.lastCredential,
+          lastWorkPoligon: locStorUserData.lastWorkPoligon,
         });
 
       } catch (e) {
@@ -204,6 +261,9 @@ export const currUser = {
       }
     },
 
+    /**
+     *
+     */
     logout(state) {
       state.id = null;
       state.token = null;

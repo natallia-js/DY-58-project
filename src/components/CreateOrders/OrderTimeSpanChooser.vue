@@ -7,6 +7,8 @@
           :showTime="true"
           hourFormat="24"
           :hideOnDateTimeSelect="true"
+          :showIcon="true"
+          :manualInput="false"
           v-model="state.startDateTime"
           @dateSelect="handleChangeStartDateTime"
         />
@@ -18,7 +20,9 @@
         <Calendar
           :showTime="true"
           hourFormat="24"
+          :showIcon="true"
           :hideOnDateTimeSelect="true"
+          :manualInput="false"
           v-model="state.endDateTime"
           @dateSelect="handleChangeEndDateTime"
         />
@@ -56,15 +60,27 @@
       });
 
       const handleChangeStartDateTime = (value) => {
-        emit('input', { start: value, end: state.tillCancellation ? null : state.endDateTime });
+        emit('input', {
+          start: value,
+          end: state.tillCancellation ? null : state.endDateTime,
+          tillCancellation: state.tillCancellation,
+        });
       };
 
       const handleChangeEndDateTime = (value) => {
-        emit('input', { start: state.startDateTime, end: state.tillCancellation ? null : value });
+        emit('input', {
+          start: state.startDateTime,
+          end: state.tillCancellation ? null : value,
+          tillCancellation: state.tillCancellation,
+        });
       };
 
       watch(getTillCancellation, (newVal) => {
-        emit('input', { start: state.startDateTime, end: newVal ? null : state.endDateTime });
+        emit('input', {
+          start: state.startDateTime,
+          end: newVal ? null : state.endDateTime,
+          tillCancellation: state.tillCancellation,
+        });
       });
 
       return {

@@ -71,8 +71,10 @@
       });
 
       const handleFocusDropdown = () => {
-        state.orderCategoryEnterMode = ORDER_CATEGORY_VALUES.existing;
-        emit('input', state.dropdownValue);
+        if (state.orderCategoryEnterMode !== ORDER_CATEGORY_VALUES.existing) {
+          state.orderCategoryEnterMode = ORDER_CATEGORY_VALUES.existing;
+          emit('input', state.dropdownValue);
+        }
       };
 
       const handleChooseOrderCategory = (event) => {
@@ -80,8 +82,10 @@
       };
 
       const handleFocusInput = () => {
-        state.orderCategoryEnterMode = ORDER_CATEGORY_VALUES.new;
-        emit('input', state.inputValue);
+        if (state.orderCategoryEnterMode !== ORDER_CATEGORY_VALUES.new) {
+          state.orderCategoryEnterMode = ORDER_CATEGORY_VALUES.new;
+          emit('input', state.inputValue);
+        }
       };
 
       const handleChangeOrderCategory = (event) => {

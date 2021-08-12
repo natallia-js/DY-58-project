@@ -15,7 +15,6 @@
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
-    :dateFormat="getDateFormat"
     :showIcon="true"
     placeholder="дата"
   />
@@ -28,7 +27,6 @@
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
-    :dateFormat="getDateFormat"
     :showTime="true"
     :showIcon="true"
     placeholder="дата-время"
@@ -59,7 +57,6 @@
   import {
     OrderPatternElementType,
     ElementSizesCorrespondence,
-    DateFormat,
     DRTrainTableColumns,
   } from '../../constants/orderPatterns';
   import AllowClearInputText from '../AllowClearInputText';
@@ -102,9 +99,6 @@
       },
       getElementSizesCorrespondence() {
         return ElementSizesCorrespondence;
-      },
-      getDateFormat() {
-        return DateFormat;
       },
       getDRTrainTableColumns() {
         return DRTrainTableColumns;

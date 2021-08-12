@@ -1,5 +1,3 @@
-export const DateFormat = 'DD.MM.YYYY';
-
 export const ORDER_PATTERN_TYPES = Object.freeze({
   ORDER: 'распоряжение',
   REQUEST: 'заявка',

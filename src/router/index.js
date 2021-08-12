@@ -101,8 +101,7 @@ const router = createRouter({
 });
 
 
-router.beforeEach((to, _from, next) => {
-
+router.beforeEach((to, from, next) => {
   // Страница, куда осуществляется переход, требует аутентификации?
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // Да, аутентификация требуется
@@ -114,6 +113,7 @@ router.beforeEach((to, _from, next) => {
 
     } else {
       // Нет -> пытаемся аутентифицировать пользователя через localstorage
+      // (такое, в частности, возможно при перезагрузке страницы)
       store.commit('tryLoginViaLocalStorage');
 
       // Удалось?
@@ -128,21 +128,28 @@ router.beforeEach((to, _from, next) => {
         });
       }
     }
-  } else if (to.matched.some(record => record.meta.guest)) {
+  } else { // if (to.matched.some(record => record.meta.guest)) {
     // Нет, аутентификация не требуется
 
-    // Пользователь уже аутентифицирован?
-    if (store.getters.isUserAuthenticated) {
-      // Да -> перенаправляем пользователя туда, куда он хотел попасть
-      next();
-
-    } else {
-      // Нет -> пытаемся аутентифицировать пользователя через localstorage
+    // Пользователь не аутентифицирован?
+    if (!store.getters.isUserAuthenticated) {
+      // Не аутентифицирован -> пытаемся аутентифицировать пользователя через localstorage
       store.commit('tryLoginViaLocalStorage');
+    }
 
-      // При любом исходе попытки аутентификации через localstorage перенаправляем
-      // пользователя туда, куда он хотел попасть
-
+    // Пользователь аутентифицирован?
+    if (store.getters.isUserAuthenticated) {
+      // Да
+      // Если пользователь хочет попасть на страницу, связанную с аутентификацией, то
+      // сделать он этого не сможет, пока не выйдет из системы
+      if (to.path === '/') {
+        next({
+          path: (from.path !== '/') ? from.path : '/mainPage',
+        });
+      }
+    } else {
+      // Нет
+      // Перенаправляем пользователя туда, куда он хотел попасть
       next();
     }
   }
