@@ -6,6 +6,7 @@ import { currUser } from './modules/currUser';
 import { currShift } from './modules/currShift';
 import { currSectorsShift } from './modules/currSectorsShift';
 import { currDateTime } from './modules/currDateTime';
+import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { incomingNotifications } from './modules/incomingNotifications';
 import { ordersInWork } from './modules/ordersInWork';
 
@@ -18,6 +19,7 @@ export const store = createStore({
     currShift,
     currSectorsShift,
     currDateTime,
+    currWorkPoligonStructure,
     incomingNotifications,
     ordersInWork,
   },

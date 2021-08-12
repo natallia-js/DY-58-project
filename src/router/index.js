@@ -107,29 +107,44 @@ router.beforeEach((to, from, next) => {
     // Да, аутентификация требуется
 
     // Пользователь уже аутентифицирован?
-    if (store.getters.isUserAuthenticated) {
-      // Да -> перенаправляем пользователя туда, куда он хотел попасть
-      next();
-
-    } else {
+    if (!store.getters.isUserAuthenticated) {
       // Нет -> пытаемся аутентифицировать пользователя через localstorage
       // (такое, в частности, возможно при перезагрузке страницы)
       store.commit('tryLoginViaLocalStorage');
-
-      // Удалось?
-      if (store.getters.isUserAuthenticated) {
-        // Да -> перенаправляем пользователя туда, куда он хотел попасть
-        next();
-      }
-      else {
-        // Нет -> переходим на страницу аутентификации
-        next({
-          path: '/',
-        });
-      }
     }
+
+    // Пользователь аутентифицирован?
+    if (store.getters.isUserAuthenticated) {
+      // Да
+      // Если определен рабочий полигон пользователя, то направляем пользователя туда, куда он хотел попасть,
+      // за исключением страницы /confirmAuthDataPage: на данную страницу у него нет пути
+      if (store.getters.getUserWorkPoligon) {
+        if (to.path !== '/confirmAuthDataPage') {
+          next();
+        } else {
+          next({
+            path: from.path,
+          });
+        }
+      } else {
+        // В противном случае перенаправляем на страницу, где он сможет определить свой рабочий полигон
+        if (to.path !== '/confirmAuthDataPage') {
+          next({
+            path: '/confirmAuthDataPage',
+          });
+        } else {
+          next();
+        }
+      }
+    } else {
+      // Нет -> переходим на страницу аутентификации
+      next({
+        path: '/',
+      });
+    }
+
   } else { // if (to.matched.some(record => record.meta.guest)) {
-    // Нет, аутентификация не требуется
+    // Страница не требует аутентификации
 
     // Пользователь не аутентифицирован?
     if (!store.getters.isUserAuthenticated) {
@@ -141,11 +156,14 @@ router.beforeEach((to, from, next) => {
     if (store.getters.isUserAuthenticated) {
       // Да
       // Если пользователь хочет попасть на страницу, связанную с аутентификацией, то
-      // сделать он этого не сможет, пока не выйдет из системы
-      if (to.path === '/') {
+      // сделать он этого не сможет, пока не выйдет из системы, за исключением случая, когда
+      // не определен его рабочий полигон
+      if ((to.path === '/') && store.getters.getUserWorkPoligon) {
         next({
           path: (from.path !== '/') ? from.path : '/mainPage',
         });
+      } else {
+        next();
       }
     } else {
       // Нет

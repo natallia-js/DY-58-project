@@ -197,7 +197,7 @@ export const currUser = {
       // полномочие, с которым будет работать пользователь (если удалось однозначно определить)
       const userCredential = trueLastCredential ? lastCredential :
         (userCredsWithPoligons && userCredsWithPoligons.length === 1 ? userCredsWithPoligons[0].cred : null);
-console.log(userCredential)
+
       // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
       const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
         (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
@@ -205,7 +205,7 @@ console.log(userCredential)
           type: userCredsWithPoligons[0].poligons[0].type,
           code: userCredsWithPoligons[0].poligons[0].workPoligons[0],
         };
-console.log(userWorkPoligon)
+
       localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
         userId,
         userToken: jtwToken,

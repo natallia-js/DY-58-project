@@ -24,6 +24,19 @@
       'getUserWorkPoligon',
     ]),
 
+    watch: {
+      /**
+       * При смене рабочего полигона пользователя подгружаем информацию о структуре данного рабочего полигона
+       */
+      getUserWorkPoligon: function(newVal) {
+        if (!newVal) {
+          this.$store.commit('delCurrWorkPoligonData');
+        } else {
+          this.$store.dispatch('loadCurrWorkPoligonData');
+        }
+      },
+    },
+
     mounted() {
       setInterval(this.updateCurrDateTime, 1000);
     },
