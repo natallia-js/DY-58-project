@@ -7,6 +7,8 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   getDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortDefinitData`,
   getECDSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortDefinitData`,
   getStationsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/definitData`,
+  getDNCSectorsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/definitData`,
+  getECDSectorsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/definitData`,
 
   getOrderPatterns: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/data`,
   modOrderCategoryTitle: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/modCategoryTitle`,

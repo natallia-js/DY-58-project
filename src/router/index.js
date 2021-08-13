@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AuthPage from '../views/AuthPage.vue';
+import SectorStructurePage from '../views/SectorStructurePage.vue';
 import ConfirmAuthDataPage from '../views/ConfirmAuthDataPage.vue';
 import MainPage from '../views/MainPage.vue';
 import NewOrderPage from '../views/NewOrderPage.vue';
@@ -32,6 +33,14 @@ const routes = [
     path: '/mainPage',
     name: 'MainPage',
     component: MainPage,
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/sectorStructure',
+    name: 'SectorStructurePage',
+    component: SectorStructurePage,
     meta: {
       requiresAuth: true,
     },

@@ -12,10 +12,14 @@
     <p><span class="p-text-bold">Должность:</span> {{ getUserPost || 'Не определена' }}</p>
     <p><span class="p-text-bold">Служба:</span> {{ getUserService || 'Не определена' }}</p>
     <p><span class="p-text-bold">Полномочие:</span> {{ getUserCredential || 'Не определено' }}</p>
-    <p><span class="p-text-bold">Рабочий полигон:</span> {{ getUserWorkPoligon || 'Не определен' }}</p>
+    <p>
+      <span class="p-text-bold">Рабочий полигон:</span>
+      {{ getUserWorkPoligon ? getUserWorkPoligon.type : 'Не определен тип' }}
+      {{ getUserWorkPoligonName || 'Не определено наименование' }}
+    </p>
 
     <template #footer>
-      <Button label="Закрыть" @click="closeDialog" autofocus />
+      <Button label="Закрыть" @click="closeDialog" />
     </template>
   </Dialog>
 </template>
@@ -49,6 +53,7 @@
         'getUserService',
         'getUserCredential',
         'getUserWorkPoligon',
+        'getUserWorkPoligonName',
       ]),
     },
 
