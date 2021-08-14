@@ -39,6 +39,22 @@ export const currWorkPoligonStructure = {
           return null;
       }
     },
+
+    getUserWorkPoligonData(state, getters) {
+      const workPoligon = getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        return;
+      }
+      switch (workPoligon.type) {
+        case WORK_POLIGON_TYPES.STATION:
+          return state.station;
+        case WORK_POLIGON_TYPES.DNC_SECTOR:
+        case WORK_POLIGON_TYPES.ECD_SECTOR:
+          return state.sector;
+        default:
+          return null;
+      }
+    },
   },
 
   mutations: {

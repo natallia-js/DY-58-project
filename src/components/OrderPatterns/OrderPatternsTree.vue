@@ -5,6 +5,12 @@
     <ProgressSpinner />
   </div>
   <div v-else-if="!allOrderPatterns || !allOrderPatterns.length">
+    <Button
+      icon="pi pi-refresh"
+      class="p-button-rounded p-button-success"
+      v-tooltip.right="'Обновить список распоряжений'"
+      @click="refreshOrderPatterns"
+    />
     Список шаблонов распоряжений пуст
   </div>
   <div v-else class="p-grid">
