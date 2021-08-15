@@ -1,12 +1,12 @@
 <template>
   <div v-if="!sectorObj">Структура участка не определена</div>
   <div v-else>
-    <Fieldset :legend="`${sectorObj.type} ${sectorObj.DNCS_Title}`" :toggleable="true">
-      <div v-if="sectorObj.TDNCTrainSectors && sectorObj.TDNCTrainSectors.length">
+    <Fieldset :legend="`${sectorObj.type} ${sectorObj.ECDS_Title}`" :toggleable="true">
+      <div v-if="sectorObj.TECDTrainSectors && sectorObj.TECDTrainSectors.length">
         <Fieldset
-          v-for="trainSector of sectorObj.TDNCTrainSectors"
-          :key="trainSector.DNCTS_ID"
-          :legend="`поездной участок ${trainSector.DNCTS_Title}`"
+          v-for="trainSector of sectorObj.TECDTrainSectors"
+          :key="trainSector.ECDTS_ID"
+          :legend="`поездной участок ${trainSector.ECDTS_Title}`"
           :toggleable="true"
         >
           <Fieldset legend="станции" :toggleable="true">
@@ -19,16 +19,16 @@
               >
                 <p class="p-mb-2">
                   <span class="p-text-bold">Позиция на поездном участке:</span>
-                  {{ station.TDNCTrainSectorStation ? station.TDNCTrainSectorStation.DNCTSS_StationPositionInTrainSector : 'не определена' }}
+                  {{ station.TECDTrainSectorStation ? station.TECDTrainSectorStation.ECDTSS_StationPositionInTrainSector : 'не определена' }}
                 </p>
                 <p class="p-mb-2">
                   <span class="p-text-bold">Принадлежность участку ДНЦ:</span>
                   {{
-                    !station.TDNCTrainSectorStation ?
+                    !station.TECDTrainSectorStation ?
                       'не определена' :
-                      (station.TDNCTrainSectorStation.DNCTSS_StationBelongsToDNCSector === true) ?
+                      (station.TECDTrainSectorStation.ECDTSS_StationBelongsToECDSector === true) ?
                         'да' :
-                        (station.TDNCTrainSectorStation.DNCTSS_StationBelongsToDNCSector === false) ?
+                        (station.TECDTrainSectorStation.ECDTSS_StationBelongsToECDSector === false) ?
                           'нет' :
                           'не определена'
                   }}
@@ -60,16 +60,16 @@
               >
                 <p class="p-mb-2">
                   <span class="p-text-bold">Позиция на поездном участке:</span>
-                  {{ block.TDNCTrainSectorBlock ? block.TDNCTrainSectorBlock.DNCTSB_BlockPositionInTrainSector : 'не определена' }}
+                  {{ block.TECDTrainSectorBlock ? block.TECDTrainSectorBlock.ECDTSB_BlockPositionInTrainSector : 'не определена' }}
                 </p>
                 <p class="p-mb-2">
                   <span class="p-text-bold">Принадлежность участку ДНЦ:</span>
                   {{
-                    !block.TDNCTrainSectorBlock ?
+                    !block.TECDTrainSectorBlock ?
                       'не определена' :
-                      (block.TDNCTrainSectorBlock.DNCTSB_BlockBelongsToDNCSector === true) ?
+                      (block.TECDTrainSectorBlock.ECDTSB_BlockBelongsToECDSector === true) ?
                         'да' :
-                        (block.TDNCTrainSectorBlock.DNCTSB_BlockBelongsToDNCSector === false) ?
+                        (block.TECDTrainSectorBlock.ECDTSB_BlockBelongsToECDSector === false) ?
                           'нет' :
                           'не определена'
                   }}
@@ -103,7 +103,7 @@
 
 <script>
   export default {
-    name: 'dy58-view-dnc-sector-poligon-structure',
+    name: 'dy58-view-ecd-sector-poligon-structure',
 
     props: {
       sectorObj: {

@@ -18,11 +18,13 @@
       FooterBar,
     },
 
-    computed: mapGetters([
-      'isUserAuthenticated',
-      'getUserCredential',
-      'getUserWorkPoligon',
-    ]),
+    computed: {
+      ...mapGetters([
+        'isUserAuthenticated',
+        'getUserCredential',
+        'getUserWorkPoligon',
+      ]),
+    },
 
     watch: {
       /**

@@ -37,6 +37,7 @@ import Tree from 'primevue/tree';
 import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmPopup from 'primevue/confirmpopup';
 import ContextMenu from 'primevue/contextmenu';
+import Fieldset from 'primevue/fieldset';
 
 const app = createApp(App);
 
@@ -71,5 +72,6 @@ app.component('TreeSelect', TreeSelect);
 app.component('Tree', Tree);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('ContextMenu', ContextMenu);
+app.component('Fieldset', Fieldset);
 
 app.mount('#app');

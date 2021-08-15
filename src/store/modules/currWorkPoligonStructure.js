@@ -8,9 +8,10 @@ export const currWorkPoligonStructure = {
     sector: null,
     // Для хранения информации о станции в случае, когда рабочий полигон - станция
     station: null,
-    //
+    // true - идет процесс загрузки структуры рабочего полигона, false - не идет
     loadingCurrWorkPoligonStructure: false,
-    //
+    // null - в процессе загрузки структуры рабочего полигона ошибок не было;
+    // строковое значение (т.е. не null) - сообщение об ошибке загрузки информации о структуре полигона
     errorLoadingCurrWorkPoligonStructure: null,
   },
 
@@ -54,6 +55,34 @@ export const currWorkPoligonStructure = {
         default:
           return null;
       }
+    },
+
+    getSectorStations(state) {
+      if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
+        return [];
+      }
+      const trainSectors = state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors;
+      const stations = [];
+      trainSectors.forEach((sector) => {
+        if (!sector.TStations || !sector.TStations.length) {
+          return;
+        }
+        stations.push(sector.TStations);
+      });
+    },
+
+    getSectorBlocks(state) {
+      if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
+        return [];
+      }
+      const trainSectors = state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors;
+      const blocks = [];
+      trainSectors.forEach((sector) => {
+        if (!sector.TBlocks || !sector.TBlocks.length) {
+          return;
+        }
+        blocks.push(sector.TBlocks);
+      });
     },
   },
 
