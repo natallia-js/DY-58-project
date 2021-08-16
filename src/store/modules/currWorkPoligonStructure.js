@@ -127,7 +127,19 @@ export const currWorkPoligonStructure = {
           { sectorId },
           { headers }
         );
-        context.state.sector = response.data;
+        const adjDNCSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentDNCSectorsShortDefinitData,
+          { sectorId },
+          { headers }
+        );
+        const nearECDSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestECDSectorsShortDefinitData,
+          { sectorId },
+          { headers }
+        );
+        context.state.sector = {
+          ...response.data,
+          TAdjacentDNCSectors: adjDNCSectResponse.data,
+          TNearestECDSectors: nearECDSectResponse.data,
+        };
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;
       }
@@ -145,7 +157,19 @@ export const currWorkPoligonStructure = {
           { sectorId },
           { headers }
         );
-        context.state.sector = response.data;
+        const adjECDSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentECDSectorsShortDefinitData,
+          { sectorId },
+          { headers }
+        );
+        const nearDNCSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestDNCSectorsShortDefinitData,
+          { sectorId },
+          { headers }
+        );
+        context.state.sector = {
+          ...response.data,
+          TAdjacentECDSectors: adjECDSectResponse.data,
+          TNearestDNCSectors: nearDNCSectResponse.data,
+        };
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;
       }
