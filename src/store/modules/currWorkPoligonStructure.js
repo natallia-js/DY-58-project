@@ -67,8 +67,9 @@ export const currWorkPoligonStructure = {
         if (!sector.TStations || !sector.TStations.length) {
           return;
         }
-        stations.push(sector.TStations);
+        stations.push(...sector.TStations);
       });
+      return stations;
     },
 
     getSectorBlocks(state) {
@@ -81,8 +82,9 @@ export const currWorkPoligonStructure = {
         if (!sector.TBlocks || !sector.TBlocks.length) {
           return;
         }
-        blocks.push(sector.TBlocks);
+        blocks.push(...sector.TBlocks);
       });
+      return blocks;
     },
   },
 

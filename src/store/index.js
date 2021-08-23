@@ -9,6 +9,7 @@ import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { incomingNotifications } from './modules/incomingNotifications';
 import { ordersInWork } from './modules/ordersInWork';
+import { webSocket } from './modules/webSocket';
 
 export const store = createStore({
   modules: {
@@ -22,5 +23,6 @@ export const store = createStore({
     currWorkPoligonStructure,
     incomingNotifications,
     ordersInWork,
+    webSocket,
   },
 });

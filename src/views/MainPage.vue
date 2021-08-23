@@ -88,8 +88,6 @@
 
     mounted() {
       this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.mainPage);
-      //
-      this.$store.dispatch('loadOrderPatterns');
     },
 
     methods: {

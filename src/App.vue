@@ -8,7 +8,10 @@
 <script>
   import NavBar from './components/NavBar';
   import FooterBar from './components/FooterBar';
-  import { mapGetters, mapMutations } from 'vuex';
+  import { mapGetters } from 'vuex';
+  import { onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import useWebSocketClient from './hooks/useWebSocketClient.hook';
 
   export default {
     name: 'dy-58-app',
@@ -23,6 +26,7 @@
         'isUserAuthenticated',
         'getUserCredential',
         'getUserWorkPoligon',
+        'getUserId',
       ]),
     },
 
@@ -37,20 +41,35 @@
           this.$store.dispatch('loadCurrWorkPoligonData');
         }
       },
-    },
 
-    mounted() {
-      setInterval(this.updateCurrDateTime, 1000);
-    },
-
-    methods: {
-      ...mapMutations([
-        'setCurrDateTime',
-      ]),
-
-      updateCurrDateTime() {
-        this.setCurrDateTime(new Date());
+      /**
+       * При смене пользователя подгружаем информацию о шаблонах распоряжений
+       */
+      getUserId: function(newVal) {
+        if (!newVal) {
+          this.$store.commit('delCurrOrderPatternsData');
+        } else {
+          this.$store.dispatch('loadOrderPatterns');
+        }
       },
+    },
+
+    setup() {
+      const store = useStore();
+      const wsCient = useWebSocketClient();
+
+      onMounted(() => {
+        setInterval(updateCurrDateTime, 1000);
+        wsCient.connect();
+      });
+
+      const updateCurrDateTime = () => {
+        store.commit('setCurrDateTime', new Date());
+      };
+
+      return {
+        //
+      };
     },
   };
 </script>

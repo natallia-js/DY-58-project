@@ -1,10 +1,8 @@
 <template>
-  <div class="dy58-dsp-tbl-block">
-    <!-- classes 'p-datatable-responsive', 'p-datatable-gridlines', 'p-datatable-sm' - PrimeVue classes -->
-    <!-- class 'z-depth-1' - materializescc class -->
+  <div>
     <DataTable
       :value="getCurrShift"
-      class="p-datatable-responsive p-datatable-gridlines p-datatable-sm z-depth-1"
+      class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
       sortMode="single" :sortField="getCurrShiftTblColumnNames.sector" :sortOrder="1"
@@ -28,7 +26,7 @@
         :headerStyle="{ width: col.width, }"
         headerClass="dy58-table-header-cell-class"
         :bodyStyle="{ width: col.width }"
-        bodyClass="dy58-table-content-cell-class dy58-no-padding"
+        bodyClass="dy58-table-content-cell-class p-p-0"
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrShiftTblColumnNames.notification"
@@ -227,9 +225,4 @@
 
 
 <style scoped>
-
-  .dy58-dsp-tbl-block {
-    min-width: 700px;
-  }
-
 </style>

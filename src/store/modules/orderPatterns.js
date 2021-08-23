@@ -186,6 +186,21 @@ export const orderPatterns = {
     },
   },
 
+  mutations: {
+    delCurrOrderPatternsData(state) {
+      state.patterns = [];
+      state.loadingOrderPatterns = false;
+      state.errorLoadingPatterns = null;
+      state.modifyOrderCategoryTitleResult = null;
+      state.modifyOrderCategoryTitleRecsBeingProcessed = 0;
+      state.delOrderPatternResult = null;
+      state.delOrderPatternRecsBeingProcessed = 0;
+      state.modOrderPatternRecsBeingProcessed = 0;
+      state.modOrderPatternResult = null;
+      state.createOrderPatternResult = null;
+    },
+  },
+
   actions: {
     /**
      *

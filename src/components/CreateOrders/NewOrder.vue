@@ -44,8 +44,8 @@
           </label>
           <order-place-chooser
             id="place"
-            :spans="state.spans"
-            :stations="state.stations"
+            :spans="getSectorBlocks"
+            :stations="getSectorStations"
             :value="v$.place.$model"
             @input="v$.place.$model = $event"
           />
@@ -153,16 +153,6 @@
           orderTitle: '',
           orderText: '',
         },
-        spans: [
-          { id: '555', title: 'jjjjjjjjjj-dgdfgdfgdfg' },
-          { id: '666', title: 'oooooooooщщщщщщщщщщщщщщooooo-fd влопр валпорв ал порвалоп рвалопвапfgdfgdfg' },
-          { id: '777', title: 'BBB-dfgdfgdfgdfgdfg' },
-        ],
-        stations: [
-          { id: '111', title: 'AAA skjfh skdjfh skdjfhsdkjfh sdkfjhs dkfjsh dkfjshdkfj shdkfj sdh' },
-          { id: '112', title: '<<<' },
-          { id: '222', title: 'BBB' },
-        ],
         allOrderPatterns: [],
         selectedPattern: null,
         // true - ожидается ответ сервера на запрос об издании распоряжения, false - запроса не ожидается
@@ -211,6 +201,22 @@
       const getCurrTimeString = computed(() => store.getters.getCurrTimeString);
       const getOrderPatternsToDisplayInTreeSelect = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect);
       const getOrderInputTypes = computed(() => OrderInputTypes);
+      const getSectorStations = computed(() =>
+        store.getters.getSectorStations.map((station) => {
+          return {
+            id: station.St_ID,
+            title: `${station.St_Title} (${station.St_UNMC})`,
+          };
+        })
+      );
+      const getSectorBlocks = computed(() =>
+        store.getters.getSectorBlocks.map((block) => {
+          return {
+            id: block.Bl_ID,
+            title: block.Bl_Title,
+          };
+        })
+      );
 
       watch(getCurrDateTimeString, (newVal) => {
         state.createDateTime = newVal;
@@ -241,6 +247,8 @@
         getOrderPatternsToDisplayInTreeSelect,
         getOrderInputTypes,
         handleSubmit,
+        getSectorStations,
+        getSectorBlocks,
       }
     },
   };

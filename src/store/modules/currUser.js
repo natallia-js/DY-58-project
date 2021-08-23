@@ -85,7 +85,7 @@ function checkUserAuthData(payload) {
 
 export const currUser = {
   state: {
-    id: null,           // id пользователя
+    id: null,         // id пользователя
     name: '',         // имя
     fatherName: '',   // отчество
     surname: '',      // фамилия

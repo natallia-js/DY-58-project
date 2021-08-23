@@ -1,10 +1,8 @@
 <template>
-  <div class="dy58-dnc-tbl-block">
-    <!-- classes 'p-datatable-responsive', 'p-datatable-gridlines', 'p-datatable-sm' - PrimeVue classes -->
-    <!-- class 'z-depth-1' - materializescc class -->
+  <div>
     <DataTable
       :value="getCurrSectorsShift"
-      class="p-datatable-responsive p-datatable-gridlines p-datatable-sm z-depth-1"
+      class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
     >
       <template #header>
@@ -17,10 +15,10 @@
         :field="col.field"
         :header="col.title"
         :key="col.field"
-        :headerStyle="{ width: col.width, }"
+        :headerStyle="{ width: col.width }"
         headerClass="dy58-table-header-cell-class"
         :bodyStyle="{ width: col.width }"
-        bodyClass="dy58-table-content-cell-class dy58-no-padding"
+        bodyClass="dy58-table-content-cell-class"
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrSectorsShiftTblColumnNames.notification"
@@ -37,12 +35,9 @@
           >
             {{ slotProps.data[col.field] }}
           </div>
-          <div v-if="col.field === getCurrSectorsShiftTblColumnNames.notification"
-          >
+          <div v-if="col.field === getCurrSectorsShiftTblColumnNames.notification">
             <div class="dy58-tbl-send-btns-block">
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
+              <a :class="['p-button-raised',
                           'dy58-send-status-btn',
                           {'dy58-send-original': slotProps.data.sendOriginal === getCurrSectorsShiftGetOrderStatus.sendOriginal,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrSectorsShiftGetOrderStatus.sendOriginal,}]"
@@ -52,9 +47,7 @@
               >
                 Оригинал
               </a>
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
+              <a :class="['p-button-raised',
                           'dy58-send-status-btn',
                           {'dy58-send-copy': slotProps.data.sendOriginal === getCurrSectorsShiftGetOrderStatus.sendCopy,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrSectorsShiftGetOrderStatus.sendCopy,}]"
@@ -64,9 +57,7 @@
               >
                 Копия
               </a>
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
+              <a :class="['p-button-raised',
                           'dy58-send-status-btn',
                           {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrSectorsShiftGetOrderStatus.doNotSend,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrSectorsShiftGetOrderStatus.doNotSend,}]"
@@ -212,9 +203,4 @@
 
 
 <style scoped>
-
-  .dy58-dnc-tbl-block {
-    min-width: 700px;
-  }
-
 </style>

@@ -24,7 +24,7 @@
   color: var(--dy58-tbl-header-text-color) !important;
   font-size: var(--dy58-tbl-header-font-size) !important;
 
-  padding: 5px 5px !important;
+  padding: 5px !important;
 
   overflow: hidden;
 }
@@ -32,6 +32,7 @@
 .dy58-table-content-cell-class {
   overflow: auto;
   vertical-align: top !important;
+  padding: 0 !important;
 
   color: var(--dy58-tbl-text-color) !important;
   font-size: var(--dy58-tbl-text-font-size) !important;
@@ -48,37 +49,43 @@
 // ------------------------------------------------------------------------
 // Стили для таблиц с персоналом, которому необходимо передать распоряжение
 
+@mixin send-cell($bgColor) {
+  background-color: $bgColor;
+  padding-left: 5px;
+}
+
 .dy58-send-original {
-  background-color: var(--dy58-send-original-color) !important;
+  @include send-cell(var(--green-200));
 }
 
 .dy58-send-copy {
-  background-color: var(--dy58-send-copy-color) !important;
+  @include send-cell(var(--orange-200));
 }
 
 .dy58-do-not-send {
-  background-color: var(--dy58-do-not-send-color) !important;
+  @include send-cell(var(--surface-100));
 }
 
 .dy58-def-btn-color {
-  background-color: lightgray !important;
+  background-color: var(--surface-300) !important;
 }
 
 .dy58-tbl-send-btns-block {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  padding: 1px 0;
 }
 
 .dy58-send-status-btn {
   min-width: 50px;
-  color: black !important;
-  border-radius: 3rem !important;
-  border: 1px solid var(--dy58-btn-bg-color) !important;
-  font-size: 0.8rem;
-  max-height: 20px !important;
-  line-height: 1.5 !important;
+  text-align: center;
+  padding-right: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.dy58-send-status-btn:hover {
+  cursor: pointer;
 }
 
 .dy58-shift-tbl-group-header {

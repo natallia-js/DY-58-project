@@ -1,4 +1,13 @@
 const AUTH_SERVER_ADDRESS = 'http://localhost:5000';
+export const WS_SERVER_ADDRESS = 'ws://localhost:5000';
+
+export const WS_SERVER_PARAMS = Object.freeze({
+  RETRY_INTERVAL: 5000,
+  CONNECTION_OK_MESSAGE: 'connection OK',
+  SERVER_PING_MESSAGE: 'ping',
+  PONG_MESSAGE: (data) => `pong ${data}`,
+  MAX_SERVER_MESSAGES_STORED: 10,
+});
 
 export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   login: `${AUTH_SERVER_ADDRESS}/api/auth/login`,

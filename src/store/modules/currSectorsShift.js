@@ -7,14 +7,12 @@ export const CurrSectorsShiftGetOrderStatus = Object.freeze({
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
   fio: 'fio',
-  post: 'post',
   notification: 'notification',
 });
 
 export const CurrSectorsShiftTblColumns = [
-  { field: CurrSectorsShiftTblColumnNames.sector, title: 'Участок', width: '20%', },
-  { field: CurrSectorsShiftTblColumnNames.fio, title: 'ФИО', width: '20%', },
-  { field: CurrSectorsShiftTblColumnNames.post, title: 'Должн.', width: '10%', },
+  { field: CurrSectorsShiftTblColumnNames.sector, title: 'Участок', width: '30%', },
+  { field: CurrSectorsShiftTblColumnNames.fio, title: 'ФИО', width: '30%', },
   { field: CurrSectorsShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
 ];
 

@@ -17,5 +17,13 @@
 }
 
 .dy58-warning {
-  color: rgb(199, 147, 50);
+  color: var(--orange-500);
+}
+
+.dy58-attention {
+  color: var(--pink-500);
+}
+
+.dy58-info {
+  color: var(--blue-500);
 }
