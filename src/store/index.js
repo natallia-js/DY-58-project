@@ -3,8 +3,8 @@ import { mainMenuItems } from './modules/mainMenuItems';
 import { leftMenuItems } from './modules/leftMenuItems';
 import { orderPatterns } from './modules/orderPatterns';
 import { currUser } from './modules/currUser';
+import { currShift1 } from './modules/currShift1';
 import { currShift } from './modules/currShift';
-import { currSectorsShift } from './modules/currSectorsShift';
 import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { incomingNotifications } from './modules/incomingNotifications';
@@ -18,7 +18,7 @@ export const store = createStore({
     orderPatterns,
     currUser,
     currShift,
-    currSectorsShift,
+    currShift1,
     currDateTime,
     currWorkPoligonStructure,
     incomingNotifications,

@@ -121,7 +121,4 @@
 
 
 <style lang="scss" scoped>
-  .dy58-date-user-block {
-    background-color: var(--dy58-tbl-header-bg-color);
-  }
 </style>

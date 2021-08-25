@@ -86,6 +86,13 @@ export const currWorkPoligonStructure = {
       });
       return blocks;
     },
+
+    getAdjacentDNCSectors(state) {
+      if (!state.sector || !state.sector.TAdjacentDNCSectors) {
+        return [];
+      }
+      return state.sector.TAdjacentDNCSectors;
+    },
   },
 
   mutations: {
@@ -142,6 +149,7 @@ export const currWorkPoligonStructure = {
           TAdjacentDNCSectors: adjDNCSectResponse.data,
           TNearestECDSectors: nearECDSectResponse.data,
         };
+        console.log(context.state.sector)
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;
       }
@@ -184,7 +192,7 @@ export const currWorkPoligonStructure = {
         return;
       }
       switch (workPoligon.type) {
-        case WORK_POLIGON_TYPES.STATION: console.log('station', workPoligon.code)
+        case WORK_POLIGON_TYPES.STATION:
           await context.dispatch('loadStationData', { stationId: workPoligon.code });
           break;
         case WORK_POLIGON_TYPES.DNC_SECTOR:

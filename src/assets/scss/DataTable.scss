@@ -2,30 +2,25 @@
 // Стили, общие для всех таблиц
 
 .dy58-table-title {
-  color: var(--dy58-tbl-title-text-color);
-  font-size: var(--dy58-tbl-title-font-size);
+  color: var(--text-color);
+  font-size: 1.2rem;
   font-weight: bold;
-
   text-align: center;
 }
 
 .dy58-table-upper-comment {
-  color: var(--dy58-tbl-comment-text-color) !important;
-  font-size: var(--dy58-tbl-comment-font-size) !important;
-
+  color: var(--text-color) !important;
+  font-size: 0.9rem !important;
   text-align: right;
 }
 
 .dy58-table-header-cell-class {
   text-align: left !important;
   vertical-align: middle !important;
-
-  background: var(--dy58-tbl-header-bg-color) !important;
-  color: var(--dy58-tbl-header-text-color) !important;
-  font-size: var(--dy58-tbl-header-font-size) !important;
-
+  background: var(--bluegray-200) !important;
+  color: var(--text-color) !important;
+  font-size: 0.9rem !important;
   padding: 5px !important;
-
   overflow: hidden;
 }
 
@@ -33,9 +28,8 @@
   overflow: auto;
   vertical-align: top !important;
   padding: 0 !important;
-
-  color: var(--dy58-tbl-text-color) !important;
-  font-size: var(--dy58-tbl-text-font-size) !important;
+  color: var(--text-color) !important;
+  font-size: 0.9rem !important;
 }
 
 // ---------------------------------------------------------------------
@@ -49,25 +43,24 @@
 // ------------------------------------------------------------------------
 // Стили для таблиц с персоналом, которому необходимо передать распоряжение
 
-@mixin send-cell($bgColor) {
-  background-color: $bgColor;
+.dy58-send-table-data-cell {
   padding-left: 5px;
 }
 
 .dy58-send-original {
-  @include send-cell(var(--green-200));
+  background-color: var(--teal-100);
 }
 
 .dy58-send-copy {
-  @include send-cell(var(--orange-200));
+  background-color: var(--orange-100);
 }
 
 .dy58-do-not-send {
-  @include send-cell(var(--surface-100));
+  background-color: #fff;
 }
 
 .dy58-def-btn-color {
-  background-color: var(--surface-300) !important;
+  background-color: var(--surface-100);
 }
 
 .dy58-tbl-send-btns-block {
@@ -79,9 +72,10 @@
 .dy58-send-status-btn {
   min-width: 50px;
   text-align: center;
-  padding-right: 5px;
-  margin-left: 2px;
-  margin-right: 2px;
+  padding: 0 5px 0 5px;
+  margin: 0 2px 0 2px;
+  border-radius: 3px;
+  border: 1px solid #dee2e6;
 }
 
 .dy58-send-status-btn:hover {
@@ -90,12 +84,10 @@
 
 .dy58-shift-tbl-group-header {
   text-align: center;
-  color: var(--dy58-nav-bar-bg-color) !important;
-  font-size: var(--dy58-tbl-text-font-size) !important;
+  color: var(--bluegray-800) !important;
+  font-size: 0.9rem !important;
   font-weight: bold;
   padding: 0 !important;
-  border: 2px solid var(--dy58-btn-bg-color);
-  text-transform: uppercase;
 }
 
 .dy58-send-btns-selectors {

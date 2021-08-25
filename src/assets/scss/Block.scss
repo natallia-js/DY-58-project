@@ -12,6 +12,10 @@
   @include dy58-order-pattern-element-block(var(--primary-color), 4px);
 }
 
+.dy58-date-user-block {
+  background-color: var(--surface-300);
+}
+
 .dy58-outer-cursor-block {
   width: auto !important;
   margin: 0 10px 10px 0;

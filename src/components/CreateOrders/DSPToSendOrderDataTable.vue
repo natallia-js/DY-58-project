@@ -23,14 +23,15 @@
         :field="col.field"
         :header="col.title"
         :key="col.field"
-        :headerStyle="{ width: col.width, }"
+        :headerStyle="{ width: col.width }"
         headerClass="dy58-table-header-cell-class"
         :bodyStyle="{ width: col.width }"
-        bodyClass="dy58-table-content-cell-class p-p-0"
+        bodyClass="dy58-table-content-cell-class"
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrShiftTblColumnNames.notification"
               :class="[
+                        'dy58-send-table-data-cell',
                         {'dy58-send-original': [getCurrShiftTblColumnNames.station,
                                                 getCurrShiftTblColumnNames.post,
                                                 getCurrShiftTblColumnNames.fio].includes(col.field)
@@ -46,10 +47,7 @@
           <div v-if="col.field === getCurrShiftTblColumnNames.notification"
           >
             <div class="dy58-tbl-send-btns-block">
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
-                          'dy58-send-status-btn',
+              <a :class="['dy58-send-status-btn',
                           {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
                   @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal) {
@@ -58,10 +56,7 @@
               >
                 Оригинал
               </a>
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
-                          'dy58-send-status-btn',
+              <a :class="['dy58-send-status-btn',
                           {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
                   @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy) {
@@ -70,10 +65,7 @@
               >
                 Копия
               </a>
-              <a :class="['waves-effect',
-                          'waves-light',
-                          'btn-small',
-                          'dy58-send-status-btn',
+              <a :class="['dy58-send-status-btn',
                           {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
                            'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
                   @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend) {
@@ -97,68 +89,22 @@
 
       <template #footer>
         <div class="dy58-send-btns-selectors">
-          <a :class="['waves-effect',
-                      'waves-light',
-                      'btn-small',
-                      'dy58-send-status-btn',
-                      'no-uppercase',
-                      'dy58-send-original',
-                      'tooltipped',]"
-              data-position="bottom" data-tooltip="Оригинал всем"
-              @click="sendOriginalToAll"
-          >
+          <a :class="['dy58-send-status-btn', 'dy58-send-original']" @click="sendOriginalToAll">
             Оригинал всем
           </a>
-          <a :class="['waves-effect',
-                      'waves-light',
-                      'btn-small',
-                      'dy58-send-status-btn',
-                      'no-uppercase',
-                      'dy58-send-copy',
-                      'tooltipped',]"
-              data-position="bottom" data-tooltip="Копию всем"
-              @click="sendCopyToAll"
-          >
+          <a :class="['dy58-send-status-btn', 'dy58-send-copy']" @click="sendCopyToAll">
             Копию всем
           </a>
-          <a :class="['waves-effect',
-                      'waves-light',
-                      'btn-small',
-                      'dy58-send-status-btn',
-                      'no-uppercase',
-                      'dy58-do-not-send',
-                      'tooltipped',]"
-              data-position="bottom" data-tooltip="Не уведомлять всех"
-              @click="doNotSendToAll"
-          >
+          <a :class="['dy58-send-status-btn', 'dy58-do-not-send']" @click="doNotSendToAll">
             Не уведомлять всех
           </a>
-          <a :class="['waves-effect',
-                      'waves-light',
-                      'btn-small',
-                      'dy58-send-status-btn',
-                      'no-uppercase',
-                      'dy58-send-original',
-                      'tooltipped',]"
-              data-position="bottom" data-tooltip="Оригинал оставшимся"
-              @click="sendOriginalToAllLeft"
-          >
+          <a :class="['dy58-send-status-btn', 'dy58-send-original']" @click="sendOriginalToAllLeft">
             Оригинал оставшимся
           </a>
-          <a :class="['waves-effect',
-                      'waves-light',
-                      'btn-small',
-                      'dy58-send-status-btn',
-                      'no-uppercase',
-                      'dy58-send-copy',
-                      'tooltipped',]"
-              data-position="bottom" data-tooltip="Копию оставшимся"
-              @click="sendCopyToAllLeft"
-          >
+          <a :class="['dy58-send-status-btn', 'dy58-send-copy']" @click="sendCopyToAllLeft">
             Копию оставшимся
           </a>
-      </div>
-
+        </div>
       </template>
 
     </DataTable>
@@ -172,7 +118,7 @@
     CurrShiftGetOrderStatus,
     CurrShiftTblColumnNames,
     CurrShiftTblColumns,
-  } from '../../store/modules/currShift';
+  } from '../../store/modules/currShift1';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',

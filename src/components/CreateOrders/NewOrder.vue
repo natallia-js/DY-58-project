@@ -162,9 +162,9 @@
         orderFieldsErrs: null,
       });
 
-      const getSelectedOrderInputType = computed(() => state.selectedOrderInputType);
+      //const getSelectedOrderInputType = computed(() => state.selectedOrderInputType);
 
-      watch(getSelectedOrderInputType, (newVal) => store.commit('setCurrentOrderInputType', newVal));
+      //watch(getSelectedOrderInputType, (newVal) => store.commit('setCurrentOrderInputType', newVal));
 
       const endDateNoLessStartDate = (value) =>
         !value ? true :
