@@ -2,7 +2,7 @@ import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
 
-export const CurrSectorsShiftGetOrderStatus = Object.freeze({
+export const CurrShiftGetOrderStatus = Object.freeze({
   sendOriginal: 0,
   sendCopy: 1,
   doNotSend: 2,
@@ -20,30 +20,79 @@ export const CurrSectorsShiftTblColumns = [
   { field: CurrSectorsShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
 ];
 
+export const CurrStationsShiftTblColumnNames = Object.freeze({
+  sector: 'sector',
+  station: 'station',
+  fio: 'fio',
+  notification: 'notification',
+});
+
+export const CurrStationsShiftTblColumns = [
+  { field: CurrStationsShiftTblColumnNames.station, title: 'Станция', width: '30%', },
+  { field: CurrStationsShiftTblColumnNames.fio, title: 'ФИО', width: '30%', },
+  { field: CurrStationsShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
+];
+
+const DNC = 'ДНЦ';
+const DSP = 'ДСП';
+
 
 /**
- * Для работы со сменным персоналом смежных и ближайших участков (ДНЦ, ЭЦД)
+ * Для работы со сменным персоналом смежных, ближайших участков (ДНЦ, ЭЦД) и станций
  */
 export const currShift = {
   state: {
     shiftPersonal: [],
-    adjacentSectorsShiftPersonal: [],
-    nearestSectorsShiftPersonal: [],
     loadingCurrShift: false,
     errorLoadingCurrShift: null,
   },
 
   getters: {
-    getCurrSectorsShift: (state) => {
-      return state.shiftPersonal;
+    /**
+     * Возвращает информацию о ДНЦ смежных участков, которым необходимо отправить некоторые данные
+     * (распоряжение).
+     */
+    getCurrAdjacentDNCSectorsDNCShiftForSendingData: (state) => {
+      if (!state.shiftPersonal.adjacentDNCSectorsShift) {
+        return [];
+      }
+      return state.shiftPersonal.adjacentDNCSectorsShift.map((item) => {
+        return {
+          id: item.sectorId,
+          sector: item.sectorTitle,
+          fio: item.people
+            .filter((el) => el.post === DNC)
+            .reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.surname} ${currentValue.name.charAt(0)}.` +
+              `${currentValue.fatherName ? currentValue.fatherName.charAt(0) + '.' : ''}` +
+              `${index === item.people.length - 1 ? '' : ', '}`, ''),
+          sendOriginalToDNC: item.sendOriginalToDNC,
+        };
+      });
     },
 
-    getAdjacentSectorsShiftPersonal: (state) => {
-      return state.adjacentSectorsShiftPersonal;
-    },
-
-    getNearestSectorsShiftPersonal: (state) => {
-      return state.nearestSectorsShiftPersonal;
+    /**
+     * Возвращает информацию о ДСП станций участка ДНЦ (рабочего полигона текущего пользователя),
+     * которым необходимо отправить некоторые данные (распоряжение).
+     */
+    getCurrStationsDSPShiftForSendingData: (state) => {
+      if (!state.shiftPersonal.sectorStationsShift) {
+        return [];
+      }
+      return state.shiftPersonal.sectorStationsShift.map((item) => {
+        return {
+          id: item.stationId,
+          station: item.stationTitle,
+          sector: item.trainSectorTitle,
+          fio: item.people
+            .filter((el) => el.post === DSP)
+            .reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.surname} ${currentValue.name.charAt(0)}.` +
+              `${currentValue.fatherName ? currentValue.fatherName.charAt(0) + '.' : ''}` +
+              `${index === item.people.length - 1 ? '' : ', '}`, ''),
+          sendOriginalToDSP: item.sendOriginalToDSP,
+        };
+      });
     },
 
     getLoadingCurrSectorsShiftStatus: (state) => {
@@ -56,250 +105,165 @@ export const currShift = {
   },
 
   mutations: {
-    setCurrSectorsShift(state, currShift) {
-      currShift = [
-        { id: 11, sector: 'Витебск узел', fio: 'Авдеенко В.Г.', post: 'ДНЦ', sendOriginal: CurrSectorsShiftGetOrderStatus.sendCopy, },
-        { id: 12, sector: 'Могилев-Езерище', fio: 'Ковалев Е.А.', post: 'ДНЦ', sendOriginal: CurrSectorsShiftGetOrderStatus.doNotSend, },
-        { id: 13, sector: 'Орша узел', fio: 'Павлов В.Г.', post: 'ДНЦ', sendOriginal: CurrSectorsShiftGetOrderStatus.sendOriginal, },
-        { id: 14, sector: 'Могилев узел', fio: 'Степанов И.Д.', post: 'ДНЦ', sendOriginal: CurrSectorsShiftGetOrderStatus.doNotSend, },
-      ];
-
-      state.shiftPersonal = currShift;
-    },
-
     /**
-     * Оригинал всем
+     * Оригинал/Копия/Ничего всем ДНЦ смежных участков ДНЦ
      */
-    originalToAllSectorsShift(state) {
-      if (state.shiftPersonal) {
-        state.shiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal);
-      }
-    },
-
-    /**
-     * Оригинал всем смежным участкам
-     */
-    originalToAllAdjacentSectorsShift(state) {
-      if (state.adjacentSectorsShiftPersonal) {
-        state.adjacentSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal);
-      }
-    },
-
-    /**
-     * Оригинал всем ближайшим участкам
-     */
-    originalToAllNearestSectorsShift(state) {
-      if (state.nearestSectorsShiftPersonal) {
-        state.nearestSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal);
-      }
-    },
-
-    /**
-     * Оригинал всем оставшимся
-     */
-    originalToAllLeftSectorsShift(state) {
-      if (state.shiftPersonal) {
-        state.shiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal;
+    setGetOrderStatusToAllAdjacentDNCSectorsDNCShift(state, { getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.adjacentDNCSectorsShift) {
+        state.shiftPersonal.adjacentDNCSectorsShift.forEach((el) => {
+          if (el.sendOriginalToDNC !== getOrderStatus) {
+            el.sendOriginalToDNC = getOrderStatus;
           }
         });
       }
     },
 
     /**
-     * Оригинал всем оставшимся смежным участкам
+     * Оригинал/Копия/Ничего ДНЦ конкретного смежного участка ДНЦ
      */
-    originalToAllLeftAdjacentSectorsShift(state) {
-      if (state.adjacentSectorsShiftPersonal) {
-        state.adjacentSectorsShiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal;
+    setGetOrderStatusToDefinitAdjacentDNCSectorDNCShift(state, { dncSectorId, getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.adjacentDNCSectorsShift) {
+        const sector = state.shiftPersonal.adjacentDNCSectorsShift.find(el => el.sectorId === dncSectorId);
+        if (sector && sector.sendOriginalToDNC !== getOrderStatus) {
+          sector.sendOriginalToDNC = getOrderStatus;
+        }
+      }
+    },
+
+    /**
+     * Оригинал/Копия/Ничего ДНЦ всех оставшихся смежных участков ДНЦ
+     */
+    setGetOrderStatusToAllLeftAdjacentDNCSectorsDNCShift(state, { getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.adjacentDNCSectorsShift) {
+        state.shiftPersonal.adjacentDNCSectorsShift.forEach(el => {
+          if (el.sendOriginalToDNC === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginalToDNC !== getOrderStatus) {
+            el.sendOriginalToDNC = getOrderStatus;
           }
         });
       }
     },
 
     /**
-     * Оригинал всем оставшимся ближайшим участкам
+     * Оригинал/Копия/Ничего всем ДСП станций участка ДНЦ
      */
-    originalToAllLeftNearestSectorsShift(state) {
-      if (state.nearestSectorsShiftPersonal) {
-        state.nearestSectorsShiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendOriginal;
+    setGetOrderStatusToAllDNCSectorStationsDSPShift(state, { getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.sectorStationsShift) {
+        state.shiftPersonal.sectorStationsShift.forEach((el) => {
+          if (el.sendOriginalToDSP !== getOrderStatus) {
+            el.sendOriginalToDSP = getOrderStatus;
           }
         });
       }
     },
 
     /**
-     * Копия всем
+     * Оригинал/Копия/Ничего ДСП конкретной станции участка ДНЦ
      */
-    copyToAllSectorsShift(state) {
-      if (state.shiftPersonal) {
-        state.shiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy);
+    setGetOrderStatusToDefinitDNCSectorStationDSPShift(state, { stationId, getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.sectorStationsShift) {
+        const station = state.shiftPersonal.sectorStationsShift.find(el => el.stationId === stationId);
+        if (station && station.sendOriginalToDSP !== getOrderStatus) {
+          station.sendOriginalToDSP = getOrderStatus;
+        }
       }
     },
 
     /**
-     * Копия всем смежным участкам
+     * Оригинал/Копия/Ничего ДСП всех оставшихся станций участка ДНЦ
      */
-    copyToAllAdjacentSectorsShift(state) {
-      if (state.adjacentSectorsShiftPersonal) {
-        state.adjacentSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy);
-      }
-    },
-
-    /**
-     * Копия всем ближайшим участкам
-     */
-    copyToAllNearestSectorsShift(state) {
-      if (state.nearestSectorsShiftPersonal) {
-        state.nearestSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy);
-      }
-    },
-
-    /**
-     * Копия всем оставшимся
-     */
-    copyToAllLeftSectorsShift(state) {
-      if (state.shiftPersonal) {
-        state.shiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy;
+     setGetOrderStatusToAllLeftDNCSectorStationsDSPShift(state, { getOrderStatus }) {
+      if (state.shiftPersonal && state.shiftPersonal.sectorStationsShift) {
+        state.shiftPersonal.sectorStationsShift.forEach(el => {
+          if (el.sendOriginalToDSP === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginalToDSP !== getOrderStatus) {
+            el.sendOriginalToDSP = getOrderStatus;
           }
         });
-      }
-    },
-
-    /**
-     * Копия всем оставшимся смежным участкам
-     */
-    copyToAllLeftAdjacentSectorsShift(state) {
-      if (state.adjacentSectorsShiftPersonal) {
-        state.adjacentSectorsShiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy;
-          }
-        });
-      }
-    },
-
-    /**
-     * Копия всем оставшимся ближайшим участкам
-     */
-    copyToAllLeftNearestSectorsShift(state) {
-      if (state.nearestSectorsShiftPersonal) {
-        state.nearestSectorsShiftPersonal.forEach(el => {
-          if (el.sendOriginal === CurrSectorsShiftGetOrderStatus.doNotSend) {
-            el.sendOriginal = CurrSectorsShiftGetOrderStatus.sendCopy;
-          }
-        });
-      }
-    },
-
-    /**
-     * Не передавать всем
-     */
-    doNotSendToAllSectorsShift(state) {
-      if (state.shiftPersonal) {
-        state.shiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.doNotSend);
-      }
-    },
-
-    /**
-     * Не передавать всем смежным участкам
-     */
-    doNotSendToAllAdjacentSectorsShift(state) {
-      if (state.adjacentSectorsShiftPersonal) {
-        state.adjacentSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.doNotSend);
-      }
-    },
-
-    /**
-     * Не передавать всем ближайшим участкам
-     */
-    doNotSendToAllNearestSectorsShift(state) {
-      if (state.nearestSectorsShiftPersonal) {
-        state.nearestSectorsShiftPersonal.forEach(el => el.sendOriginal = CurrSectorsShiftGetOrderStatus.doNotSend);
       }
     },
   },
 
   actions: {
+    /**
+     * Подгружает информацию об оперативном персонале, которая необходима ДНЦ
+     */
     async loadShiftDataForDNC(context) {
       const currPoligonData = context.getters.getUserWorkPoligonData;
       if (!currPoligonData) {
         return;
       }
+      // id смежных участков ДНЦ
       const adjacentSectorsIds = context.getters.getAdjacentDNCSectors.map((sector) => sector.DNCS_ID);
+      // id станций участка ДНЦ
       const stationsIds = context.getters.getSectorStations.map((station) => station.St_ID);
 
-      console.log(currPoligonData)
+      const shiftPersonal = {
+        // Информация о тех пользователях, которые работают на участках ДНЦ, смежных с
+        // участком ДНЦ с id = sectorId
+        adjacentDNCSectorsShift: context.getters.getAdjacentDNCSectors.map((sector) => {
+          return {
+            sectorId: sector.DNCS_ID,
+            sectorTitle: sector.DNCS_Title,
+            people: [],
+            sendOriginalToDNC: CurrShiftGetOrderStatus.doNotSend,
+          };
+        }),
+        // Информация о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
+        sectorStationsShift: context.getters.getSectorStationsWithTrainSectors.map((station) => {
+          return {
+            trainSectorId: station.trainSectorId,
+            trainSectorTitle: station.trainSectorTitle,
+            stationPosInTrainSector: station.posInTrainSector,
+            stationId: station.St_ID,
+            stationUNMC: station.St_UNMC,
+            stationTitle: station.St_Title,
+            people: [],
+            sendOriginalToDSP: CurrShiftGetOrderStatus.doNotSend,
+          };
+        }),
+      };
 
-      /*context.state.shiftPersonal = [
-        {
-          post: 'ДНЦ',
-          adjacentSectorsShift: context.getters.getAdjacentDNCSectors.map((sector) => {
-            return {
-              sectorId: sector.DNCS_ID,
-              sectorTitle: sector.DNCS_Title,
-              people: [],
-            };
-          }),
-        },
-        {
-          post: 'ДСП',
-          sectorStationsShift: context.getters.getSectorStations.map((station) => {
-            return {
-              trainSectorID: 1,
-              trainSectorTitle: '',
-              stationId: 1,
-              stationTitle: '',
-              people: [],
-            };
-          }),
-        },
-      ];*/
       context.state.errorLoadingCurrShift = null;
       context.state.loadingCurrShift = true;
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        // Вначале извлекаем id тех пользователей, которые работают на участках ДНЦ, смежных с
-        // участком ДНЦ с id = sectorId, а также на станциях участка ДНЦ с id = sectorId
+        // Извлекаем информацию о тех пользователях, которые работают на участках ДНЦ, смежных с
+        // участком ДНЦ с id = sectorId
         if (adjacentSectorsIds.length) {
           const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsWorkPoligonsUsers,
-            { sectorIds: adjacentSectorsIds },
+            { sectorIds: adjacentSectorsIds, onlyOnline: false },
             { headers }
           );
-          console.log(response.data)
+          if (response.data && response.data.length) {
+            response.data.forEach((user) => {
+              const element = shiftPersonal.adjacentDNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
+              if (element) {
+                element.people.push(user);
+              }
+            });
+          }
         }
+        // Извлекаем информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
         if (stationsIds.length) {
           const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPoligonsUsers,
-            { stationIds: stationsIds },
+            { stationIds: stationsIds, onlyOnline: false },
             { headers }
           );
-          console.log(response.data)
+          if (response.data && response.data.length) {
+            response.data.forEach((user) => {
+              const element = shiftPersonal.sectorStationsShift.find((item) => item.stationId === user.stationId);
+              if (element) {
+                element.people.push(user);
+              }
+            });
+          }
         }
-        /*const adjDNCSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentDNCSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
-        const nearECDSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestECDSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
-        context.state.sector = {
-          ...response.data,
-          TAdjacentDNCSectors: adjDNCSectResponse.data,
-          TNearestECDSectors: nearECDSectResponse.data,
-        };*/
+        context.state.shiftPersonal = shiftPersonal;
       } catch (err) {
         context.state.errorLoadingCurrShift = err;
-        console.log(err)
       }
       context.state.loadingCurrShift = false;
     },
@@ -308,8 +272,8 @@ export const currShift = {
      * Позволяет извлечь из БД информацию о персонале рабочего полигона.
      * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя:
      * 1) если рабочий полигон - участок ДНЦ, то извлекается информация о:
-     *   - online ДНЦ смежных участков ДНЦ
-     *   - online ДСП станций рабочего полигона
+     *   - online-пользователях смежных участков ДНЦ
+     *   - online-пользователях станций рабочего полигона
      */
     async loadCurrSectorsShift(context) {
       const workPoligon = context.getters.getUserWorkPoligon;

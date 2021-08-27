@@ -1,7 +1,7 @@
 <template>
   <div>
     <DataTable
-      :value="getCurrShift"
+      :value="getCurrStationsDSPShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
@@ -33,13 +33,11 @@
               :class="[
                         'dy58-send-table-data-cell',
                         {'dy58-send-original': [getCurrShiftTblColumnNames.station,
-                                                getCurrShiftTblColumnNames.post,
                                                 getCurrShiftTblColumnNames.fio].includes(col.field)
-                                                && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
+                                                && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal},
                         {'dy58-send-copy': [getCurrShiftTblColumnNames.station,
-                                            getCurrShiftTblColumnNames.post,
                                             getCurrShiftTblColumnNames.fio].includes(col.field)
-                                            && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
+                                            && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy},
                       ]"
           >
             {{ slotProps.data[col.field] }}
@@ -48,29 +46,23 @@
           >
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
-                          {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
-                           'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
-                  @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal) {
-                            slotProps.data.sendOriginal = getCurrShiftGetOrderStatus.sendOriginal;
-                          }"
+                          {'dy58-send-original': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal,
+                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendOriginal,}]"
+                  @click="() => sendOriginalToDefinitStation(slotProps.data.id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
-                          {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
-                           'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
-                  @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy) {
-                            slotProps.data.sendOriginal = getCurrShiftGetOrderStatus.sendCopy;
-                          }"
+                          {'dy58-send-copy': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy,
+                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendCopy,}]"
+                  @click="() => sendCopyToDefinitStation(slotProps.data.id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
-                          {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
-                           'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
-                  @click="if (slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend) {
-                            slotProps.data.sendOriginal = getCurrShiftGetOrderStatus.doNotSend;
-                          }"
+                          {'dy58-do-not-send': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.doNotSend,
+                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.doNotSend,}]"
+                  @click="() => doNotSendToDefinitStation(slotProps.data.id)"
               >
                 &#9747;
               </a>
@@ -116,20 +108,20 @@
   import { mapGetters } from 'vuex';
   import {
     CurrShiftGetOrderStatus,
-    CurrShiftTblColumnNames,
-    CurrShiftTblColumns,
-  } from '../../store/modules/currShift1';
+    CurrStationsShiftTblColumnNames,
+    CurrStationsShiftTblColumns,
+  } from '../../store/modules/currShift';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',
 
     computed: {
       ...mapGetters([
-        'getCurrShift',
+        'getCurrStationsDSPShiftForSendingData',
       ]),
 
       getCurrShiftTblColumnNames() {
-        return CurrShiftTblColumnNames;
+        return CurrStationsShiftTblColumnNames;
       },
 
       getCurrShiftGetOrderStatus() {
@@ -137,33 +129,49 @@
       },
 
       getCurrShiftTblColumns() {
-        return CurrShiftTblColumns;
+        return CurrStationsShiftTblColumns;
       },
-    },
-
-    mounted() {
-      this.$store.commit('setCurrShift', []);
     },
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('originalToAll');
+        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+          { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+      },
+
+      sendOriginalToDefinitStation(stationId) {
+        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+          { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('originalToAllLeft');
+        this.$store.commit('setGetOrderStatusToAllLeftDNCSectorStationsDSPShift',
+          { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('copyToAll');
+        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+          { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
+      },
+
+      sendCopyToDefinitStation(stationId) {
+        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+          { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('copyToAllLeft');
+        this.$store.commit('setGetOrderStatusToAllLeftDNCSectorStationsDSPShift',
+          { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('doNotSendToAll');
+        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+          { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+      },
+
+      doNotSendToDefinitStation(stationId) {
+        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+          { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
     }
   }

@@ -72,6 +72,29 @@ export const currWorkPoligonStructure = {
       return stations;
     },
 
+    getSectorStationsWithTrainSectors(state) {
+      if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
+        return [];
+      }
+      const trainSectors = state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors;
+      const stations = [];
+      trainSectors.forEach((sector) => {
+        if (!sector.TStations || !sector.TStations.length) {
+          return;
+        }
+        const sectorStations = sector.TStations.map((station) => {
+          return {
+            ...station,
+            trainSectorId: sector.DNCTS_ID || sector.ECDTS_ID,
+            trainSectorTitle: sector.DNCTS_Title || sector.ECDTS_Title,
+            posInTrainSector: station.TDNCTrainSectorStation.DNCTSS_StationPositionInTrainSector,
+          };
+        });
+        stations.push(...sectorStations);
+      });
+      return stations;
+    },
+
     getSectorBlocks(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
         return [];
