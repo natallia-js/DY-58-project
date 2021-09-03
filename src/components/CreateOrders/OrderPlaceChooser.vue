@@ -74,17 +74,13 @@
       });
 
       const handleFocusStationDropdown = () => {
-        if (state.orderPlaceEnterMode !== ORDER_PLACE_VALUES.station) {
-          state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;
-          emit('input', { place: ORDER_PLACE_VALUES.station, value: state.stationValue });
-        }
+        state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;
+        emit('input', { place: ORDER_PLACE_VALUES.station, value: state.stationValue });
       };
 
       const handleFocusSpanDropdown = () => {
-        if (state.orderPlaceEnterMode !== ORDER_PLACE_VALUES.span) {
-          state.orderPlaceEnterMode = ORDER_PLACE_VALUES.span;
-          emit('input', { place: ORDER_PLACE_VALUES.span, value: state.spanValue });
-        }
+        state.orderPlaceEnterMode = ORDER_PLACE_VALUES.span;
+        emit('input', { place: ORDER_PLACE_VALUES.span, value: state.spanValue });
       };
 
       const handleChooseStation = (event) => {

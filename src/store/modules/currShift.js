@@ -48,6 +48,10 @@ export const currShift = {
   },
 
   getters: {
+    getShiftPersonal: (state) => {
+      return state.shiftPersonal;
+    },
+
     /**
      * Возвращает информацию о ДНЦ смежных участков, которым необходимо отправить некоторые данные
      * (распоряжение).
@@ -189,8 +193,7 @@ export const currShift = {
      * Подгружает информацию об оперативном персонале, которая необходима ДНЦ
      */
     async loadShiftDataForDNC(context) {
-      const currPoligonData = context.getters.getUserWorkPoligonData;
-      if (!currPoligonData) {
+      if (!context.getters.getUserWorkPoligonData) {
         return;
       }
       // id смежных участков ДНЦ
@@ -234,7 +237,7 @@ export const currShift = {
         // участком ДНЦ с id = sectorId
         if (adjacentSectorsIds.length) {
           const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsWorkPoligonsUsers,
-            { sectorIds: adjacentSectorsIds, onlyOnline: false },
+            { sectorIds: adjacentSectorsIds, onlyOnline: true },
             { headers }
           );
           if (response.data && response.data.length) {
@@ -249,7 +252,7 @@ export const currShift = {
         // Извлекаем информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
         if (stationsIds.length) {
           const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPoligonsUsers,
-            { stationIds: stationsIds, onlyOnline: false },
+            { stationIds: stationsIds, onlyOnline: true },
             { headers }
           );
           if (response.data && response.data.length) {

@@ -101,9 +101,15 @@
     </div>
     <div class="p-col-6">
       <!-- Таблица ДСП -->
-      <DSPToSendOrderDataTable />
+      <DSPToSendOrderDataTable
+        :value="v$.dspSectorsToSendOrder.$model"
+        @input="v$.dspSectorsToSendOrder.$model = $event"
+      />
       <!-- Таблица ДНЦ -->
-      <DNCToSendOrderDataTable />
+      <DNCToSendOrderDataTable
+        :value="v$.dncSectorsToSendOrder.$model"
+        @input="v$.dncSectorsToSendOrder.$model = $event"
+      />
     </div>
   </div>
 </template>
@@ -112,7 +118,7 @@
 <script>
   import { reactive, ref, computed, onMounted, watch } from 'vue';
   import { useStore } from 'vuex';
-  import { required } from '@vuelidate/validators';
+  import { required, minLength } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
   import DSPToSendOrderDataTable from './DSPToSendOrderDataTable';
   import DNCToSendOrderDataTable from './DNCToSendOrderDataTable';
@@ -120,6 +126,7 @@
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
+  import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
 
   export default {
     name: 'dy58-new-order-block',
@@ -138,23 +145,25 @@
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
         number: 8,
-        createDateTime: '',
+        createDateTime: null,
         place: {
-          place: '',
-          value: '',
+          place: null,
+          value: null,
         },
         timeSpan: {
-          start: '',
-          end: '',
-          tillCancellation: '',
+          start: null,
+          end: null,
+          tillCancellation: null,
         },
         orderText: {
-          orderTextSource: '',
-          orderTitle: '',
-          orderText: '',
+          orderTextSource: null,
+          orderTitle: null,
+          orderText: null,
         },
         allOrderPatterns: [],
         selectedPattern: null,
+        dncSectorsToSendOrder: [],
+        dspSectorsToSendOrder: [],
         // true - ожидается ответ сервера на запрос об издании распоряжения, false - запроса не ожидается
         waitingForServerResponse: false,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
@@ -189,6 +198,8 @@
           orderTitle: { required },
           orderText: { required },
         },
+        dncSectorsToSendOrder: { minLength: minLength(1) },
+        dspSectorsToSendOrder: { minLength: minLength(1) },
       };
 
       const submitted = ref(false);
@@ -199,7 +210,7 @@
       const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
       const getCurrDateString = computed(() => store.getters.getCurrDateString);
       const getCurrTimeString = computed(() => store.getters.getCurrTimeString);
-      const getOrderPatternsToDisplayInTreeSelect = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect);
+      const getOrderPatternsToDisplayInTreeSelect = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(ORDER_PATTERN_TYPES.ORDER));
       const getOrderInputTypes = computed(() => OrderInputTypes);
       const getSectorStations = computed(() =>
         store.getters.getSectorStations.map((station) => {
@@ -226,6 +237,9 @@
         state.allOrderPatterns = getOrderPatternsToDisplayInTreeSelect;
       });
 
+      /**
+       * Издание распоряжения (отправка и сервер и передача всем причастным).
+       */
       const handleSubmit = (isFormValid) => {console.log(isFormValid, state)
         submitted.value = true;
 
@@ -233,7 +247,17 @@
           return;
         }
 
-
+        state.waitingForServerResponse = true;
+        store.dispatch('dispatchOrder', {
+          type: ORDER_PATTERN_TYPES.ORDER,
+          number: state.number,
+          createDateTime: state.createDateTime,
+          place: state.place,
+          timeSpan: state.timeSpan,
+          orderText: state.orderText,
+          dncToSend: state.dncSectorsToSendOrder,
+          dspToSend: state.dspSectorsToSendOrder,
+        });
       };
 
       return {

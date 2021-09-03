@@ -3,13 +3,14 @@ import { mainMenuItems } from './modules/mainMenuItems';
 import { leftMenuItems } from './modules/leftMenuItems';
 import { orderPatterns } from './modules/orderPatterns';
 import { currUser } from './modules/currUser';
-import { currShift1 } from './modules/currShift1';
 import { currShift } from './modules/currShift';
 import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { incomingNotifications } from './modules/incomingNotifications';
 import { ordersInWork } from './modules/ordersInWork';
 import { webSocket } from './modules/webSocket';
+import { lastOrdersParams } from './modules/lastOrdersParams';
+import { orders } from './modules/orders';
 
 export const store = createStore({
   modules: {
@@ -18,11 +19,12 @@ export const store = createStore({
     orderPatterns,
     currUser,
     currShift,
-    currShift1,
     currDateTime,
     currWorkPoligonStructure,
     incomingNotifications,
     ordersInWork,
     webSocket,
+    lastOrdersParams,
+    orders,
   },
 });

@@ -33,26 +33,30 @@
 
     watch: {
       /**
-       * При смене рабочего полигона пользователя подгружаем информацию
-       * о структуре данного рабочего полигона
+       * При смене рабочего полигона пользователя подгружаем информацию о:
+       * - структуре данного рабочего полигона,
        */
       getUserWorkPoligon: function(newVal) {
         if (!newVal) {
           this.$store.commit('delCurrWorkPoligonData');
         } else {
           this.$store.dispatch('loadCurrWorkPoligonData');
+
         }
       },
 
       /**
-       * При смене структуры рабочего полигона пользователя подгружаем информацию
-       * о персонале данного рабочего полигона
+       * При смене структуры рабочего полигона пользователя подгружаем информацию о:
+       * - персонале данного рабочего полигона,
+       * - параметрах последних распоряжений, изданных в рамках данного полигона,
        */
       getUserWorkPoligonData: function(newVal) {
         if (!newVal) {
-          //
+          // ...
+          this.$store.commit('delCurrLastOrdersParams');
         } else {
           this.$store.dispatch('loadCurrSectorsShift');
+          this.$store.dispatch('loadLastOrdersParams');
         }
       },
 

@@ -99,6 +99,8 @@
   export default {
     name: 'dy58-dnc-to-send-order-data-table',
 
+    emits: ['input'],
+
     computed: {
       ...mapGetters([
         'getCurrAdjacentDNCSectorsDNCShiftForSendingData',
@@ -114,6 +116,14 @@
 
       getCurrSectorsShiftTblColumns() {
         return CurrSectorsShiftTblColumns;
+      },
+    },
+
+    watch: {
+      getCurrAdjacentDNCSectorsDNCShiftForSendingData(newVal) {
+        this.$emit('input', newVal
+          ? newVal.filter((item) => item.sendOriginalToDNC !== CurrShiftGetOrderStatus.doNotSend)
+          : []);
       },
     },
 

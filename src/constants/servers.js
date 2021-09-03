@@ -34,3 +34,8 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   modOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/mod`,
   createOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/add`,
 });
+
+export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
+  getLastOrdersParams: `${AUTH_SERVER_ADDRESS}/api/lastOrdersParams/data`,
+  dispatchOrder: `${AUTH_SERVER_ADDRESS}/api/orders/add`,
+});

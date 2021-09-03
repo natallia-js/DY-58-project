@@ -115,6 +115,8 @@
   export default {
     name: 'dy58-dsp-to-send-order-data-table',
 
+    emits: ['input'],
+
     computed: {
       ...mapGetters([
         'getCurrStationsDSPShiftForSendingData',
@@ -130,6 +132,14 @@
 
       getCurrShiftTblColumns() {
         return CurrStationsShiftTblColumns;
+      },
+    },
+
+    watch: {
+      getCurrStationsDSPShiftForSendingData(newVal) {
+        this.$emit('input', newVal
+          ? newVal.filter((item) => item.sendOriginalToDSP !== CurrShiftGetOrderStatus.doNotSend)
+          : []);
       },
     },
 

@@ -4,25 +4,43 @@
     <div v-if="getLoadingCurrSectorsShiftStatus">
       <ProgressSpinner />
     </div>
+    <div v-else-if="!getErrorLoadingCurrSectorsShift" class="p-ml-2 p-mt-2 p-mr-4 p-mb-4">
+      <view-shift-for-d-n-c
+        v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.DNC_SECTOR"
+      />
+    </div>
+    <div v-else>
+      {{ getErrorLoadingCurrSectorsShift }}
+    </div>
   </div>
 </template>
 
 
 <script>
-import { mapGetters } from 'vuex';
+  import { mapGetters } from 'vuex';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
+  import ViewShiftForDNC from '../components/ViewShiftForDNC';
+  import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
 
   export default {
     name: 'dy58-shift-page',
+
+    components: {
+      ViewShiftForDNC,
+    },
 
     computed: {
       ...mapGetters([
         'getLoadingCurrSectorsShiftStatus',
         'getErrorLoadingCurrSectorsShift',
+        'getUserWorkPoligon',
       ]),
 
       getMainMenuItemsKeys() {
         return MainMenuItemsKeys;
+      },
+      getWorkPoligonTypes() {
+        return WORK_POLIGON_TYPES;
       },
     },
 

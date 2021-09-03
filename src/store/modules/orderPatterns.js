@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { ORDER_PATTERN_TYPES, OrderPatternsNodeType } from '../../constants/orderPatterns';
+import { OrderPatternsNodeType } from '../../constants/orderPatterns';
 
 
 export const orderPatterns = {
@@ -47,24 +47,26 @@ export const orderPatterns = {
     },
 
     getOrderPatternsToDisplayInTreeSelect(state) {
-      // data is grouped by order category
-      const orders = state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.ORDER);
-      const groupedOrders = [];
-      orders.forEach((order) => {
-        const categoryGroup = groupedOrders.find((group) => group.key === order.category);
-        if (!categoryGroup) {
-          groupedOrders.push({
-            key: order.category,
-            label: order.category,
-            data: order.category,
-            selectable: false,
-            children: [{ key: order._id, label: order.title, data: order }],
-          });
-        } else {
-          categoryGroup.children.push({ key: order._id, label: order.title, data: order });
-        }
-      });
-      return groupedOrders;
+      return (patternsType) => {
+        // data is grouped by order category
+        const orders = state.patterns.filter((pattern) => pattern.type === patternsType);
+        const groupedOrders = [];
+        orders.forEach((order) => {
+          const categoryGroup = groupedOrders.find((group) => group.key === order.category);
+          if (!categoryGroup) {
+            groupedOrders.push({
+              key: order.category,
+              label: order.category,
+              data: order.category,
+              selectable: false,
+              children: [{ key: order._id, label: order.title, data: order }],
+            });
+          } else {
+            categoryGroup.children.push({ key: order._id, label: order.title, data: order });
+          }
+        });
+        return groupedOrders;
+      };
     },
 
     getOrderPatternsTreeNodeKey() {
@@ -76,7 +78,7 @@ export const orderPatterns = {
       };
     },
 
-    getOrderPatternsToDisplayInTreeComponent(state) {
+    getOrderPatternsToDisplayInTreeComponent(state, getters) {
       if (!state.patterns || !state.patterns.length) {
         return [];
       }
@@ -86,8 +88,14 @@ export const orderPatterns = {
           key: orderPattern._id,
           pattern: orderPattern.elements,
           type: OrderPatternsNodeType.ORDER_PATTERN,
-          personalPattern: Boolean(orderPattern.personalPattern),
-          icon: orderPattern.personalPattern ? 'pi pi-file' : 'pi pi-file-excel',
+          personalPattern:
+            orderPattern.personalPattern &&
+            String(orderPattern.personalPattern) === String(getters.getUserId),
+          icon:
+            // пользователь не может редактировать шаблон, созданный не им
+            (orderPattern.personalPattern &&
+            String(orderPattern.personalPattern) === String(getters.getUserId)) ?
+            'pi pi-file' : 'pi pi-file-excel',
         };
       };
       const orderCategoryNodeObject = (orderPattern) => {
@@ -99,10 +107,12 @@ export const orderPatterns = {
             service: orderPattern.service,
             orderType: orderPattern.type,
           },
-          personalCategory: state.patterns.find((item) =>
+          // если значение personalCategory = true, то пользователь сможет отредактировать
+          // наименование категории распоряжений
+          personalCategory: /*state.patterns.find((item) =>
             item.service === orderPattern.service && item.type === orderPattern.type &&
-            item.category === orderPattern.category && item.personalPattern !== orderPattern.personalPattern
-          ) ? false : true,
+            item.category === orderPattern.category && String(item.personalPattern) !== String(getters.getUserId)
+          ) ? false : */ true,
           children: [orderPatternNodeObject(orderPattern)],
         };
       };
@@ -141,16 +151,6 @@ export const orderPatterns = {
         }
       });
       return treeData;
-    },
-
-    getRequestPatterns(state) {
-      // data is grouped by order category
-      return state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.REQUEST);
-    },
-
-    getNotificationPatterns(state) {
-      // data is grouped by order category
-      return state.patterns.filter((pattern) => pattern.type === ORDER_PATTERN_TYPES.NOTIFICATION);
     },
 
     getOrderPatternById: (state) => (patternId) => {
@@ -213,7 +213,10 @@ export const orderPatterns = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getOrderPatterns,
-          { userId: context.getters.getCurrentUserId },
+          {
+            workPoligonType: context.getters.getUserWorkPoligon.type,
+            workPoligonId: context.getters.getUserWorkPoligon.code,
+          },
           { headers }
         );
         context.state.patterns = response.data || [];
@@ -331,7 +334,16 @@ export const orderPatterns = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
-          { service, type, category, title, elements, isPersonalPattern: true },
+          {
+            service,
+            type,
+            category,
+            title,
+            elements,
+            isPersonalPattern: true,
+            workPoligonType: context.getters.getUserWorkPoligon.type,
+            workPoligonId: context.getters.getUserWorkPoligon.code,
+          },
           { headers }
         );
         context.state.createOrderPatternResult = {

@@ -57,6 +57,7 @@
   import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import OrderPatternText from './OrderPatternText';
+  import { OrderPatternElementType } from '../../constants/orderPatterns';
 
   export default {
     name: 'dy58-order-text',
@@ -102,7 +103,11 @@
         emit('input', {
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,
           orderTitle: state.orderTitle,
-          orderText: newVal,
+          orderText: [{
+            type: OrderPatternElementType.TEXT,
+            ref: null,
+            value: newVal,
+          }]
         })
       );
 
@@ -134,7 +139,11 @@
           emit('input', {
             orderTextSource: ORDER_TEXT_SOURCE.nopattern,
             orderTitle: state.orderTitle,
-            orderText: state.orderText,
+            orderText: [{
+              type: OrderPatternElementType.TEXT,
+              ref: null,
+              value: state.orderText,
+            }]
           });
         }
       };
@@ -143,7 +152,11 @@
         emit('input', {
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,
           orderTitle: event.target.value,
-          orderText: state.orderText,
+          orderText: [{
+            type: OrderPatternElementType.TEXT,
+            ref: null,
+            value: state.orderText,
+          }]
         });
       };
 
