@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
+import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
 
 
 /**
@@ -25,12 +26,37 @@ export const lastOrdersParams = {
     getErrorLoadingLastOrdersParams: (state) => {
       return state.errorLoadingParams;
     },
+
+    getNextOrdersNumber: (state) => {
+      const ordersParams = state.params.find((params) => params.ordersType === ORDER_PATTERN_TYPES.ORDER);
+      if (ordersParams) {
+        return ordersParams.lastOrderNumber + 1;
+      }
+      return 1;
+    },
+
+    /*REQUEST
+    NOTIFICATION
+    ORDER_PROHIBITION
+    NOTIFICATION_PROHIBITION_CANCELLATION*/
   },
 
   mutations: {
     delCurrLastOrdersParams(state) {
       if (state.params.length > 0) {
         state.params = [];
+      }
+    },
+
+    setLastOrdersNumber(state, { ordersType, number }) {
+      const ordersParams = state.params.find((params) => params.ordersType === ordersType);
+      if (ordersParams) {
+        ordersParams.lastOrderNumber = number;
+      } else {
+        state.params.push({
+          ordersType,
+          lastOrderNumber: number,
+        });
       }
     },
   },
@@ -59,7 +85,12 @@ export const lastOrdersParams = {
           },
           { headers }
         );
-        context.state.params = response.data;
+        context.state.params = response.data.map((param) => {
+          return {
+            ordersType: param.ordersType,
+            lastOrderNumber: +param.lastOrderNumber,
+          };
+        });
       } catch (err) {
         context.state.errorLoadingParams = err;
       }

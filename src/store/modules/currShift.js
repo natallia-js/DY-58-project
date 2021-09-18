@@ -1,12 +1,7 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
-
-export const CurrShiftGetOrderStatus = Object.freeze({
-  sendOriginal: 0,
-  sendCopy: 1,
-  doNotSend: 2,
-});
+import { CurrShiftGetOrderStatus } from '../../constants/orders';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -60,9 +55,11 @@ export const currShift = {
       if (!state.shiftPersonal.adjacentDNCSectorsShift) {
         return [];
       }
+      console.log(state.shiftPersonal.adjacentDNCSectorsShift)
       return state.shiftPersonal.adjacentDNCSectorsShift.map((item) => {
         return {
           id: item.sectorId,
+          type: WORK_POLIGON_TYPES.DNC_SECTOR,
           sector: item.sectorTitle,
           fio: item.people
             .filter((el) => el.post === DNC)
@@ -86,6 +83,7 @@ export const currShift = {
       return state.shiftPersonal.sectorStationsShift.map((item) => {
         return {
           id: item.stationId,
+          type: WORK_POLIGON_TYPES.STATION,
           station: item.stationTitle,
           sector: item.trainSectorTitle,
           fio: item.people

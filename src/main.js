@@ -38,6 +38,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ConfirmPopup from 'primevue/confirmpopup';
 import ContextMenu from 'primevue/contextmenu';
 import Fieldset from 'primevue/fieldset';
+import Badge from 'primevue/badge';
 
 const app = createApp(App);
 
@@ -73,5 +74,6 @@ app.component('Tree', Tree);
 app.component('ConfirmPopup', ConfirmPopup);
 app.component('ContextMenu', ContextMenu);
 app.component('Fieldset', Fieldset);
+app.component('Badge', Badge);
 
 app.mount('#app');

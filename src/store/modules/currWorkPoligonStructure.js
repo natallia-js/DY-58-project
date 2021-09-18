@@ -37,7 +37,7 @@ export const currWorkPoligonStructure = {
         case WORK_POLIGON_TYPES.ECD_SECTOR:
           return state.sector ? state.sector.ECDS_Title : null;
         default:
-          return null;
+          return 'Наименование рабочего полигона не указано';
       }
     },
 
@@ -116,6 +116,44 @@ export const currWorkPoligonStructure = {
       }
       return state.sector.TAdjacentDNCSectors;
     },
+/*
+    getPlaceTitle(state, getters) {
+      return (id, type) => {
+        const workPoligon = getters.getUserWorkPoligon;
+        if (!workPoligon) {
+          return null;
+        }
+        switch (type) {
+          case WORK_POLIGON_TYPES.STATION:
+            switch (workPoligon.type) {
+              // Полагаем, что если рабочий полигон пользователя - станция, то о других
+              // станциях приложению ничего не известно
+              case WORK_POLIGON_TYPES.STATION:
+                return state.station && state.station.St_ID === id ? state.station.St_Title : null;
+              // Если рабочий полигон - участок ДНЦ или ЭЦД, то станцию ищем среди станций данного участка
+              case WORK_POLIGON_TYPES.DNC_SECTOR:
+              case WORK_POLIGON_TYPES.ECD_SECTOR:
+                const stations = getters.getSectorStations;
+                const station = stations.find((st) => st.St_ID === id);
+                return station ? station.St_Title : null;
+          case WORK_POLIGON_TYPES.DNC_SECTOR:
+            switch (workPoligon.type) {
+              // Если рабочий полигон пользователя - станция, то об участках ДНЦ и ЭЦД пока ничего не известно
+              case WORK_POLIGON_TYPES.STATION:
+                return null;
+              // Если рабочий полигон пользователя - участок ДНЦ, то
+              case WORK_POLIGON_TYPES.DNC_SECTOR:
+                return state.sector ? state.sector.DNCS_Title : null;
+              case WORK_POLIGON_TYPES.ECD_SECTOR:
+                const stations = getters.getSectorStations;
+                const station = stations.find((st) => st.St_ID === id);
+                return station ? station.St_Title : null;
+            break;
+          case WORK_POLIGON_TYPES.ECD_SECTOR:
+            break;
+        }
+      };
+    },*/
   },
 
   mutations: {

@@ -6,11 +6,10 @@ import { currUser } from './modules/currUser';
 import { currShift } from './modules/currShift';
 import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
-import { incomingNotifications } from './modules/incomingNotifications';
-import { ordersInWork } from './modules/ordersInWork';
 import { webSocket } from './modules/webSocket';
 import { lastOrdersParams } from './modules/lastOrdersParams';
 import { orders } from './modules/orders';
+import { workOrders } from './modules/workOrders';
 
 export const store = createStore({
   modules: {
@@ -21,10 +20,9 @@ export const store = createStore({
     currShift,
     currDateTime,
     currWorkPoligonStructure,
-    incomingNotifications,
-    ordersInWork,
     webSocket,
     lastOrdersParams,
     orders,
+    workOrders,
   },
 });

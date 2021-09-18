@@ -2,20 +2,20 @@
   <Dialog
     header="Информация о текущем пользователе"
     v-model:visible="dlgVisible"
-    :style="{ width: 'auto' }"
+    style="width:auto; maxWidth:50%"
     :modal="true"
     @hide="closeDialog"
   >
-    <p><span class="p-text-bold">Фамилия:</span> {{ getUserSurname || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Имя:</span> {{ getUserName || 'Не определено' }}</p>
-    <p><span class="p-text-bold">Отчество:</span> {{ getUserFatherName || 'Не определено' }}</p>
-    <p><span class="p-text-bold">Должность:</span> {{ getUserPost || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Служба:</span> {{ getUserService || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Полномочие:</span> {{ getUserCredential || 'Не определено' }}</p>
+    <p><span class="p-text-bold">Фамилия:</span> &#160; {{ getUserSurname || 'Не определена' }}</p>
+    <p><span class="p-text-bold">Имя:</span> &#160; {{ getUserName || 'Не определено' }}</p>
+    <p><span class="p-text-bold">Отчество:</span> &#160; {{ getUserFatherName || 'Не определено' }}</p>
+    <p><span class="p-text-bold">Должность:</span> &#160; {{ getUserPost || 'Не определена' }}</p>
+    <p><span class="p-text-bold">Служба:</span> &#160; {{ getUserService || 'Не определена' }}</p>
+    <p><span class="p-text-bold">Полномочие:</span> &#160; {{ getUserCredential || 'Не определено' }}</p>
     <p>
-      <span class="p-text-bold">Рабочий полигон:</span>
-      {{ getUserWorkPoligon ? getUserWorkPoligon.type : 'Не определен тип' }}
-      {{ getUserWorkPoligonName || 'Не определено наименование' }}
+      <span class="p-text-bold">Рабочий полигон:</span> &#160;
+      {{ getUserWorkPoligon ? getUserWorkPoligon.type : 'Не определен тип' }} &#160;
+      {{ getUserWorkPoligonName }}
     </p>
 
     <template #footer>

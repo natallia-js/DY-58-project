@@ -35,7 +35,7 @@ export const mainMenuItems = {
           return {
             ...item,
             // На пункте меню "Главная страница" отображаем количество входящих уведомлений и количество распоряжений, находящихся в работе
-            label: `${item.label} ${getters.getIncomingNotificationsNumber}/${getters.getOrdersInWorkNumber}`,
+            label: `${item.label} ${getters.getIncomingOrdersNumber}/${getters.getWorkingOrdersNumber}`,
           };
         }
         if (item.key === MainMenuItemsKeys.sectorStructure && getters.getLoadingCurrWorkPoligonStructureStatus) {

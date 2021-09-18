@@ -7,14 +7,15 @@ export const orderPatterns = {
   state: {
     patterns: [],
     loadingOrderPatterns: false,
-    errorLoadingPatterns: null,
+    loadingOrderPatternsResult: null,
     modifyOrderCategoryTitleResult: null,
     modifyOrderCategoryTitleRecsBeingProcessed: 0,
     delOrderPatternResult: null,
     delOrderPatternRecsBeingProcessed: 0,
-    modOrderPatternRecsBeingProcessed: 0,
     modOrderPatternResult: null,
+    modOrderPatternRecsBeingProcessed: 0,
     createOrderPatternResult: null,
+    createOrderPatternRecsBeingProcessed: 0,
   },
 
   getters: {
@@ -199,6 +200,138 @@ export const orderPatterns = {
       state.modOrderPatternResult = null;
       state.createOrderPatternResult = null;
     },
+
+    setNewOrderPatternsArray(state, newPatternsArray) {
+      state.patterns = newPatternsArray || [];
+    },
+
+    setLoadingOrderPatternsStatus(state, status) {
+      state.loadingOrderPatterns = status;
+    },
+
+    clearLoadingOrderPatternsResult(state) {
+      state.loadingOrderPatternsResult = null;
+    },
+
+    setLoadingOrderPatternsResult(state, { error, message }) {
+      state.loadingOrderPatternsResult = {
+        error,
+        message,
+      };
+    },
+
+    clearModifyOrderCategoryTitleResult(state) {
+      state.modifyOrderCategoryTitleResult = null;
+    },
+
+    setModifyOrderCategoryTitleResult(state, { error, message, newTitle }) {
+      state.modifyOrderCategoryTitleResult = {
+        error,
+        message,
+        newTitle,
+      };
+    },
+
+    addModifyOrderCategoryTitleRecsBeingProcessed(state) {
+      state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
+    },
+
+    subModifyOrderCategoryTitleRecsBeingProcessed(state) {
+      state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
+    },
+
+    setOrderCategoryTitle(state, { service, orderType, title, newTitle}) {
+      state.patterns = state.patterns.map((pattern) => {
+        if (pattern.service === service && pattern.type === orderType && pattern.category === title) {
+          return {
+            ...pattern,
+            category: newTitle,
+          };
+        }
+        return pattern;
+      });
+    },
+
+    clearDelOrderPatternResult(state) {
+      state.delOrderPatternResult = null;
+    },
+
+    setDelOrderPatternResult(state, { error, message }) {
+      state.delOrderPatternResult = {
+        error,
+        message,
+      };
+    },
+
+    addDelOrderPatternRecsBeingProcessed(state) {
+      state.delOrderPatternRecsBeingProcessed += 1;
+    },
+
+    subDelOrderPatternRecsBeingProcessed(state) {
+      state.delOrderPatternRecsBeingProcessed -= 1;
+    },
+
+    delOrderPattern(state, orderPatternId) {
+      state.patterns = state.patterns.filter((pattern) => pattern._id !== orderPatternId);
+    },
+
+    clearModOrderPatternResult(state) {
+      state.modOrderPatternResult = null;
+    },
+
+    setModOrderPatternResult(state, { error, message, orderPattern }) {
+      state.modOrderPatternResult = {
+        error,
+        message,
+        orderPattern,
+      };
+    },
+
+    addModOrderPatternRecsBeingProcessed(state) {
+      state.modOrderPatternRecsBeingProcessed += 1;
+    },
+
+    subModOrderPatternRecsBeingProcessed(state) {
+      state.modOrderPatternRecsBeingProcessed -= 1;
+    },
+
+    modOrderPattern(state, { orderPatternId, newOrderPattern }) {
+      state.patterns = state.patterns.map((pattern) => {
+        if (pattern._id !== orderPatternId) {
+          return pattern;
+        }
+        return {
+          ...pattern,
+          ...newOrderPattern,
+        };
+      });
+    },
+
+    clearCreateOrderPatternResult(state) {
+      state.createOrderPatternResult = null;
+    },
+
+    setCreateOrderPatternResult(state, { error, message }) {
+      state.createOrderPatternResult = {
+        error,
+        message,
+      };
+    },
+
+    addCreateOrderPatternRecsBeingProcessed(state) {
+      state.createOrderPatternRecsBeingProcessed += 1;
+    },
+
+    subCreateOrderPatternRecsBeingProcessed(state) {
+      state.createOrderPatternRecsBeingProcessed -= 1;
+    },
+
+    addNewOrderPattern(state, newPattern) {
+      state.patterns = [
+        ...state.patterns,
+        newPattern,
+      ];
+    },
   },
 
   actions: {
@@ -206,8 +339,8 @@ export const orderPatterns = {
      *
      */
     async loadOrderPatterns(context) {
-      context.state.errorLoadingPatterns = null;
-      context.state.loadingOrderPatterns = true;
+      context.commit('setLoadingOrderPatternsStatus', true);
+      context.commit('clearLoadingOrderPatternsResult');
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -219,18 +352,20 @@ export const orderPatterns = {
           },
           { headers }
         );
-        context.state.patterns = response.data || [];
-      } catch (err) {
-        context.state.errorLoadingPatterns = err;
+        context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
+        context.commit('setNewOrderPatternsArray', response.data);
+      } catch ({ response }) {
+        context.commit('setLoadingOrderPatternsResult', { error: true, message: response.data.message });
       }
-      context.state.loadingOrderPatterns = false;
+      context.commit('setLoadingOrderPatternsStatus', false);
     },
 
     /**
      *
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
-      context.state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
+      context.commit('addModifyOrderCategoryTitleRecsBeingProcessed');
+      context.commit('clearModifyOrderCategoryTitleResult');
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -239,34 +374,33 @@ export const orderPatterns = {
           { service, orderType, title, newTitle },
           { headers }
         );
-        context.state.modifyOrderCategoryTitleResult = {
+        context.commit('setModifyOrderCategoryTitleResult', {
           error: false,
           message: response.data.message,
           newTitle: response.data.newTitle,
-        };
-        context.state.patterns = context.state.patterns.map((pattern) => {
-          if (pattern.service === service && pattern.type === orderType && pattern.category === title) {
-            return {
-              ...pattern,
-              category: response.data.newTitle,
-            };
-          }
-          return pattern;
+        });
+        context.commit('setOrderCategoryTitle', {
+          service,
+          orderType,
+          title,
+          newTitle: response.data.newTitle,
         });
       } catch ({ response }) {
-        context.state.modifyOrderCategoryTitleResult = {
+        context.commit('setModifyOrderCategoryTitleResult', {
           error: true,
           message: response.data.message,
-        };
+          newTitle: null,
+        });
       }
-      context.state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
+      context.commit('subModifyOrderCategoryTitleRecsBeingProcessed');
     },
 
     /**
      *
      */
     async delOrderPattern(context, orderPatternId) {
-      context.state.delOrderPatternRecsBeingProcessed += 1;
+      context.commit('addDelOrderPatternRecsBeingProcessed');
+      context.commit('clearDelOrderPatternResult');
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -275,25 +409,20 @@ export const orderPatterns = {
           { id: orderPatternId },
           { headers }
         );
-        context.state.delOrderPatternResult = {
-          error: false,
-          message: response.data.message,
-        };
-        context.state.patterns = context.state.patterns.filter((pattern) => pattern._id !== orderPatternId);
+        context.commit('setDelOrderPatternResult', { error: false, message: response.data.message });
+        context.commit('delOrderPattern', orderPatternId);
       } catch ({ response }) {
-        context.state.delOrderPatternResult = {
-          error: true,
-          message: response.data.message,
-        };
+        context.commit('setDelOrderPatternResult', { error: true, message: response.data.message });
       }
-      context.state.delOrderPatternRecsBeingProcessed -= 1;
+      context.commit('subDelOrderPatternRecsBeingProcessed');
     },
 
     /**
      *
      */
     async modOrderPattern(context, { id, title, elements }) {
-      context.state.modOrderPatternRecsBeingProcessed += 1;
+      context.commit('addModOrderPatternRecsBeingProcessed');
+      context.commit('clearModOrderPatternResult');
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -302,33 +431,31 @@ export const orderPatterns = {
           { id, title, elements },
           { headers }
         );
-        context.state.modOrderPatternResult = {
+        context.commit('setModOrderPatternResult', {
           error: false,
           message: response.data.message,
           orderPattern: response.data.orderPattern,
-        };
-        context.state.patterns = context.state.patterns.map((pattern) => {
-          if (pattern._id !== response.data.orderPattern._id) {
-            return pattern;
-          }
-          return {
-            ...pattern,
-            ...response.data.orderPattern,
-          };
+        });
+        context.commit('modOrderPattern', {
+          orderPatternId: response.data.orderPattern._id,
+          newOrderPattern: response.data.orderPattern,
         });
       } catch ({ response }) {
-        context.state.modOrderPatternResult = {
+        context.commit('setModOrderPatternResult', {
           error: true,
           message: response.data.message,
-        };
+          orderPattern: null,
+        });
       }
-      context.state.modOrderPatternRecsBeingProcessed -= 1;
+      context.commit('subModOrderPatternRecsBeingProcessed');
     },
 
     /**
      *
      */
     async createOrderPattern(context, { service, type, category, title, elements }) {
+      context.commit('clearCreateOrderPatternResult');
+      context.commit('addCreateOrderPatternRecsBeingProcessed');
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -346,21 +473,12 @@ export const orderPatterns = {
           },
           { headers }
         );
-        context.state.createOrderPatternResult = {
-          error: false,
-          message: response.data.message,
-          orderPattern: response.data.orderPattern,
-        };
-        context.state.patterns = [
-          ...context.state.patterns,
-          response.data.orderPattern,
-        ];
+        context.commit('setCreateOrderPatternResult', { error: false, message: response.data.message });
+        context.commit('addNewOrderPattern', response.data.orderPattern);
       } catch ({ response }) {
-        context.state.createOrderPatternResult = {
-          error: true,
-          message: response.data.message,
-        };
+        context.commit('setCreateOrderPatternResult', { error: true, message: response.data.message });
       }
+      context.commit('subCreateOrderPatternRecsBeingProcessed');
     },
   },
 };

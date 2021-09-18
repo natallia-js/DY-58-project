@@ -33,6 +33,9 @@
     },
 
     watch: {
+      chosenSize(newVal) {
+        this.selectedSize = newVal;
+      },
       selectedSize(newVal) {
         this.$emit('changeSize', newVal);
       },

@@ -15,6 +15,7 @@
       <side-menu />
     </div>
     <div class="p-col-9">
+      <!--
       <div class="p-mt-3">
         <Button
           type="button"
@@ -39,11 +40,18 @@
         />
       </div>
       <br>
-      <!-- Таблица входящих уведомлений -->
-      <IncomingNotificationsDataTable />
-      <br>
-      <!-- Таблица распоряжений в работе -->
-      <OrdersInWorkDataTable />
+      -->
+      <div class="p-d-flex p-flex-column">
+        <div>
+          <!-- Таблица входящих уведомлений -->
+          <IncomingNotificationsDataTable />
+        </div>
+        <br>
+        <div>
+          <!-- Таблица распоряжений в работе -->
+          <OrdersInWorkDataTable />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -56,7 +64,6 @@
   import IncomingNotificationsDataTable from '../components/IncomingNotificationsDataTable';
   import ShowUserDataDlg from '../components/ShowUserDataDlg';
   import OrdersInWorkDataTable from '../components/OrdersInWorkDataTable';
-  import { APP_CREDENTIALS } from '../constants/appCredentials';
 
   export default {
     name: 'dy58-main-page',
@@ -91,15 +98,6 @@
     },
 
     methods: {
-      userIs_DNC_or_ECD() {
-        return this.getUserCredential === APP_CREDENTIALS.DNC_FULL ||
-               this.getUserCredential === APP_CREDENTIALS.ECD_FULL;
-      },
-
-      userIs_DNC() {
-        return this.getUserCredential === APP_CREDENTIALS.DNC_FULL;
-      },
-
       showUserInfo() {
         this.showUserDataDlg = true;
       },

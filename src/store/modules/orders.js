@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
+import { CurrShiftGetOrderStatus } from '../../constants/orders';
 
 
 export const orders = {
   state: {
     data: [],
-    loadingOrders: false,
-    errorLoadingOrders: null,
     dispatchOrderResult: null,
     dispatchOrdersBeingProcessed: 0,
   },
@@ -15,33 +14,34 @@ export const orders = {
   },
 
   mutations: {
+    clearDispatchOrderResult(state) {
+      state.dispatchOrderResult = null;
+    },
+
+    addOrdersBeingDispatchedNumber(state) {
+      state.dispatchOrdersBeingProcessed += 1;
+    },
+
+    subOrdersBeingDispatchedNumber(state) {
+      state.dispatchOrdersBeingProcessed -= 1;
+    },
+
+    setDispatchOrderResult(state, { error, message }) {
+      state.dispatchOrderResult = {
+        error,
+        message,
+      };
+    },
+
+    addOrder(state, newOrder) {
+      state.data = [
+        ...state.data,
+        newOrder,
+      ];
+    },
   },
 
   actions: {
-    /**
-     *
-     */
-    /*async loadOrderPatterns(context) {
-      context.state.errorLoadingPatterns = null;
-      context.state.loadingOrderPatterns = true;
-      try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getOrderPatterns,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-          },
-          { headers }
-        );
-        context.state.patterns = response.data || [];
-      } catch (err) {
-        context.state.errorLoadingPatterns = err;
-      }
-      context.state.loadingOrderPatterns = false;
-    },*/
-
     /**
      *
      */
@@ -56,6 +56,10 @@ export const orders = {
         dncToSend,
         dspToSend,
       } = params;
+
+      context.commit('clearDispatchOrderResult');
+      context.commit('addOrdersBeingDispatchedNumber');
+
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -68,31 +72,42 @@ export const orders = {
             place,
             timeSpan,
             orderText,
-            dncToSend,
-            dspToSend,
+            dncToSend: dncToSend.map((item) => {
+              return {
+                ...item,
+                sendOriginal: item.sendOriginalToDNC === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                placeTitle: item.sector,
+              };
+            }),
+            dspToSend : dspToSend.map((item) => {
+              return {
+                ...item,
+                sendOriginal: item.sendOriginalToDSP === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                placeTitle: item.station,
+              };
+            }),
             workPoligon: {
               id: context.getters.getUserWorkPoligon.code,
               type: context.getters.getUserWorkPoligon.type,
+              title: context.getters.getUserWorkPoligonName,
+            },
+            creator: {
+              id: context.getters.getUserId,
+              post: context.getters.getUserPost,
+              fio: context.getters.getUserFIO,
             },
           },
           { headers }
         );
-        context.state.createOrderPatternResult = {
-          error: false,
-          message: response.data.message,
-          order: response.data.order,
-        };
-        console.log('ОТВЕТ', response.data)
-        context.state.data = [
-          ...context.state.data,
-          response.data.order,
-        ];
+        context.commit('setDispatchOrderResult', { error: false, message: response.data.message });
+        context.commit('addOrder', response.data.order);
+        context.commit('setLastOrdersNumber', { ordersType: type, number });
+
       } catch ({ response }) {
-        context.state.createOrderPatternResult = {
-          error: true,
-          message: response.data.message,
-        };
+        context.commit('setDispatchOrderResult', { error: true, message: response.data.message });
       }
+
+      context.commit('subOrdersBeingDispatchedNumber');
     },
   },
 };

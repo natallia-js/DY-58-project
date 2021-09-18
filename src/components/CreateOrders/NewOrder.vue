@@ -10,7 +10,6 @@
           </label>
           <InputText
             id="number"
-            disabled
             v-model="v$.number.$model"
             :class="{'p-invalid':v$.number.$invalid && submitted}"
           />
@@ -139,12 +138,24 @@
       DNCToSendOrderDataTable,
     },
 
+    computed: {
+      nextOrderNumber: function() {
+        return this.$store.getters.getNextOrdersNumber;
+      },
+    },
+
+    watch: {
+      nextOrderNumber: function(newVal) {
+        this.state.number = newVal;
+      },
+    },
+
     setup() {
       const store = useStore();
 
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
-        number: 8,
+        number: store.getters.getNextOrdersNumber,
         createDateTime: null,
         place: {
           place: null,
@@ -208,8 +219,7 @@
 
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
       const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
-      const getCurrDateString = computed(() => store.getters.getCurrDateString);
-      const getCurrTimeString = computed(() => store.getters.getCurrTimeString);
+      const getCurrDateTime = computed(() => store.getters.getCurrDateTime);
       const getOrderPatternsToDisplayInTreeSelect = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(ORDER_PATTERN_TYPES.ORDER));
       const getOrderInputTypes = computed(() => OrderInputTypes);
       const getSectorStations = computed(() =>
@@ -240,7 +250,7 @@
       /**
        * Издание распоряжения (отправка и сервер и передача всем причастным).
        */
-      const handleSubmit = (isFormValid) => {console.log(isFormValid, state)
+      const handleSubmit = (isFormValid) => {
         submitted.value = true;
 
         if (!isFormValid) {
@@ -251,7 +261,7 @@
         store.dispatch('dispatchOrder', {
           type: ORDER_PATTERN_TYPES.ORDER,
           number: state.number,
-          createDateTime: state.createDateTime,
+          createDateTime: getCurrDateTime.value.toISOString(),
           place: state.place,
           timeSpan: state.timeSpan,
           orderText: state.orderText,
@@ -266,8 +276,6 @@
         submitted,
         getUserPostFIO,
         getCurrDateTimeString,
-        getCurrDateString,
-        getCurrTimeString,
         getOrderPatternsToDisplayInTreeSelect,
         getOrderInputTypes,
         handleSubmit,

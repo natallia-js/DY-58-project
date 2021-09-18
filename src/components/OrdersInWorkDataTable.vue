@@ -1,83 +1,87 @@
 <template>
   <div>
     <DataTable
-      :value="getOrdersInWork"
+      :value="getWorkingOrders"
       class="p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
-      :scrollable="true" scrollHeight="350px"
       dataKey="id"
+      :scrollable="true" scrollHeight="400px"
       v-model:expandedRows="expandedRows"
     >
       <template #header>
         <div class="dy58-table-title">
-          {{ showOrdersInWorkForDSP() ? 'Документы' : 'Распоряжения' }} в работе
+          {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
         </div>
-        <p class="dy58-table-upper-comment">Количество записей: {{ getOrdersInWorkNumber }}</p>
+        <p class="dy58-table-upper-comment">Количество записей: {{ getWorkingOrdersNumber }}</p>
       </template>
 
       <Column
         :expander="true"
-        headerStyle="width: 3rem"
+        :bodyStyle="{ minWidth: getExpanderColumnObject.width, textAlign: getExpanderColumnObject.align }"
         headerClass="dy58-table-header-cell-class"
-        bodyStyle="width: 3rem"
+        bodyClass="dy58-table-content-cell-class"
       />
 
-      <Column v-for="col of getWorkMessTblColumns"
+      <Column v-for="col of getWorkMessTblColumnsExceptExpander"
         :field="col.field"
         :header="col.title"
         :key="col.field"
-        :headerStyle="{ width: col.width, }"
+        :style="{ minWidth: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
-        :bodyStyle="{ width: col.width }"
         bodyClass="dy58-table-content-cell-class"
       >
         <template #body="slotProps">
-          <span v-if="![getWorkMessTblColumnsTitles.state, getWorkMessTblColumnsTitles.orderReceiveStatus].includes(col.field)"
-          >
-            {{ slotProps.data[col.field] }}
-          </span>
-          <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus"
-          >
-            <span class="dy58-margin-after">Не прочитано:</span>
-            <span class="new badge not-read-order black-text" data-badge-caption="">{{ slotProps.data[col.field]().notRead }}</span>
-            <br>
-            <span class="dy58-margin-after">Не подтверждено:</span>
-            <span class="new badge read-order black-text" data-badge-caption="">{{ slotProps.data[col.field]().notConfirmed }}</span>
+          <div style="width:100%;height:100%">
+            <span v-if="![
+              getWorkMessTblColumnsTitles.expander,
+              getWorkMessTblColumnsTitles.state,
+              getWorkMessTblColumnsTitles.orderReceiveStatus].includes(col.field)"
+            >
+              {{ slotProps.data[col.field] }}
+            </span>
+            <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus"
+            >
+              <p v-if="slotProps.data[col.field]().notDelivered > 0">
+                <span class="dy58-margin-after">Не доставлено:</span>
+                <Badge class="not-delivered-order" :value="slotProps.data[col.field]().notDelivered"></Badge>
+              </p>
+              <p v-if="slotProps.data[col.field]().notConfirmed > 0">
+                <span class="dy58-margin-after">Не подтверждено:</span>
+                <Badge class="not-confirmed-order" :value="slotProps.data[col.field]().notConfirmed"></Badge>
+              </p>
+            </div>
+            <img v-if="col.field === getWorkMessTblColumnsTitles.state"
+              :src="slotProps.data[col.field] === getWorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
+                    (slotProps.data[col.field] === getWorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
+              :alt="slotProps.data[col.field]"
+              class="dy58-order-state-img-style"
+            />
           </div>
-          <img v-if="col.field === getWorkMessTblColumnsTitles.state"
-            :src="slotProps.data[col.field] === getWorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
-                  (slotProps.data[col.field] === getWorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
-            :alt="slotProps.data[col.field]"
-            class="dy58-order-state-img-style"
-          />
         </template>
       </Column>
 
       <template #expansion="slotProps">
-        <div class="dy58-order-details">
+        <div class="p-grid" style="width:100%">
 
-          <div class="dy58-order-text dy58-margin-after">
+          <div class="p-col">
             {{ slotProps.data.orderText }}
           </div>
 
-          <div class="dy58-order-receivers">
-            <DataTable :value="slotProps.data.receivers">
+          <div class="p-col">
+            <DataTable :value="slotProps.data.receivers()">
               <Column v-for="col2 of getWorkMessReceiversTblColumns"
                 :field="col2.field"
                 :header="col2.title"
                 :key="col2.field"
-                :headerStyle="{ width: col2.width, }"
+                :style="{ width: col2.width, }"
                 headerClass="dy58-table-header-cell-class"
-                :bodyStyle="{ width: col2.width }"
-                bodyClass="dy58-table-content-cell-class dy58-no-padding"
+                bodyClass="dy58-table-content-cell-class"
               >
                 <template #body="slotProps">
-                  <div
-                    :class="[
-                             {'confirmed-order': slotProps.data.status === getWorkMessStatus.confirmed},
-                             {'read-order': slotProps.data.status === getWorkMessStatus.read},
-                             {'not-read-order': slotProps.data.status === getWorkMessStatus.notRead},
-                            ]"
+                  <div style="width:100%"
+                    :class="[{'not-delivered-order': !slotProps.data.deliverDateTime},
+                             {'not-confirmed-order': slotProps.data.deliverDateTime && !slotProps.data.confirmDateTime},
+                             ]"
                   >
                     {{ slotProps.data[col2.field] }}
                   </div>
@@ -87,7 +91,7 @@
             </DataTable>
           </div>
         </div>
-    </template>
+      </template>
 
     </DataTable>
   </div>
@@ -96,98 +100,54 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import {
-    WorkMessStatus,
-    WorkMessStates,
-    WorkMessTblColumnsTitles,
-    WorkMessReceiversTblColumnsTitles,
-    WorkMessTblColumns,
-    WorkMessReceiversTblColumns,
-  } from '../store/modules/ordersInWork';
-  import { APP_CREDENTIALS } from '../constants/appCredentials';
+  import { WorkMessStates } from '../constants/orders';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
 
     data() {
       return {
-        expandedRows: []
-      }
+        expandedRows: [],
+      };
     },
 
     computed: {
       ...mapGetters([
-        'getOrdersInWork',
-        'getOrdersInWorkNumber',
-        'getUserCredential',
+        'getWorkingOrders',
+        'getWorkingOrdersNumber',
+        'isDSP',
+        'getWorkMessTblColumnsTitles',
+        'getWorkMessTblColumns',
+        'getWorkMessReceiversTblColumns',
       ]),
-
-      getWorkMessStatus() {
-        return WorkMessStatus;
-      },
 
       getWorkMessStates() {
         return WorkMessStates;
       },
 
-      getWorkMessTblColumnsTitles() {
-        return WorkMessTblColumnsTitles;
+      getWorkMessTblColumnsExceptExpander() {
+        return this.getWorkMessTblColumns.filter((el) => el.field !== this.getWorkMessTblColumnsTitles.expander);
       },
 
-      getWorkMessTblColumns() {
-        return WorkMessTblColumns;
-      },
-
-      getWorkMessReceiversTblColumns() {
-        if (!this.showOrdersInWorkForECD()) {
-          return WorkMessReceiversTblColumns;
-        }
-        return WorkMessReceiversTblColumns.map(col => {
-          if (col.field === WorkMessReceiversTblColumnsTitles.post) {
-            return { field: col.field, title: col.altTitle, width: col.width };
-          }
-          return col;
-        });
+      getExpanderColumnObject() {
+        const obj = this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
+        return obj || { width: '50px', align: 'left' };
       },
     },
-
-    mounted() {
-      this.$store.commit('setOrdersInWork', []);
-    },
-
-    methods: {
-      showOrdersInWorkForDSP() {
-        return this.getUserCredential === APP_CREDENTIALS.DSP_FULL;
-      },
-
-      showOrdersInWorkForECD() {
-        return this.getUserCredential === APP_CREDENTIALS.ECD_FULL;
-      },
-    }
   }
 </script>
 
 
 <style lang="scss" scoped>
-  .dy58-order-details {
-    padding: 1rem;
-    display: flex;
-    flex-direction: row;
-  }
-
-  .dy58-order-text, .dy58-order-receivers {
-    flex-basis: 50%;
-  }
-
   .confirmed-order {
     background-color: var(--dy58-confirmed-order-bg-color) !important;
   }
 
-  .read-order {
-    background-color: var(--dy58-read-order-bg-color) !important;
+  .not-delivered-order {
+    background-color: var(--dy58-not-read-order-bg-color) !important;
   }
 
-  .not-read-order {
-    background-color: var(--dy58-not-read-order-bg-color) !important;
+  .not-confirmed-order {
+    background-color: var(--dy58-read-order-bg-color) !important;
   }
 </style>

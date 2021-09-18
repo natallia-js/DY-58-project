@@ -15,9 +15,8 @@
         :field="col.field"
         :header="col.title"
         :key="col.field"
-        :headerStyle="{ width: col.width }"
+        :style="{ width: col.width }"
         headerClass="dy58-table-header-cell-class"
-        :bodyStyle="{ width: col.width }"
         bodyClass="dy58-table-content-cell-class"
       >
         <template #body="slotProps">
@@ -90,8 +89,8 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import { CurrShiftGetOrderStatus } from '../../constants/orders';
   import {
-    CurrShiftGetOrderStatus,
     CurrSectorsShiftTblColumnNames,
     CurrSectorsShiftTblColumns,
   } from '../../store/modules/currShift';

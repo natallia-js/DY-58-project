@@ -118,6 +118,9 @@ export const currUser = {
     getUserService(state) {
       return state.service;
     },
+    getUserFIO(state) {
+      return `${state.surname} ${state.name.charAt(0)}.` + `${state.fatherName ? state.fatherName.charAt(0) + '.' : ''}`;
+    },
     getUserPostFIO(state) {
       return `${state.post} ${state.surname} ${state.name.charAt(0)}.` + `${state.fatherName ? state.fatherName.charAt(0) + '.' : ''}`;
     },
@@ -135,6 +138,15 @@ export const currUser = {
     },
     isUserAuthenticated(state) {
       return state.isAuthenticated;
+    },
+    isDSP(state) {
+      return state.credential === APP_CREDENTIALS.DSP_FULL;
+    },
+    isDNC(state) {
+      return state.credential === APP_CREDENTIALS.DNC_FULL;
+    },
+    isECD(state) {
+      return state.credential === APP_CREDENTIALS.ECD_FULL;
     },
   },
 

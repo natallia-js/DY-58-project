@@ -57,6 +57,7 @@
         } else {
           this.$store.dispatch('loadCurrSectorsShift');
           this.$store.dispatch('loadLastOrdersParams');
+          this.$store.dispatch('loadWorkOrders');
         }
       },
 

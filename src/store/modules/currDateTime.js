@@ -4,6 +4,10 @@ export const currDateTime = {
   },
 
   getters: {
+    getCurrDateTime(state) {
+      return state.dateTime;
+    },
+
     getCurrDateString(state) {
       if (!state.dateTime) {
         return '';
