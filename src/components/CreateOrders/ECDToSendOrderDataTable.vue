@@ -1,7 +1,14 @@
 <template>
+  <ShowChoosePersonDlg
+    :showDlg="showChoosePersonDlg"
+    :personal="sectorPersonal"
+    :personalPost="getECDPost"
+    :sector="sector"
+    @close="hideChoosePersonDlg"
+  ></ShowChoosePersonDlg>
   <div>
     <DataTable
-      :value="getCurrNearestECDSectorsECDShiftForSendingData"
+      :value="getECDShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
     >
@@ -31,7 +38,18 @@
                                     && slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.sendCopy},
               ]"
           >
-            {{ slotProps.data[col.field] }}
+            <span v-if="col.field !== getCurrSectorsShiftTblColumnNames.fio">
+              {{ slotProps.data[col.field] }}
+            </span>
+            <span v-else :class="{'dy58-info': slotProps.data.fioOnline}">
+              {{ slotProps.data[col.field] }}
+              <a
+                :class="['dy58-send-status-btn']"
+                @click="() => openChoosePersonDlg(slotProps.data.people, slotProps.data.sector)"
+              >
+                ...
+              </a>
+            </span>
           </div>
           <div v-if="col.field === getCurrSectorsShiftTblColumnNames.notification">
             <div class="dy58-tbl-send-btns-block">
@@ -89,20 +107,33 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus } from '../../constants/orders';
+  import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
   import {
     CurrSectorsShiftTblColumnNames,
     CurrSectorsShiftTblColumns,
   } from '../../store/modules/personal';
+  import ShowChoosePersonDlg from '../../components/ShowChoosePersonDlg';
 
   export default {
     name: 'dy58-ecd-to-send-order-data-table',
 
     emits: ['input'],
 
+    data() {
+      return {
+        showChoosePersonDlg: false,
+        sectorPersonal: [],
+        sector: null,
+      };
+    },
+
+    components: {
+      ShowChoosePersonDlg,
+    },
+
     computed: {
       ...mapGetters([
-        'getCurrNearestECDSectorsECDShiftForSendingData',
+        'getECDShiftForSendingData',
       ]),
 
       getCurrSectorsShiftTblColumnNames() {
@@ -116,20 +147,24 @@
       getCurrSectorsShiftTblColumns() {
         return CurrSectorsShiftTblColumns;
       },
+
+      getECDPost() {
+        return ReceiversPosts.ECD;
+      },
     },
 
     mounted() {
       // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
       // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
       // состояние хранилища
-      this.$emit('input', this.getCurrNearestECDSectorsECDShiftForSendingData
-        ? this.getCurrNearestECDSectorsECDShiftForSendingData
+      this.$emit('input', this.getECDShiftForSendingData
+        ? this.getECDShiftForSendingData
           .filter((item) => item.sendOriginalToECD !== CurrShiftGetOrderStatus.doNotSend)
           : []);
     },
 
     watch: {
-      getCurrNearestECDSectorsECDShiftForSendingData(newVal) {
+      getECDShiftForSendingData(newVal) {console.log(newVal)
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginalToECD !== CurrShiftGetOrderStatus.doNotSend)
           : []);
@@ -138,43 +173,53 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
+        this.$store.commit('setGetOrderStatusToAllECDSectors',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+        this.$store.commit('setGetOrderStatusToDefinitECDSector',
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftNearestECDSectorsECDShift',
+        this.$store.commit('setGetOrderStatusToAllLeftECDSectors',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
+        this.$store.commit('setGetOrderStatusToAllECDSectors',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+        this.$store.commit('setGetOrderStatusToDefinitECDSector',
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftNearestECDSectorsECDShift',
+        this.$store.commit('setGetOrderStatusToAllLeftECDSectors',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
+        this.$store.commit('setGetOrderStatusToAllECDSectors',
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       doNotSendToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+        this.$store.commit('setGetOrderStatusToDefinitECDSector',
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+      },
+
+      openChoosePersonDlg(people, sector) {
+        this.sectorPersonal = people || [];
+        this.sector = sector;
+        this.showChoosePersonDlg = true;
+      },
+
+      hideChoosePersonDlg() {
+        this.showChoosePersonDlg = false;
       },
     }
   }

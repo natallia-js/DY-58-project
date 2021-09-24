@@ -25,6 +25,8 @@
   export default {
     name: 'dy58-choose-person-dialog',
 
+    emits: ['close'],
+
     data() {
       return {
         dlgVisible: false,

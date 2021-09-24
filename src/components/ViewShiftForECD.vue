@@ -17,8 +17,8 @@
       </div>
     </Fieldset>
     <Fieldset legend="Персонал смежных участков ЭЦД" :toggleable="true">
-      <div v-if="getSectorPersonal.adjacentECDSectorsShift && getSectorPersonal.adjacentECDSectorsShift.length">
-        <div v-for="adjSector of getSectorPersonal.adjacentECDSectorsShift" :key="adjSector.sectorId" class="p-ml-4">
+      <div v-if="getSectorPersonal.ECDSectorsShift && getSectorPersonal.ECDSectorsShift.length">
+        <div v-for="adjSector of getSectorPersonal.ECDSectorsShift" :key="adjSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ adjSector.sectorTitle }}</span>
           <div v-if="!adjSector.people || !adjSector.people.length">
             -
@@ -32,8 +32,8 @@
       </div>
     </Fieldset>
     <Fieldset legend="Персонал ближайших участков ДНЦ" :toggleable="true">
-      <div v-if="getSectorPersonal.nearestDNCSectorsShift && getSectorPersonal.nearestDNCSectorsShift.length">
-        <div v-for="nearSector of getSectorPersonal.nearestDNCSectorsShift" :key="nearSector.sectorId" class="p-ml-4">
+      <div v-if="getSectorPersonal.DNCSectorsShift && getSectorPersonal.DNCSectorsShift.length">
+        <div v-for="nearSector of getSectorPersonal.DNCSectorsShift" :key="nearSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ nearSector.sectorTitle }}</span>
           <div v-if="!nearSector.people || !nearSector.people.length">
             -

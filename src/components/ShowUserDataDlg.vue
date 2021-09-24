@@ -31,6 +31,8 @@
   export default {
     name: 'dy58-user-info-dialog',
 
+    emits: ['close'],
+
     data() {
       return {
         dlgVisible: false,

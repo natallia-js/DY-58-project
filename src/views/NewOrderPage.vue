@@ -1,12 +1,13 @@
 <template>
   <TabView>
-    <TabPanel header="Распоряжение">
-      <new-order/>
+    <TabPanel v-if="isDNC || isECD" :header="isDNC ? getOrderTypes.ORDER : getOrderTypes.ECD_ORDER">
+      <new-order v-if="isDNC" :orderType="getOrderTypes.ORDER" />
+      <new-order v-if="isECD" :orderType="getOrderTypes.ECD_ORDER" />
     </TabPanel>
-    <TabPanel header="Заявка">
-      <new-request/>
+    <TabPanel v-if="isDNC || isDSP" :header="getOrderTypes.REQUEST">
+      <new-order :orderType="getOrderTypes.REQUEST" />
     </TabPanel>
-    <TabPanel header="Уведомление">
+    <TabPanel v-if="isDNC || isECD || isDSP" :header="isDNC || isDSP ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION">
       <new-notification/>
     </TabPanel>
   </TabView>
@@ -14,72 +15,38 @@
 
 
 <script>
+  import { mapGetters } from 'vuex';
   import NewOrder from '../components/CreateOrders/NewOrder';
-  import NewRequest from '../components/CreateOrders/NewRequest';
   import NewNotification from '../components/CreateOrders/NewNotification';
-  // import internationalizationDateTimeOptions from '../constants/internationalizationDateTimeOptions';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
+  import { OrderTypes } from '../constants/orders';
 
   export default {
     name: 'dy58-new-order-page',
 
     components: {
       NewOrder,
-      NewRequest,
       NewNotification,
     },
 
     computed: {
+      ...mapGetters([
+        'isDSP',
+        'isDNC',
+        'isECD',
+      ]),
+
       getMainMenuItemsKeys() {
         return MainMenuItemsKeys;
+      },
+
+      getOrderTypes() {
+        return OrderTypes;
       },
     },
 
     mounted() {
       this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.createOrder);
-
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-      // Следующий участок кода очень важно держать именно здесь, а не во вложенных
-      // компонентах NewOrder, NewRequest, NewNotification, поскольку если положить его
-      // в каждый из вложенных компонентов, то будет следующая проблема: при переходе ко
-      // вложенному компоненту с помощью this.$router.push(...) инициализация компонентов
-      // Datepicker, Timepicker, FormSelect,... будет лишь "поверхностной" и, в частности, в
-      // этих компонентах не произойдет переход на русский язык. Этого всего не будет, если
-      // соответствующую страницу полностью перезагрузить, но нам этого не надо.
-/*
-      let elems = document.querySelectorAll('.datepicker');
-      M.Datepicker.init(elems, {
-        autoClose: false,
-        format: 'dd.mm.yyyy',
-        defaultDate: Date.now(),
-        setDefaultDate: true,
-        firstDay: 1,
-        isRTL: false,
-        i18n: internationalizationDateTimeOptions.dateOptions,
-      });
-
-      elems = document.querySelectorAll('.timepicker');
-      M.Timepicker.init(elems, {
-        showClearBtn: false,
-        defaultTime: 'now',
-        twelveHour: false,
-        i18n: internationalizationDateTimeOptions.timeOptions,
-      });
-
-      elems = document.querySelectorAll('select');
-      M.FormSelect.init(elems, {});
-
-      elems = document.querySelectorAll('.tooltipped');
-      M.Tooltip.init(elems, {});
-*/
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    },
-
-    methods: {
-      goToMainPage() {
-        this.$router.push('/');
-      },
     },
   }
 </script>

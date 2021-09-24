@@ -17,3 +17,11 @@ export const ReceiversPosts = Object.freeze({
   DSP: 'ДСП',
   ECD: 'ЭЦД',
 });
+
+export const OrderTypes = Object.freeze({
+  ORDER: 'Распоряжение',
+  REQUEST: 'Заявка',
+  NOTIFICATION: 'Уведомление',
+  ECD_ORDER: 'Распоряжение/запрещение',
+  ECD_NOTIFICATION: 'Уведомление/отмена запрещения',
+});

@@ -34,7 +34,7 @@
         :binary="true"
         v-model="state.tillCancellation"
       />
-      <label for="tillCancellation"> До отмены</label>
+      <label for="tillCancellation"> До {{ isDNC ? 'отмены' : 'уведомления' }}</label>
     </div>
   </div>
 </template>
@@ -42,6 +42,7 @@
 
 <script>
   import { computed, reactive, watch } from 'vue';
+  import { useStore } from 'vuex';
 
   export default {
     name: 'dy58-order-timespan-chooser',
@@ -49,11 +50,15 @@
     emits: ['input'],
 
     setup(_props, { emit }) {
+      const store = useStore();
+
       const state = reactive({
         startDateTime: null,
         endDateTime: null,
         tillCancellation: false,
       });
+
+      const isDNC = computed(() => store.getters.isDNC);
 
       const getTillCancellation = computed(() => {
         return state.tillCancellation;
@@ -85,6 +90,7 @@
 
       return {
         state,
+        isDNC,
         handleChangeStartDateTime,
         handleChangeEndDateTime,
       };

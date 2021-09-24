@@ -72,40 +72,44 @@ export const personal = {
           });
         }
       }
-      getUsersIds(state.sectorPersonal.adjacentDNCSectorsShift);
+      getUsersIds(state.sectorPersonal.DNCSectorsShift);
       getUsersIds(state.sectorPersonal.sectorStationsShift);
-      getUsersIds(state.sectorPersonal.nearestECDSectorsShift);
+      getUsersIds(state.sectorPersonal.ECDSectorsShift);
       return ids;
     },
 
     /**
-     * Возвращает информацию о всех ДНЦ участков ДНЦ, смежных с текущим полигоном
-     * управления (участком ДНЦ).
+     * Возвращает информацию о всех ДНЦ участков ДНЦ, связанных с текущим полигоном управления.
      */
-    getCurrAdjacentDNCSectorsDNCShiftForSendingData: (state) => {
-      if (!state.sectorPersonal || !state.sectorPersonal.adjacentDNCSectorsShift) {
+    getDNCShiftForSendingData: (state) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.DNCSectorsShift) {
         return [];
       }
-      return state.sectorPersonal.adjacentDNCSectorsShift.map((item) => {
+      return state.sectorPersonal.DNCSectorsShift.map((item) => {
         return {
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.DNC_SECTOR,
           sector: item.sectorTitle,
-          fio: item.people
+          fio: item.lastUserChoice || '',
+          fioOnline: item.lastUserChoiceOnline,
+          people: item.people
             .filter((el) => el.post === ReceiversPosts.DNC)
-            .reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.surname} ${currentValue.name.charAt(0)}.` +
-              `${currentValue.fatherName ? currentValue.fatherName.charAt(0) + '.' : ''}` +
-              `${index === item.people.length - 1 ? '' : ', '}`, ''),
+            .map((el) => {
+              return {
+                id: el._id,
+                fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
+                online: el.online,
+              };
+            }),
           sendOriginalToDNC: item.sendOriginalToDNC,
         };
       });
     },
 
     /**
-     * Возвращает информацию о всех ДСП станций участка ДНЦ (рабочего полигона текущего пользователя).
+     * Возвращает информацию о всех ДСП станций, связанных с текущим полигом управления.
      */
-    getCurrStationsDSPShiftForSendingData: (state) => {
+    getDSPShiftForSendingData: (state) => {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
         return [];
       }
@@ -133,24 +137,28 @@ export const personal = {
     },
 
     /**
-     * Возвращает информацию о всех ЭЦД участков ЭЦД, ближайших к текущему полигону
-     * управления (участку ДНЦ).
+     * Возвращает информацию о всех ЭЦД участков ЭЦД, связанных с текущим полигоном управления.
      */
-     getCurrNearestECDSectorsECDShiftForSendingData: (state) => {
-      if (!state.sectorPersonal || !state.sectorPersonal.nearestECDSectorsShift) {
+     getECDShiftForSendingData: (state) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
         return [];
       }
-      return state.sectorPersonal.nearestECDSectorsShift.map((item) => {
+      return state.sectorPersonal.ECDSectorsShift.map((item) => {
         return {
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.ECD_SECTOR,
           sector: item.sectorTitle,
-          fio: item.people
+          fio: item.lastUserChoice || '',
+          fioOnline: item.lastUserChoiceOnline,
+          people: item.people
             .filter((el) => el.post === ReceiversPosts.ECD)
-            .reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.surname} ${currentValue.name.charAt(0)}.` +
-              `${currentValue.fatherName ? currentValue.fatherName.charAt(0) + '.' : ''}` +
-              `${index === item.people.length - 1 ? '' : ', '}`, ''),
+            .map((el) => {
+              return {
+                id: el._id,
+                fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
+                online: el.online,
+              };
+            }),
           sendOriginalToECD: item.sendOriginalToECD,
         };
       });
@@ -167,11 +175,11 @@ export const personal = {
 
   mutations: {
     /**
-     * Оригинал/Копия/Ничего всем ДНЦ смежных участков ДНЦ
+     * Оригинал/Копия/Ничего всем ДНЦ всех участков ДНЦ
      */
-    setGetOrderStatusToAllAdjacentDNCSectorsDNCShift(state, { getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.adjacentDNCSectorsShift) {
-        state.sectorPersonal.adjacentDNCSectorsShift.forEach((el) => {
+    setGetOrderStatusToAllDNCSectors(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
+        state.sectorPersonal.DNCSectorsShift.forEach((el) => {
           if (el.sendOriginalToDNC !== getOrderStatus) {
             el.sendOriginalToDNC = getOrderStatus;
           }
@@ -180,11 +188,11 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДНЦ конкретного смежного участка ДНЦ
+     * Оригинал/Копия/Ничего ДНЦ конкретного участка ДНЦ
      */
-    setGetOrderStatusToDefinitAdjacentDNCSectorDNCShift(state, { dncSectorId, getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.adjacentDNCSectorsShift) {
-        const sector = state.sectorPersonal.adjacentDNCSectorsShift.find(el => el.sectorId === dncSectorId);
+    setGetOrderStatusToDefinitDNCSector(state, { dncSectorId, getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
+        const sector = state.sectorPersonal.DNCSectorsShift.find(el => el.sectorId === dncSectorId);
         if (sector && sector.sendOriginalToDNC !== getOrderStatus) {
           sector.sendOriginalToDNC = getOrderStatus;
         }
@@ -192,11 +200,11 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДНЦ всех оставшихся смежных участков ДНЦ
+     * Оригинал/Копия/Ничего всем ДНЦ оставшихся участков ДНЦ
      */
-    setGetOrderStatusToAllLeftAdjacentDNCSectorsDNCShift(state, { getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.adjacentDNCSectorsShift) {
-        state.sectorPersonal.adjacentDNCSectorsShift.forEach(el => {
+    setGetOrderStatusToAllLeftDNCSectors(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
+        state.sectorPersonal.DNCSectorsShift.forEach(el => {
           if (el.sendOriginalToDNC === CurrShiftGetOrderStatus.doNotSend &&
               el.sendOriginalToDNC !== getOrderStatus) {
             el.sendOriginalToDNC = getOrderStatus;
@@ -206,9 +214,9 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ДСП станций участка ДНЦ
+     * Оригинал/Копия/Ничего всем ДСП всех станций
      */
-    setGetOrderStatusToAllDNCSectorStationsDSPShift(state, { getOrderStatus }) {
+    setGetOrderStatusToAllDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => {
           if (el.sendOriginalToDSP !== getOrderStatus) {
@@ -219,9 +227,9 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДСП конкретной станции участка ДНЦ
+     * Оригинал/Копия/Ничего ДСП конкретной станции
      */
-    setGetOrderStatusToDefinitDNCSectorStationDSPShift(state, { stationId, getOrderStatus }) {
+    setGetOrderStatusToDefinitDSP(state, { stationId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         const station = state.sectorPersonal.sectorStationsShift.find(el => el.stationId === stationId);
         if (station && station.sendOriginalToDSP !== getOrderStatus) {
@@ -231,9 +239,9 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДСП всех оставшихся станций участка ДНЦ
+     * Оригинал/Копия/Ничего ДСП всех оставшихся станций
      */
-    setGetOrderStatusToAllLeftDNCSectorStationsDSPShift(state, { getOrderStatus }) {
+    setGetOrderStatusToAllLeftDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach(el => {
           if (el.sendOriginalToDSP === CurrShiftGetOrderStatus.doNotSend &&
@@ -245,11 +253,11 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ЭЦД ближайших участков ЭЦД
+     * Оригинал/Копия/Ничего всем ЭЦД всех участков ЭЦД
      */
-    setGetOrderStatusToAllNearestECDSectorsECDShift(state, { getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.nearestECDSectorsShift) {
-        state.sectorPersonal.nearestECDSectorsShift.forEach((el) => {
+     setGetOrderStatusToAllECDSectors(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
+        state.sectorPersonal.ECDSectorsShift.forEach((el) => {
           if (el.sendOriginalToECD !== getOrderStatus) {
             el.sendOriginalToECD = getOrderStatus;
           }
@@ -258,11 +266,11 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ЭЦД конкретного ближайшего участка ЭЦД
+     * Оригинал/Копия/Ничего ЭЦД конкретного участка ЭЦД
      */
-    setGetOrderStatusToDefinitNearestECDSectorECDShift(state, { ecdSectorId, getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.nearestECDSectorsShift) {
-        const sector = state.sectorPersonal.nearestECDSectorsShift.find(el => el.sectorId === ecdSectorId);
+     setGetOrderStatusToDefinitECDSector(state, { ecdSectorId, getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
+        const sector = state.sectorPersonal.ECDSectorsShift.find(el => el.sectorId === ecdSectorId);
         if (sector && sector.sendOriginalToECD !== getOrderStatus) {
           sector.sendOriginalToECD = getOrderStatus;
         }
@@ -270,11 +278,11 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ЭЦД всех оставшихся ближайших участков ЭЦД
+     * Оригинал/Копия/Ничего всем ЭЦД оставшихся участков ЭЦД
      */
-     setGetOrderStatusToAllLeftNearestECDSectorsECDShift(state, { getOrderStatus }) {
-      if (state.sectorPersonal && state.sectorPersonal.nearestECDSectorsShift) {
-        state.sectorPersonal.nearestECDSectorsShift.forEach(el => {
+     setGetOrderStatusToAllLeftECDSectors(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
+        state.sectorPersonal.ECDSectorsShift.forEach(el => {
           if (el.sendOriginalToECD === CurrShiftGetOrderStatus.doNotSend &&
               el.sendOriginalToECD !== getOrderStatus) {
             el.sendOriginalToECD = getOrderStatus;
@@ -314,9 +322,9 @@ export const personal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.adjacentDNCSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift);
       setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift);
-      setOnlineSectorsShift(state.sectorPersonal.nearestECDSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift);
     },
 
     /**
@@ -345,9 +353,9 @@ export const personal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.adjacentDNCSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift);
       setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift);
-      setOnlineSectorsShift(state.sectorPersonal.nearestECDSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift);
     },
 
     /**
@@ -373,9 +381,9 @@ export const personal = {
         }
         return false;
       }
-      if (findUserAndSetChosenStatus(state.sectorPersonal.adjacentDNCSectorsShift)) return;
+      if (findUserAndSetChosenStatus(state.sectorPersonal.DNCSectorsShift)) return;
       if (findUserAndSetChosenStatus(state.sectorPersonal.sectorStationsShift)) return;
-      if (findUserAndSetChosenStatus(state.sectorPersonal.nearestECDSectorsShift)) return;
+      if (findUserAndSetChosenStatus(state.sectorPersonal.ECDSectorsShift)) return;
     },
   },
 
@@ -399,7 +407,7 @@ export const personal = {
       const shiftPersonal = {
         // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, смежных с
         // участком ДНЦ с id = sectorId
-        adjacentDNCSectorsShift: context.getters.getAdjacentDNCSectors.map((sector) => {
+        DNCSectorsShift: context.getters.getAdjacentDNCSectors.map((sector) => {
           return {
             sectorId: sector.DNCS_ID,
             sectorTitle: sector.DNCS_Title,
@@ -422,7 +430,7 @@ export const personal = {
         }),
         // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, ближайших к
         // участку ДНЦ с id = sectorId
-        nearestECDSectorsShift: context.getters.getNearestECDSectors.map((sector) => {
+        ECDSectorsShift: context.getters.getNearestECDSectors.map((sector) => {
           return {
             sectorId: sector.ECDS_ID,
             sectorTitle: sector.ECDS_Title,
@@ -441,7 +449,7 @@ export const personal = {
           const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              const element = shiftPersonal.adjacentDNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
+              const element = shiftPersonal.DNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
               if (element) {
                 element.people.push(user);
               }
@@ -466,7 +474,7 @@ export const personal = {
           const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              const element = shiftPersonal.nearestECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
+              const element = shiftPersonal.ECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
               if (element) {
                 element.people.push(user);
               }
@@ -500,7 +508,7 @@ export const personal = {
       const shiftPersonal = {
         // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, смежных с
         // участком ЭЦД с id = sectorId
-        adjacentECDSectorsShift: context.getters.getAdjacentECDSectors.map((sector) => {
+        ECDSectorsShift: context.getters.getAdjacentECDSectors.map((sector) => {
           return {
             sectorId: sector.ECDS_ID,
             sectorTitle: sector.ECDS_Title,
@@ -523,7 +531,7 @@ export const personal = {
         }),
         // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, ближайших к
         // участку ЭЦД с id = sectorId
-        nearestDNCSectorsShift: context.getters.getNearestDNCSectors.map((sector) => {
+        DNCSectorsShift: context.getters.getNearestDNCSectors.map((sector) => {
           return {
             sectorId: sector.DNCS_ID,
             sectorTitle: sector.DNCS_Title,
@@ -542,7 +550,7 @@ export const personal = {
           const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              const element = shiftPersonal.adjacentECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
+              const element = shiftPersonal.ECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
               if (element) {
                 element.people.push(user);
               }
@@ -567,7 +575,7 @@ export const personal = {
           const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              const element = shiftPersonal.nearestDNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
+              const element = shiftPersonal.DNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
               if (element) {
                 element.people.push(user);
               }

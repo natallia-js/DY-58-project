@@ -31,6 +31,8 @@
   export default {
     name: 'dy58-show-incoming-order-dialog',
 
+    emits: ['close'],
+
     data() {
       return {
         dlgVisible: false,

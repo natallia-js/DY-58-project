@@ -4,6 +4,7 @@
       <SelectButton v-model="state.selectedOrderInputType" :options="getOrderInputTypes" optionLabel="label" />
       <br />
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
+        <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-4 p-d-flex p-flex-column">
           <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
@@ -20,6 +21,7 @@
             Не указан номер распоряжения
           </small>
         </div>
+        <!-- ДАТА И ВРЕМЯ СОЗДАНИЯ РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-6 p-d-flex p-flex-column">
           <label for="createDateTime" :class="{'p-error':v$.createDateTime.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
@@ -37,7 +39,11 @@
             Не определены дата и время создания распоряжения
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+        <div
+          v-if="[getOrderTypes.ORDER,getOrderTypes.ECD_ORDER].includes(orderType)"
+          class="p-field p-col-12 p-d-flex p-flex-column"
+        >
           <label for="place" :class="{'p-error':v$.place.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Место действия</span>
           </label>
@@ -55,7 +61,11 @@
             Пожалуйста, определите место действия распоряжения
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <!-- ВРЕМЯ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+        <div
+          v-if="[getOrderTypes.ORDER,getOrderTypes.ECD_ORDER].includes(orderType)"
+          class="p-field p-col-12 p-d-flex p-flex-column"
+        >
           <label for="timeSpan" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Время действия</span>
           </label>
@@ -71,6 +81,7 @@
             Пожалуйста, корректно определите время действия распоряжения
           </small>
         </div>
+        <!-- НАИМЕНОВАНИЕ И ТЕКСТ РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="orderText" :class="{'p-error':v$.orderText.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Текст распоряжения</span>
@@ -98,6 +109,7 @@
         </div>
       </form>
     </div>
+    <!-- АДРЕСАТЫ -->
     <div class="p-col-6">
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
       <Accordion :multiple="true">
@@ -121,7 +133,7 @@
             @input="v$.dncSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab>
+        <AccordionTab v-if="isDNC">
           <template #header>
             <span><b>ЭЦД:</b> <span v-html="selectedECDString"></span></span>
           </template>
@@ -150,10 +162,17 @@
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
-  import { CurrShiftGetOrderStatus } from '../../constants/orders';
+  import { CurrShiftGetOrderStatus, OrderTypes } from '../../constants/orders';
 
   export default {
     name: 'dy58-new-order-block',
+
+    props: {
+      orderType: {
+        type: String,
+        required: true,
+      },
+    },
 
     components: {
       OrderPlaceChooser,
@@ -167,6 +186,9 @@
     computed: {
       nextOrderNumber: function() {
         return this.$store.getters.getNextOrdersNumber;
+      },
+      getOrderTypes: function() {
+        return OrderTypes;
       },
     },
 
@@ -213,6 +235,8 @@
 
       //watch(getSelectedOrderInputType, (newVal) => store.commit('setCurrentOrderInputType', newVal));
 
+      const isDNC = computed(() => store.getters.isDNC);
+
       const endDateNoLessStartDate = (value) =>
         !value ? true :
           !state.timeSpan.start ? true : value >= state.timeSpan.start;
@@ -236,6 +260,7 @@
           orderTitle: { required },
           orderText: { required },
         },
+        // ! minLength: minLength(1) означает, что минимальная длина массива должна быть равна нулю
         dncSectorsToSendOrder: { minLength: minLength(1) },
         dspSectorsToSendOrder: { minLength: minLength(1) },
         ecdSectorsToSendOrder: { minLength: minLength(1) },
@@ -401,6 +426,7 @@
 
       return {
         state,
+        isDNC,
         v$,
         submitted,
         getUserPostFIO,

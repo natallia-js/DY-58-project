@@ -55,6 +55,7 @@ export const orders = {
         orderText,
         dncToSend,
         dspToSend,
+        ecdToSend,
       } = params;
 
       context.commit('clearDispatchOrderResult');
@@ -84,6 +85,13 @@ export const orders = {
                 ...item,
                 sendOriginal: item.sendOriginalToDSP === CurrShiftGetOrderStatus.sendOriginal ? true : false,
                 placeTitle: item.station,
+              };
+            }),
+            ecdToSend: ecdToSend.map((item) => {
+              return {
+                ...item,
+                sendOriginal: item.sendOriginalToECD === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                placeTitle: item.sector,
               };
             }),
             workPoligon: {

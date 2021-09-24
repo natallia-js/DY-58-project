@@ -8,7 +8,7 @@
   ></ShowChoosePersonDlg>
   <div>
     <DataTable
-      :value="getCurrStationsDSPShiftForSendingData"
+      :value="getDSPShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
@@ -46,7 +46,9 @@
                                     && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy},
               ]"
           >
-            <span v-if="col.field !== getCurrShiftTblColumnNames.fio">{{ slotProps.data[col.field] }}</span>
+            <span v-if="col.field !== getCurrShiftTblColumnNames.fio">
+              {{ slotProps.data[col.field] }}
+            </span>
             <span v-else :class="{'dy58-info': slotProps.data.fioOnline}">
               {{ slotProps.data[col.field] }}
               <a
@@ -57,8 +59,7 @@
               </a>
             </span>
           </div>
-          <div v-if="col.field === getCurrShiftTblColumnNames.notification"
-          >
+          <div v-if="col.field === getCurrShiftTblColumnNames.notification">
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal,
@@ -147,7 +148,7 @@
 
     computed: {
       ...mapGetters([
-        'getCurrStationsDSPShiftForSendingData',
+        'getDSPShiftForSendingData',
       ]),
 
       getCurrShiftTblColumnNames() {
@@ -171,14 +172,14 @@
       // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
       // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
       // состояние хранилища
-      this.$emit('input', this.getCurrStationsDSPShiftForSendingData
-        ? this.getCurrStationsDSPShiftForSendingData
+      this.$emit('input', this.getDSPShiftForSendingData
+        ? this.getDSPShiftForSendingData
           .filter((item) => item.sendOriginalToDSP !== CurrShiftGetOrderStatus.doNotSend)
           : []);
     },
 
     watch: {
-      getCurrStationsDSPShiftForSendingData(newVal) {
+      getDSPShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginalToDSP !== CurrShiftGetOrderStatus.doNotSend)
           : []);
@@ -187,42 +188,42 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+        this.$store.commit('setGetOrderStatusToAllDSP',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+        this.$store.commit('setGetOrderStatusToDefinitDSP',
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftDNCSectorStationsDSPShift',
+        this.$store.commit('setGetOrderStatusToAllLeftDSP',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+        this.$store.commit('setGetOrderStatusToAllDSP',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+        this.$store.commit('setGetOrderStatusToDefinitDSP',
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftDNCSectorStationsDSPShift',
+        this.$store.commit('setGetOrderStatusToAllLeftDSP',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllDNCSectorStationsDSPShift',
+        this.$store.commit('setGetOrderStatusToAllDSP',
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       doNotSendToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
+        this.$store.commit('setGetOrderStatusToDefinitDSP',
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
