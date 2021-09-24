@@ -39,6 +39,9 @@ import ConfirmPopup from 'primevue/confirmpopup';
 import ContextMenu from 'primevue/contextmenu';
 import Fieldset from 'primevue/fieldset';
 import Badge from 'primevue/badge';
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
+import Listbox from 'primevue/listbox';
 
 const app = createApp(App);
 
@@ -75,5 +78,8 @@ app.component('ConfirmPopup', ConfirmPopup);
 app.component('ContextMenu', ContextMenu);
 app.component('Fieldset', Fieldset);
 app.component('Badge', Badge);
+app.component('Accordion', Accordion);
+app.component('AccordionTab', AccordionTab);
+app.component('Listbox', Listbox);
 
 app.mount('#app');

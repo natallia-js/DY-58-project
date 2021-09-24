@@ -1,7 +1,7 @@
 <template>
-  <footer class="footer">
+  <footer class="dy58-footer">
     <server-conn-status></server-conn-status>
-    <div class="p-text-center">Журнал ДУ-58 ©2021 КТЦ БелЖД</div>
+    <div class="p-text-right p-pt-3">Журнал ДУ-58 ©2021 КТЦ БелЖД</div>
   </footer>
 </template>
 

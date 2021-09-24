@@ -99,16 +99,39 @@
       </form>
     </div>
     <div class="p-col-6">
-      <!-- Таблица ДСП -->
-      <DSPToSendOrderDataTable
-        :value="v$.dspSectorsToSendOrder.$model"
-        @input="v$.dspSectorsToSendOrder.$model = $event"
-      />
-      <!-- Таблица ДНЦ -->
-      <DNCToSendOrderDataTable
-        :value="v$.dncSectorsToSendOrder.$model"
-        @input="v$.dncSectorsToSendOrder.$model = $event"
-      />
+      <p class="p-text-bold p-mb-2">Кому адресовать</p>
+      <Accordion :multiple="true">
+        <AccordionTab>
+          <template #header>
+            <span><b>ДСП:</b> <span v-html="selectedDSPString"></span></span>
+          </template>
+          <!-- Таблица ДСП -->
+          <DSPToSendOrderDataTable
+            :value="v$.dspSectorsToSendOrder.$model"
+            @input="v$.dspSectorsToSendOrder.$model = $event"
+          />
+        </AccordionTab>
+        <AccordionTab>
+          <template #header>
+            <span><b>ДНЦ:</b> <span v-html="selectedDNCString"></span></span>
+          </template>
+          <!-- Таблица ДНЦ -->
+          <DNCToSendOrderDataTable
+            :value="v$.dncSectorsToSendOrder.$model"
+            @input="v$.dncSectorsToSendOrder.$model = $event"
+          />
+        </AccordionTab>
+        <AccordionTab>
+          <template #header>
+            <span><b>ЭЦД:</b> <span v-html="selectedECDString"></span></span>
+          </template>
+          <!-- Таблица ЭЦД -->
+          <ECDToSendOrderDataTable
+            :value="v$.ecdSectorsToSendOrder.$model"
+            @input="v$.ecdSectorsToSendOrder.$model = $event"
+          />
+        </AccordionTab>
+      </Accordion>
     </div>
   </div>
 </template>
@@ -121,11 +144,13 @@
   import { useVuelidate } from '@vuelidate/core';
   import DSPToSendOrderDataTable from './DSPToSendOrderDataTable';
   import DNCToSendOrderDataTable from './DNCToSendOrderDataTable';
+  import ECDToSendOrderDataTable from './ECDToSendOrderDataTable';
   import { OrderInputTypes } from '../../constants/orderInputTypes';
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
+  import { CurrShiftGetOrderStatus } from '../../constants/orders';
 
   export default {
     name: 'dy58-new-order-block',
@@ -136,6 +161,7 @@
       OrderText,
       DSPToSendOrderDataTable,
       DNCToSendOrderDataTable,
+      ECDToSendOrderDataTable,
     },
 
     computed: {
@@ -175,6 +201,7 @@
         selectedPattern: null,
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
+        ecdSectorsToSendOrder: [],
         // true - ожидается ответ сервера на запрос об издании распоряжения, false - запроса не ожидается
         waitingForServerResponse: false,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
@@ -211,6 +238,7 @@
         },
         dncSectorsToSendOrder: { minLength: minLength(1) },
         dspSectorsToSendOrder: { minLength: minLength(1) },
+        ecdSectorsToSendOrder: { minLength: minLength(1) },
       };
 
       const submitted = ref(false);
@@ -239,12 +267,112 @@
         })
       );
 
+      // Строка для отображения информации о выбранных ДСП
+      const selectedDSPString = computed(() => {
+        if (!state.dspSectorsToSendOrder) {
+          return '';
+        }
+        let originalToString = '';
+        let copyToString = '';
+        const sendOriginalTo = state.dspSectorsToSendOrder
+          .filter((el) => el.sendOriginalToDSP === CurrShiftGetOrderStatus.sendOriginal);
+        if (sendOriginalTo.length) {
+          originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
+            sendOriginalTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.station}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
+        }
+        const sendCopyTo = state.dspSectorsToSendOrder
+          .filter((el) => el.sendOriginalToDSP === CurrShiftGetOrderStatus.sendCopy);
+        if (sendCopyTo.length) {
+          copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
+            sendCopyTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.station}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
+        }
+        let resultString = '';
+        if (originalToString) {
+          resultString = originalToString;
+        }
+        if (copyToString) {
+          resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
+        }
+        return resultString;
+      });
+
+      // Строка для отображения информации о выбранных ДНЦ
+      const selectedDNCString = computed(() => {
+        if (!state.dncSectorsToSendOrder) {
+          return '';
+        }
+        let originalToString = '';
+        let copyToString = '';
+        const sendOriginalTo = state.dncSectorsToSendOrder
+          .filter((el) => el.sendOriginalToDNC === CurrShiftGetOrderStatus.sendOriginal);
+        if (sendOriginalTo.length) {
+          originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
+            sendOriginalTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
+        }
+        const sendCopyTo = state.dncSectorsToSendOrder
+          .filter((el) => el.sendOriginalToDNC === CurrShiftGetOrderStatus.sendCopy);
+        if (sendCopyTo.length) {
+          copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
+            sendCopyTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
+        }
+        let resultString = '';
+        if (originalToString) {
+          resultString = originalToString;
+        }
+        if (copyToString) {
+          resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
+        }
+        return resultString;
+      });
+
+      // Строка для отображения информации о выбранных ДСП
+      const selectedECDString = computed(() => {
+        if (!state.ecdSectorsToSendOrder) {
+          return '';
+        }
+        let originalToString = '';
+        let copyToString = '';
+        const sendOriginalTo = state.ecdSectorsToSendOrder
+          .filter((el) => el.sendOriginalToECD === CurrShiftGetOrderStatus.sendOriginal);
+        if (sendOriginalTo.length) {
+          originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
+            sendOriginalTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
+        }
+        const sendCopyTo = state.ecdSectorsToSendOrder
+          .filter((el) => el.sendOriginalToECD === CurrShiftGetOrderStatus.sendCopy);
+        if (sendCopyTo.length) {
+          copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
+            sendCopyTo.reduce((accumulator, currentValue, index) =>
+              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
+        }
+        let resultString = '';
+        if (originalToString) {
+          resultString = originalToString;
+        }
+        if (copyToString) {
+          resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
+        }
+        return resultString;
+      });
+
       watch(getCurrDateTimeString, (newVal) => {
         state.createDateTime = newVal;
       });
 
       onMounted(() => {
         state.allOrderPatterns = getOrderPatternsToDisplayInTreeSelect;
+        store.commit('chooseOnlyOnlinePersonal');
       });
 
       /**
@@ -267,6 +395,7 @@
           orderText: state.orderText,
           dncToSend: state.dncSectorsToSendOrder,
           dspToSend: state.dspSectorsToSendOrder,
+          ecdToSend: state.ecdSectorsToSendOrder,
         });
       };
 
@@ -281,6 +410,9 @@
         handleSubmit,
         getSectorStations,
         getSectorBlocks,
+        selectedDSPString,
+        selectedDNCString,
+        selectedECDString,
       }
     },
   };

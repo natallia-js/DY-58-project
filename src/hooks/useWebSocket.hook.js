@@ -1,6 +1,6 @@
-import { computed, watch } from 'vue';
-import { useStore } from 'vuex';
+import { computed, watch, reactive } from 'vue';
 import { WS_SERVER_PARAMS } from '../constants/servers';
+import { store } from '../store';
 
 
 // handle json messages
@@ -21,23 +21,36 @@ function getTimestamp() {
 
 // accepts:
 // - the url to connect to;
-// the hook retries a connection infinitely while it is not OK
+// the hook retries a connection infinitely while it is not OK (unless this behavior is not forbidden)
 export default function useWebSocket({ socketUrl }) {
-  const store = useStore();
+  const state = reactive({
+    ws: null,
+    updatingAppData: false,
+  });
 
   // number of retry attempts to connect to the websocket server
   const retryNum = computed(() => store.getters.getRetryNum);
+  // true - retry to connect to the WS server on connection closure, false - do not retry
+  const retryOnCloseWSConnection = computed(() => store.getters.getRetryOnCloseWSConnection);
+
+  let updateDataTimerId;
+
+  function closeWSConnection() {
+    if (state.ws) {
+      state.ws.close();
+    }
+  }
 
   // retryNum dependency here triggers the connection attempt
   watch(retryNum, (newRetryNum) => {
-    if (newRetryNum === 0) {
+    if (newRetryNum === 0 || !retryOnCloseWSConnection.value) {
       return;
     }
-    const ws = new WebSocket(socketUrl);
+    state.ws = new WebSocket(socketUrl);
 
     const sendMessageToServer = (message) => {
       try {
-        ws.send(JSON.stringify(message));
+        state.ws.send(JSON.stringify(message));
         return true;
       } catch (err) {
         return false;
@@ -53,6 +66,15 @@ export default function useWebSocket({ socketUrl }) {
 
       if (msg === WS_SERVER_PARAMS.SERVER_PING_MESSAGE) {
         sendMessageToServer(WS_SERVER_PARAMS.PONG_MESSAGE(store.getters.getUserId));
+        return;
+      }
+
+      if (msg.match(WS_SERVER_PARAMS.ONLINE_USERS_MESSAGE_PATTERN)) {
+        const onlineUsersIds = JSON.parse(msg.slice(7));
+        if (Array.isArray(onlineUsersIds)) {
+          store.commit('setOnlineShiftPersonal', onlineUsersIds);
+        }
+        return;
       }
     };
 
@@ -62,33 +84,50 @@ export default function useWebSocket({ socketUrl }) {
     const toDoOnOpenWSConnection = () => {
       store.commit('setReadyState', { ready: true, datetime: getTimestamp() });
       store.commit('resetRetryNum');
-      ws.onmessage = toDoOnWSMessage;
+      store.commit('retryOnCloseWSConnection');
+
+      // Настраиваем периодическое обновление информации в приложении.
+      // Обновлению подлежит лишь информация о:
+      // - online-статусе персонала рабочего полигона,
+      updateDataTimerId = setInterval(() => {
+        if (!state.updatingAppData) {
+          state.updatingAppData = true;
+          sendMessageToServer(WS_SERVER_PARAMS.GET_ONLINE_USERS(store.getters.getShiftPersonalIds));
+          state.updatingAppData = false;
+        }
+      }, WS_SERVER_PARAMS.UPDATE_DATA_INTERVAL);
     };
 
     /**
-     * on close we should update connection state and retry connection
+     * on close we should update connection state and retry connection if necessary
      */
     const toDoOnCloseWSConnection = () => {
       store.commit('setReadyState', { ready: false, datetime: getTimestamp() });
 
+      // Прекращаем периодическое обновление информации в приложении
+      clearTimeout(updateDataTimerId);
+
       // retry connection logic
-      setTimeout(() => {
-        store.commit('nextRetryNum');
-      }, WS_SERVER_PARAMS.RETRY_INTERVAL);
+      if (retryOnCloseWSConnection.value) {
+        setTimeout(() => {
+          store.commit('nextRetryNum');
+        }, WS_SERVER_PARAMS.RETRY_CONNECTION_INTERVAL);
+      }
     };
 
-    ws.onopen = toDoOnOpenWSConnection;
-    ws.onclose = toDoOnCloseWSConnection;
+    state.ws.onopen = toDoOnOpenWSConnection;
+    state.ws.onclose = toDoOnCloseWSConnection;
+    state.ws.onmessage = toDoOnWSMessage;
 
     // terminate connection on unmount
     return () => {
-      if (ws) {
-        ws.close();
-      }
+      closeWSConnection();
     };
   });
 
   store.commit('nextRetryNum');
 
-  return {};
+  return {
+    closeWSConnection,
+  };
 }

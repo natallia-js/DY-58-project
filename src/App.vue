@@ -6,12 +6,12 @@
 
 
 <script>
+  import { onMounted, onUnmounted, watch, computed, reactive } from 'vue';
+  import { useStore } from 'vuex';
   import NavBar from './components/NavBar';
   import FooterBar from './components/FooterBar';
-  import { mapGetters } from 'vuex';
-  import { onMounted } from 'vue';
-  import { useStore } from 'vuex';
-  import useWebSocketClient from './hooks/useWebSocketClient.hook';
+  import useWebSocket from './hooks/useWebSocket.hook';
+  import { WS_SERVER_ADDRESS } from './constants/servers';
 
   export default {
     name: 'dy-58-app',
@@ -21,73 +21,89 @@
       FooterBar,
     },
 
-    computed: {
-      ...mapGetters([
-        'isUserAuthenticated',
-        'getUserCredential',
-        'getUserWorkPoligon',
-        'getUserWorkPoligonData',
-        'getUserId',
-      ]),
-    },
-
-    watch: {
-      /**
-       * При смене рабочего полигона пользователя подгружаем информацию о:
-       * - структуре данного рабочего полигона,
-       */
-      getUserWorkPoligon: function(newVal) {
-        if (!newVal) {
-          this.$store.commit('delCurrWorkPoligonData');
-        } else {
-          this.$store.dispatch('loadCurrWorkPoligonData');
-
-        }
-      },
-
-      /**
-       * При смене структуры рабочего полигона пользователя подгружаем информацию о:
-       * - персонале данного рабочего полигона,
-       * - параметрах последних распоряжений, изданных в рамках данного полигона,
-       */
-      getUserWorkPoligonData: function(newVal) {
-        if (!newVal) {
-          // ...
-          this.$store.commit('delCurrLastOrdersParams');
-        } else {
-          this.$store.dispatch('loadCurrSectorsShift');
-          this.$store.dispatch('loadLastOrdersParams');
-          this.$store.dispatch('loadWorkOrders');
-        }
-      },
-
-      /**
-       * При смене пользователя подгружаем информацию о шаблонах распоряжений
-       */
-      getUserId: function(newVal) {
-        if (!newVal) {
-          this.$store.commit('delCurrOrderPatternsData');
-        } else {
-          this.$store.dispatch('loadOrderPatterns');
-        }
-      },
-    },
-
     setup() {
       const store = useStore();
-      const wsCient = useWebSocketClient();
+
+      let timerId;
+      let updateDataTimerId;
+
+      const state = reactive({
+        wsClient: null,
+      });
+
+      const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
+      const getUserCredential = computed(() => store.getters.getUserCredential);
+      const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
+      const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
 
       onMounted(() => {
-        setInterval(updateCurrDateTime, 1000);
-        wsCient.connect();
+        timerId = setInterval(updateCurrDateTime, 1000);
+        updateDataTimerId = setInterval(updateAppState, 5000);
+      });
+
+      onUnmounted(() => {
+        if (timerId) {
+          clearInterval(timerId);
+        }
+        if (updateDataTimerId) {
+          clearInterval(updateDataTimerId);
+        }
       });
 
       const updateCurrDateTime = () => {
         store.commit('setCurrDateTime', new Date());
       };
 
+      const updateAppState = () => {
+        if (getUserWorkPoligonData.value) {
+          //store.dispatch('loadCurrSectorsShift');
+          store.dispatch('loadWorkOrders');
+        }
+      };
+
+      /**
+       * При смене рабочего полигона пользователя подгружаем информацию о:
+       * - структуре данного рабочего полигона,
+       * - шаблонах разного типа распоряжений данного рабочего полигона,
+       * - открываем WebSocket-соединение между клиентом и сервером,
+       */
+      watch(getUserWorkPoligon, (workPoligonNew) => {
+        if (!workPoligonNew) {
+          store.commit('delCurrWorkPoligonData');
+          store.commit('delCurrOrderPatternsData');
+          if (state.wsClient) {
+            state.wsClient.closeWSConnection();
+          }
+        } else {
+          store.dispatch('loadCurrWorkPoligonData');
+          store.dispatch('loadOrderPatterns');
+          if (!state.wsClient) {
+            state.wsClient = useWebSocket({ socketUrl: WS_SERVER_ADDRESS });
+          }
+        }
+      });
+
+      /**
+       * При смене структуры рабочего полигона пользователя подгружаем информацию о:
+       * - персонале данного рабочего полигона,
+       * - параметрах последних распоряжений, изданных в рамках данного полигона,
+       * - входящих уведомлениях и рабочих распоряжениях
+       */
+      watch(getUserWorkPoligonData, (workPoligonDataNew) => {
+        if (!workPoligonDataNew) {
+          // ...
+          store.commit('delCurrLastOrdersParams');
+        } else {
+          store.dispatch('loadCurrSectorsShift');
+          store.dispatch('loadLastOrdersParams');
+          store.dispatch('loadWorkOrders');
+        }
+      });
+
       return {
-        //
+        isUserAuthenticated,
+        getUserCredential,
+        getUserWorkPoligon,
       };
     },
   };

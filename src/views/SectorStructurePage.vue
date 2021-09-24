@@ -1,6 +1,6 @@
 <template>
   <div class="p-ml-4">
-    <h2 class="p-text-center p-mt-3 p-mb-2">Структура участка</h2>
+    <h2 class="p-text-center p-mt-3 p-mb-2">Структура рабочего полигона</h2>
     <div v-if="getLoadingCurrWorkPoligonStructureStatus">
       <ProgressSpinner />
     </div>

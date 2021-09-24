@@ -1,13 +1,13 @@
 <template>
   <div>
     <DataTable
-      :value="getCurrAdjacentDNCSectorsDNCShiftForSendingData"
+      :value="getCurrNearestECDSectorsECDShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
     >
       <!--<template #header>
         <div class="dy58-table-title">
-          ДНЦ
+          ЭЦД
         </div>
       </template>-->
 
@@ -25,10 +25,10 @@
                 'dy58-send-table-data-cell',
                 {'dy58-send-original': [getCurrSectorsShiftTblColumnNames.sector,
                                         getCurrSectorsShiftTblColumnNames.fio].includes(col.field)
-                                        && slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.sendOriginal},
+                                        && slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.sendOriginal},
                 {'dy58-send-copy': [getCurrSectorsShiftTblColumnNames.sector,
                                     getCurrSectorsShiftTblColumnNames.fio].includes(col.field)
-                                    && slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.sendCopy},
+                                    && slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.sendCopy},
               ]"
           >
             {{ slotProps.data[col.field] }}
@@ -36,22 +36,22 @@
           <div v-if="col.field === getCurrSectorsShiftTblColumnNames.notification">
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
-                    {'dy58-send-original': slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.sendOriginal,
-                     'dy58-def-btn-color': slotProps.data.sendOriginalToDNC !== getCurrShiftGetOrderStatus.sendOriginal,}]"
+                    {'dy58-send-original': slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.sendOriginal,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToECD !== getCurrShiftGetOrderStatus.sendOriginal,}]"
                   @click="() => sendOriginalToDefinitSector(slotProps.data.id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
-                    {'dy58-send-copy': slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.sendCopy,
-                     'dy58-def-btn-color': slotProps.data.sendOriginalToDNC !== getCurrShiftGetOrderStatus.sendCopy,}]"
+                    {'dy58-send-copy': slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.sendCopy,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToECD !== getCurrShiftGetOrderStatus.sendCopy,}]"
                   @click="() => sendCopyToDefinitSector(slotProps.data.id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
-                    {'dy58-do-not-send': slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.doNotSend,
-                     'dy58-def-btn-color': slotProps.data.sendOriginalToDNC !== getCurrShiftGetOrderStatus.doNotSend,}]"
+                    {'dy58-do-not-send': slotProps.data.sendOriginalToECD === getCurrShiftGetOrderStatus.doNotSend,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToECD !== getCurrShiftGetOrderStatus.doNotSend,}]"
                   @click="() => doNotSendToDefinitSector(slotProps.data.id)"
               >
                 &#9747;
@@ -96,13 +96,13 @@
   } from '../../store/modules/personal';
 
   export default {
-    name: 'dy58-dnc-to-send-order-data-table',
+    name: 'dy58-ecd-to-send-order-data-table',
 
     emits: ['input'],
 
     computed: {
       ...mapGetters([
-        'getCurrAdjacentDNCSectorsDNCShiftForSendingData',
+        'getCurrNearestECDSectorsECDShiftForSendingData',
       ]),
 
       getCurrSectorsShiftTblColumnNames() {
@@ -122,59 +122,59 @@
       // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
       // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
       // состояние хранилища
-      this.$emit('input', this.getCurrAdjacentDNCSectorsDNCShiftForSendingData
-        ? this.getCurrAdjacentDNCSectorsDNCShiftForSendingData
-          .filter((item) => item.sendOriginalToDNC !== CurrShiftGetOrderStatus.doNotSend)
+      this.$emit('input', this.getCurrNearestECDSectorsECDShiftForSendingData
+        ? this.getCurrNearestECDSectorsECDShiftForSendingData
+          .filter((item) => item.sendOriginalToECD !== CurrShiftGetOrderStatus.doNotSend)
           : []);
     },
 
     watch: {
-      getCurrAdjacentDNCSectorsDNCShiftForSendingData(newVal) {
+      getCurrNearestECDSectorsECDShiftForSendingData(newVal) {
         this.$emit('input', newVal
-          ? newVal.filter((item) => item.sendOriginalToDNC !== CurrShiftGetOrderStatus.doNotSend)
+          ? newVal.filter((item) => item.sendOriginalToECD !== CurrShiftGetOrderStatus.doNotSend)
           : []);
       },
     },
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllAdjacentDNCSectorsDNCShift',
+        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
-      sendOriginalToDefinitSector(dncSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitAdjacentDNCSectorDNCShift',
-          { dncSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+      sendOriginalToDefinitSector(ecdSectorId) {
+        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+          { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftAdjacentDNCSectorsDNCShift',
+        this.$store.commit('setGetOrderStatusToAllLeftNearestECDSectorsECDShift',
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllAdjacentDNCSectorsDNCShift',
+        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
-      sendCopyToDefinitSector(dncSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitAdjacentDNCSectorDNCShift',
-          { dncSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
+      sendCopyToDefinitSector(ecdSectorId) {
+        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+          { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftAdjacentDNCSectorsDNCShift',
+        this.$store.commit('setGetOrderStatusToAllLeftNearestECDSectorsECDShift',
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllAdjacentDNCSectorsDNCShift',
+        this.$store.commit('setGetOrderStatusToAllNearestECDSectorsECDShift',
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
-      doNotSendToDefinitSector(dncSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitAdjacentDNCSectorDNCShift',
-          { dncSectorId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+      doNotSendToDefinitSector(ecdSectorId) {
+        this.$store.commit('setGetOrderStatusToDefinitNearestECDSectorECDShift',
+          { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
     }
   }

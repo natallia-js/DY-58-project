@@ -1,6 +1,7 @@
 <template>
   <div class="p-ml-4">
-    <h2 class="p-text-center p-mt-3 p-mb-2">На смене</h2>
+    <h2 class="p-text-center p-mt-3 p-mb-2">Персонал рабочего полигона</h2>
+    <p><i>Примечание:</i> <span class="dy58-info">Данным цветом</span> выделен персонал, находящийся в сети</p>
     <div v-if="getLoadingCurrSectorsShiftStatus">
       <ProgressSpinner />
     </div>

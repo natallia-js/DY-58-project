@@ -341,14 +341,19 @@ export const orderPatterns = {
     async loadOrderPatterns(context) {
       context.commit('setLoadingOrderPatternsStatus', true);
       context.commit('clearLoadingOrderPatternsResult');
+      const workPoligon = context.getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        context.commit('setLoadingOrderPatternsResult', { error: true, message: 'No user work poligon' });
+        return;
+      }
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getOrderPatterns,
           {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
+            workPoligonType: workPoligon.type,
+            workPoligonId: workPoligon.code,
           },
           { headers }
         );
@@ -456,6 +461,11 @@ export const orderPatterns = {
     async createOrderPattern(context, { service, type, category, title, elements }) {
       context.commit('clearCreateOrderPatternResult');
       context.commit('addCreateOrderPatternRecsBeingProcessed');
+      const workPoligon = context.getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        context.commit('setCreateOrderPatternResult', { error: true, message: 'No user work poligon' });
+        return;
+      }
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
@@ -468,8 +478,8 @@ export const orderPatterns = {
             title,
             elements,
             isPersonalPattern: true,
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
+            workPoligonType: workPoligon.type,
+            workPoligonId: workPoligon.code,
           },
           { headers }
         );

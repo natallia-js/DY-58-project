@@ -16,8 +16,8 @@ export const mainMenuItems = {
   state: {
     mainMenuItems: [
       { key: MainMenuItemsKeys.mainPage, label: 'Главная страница', to: '/mainPage' },
-      { key: MainMenuItemsKeys.sectorStructure, label: 'Участок', to: 'sectorStructure' },
-      { key: MainMenuItemsKeys.currShift, label: 'На смене', to: '/shiftPage' },
+      { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: 'sectorStructure' },
+      { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
       { key: MainMenuItemsKeys.currJournal, label: 'Журнал', to: '/currJournalPage' },
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', to: '/newOrderPage' },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},

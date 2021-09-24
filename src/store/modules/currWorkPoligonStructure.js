@@ -116,6 +116,14 @@ export const currWorkPoligonStructure = {
       }
       return state.sector.TAdjacentDNCSectors;
     },
+
+    getNearestECDSectors(state) {
+      if (!state.sector || !state.sector.TNearestECDSectors) {
+        return [];
+      }
+      return state.sector.TNearestECDSectors;
+    },
+
 /*
     getPlaceTitle(state, getters) {
       return (id, type) => {
@@ -210,7 +218,6 @@ export const currWorkPoligonStructure = {
           TAdjacentDNCSectors: adjDNCSectResponse.data,
           TNearestECDSectors: nearECDSectResponse.data,
         };
-        console.log(context.state.sector)
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;
       }

@@ -1102,8 +1102,7 @@
   border-radius: 0;
 }
 .p-listbox .p-listbox-list .p-listbox-item.p-highlight {
-  color: #ffffff;
-  background: #007bff;
+  background: #E3F2FD;
 }
 .p-listbox .p-listbox-list .p-listbox-item:focus {
   outline: 0 none;

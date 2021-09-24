@@ -2,10 +2,18 @@ const AUTH_SERVER_ADDRESS = 'http://localhost:5000';
 export const WS_SERVER_ADDRESS = 'ws://localhost:5000';
 
 export const WS_SERVER_PARAMS = Object.freeze({
-  RETRY_INTERVAL: 5000,
+  RETRY_CONNECTION_INTERVAL: 5000,
+  UPDATE_DATA_INTERVAL: 30000,
   CONNECTION_OK_MESSAGE: 'connection OK',
+
+  // сообщения от сервера
   SERVER_PING_MESSAGE: 'ping',
+  ONLINE_USERS_MESSAGE_PATTERN: /^online /,
+
+  // сообщения серверу
   PONG_MESSAGE: (data) => `pong ${data}`,
+  GET_ONLINE_USERS: (usersIds) => `online ${JSON.stringify(usersIds)}`,
+
   MAX_SERVER_MESSAGES_STORED: 10,
 });
 
@@ -27,6 +35,7 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
 
   getDNCSectorsWorkPoligonsUsers: `${AUTH_SERVER_ADDRESS}/api/workPoligons/dncSectors/definitData`,
   getStationsWorkPoligonsUsers: `${AUTH_SERVER_ADDRESS}/api/workPoligons/stations/definitData`,
+  getECDSectorsWorkPoligonsUsers: `${AUTH_SERVER_ADDRESS}/api/workPoligons/ecdSectors/definitData`,
 
   getOrderPatterns: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/data`,
   modOrderCategoryTitle: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/modCategoryTitle`,

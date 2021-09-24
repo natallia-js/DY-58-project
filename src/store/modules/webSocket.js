@@ -9,6 +9,9 @@ export const webSocket = {
     },
     // number of retry connect attempts
     retryNum: 0,
+    // true - retry connect to the server on close WebSocket connection,
+    // false - do not retry
+    retryOnCloseConnection: true,
   },
 
   getters: {
@@ -20,6 +23,9 @@ export const webSocket = {
     },
     getRetryNum(state) {
       return state.retryNum;
+    },
+    getRetryOnCloseWSConnection(state) {
+      return state.retryOnCloseConnection;
     },
   },
 
@@ -45,6 +51,14 @@ export const webSocket = {
 
     nextRetryNum(state) {
       state.retryNum += 1;
+    },
+
+    retryOnCloseWSConnection(state) {
+      state.retryOnCloseConnection = true;
+    },
+
+    doNotRetryOnCloseWSConnection(state) {
+      state.retryOnCloseConnection = false;
     },
   },
 };

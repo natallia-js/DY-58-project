@@ -1,4 +1,11 @@
 <template>
+  <ShowChoosePersonDlg
+    :showDlg="showChoosePersonDlg"
+    :personal="sectorPersonal"
+    :personalPost="getDSPPost"
+    :sector="station"
+    @close="hideChoosePersonDlg"
+  ></ShowChoosePersonDlg>
   <div>
     <DataTable
       :value="getCurrStationsDSPShiftForSendingData"
@@ -7,11 +14,11 @@
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
       sortMode="single" :sortField="getCurrShiftTblColumnNames.sector" :sortOrder="1"
     >
-      <template #header>
+      <!--<template #header>
         <div class="dy58-table-title">
           ДСП
         </div>
-      </template>
+      </template>-->
 
       <Column
         :field="getCurrShiftTblColumnNames.sector"
@@ -30,37 +37,46 @@
         <template #body="slotProps">
           <div v-if="col.field !== getCurrShiftTblColumnNames.notification"
               :class="[
-                        'dy58-send-table-data-cell',
-                        {'dy58-send-original': [getCurrShiftTblColumnNames.station,
-                                                getCurrShiftTblColumnNames.fio].includes(col.field)
-                                                && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal},
-                        {'dy58-send-copy': [getCurrShiftTblColumnNames.station,
-                                            getCurrShiftTblColumnNames.fio].includes(col.field)
-                                            && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy},
-                      ]"
+                'dy58-send-table-data-cell',
+                {'dy58-send-original': [getCurrShiftTblColumnNames.station,
+                                        getCurrShiftTblColumnNames.fio].includes(col.field)
+                                        && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal},
+                {'dy58-send-copy': [getCurrShiftTblColumnNames.station,
+                                    getCurrShiftTblColumnNames.fio].includes(col.field)
+                                    && slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy},
+              ]"
           >
-            {{ slotProps.data[col.field] }}
+            <span v-if="col.field !== getCurrShiftTblColumnNames.fio">{{ slotProps.data[col.field] }}</span>
+            <span v-else :class="{'dy58-info': slotProps.data.fioOnline}">
+              {{ slotProps.data[col.field] }}
+              <a
+                :class="['dy58-send-status-btn']"
+                @click="() => openChoosePersonDlg(slotProps.data.people, slotProps.data.station)"
+              >
+                ...
+              </a>
+            </span>
           </div>
           <div v-if="col.field === getCurrShiftTblColumnNames.notification"
           >
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
-                          {'dy58-send-original': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal,
-                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendOriginal,}]"
+                    {'dy58-send-original': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendOriginal,}]"
                   @click="() => sendOriginalToDefinitStation(slotProps.data.id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
-                          {'dy58-send-copy': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy,
-                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendCopy,}]"
+                    {'dy58-send-copy': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendCopy,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.sendCopy,}]"
                   @click="() => sendCopyToDefinitStation(slotProps.data.id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
-                          {'dy58-do-not-send': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.doNotSend,
-                           'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.doNotSend,}]"
+                    {'dy58-do-not-send': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.doNotSend,
+                     'dy58-def-btn-color': slotProps.data.sendOriginalToDSP !== getCurrShiftGetOrderStatus.doNotSend,}]"
                   @click="() => doNotSendToDefinitStation(slotProps.data.id)"
               >
                 &#9747;
@@ -105,16 +121,29 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus } from '../../constants/orders';
+  import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
   import {
     CurrStationsShiftTblColumnNames,
     CurrStationsShiftTblColumns,
-  } from '../../store/modules/currShift';
+  } from '../../store/modules/personal';
+  import ShowChoosePersonDlg from '../../components/ShowChoosePersonDlg';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',
 
     emits: ['input'],
+
+    data() {
+      return {
+        showChoosePersonDlg: false,
+        sectorPersonal: [],
+        station: null,
+      };
+    },
+
+    components: {
+      ShowChoosePersonDlg,
+    },
 
     computed: {
       ...mapGetters([
@@ -132,6 +161,20 @@
       getCurrShiftTblColumns() {
         return CurrStationsShiftTblColumns;
       },
+
+      getDSPPost() {
+        return ReceiversPosts.DSP;
+      },
+    },
+
+    mounted() {
+      // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
+      // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
+      // состояние хранилища
+      this.$emit('input', this.getCurrStationsDSPShiftForSendingData
+        ? this.getCurrStationsDSPShiftForSendingData
+          .filter((item) => item.sendOriginalToDSP !== CurrShiftGetOrderStatus.doNotSend)
+          : []);
     },
 
     watch: {
@@ -181,6 +224,16 @@
       doNotSendToDefinitStation(stationId) {
         this.$store.commit('setGetOrderStatusToDefinitDNCSectorStationDSPShift',
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+      },
+
+      openChoosePersonDlg(people, station) {
+        this.sectorPersonal = people || [];
+        this.station = station;
+        this.showChoosePersonDlg = true;
+      },
+
+      hideChoosePersonDlg() {
+        this.showChoosePersonDlg = false;
       },
     }
   }

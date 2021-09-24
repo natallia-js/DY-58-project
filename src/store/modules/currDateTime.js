@@ -12,11 +12,9 @@ export const currDateTime = {
       if (!state.dateTime) {
         return '';
       }
-
       const date = state.dateTime.getDate();
       const month = state.dateTime.getMonth() + 1;
       const year = state.dateTime.getFullYear();
-
       return `${date < 10 ? `0${date}` : date}.${month < 10 ? `0${month}` : month}.${year}`;
     },
 
@@ -24,11 +22,9 @@ export const currDateTime = {
       if (!state.dateTime) {
         return '';
       }
-
       const hours = state.dateTime.getHours();
       const minutes = state.dateTime.getMinutes();
       const seconds = state.dateTime.getSeconds();
-
       return `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
     },
 
@@ -36,17 +32,14 @@ export const currDateTime = {
       if (!state.dateTime) {
         return '';
       }
-
       const date = state.dateTime.getDate();
       const month = state.dateTime.getMonth() + 1;
       const year = state.dateTime.getFullYear();
       const hours = state.dateTime.getHours();
       const minutes = state.dateTime.getMinutes();
       const seconds = state.dateTime.getSeconds();
-
       const dateString = `${date < 10 ? `0${date}` : date}.${month < 10 ? `0${month}` : month}.${year}`;
       const timeString = `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
-
       return `${dateString} ${timeString}`;
     },
   },

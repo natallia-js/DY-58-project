@@ -3,7 +3,7 @@ import { mainMenuItems } from './modules/mainMenuItems';
 import { leftMenuItems } from './modules/leftMenuItems';
 import { orderPatterns } from './modules/orderPatterns';
 import { currUser } from './modules/currUser';
-import { currShift } from './modules/currShift';
+import { personal } from './modules/personal';
 import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { webSocket } from './modules/webSocket';
@@ -17,7 +17,7 @@ export const store = createStore({
     leftMenuItems,
     orderPatterns,
     currUser,
-    currShift,
+    personal,
     currDateTime,
     currWorkPoligonStructure,
     webSocket,
