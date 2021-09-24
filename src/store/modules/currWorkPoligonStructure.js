@@ -87,7 +87,10 @@ export const currWorkPoligonStructure = {
             ...station,
             trainSectorId: sector.DNCTS_ID || sector.ECDTS_ID,
             trainSectorTitle: sector.DNCTS_Title || sector.ECDTS_Title,
-            posInTrainSector: station.TDNCTrainSectorStation.DNCTSS_StationPositionInTrainSector,
+            posInTrainSector:
+              station.TDNCTrainSectorStation ? station.TDNCTrainSectorStation.DNCTSS_StationPositionInTrainSector:
+              station.TECDTrainSectorStation ? station.TECDTrainSectorStation.ECDTSS_StationPositionInTrainSector:
+              -1,
           };
         });
         stations.push(...sectorStations);
@@ -124,44 +127,19 @@ export const currWorkPoligonStructure = {
       return state.sector.TNearestECDSectors;
     },
 
-/*
-    getPlaceTitle(state, getters) {
-      return (id, type) => {
-        const workPoligon = getters.getUserWorkPoligon;
-        if (!workPoligon) {
-          return null;
-        }
-        switch (type) {
-          case WORK_POLIGON_TYPES.STATION:
-            switch (workPoligon.type) {
-              // Полагаем, что если рабочий полигон пользователя - станция, то о других
-              // станциях приложению ничего не известно
-              case WORK_POLIGON_TYPES.STATION:
-                return state.station && state.station.St_ID === id ? state.station.St_Title : null;
-              // Если рабочий полигон - участок ДНЦ или ЭЦД, то станцию ищем среди станций данного участка
-              case WORK_POLIGON_TYPES.DNC_SECTOR:
-              case WORK_POLIGON_TYPES.ECD_SECTOR:
-                const stations = getters.getSectorStations;
-                const station = stations.find((st) => st.St_ID === id);
-                return station ? station.St_Title : null;
-          case WORK_POLIGON_TYPES.DNC_SECTOR:
-            switch (workPoligon.type) {
-              // Если рабочий полигон пользователя - станция, то об участках ДНЦ и ЭЦД пока ничего не известно
-              case WORK_POLIGON_TYPES.STATION:
-                return null;
-              // Если рабочий полигон пользователя - участок ДНЦ, то
-              case WORK_POLIGON_TYPES.DNC_SECTOR:
-                return state.sector ? state.sector.DNCS_Title : null;
-              case WORK_POLIGON_TYPES.ECD_SECTOR:
-                const stations = getters.getSectorStations;
-                const station = stations.find((st) => st.St_ID === id);
-                return station ? station.St_Title : null;
-            break;
-          case WORK_POLIGON_TYPES.ECD_SECTOR:
-            break;
-        }
-      };
-    },*/
+    getAdjacentECDSectors(state) {
+      if (!state.sector || !state.sector.TAdjacentECDSectors) {
+        return [];
+      }
+      return state.sector.TAdjacentECDSectors;
+    },
+
+    getNearestDNCSectors(state) {
+      if (!state.sector || !state.sector.TNearestDNCSectors) {
+        return [];
+      }
+      return state.sector.TNearestDNCSectors;
+    },
   },
 
   mutations: {
@@ -176,6 +154,9 @@ export const currWorkPoligonStructure = {
   },
 
   actions: {
+    /**
+     *
+     */
     async loadStationData(context, { stationId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
@@ -194,6 +175,9 @@ export const currWorkPoligonStructure = {
       context.state.loadingCurrWorkPoligonStructure = false;
     },
 
+    /**
+     *
+     */
     async loadDNCSectorData(context, { sectorId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
@@ -224,6 +208,9 @@ export const currWorkPoligonStructure = {
       context.state.loadingCurrWorkPoligonStructure = false;
     },
 
+    /**
+     *
+     */
     async loadECDSectorData(context, { sectorId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
@@ -254,6 +241,9 @@ export const currWorkPoligonStructure = {
       context.state.loadingCurrWorkPoligonStructure = false;
     },
 
+    /**
+     *
+     */
     async loadCurrWorkPoligonData(context) {
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {

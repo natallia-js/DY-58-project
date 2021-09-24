@@ -9,6 +9,9 @@
       <view-shift-for-d-n-c
         v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.DNC_SECTOR"
       />
+      <view-shift-for-e-c-d
+        v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.ECD_SECTOR"
+      />
     </div>
     <div v-else>
       {{ getErrorLoadingCurrSectorsShift }}
@@ -21,6 +24,7 @@
   import { mapGetters } from 'vuex';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
   import ViewShiftForDNC from '../components/ViewShiftForDNC';
+  import ViewShiftForECD from '../components/ViewShiftForECD';
   import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
 
   export default {
@@ -28,6 +32,7 @@
 
     components: {
       ViewShiftForDNC,
+      ViewShiftForECD,
     },
 
     computed: {

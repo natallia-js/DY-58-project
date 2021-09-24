@@ -1,7 +1,10 @@
-import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
 import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
+import {
+  getDNCSectorsWorkPoligonsUsers,
+  getStationsWorkPoligonsUsers,
+  getECDSectorsWorkPoligonsUsers,
+} from '../../serverRequests/users.requests';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -432,18 +435,12 @@ export const personal = {
       context.state.errorLoadingCurrShift = null;
       context.state.loadingCurrShift = true;
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         // Извлекаем информацию о тех пользователях, которые работают на участках ДНЦ, смежных с
         // участком ДНЦ с id = sectorId
         if (adjacentSectorsIds.length) {
-          const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsWorkPoligonsUsers,
-            { sectorIds: adjacentSectorsIds, onlyOnline: false },
-            { headers }
-          );
-          if (response.data && response.data.length) {
-            response.data.forEach((user) => {
+          const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
               const element = shiftPersonal.adjacentDNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
               if (element) {
                 element.people.push(user);
@@ -453,12 +450,9 @@ export const personal = {
         }
         // Извлекаем информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
         if (stationsIds.length) {
-          const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPoligonsUsers,
-            { stationIds: stationsIds, onlyOnline: false },
-            { headers }
-          );
-          if (response.data && response.data.length) {
-            response.data.forEach((user) => {
+          const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
               const element = shiftPersonal.sectorStationsShift.find((item) => item.stationId === user.stationId);
               if (element) {
                 element.people.push(user);
@@ -469,13 +463,111 @@ export const personal = {
         // Извлекаем информацию о тех пользователях, которые работают на участках ЭЦД, ближайших к
         // участку ДНЦ с id = sectorId
         if (nearestSectorsIds.length) {
-          const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getECDSectorsWorkPoligonsUsers,
-            { sectorIds: nearestSectorsIds, onlyOnline: false },
-            { headers }
-          );
-          if (response.data && response.data.length) {
-            response.data.forEach((user) => {
+          const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
               const element = shiftPersonal.nearestECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
+              if (element) {
+                element.people.push(user);
+              }
+            });
+          }
+        }
+        context.state.sectorPersonal = shiftPersonal || {};
+      } catch (err) {
+        console.log(err)
+        context.state.errorLoadingCurrShift = err;
+      }
+      context.state.loadingCurrShift = false;
+    },
+
+    /**
+     * Подгружает информацию обо всем персонале участка ЭЦД.
+     */
+     async loadShiftDataForECD(context) {
+      // Если не известна структура рабочего полигона, то продолжать не можем
+      if (!context.getters.getUserWorkPoligonData) {
+        return;
+      }
+      // id смежных участков ЭЦД
+      const adjacentSectorsIds = context.getters.getAdjacentECDSectors.map((sector) => sector.ECDS_ID);
+      // id станций участка ЭЦД
+      const stationsIds = context.getters.getSectorStations.map((station) => station.St_ID);
+      // id ближайших участков ДНЦ
+      const nearestSectorsIds = context.getters.getNearestDNCSectors.map((sector) => sector.DNCS_ID);
+      // Сюда поместим информацию о персонале, необходимую ЭЦД. Предварительно (до обращения к БД)
+      // сформируем структуру данных
+      const shiftPersonal = {
+        // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, смежных с
+        // участком ЭЦД с id = sectorId
+        adjacentECDSectorsShift: context.getters.getAdjacentECDSectors.map((sector) => {
+          return {
+            sectorId: sector.ECDS_ID,
+            sectorTitle: sector.ECDS_Title,
+            people: [],
+            sendOriginalToECD: CurrShiftGetOrderStatus.doNotSend,
+          };
+        }),
+        // Здесь будет информация о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
+        sectorStationsShift: context.getters.getSectorStationsWithTrainSectors.map((station) => {
+          return {
+            trainSectorId: station.trainSectorId,
+            trainSectorTitle: station.trainSectorTitle,
+            stationPosInTrainSector: station.posInTrainSector,
+            stationId: station.St_ID,
+            stationUNMC: station.St_UNMC,
+            stationTitle: station.St_Title,
+            people: [],
+            sendOriginalToDSP: CurrShiftGetOrderStatus.doNotSend,
+          };
+        }),
+        // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, ближайших к
+        // участку ЭЦД с id = sectorId
+        nearestDNCSectorsShift: context.getters.getNearestDNCSectors.map((sector) => {
+          return {
+            sectorId: sector.DNCS_ID,
+            sectorTitle: sector.DNCS_Title,
+            people: [],
+            sendOriginalToDNC: CurrShiftGetOrderStatus.doNotSend,
+          };
+        }),
+      };
+      // Извлекаем информацию из БД
+      context.state.errorLoadingCurrShift = null;
+      context.state.loadingCurrShift = true;
+      try {
+        // Извлекаем информацию о тех пользователях, которые работают на участках ЭЦД, смежных с
+        // участком ЭЦД с id = sectorId
+        if (adjacentSectorsIds.length) {
+          const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
+              const element = shiftPersonal.adjacentECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
+              if (element) {
+                element.people.push(user);
+              }
+            });
+          }
+        }
+        // Извлекаем информацию о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
+        if (stationsIds.length) {
+          const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
+              const element = shiftPersonal.sectorStationsShift.find((item) => item.stationId === user.stationId);
+              if (element) {
+                element.people.push(user);
+              }
+            });
+          }
+        }
+        // Извлекаем информацию о тех пользователях, которые работают на участках ДНЦ, ближайших к
+        // участку ЭЦД с id = sectorId
+        if (nearestSectorsIds.length) {
+          const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
+          if (responseData && responseData.length) {
+            responseData.forEach((user) => {
+              const element = shiftPersonal.nearestDNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
               if (element) {
                 element.people.push(user);
               }
@@ -488,6 +580,7 @@ export const personal = {
       }
       context.state.loadingCurrShift = false;
     },
+
 
     /**
      * Позволяет извлечь из БД информацию о всем персонале рабочего полигона.
@@ -513,6 +606,7 @@ export const personal = {
           await context.dispatch('loadShiftDataForDNC');
           break;
         case WORK_POLIGON_TYPES.ECD_SECTOR:
+          await context.dispatch('loadShiftDataForECD');
           break;
       }
     },
