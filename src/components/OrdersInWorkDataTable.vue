@@ -5,7 +5,7 @@
       class="p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       dataKey="id"
-      :scrollable="true" scrollHeight="400px"
+      :scrollable="true" scrollHeight="flex"
       v-model:expandedRows="expandedRows"
     >
       <template #header>

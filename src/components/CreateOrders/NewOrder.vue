@@ -4,6 +4,9 @@
     <div class="p-col-6">
       <SelectButton v-model="state.selectedOrderInputType" :options="getOrderInputTypes" optionLabel="label" />
       <br />
+      <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
+        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения/заявки/уведомления. Ожидаю ответ...
+      </div>
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-4 p-d-flex p-flex-column">
@@ -364,6 +367,7 @@
           };
         })
       );
+      const getDispatchOrdersBeingProcessed = computed(() => store.getters.getDispatchOrdersBeingProcessed);
 
       // Строка для отображения информации о выбранных ДСП
       const selectedDSPString = computed(() => {
@@ -555,6 +559,7 @@
         selectedDSPString,
         selectedDNCString,
         selectedECDString,
+        getDispatchOrdersBeingProcessed,
       }
     },
   };

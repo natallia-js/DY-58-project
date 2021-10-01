@@ -1,7 +1,7 @@
 <template>
   <ShowUserDataDlg :showDlg="showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
-  <div class="p-grid">
-    <div class="p-col-3">
+  <div class="p-grid" style="margin:0">
+    <div class="p-col-3 dy58-left-menu-panel">
       <div class="dy58-date-user-block p-p-3 p-d-flex p-jc-center p-ai-center p-flex-wrap">
         <p class="dy58-text-big p-m-2 p-text-center p-text-bold" style="width:100%">
           {{ getCurrDateTimeString }}
@@ -17,7 +17,7 @@
       </div>
       <side-menu />
     </div>
-    <div class="p-col-9">
+    <div class="p-col-9" style="flex:1">
       <!--
       <div class="p-mt-3">
         <Button

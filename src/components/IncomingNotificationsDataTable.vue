@@ -30,7 +30,7 @@
         :field="col.field"
         :header="col.title"
         :key="col.field"
-        :style="{ minWidth: col.width, textAlign: col.align }"
+        :style="{ minWidth: col.width, maxWidth: col.maxWidth, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-content-cell-class"
       >
