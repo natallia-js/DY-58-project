@@ -2,11 +2,12 @@ import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { filterObj } from '../../additional/filterObject';
 import { ReceiversPosts, WorkMessStates, RECENTLY } from '../../constants/orders';
+import { getLocaleDateTimeString, getTimeSpanString } from '../../additional/dateTimeConvertions';
 
 const InputMessTblColumnsTitles = Object.freeze({
   state: 'state',
   seqNum: 'seqNum',
-  time: 'time', // Время действия распоряжения (с ... по ...)
+  time: 'time', // Время издания распоряжения
   orderNum: 'orderNum',
   orderTitle: 'orderTitle',
   orderText: 'orderText', // Только для ДСП
@@ -42,6 +43,8 @@ export const workOrders = {
     data: [],
     loadingWorkOrders: false,
     loadingWorkOrdersResult: null,
+    reportingOnOrdersDelivery: false,
+    reportOnOrdersDeliveryResult: null,
     confirmingOrder: false,
     orderConfirmResult: null,
   },
@@ -59,7 +62,7 @@ export const workOrders = {
       const tblCols = [
         { field: InputMessTblColumnsTitles.state, title: '', width: isDSP ? '3%' : '3%', align: 'center' },
         { field: InputMessTblColumnsTitles.seqNum, title: '№', width: isDSP ? '4%' : '4%', align: 'left' },
-        { field: InputMessTblColumnsTitles.time, title: 'Время', width: isDSP ? '7%': '10%', align: 'left' },
+        { field: InputMessTblColumnsTitles.time, title: 'Время издания', width: isDSP ? '7%': '10%', align: 'left' },
         { field: InputMessTblColumnsTitles.orderNum, title: 'Номер', width: isDSP ? '5%' : '7%', align: 'left' },
         { field: InputMessTblColumnsTitles.orderTitle, title: 'Наименование', width: isDSP ? '15%' : '30%', align: 'left' },
       ];
@@ -114,10 +117,11 @@ export const workOrders = {
         .map((item, index) => {
           return {
             id: item._id,
+            type: item.type,
             state: now - new Date(item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
-            time: `${new Date(item.createDateTime).toLocaleDateString('ru', { day: 'numeric', month: 'numeric', year: 'numeric' })}\r\n` +
-                  `${new Date(item.createDateTime).toLocaleTimeString('ru', { hour: 'numeric', minute: 'numeric', second: 'numeric' })}`,
+            time: getLocaleDateTimeString(new Date(item.createDateTime), false, true),
+            timeSpan: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
             orderText: formOrderText(item.orderText.orderText),
@@ -128,8 +132,43 @@ export const workOrders = {
         });
     },
 
+    /**
+     * Позволяет получить количество входящих уведомлений.
+     */
     getIncomingOrdersNumber(state) {
       return state.data.filter((item) => !item.confirmDateTime).length;
+    },
+
+    /**
+     *
+     */
+    getActiveOrdersToDisplayInTreeSelect(state) {
+      const orders = state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId);
+      const groupedOrders = [{
+        key: null,
+        label: '-',
+        data: null,
+      }];
+      orders.forEach((order) => {
+        const typeGroup = groupedOrders.find((group) => group.key === order.type);
+        const childItem = {
+          key: order._id,
+          label: `№ ${order.number} от ${getLocaleDateTimeString(new Date(order.createDateTime), false, false)} - ${order.orderText.orderTitle}`,
+          data: order,
+        };
+        if (!typeGroup) {
+          groupedOrders.push({
+            key: order.type,
+            label: order.type,
+            data: order.type,
+            selectable: false,
+            children: [childItem],
+          });
+        } else {
+          typeGroup.children.push(childItem);
+        }
+      });
+      return groupedOrders;
     },
 
     getWorkingOrders(state) {
@@ -140,20 +179,19 @@ export const workOrders = {
             id: item._id,
             state: now - new Date(item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
-            time: `${new Date(item.createDateTime).toLocaleDateString('ru', { day: 'numeric', month: 'numeric', year: 'numeric' })}\r\n` +
-                  `${new Date(item.createDateTime).toLocaleTimeString('ru', { hour: 'numeric', minute: 'numeric', second: 'numeric' })}`,
+            time: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
             orderText: formOrderText(item.orderText.orderText),
-            orderReceiveStatus: function() {
-              return {
-                notDelivered:
-                  item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0 +
-                  item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime).length : 0,
-                notConfirmed:
-                  item.dspToSend ? item.dspToSend.filter((dsp) => dsp.deliverDateTime && !dsp.confirmDateTime).length : 0 +
-                  item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0,
-              };
+            orderReceiveStatus: {
+              notDelivered:
+                (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0) +
+                (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime).length : 0) +
+                (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime).length : 0),
+              notConfirmed:
+                (item.dspToSend ? item.dspToSend.filter((dsp) => dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
+                (item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
+                (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
             },
             receivers: function() {
               const receiversArray = [];
@@ -179,12 +217,27 @@ export const workOrders = {
                   };
                 }));
               }
+              if (item.ecdToSend) {
+                receiversArray.push(...item.ecdToSend.map((ecd) => {
+                  return {
+                    place: ecd.placeTitle,
+                    post: ReceiversPosts.ECD,
+                    fio: ecd.fio,
+                    deliverDateTime: ecd.deliverDateTime,
+                    confirmDateTime: ecd.confirmDateTime,
+                  };
+                }));
+              }
               return receiversArray;
             },
           };
         });
     },
 
+    /**
+     * Позволяет получить количество распоряжений, находящихся в работе
+     * (действующих распоряжений).
+     */
     getWorkingOrdersNumber(state) {
       return state.data.filter((item) => item.confirmDateTime).length;
     },
@@ -227,10 +280,58 @@ export const workOrders = {
       state.confirmingOrder = status;
     },
 
-    setNewWorkOrdersArray(state, newData) {
-      state.data = newData || [];
+    setReportingOnOrderDeliveryStatus(state, status) {
+      state.reportingOnOrdersDelivery = status;
     },
 
+    clearReportOnOrdersDeliveryResult(state) {
+      state.reportOnOrdersDeliveryResult = null;
+    },
+
+    setReportOnOrdersDeliveryResult(state, { error, message }) {
+      state.reportOnOrdersDeliveryResult = {
+        error,
+        message,
+      };
+    },
+
+    /**
+     * Позволяет запомнить массив "рабочих" распоряжений.
+     */
+    setNewWorkOrdersArray(state, newData) {
+      if (!newData || !newData.length) {
+        state.data = [];
+        return;
+      }
+      if (!state.data || !state.data.length) {
+        state.data = newData;
+        return;
+      }
+      // Вначале удалим те элементы существующего массива, которых нет в новом массиве
+      const delIndexes = [];
+      state.data.forEach((order, index) => {
+        if (!newData.find((item) => item._id === order._id)) {
+          delIndexes.push(index);
+        }
+      });
+      if (delIndexes.length) {
+        state.data = state.data.filter((_item, index) => !delIndexes.includes(index));
+      }
+      // Затем добавим в существующий массив элементы, которых в нем нет, и отредактируем,
+      // при необходимости, существующие элементы
+      newData.forEach((order) => {
+        const existingOrderIndex = state.data.findIndex((item) => item._id === order._id);
+        if (existingOrderIndex < 0) {
+          state.data.push({ ...order });
+        } else if (JSON.stringify(state.data[existingOrderIndex]) !== JSON.stringify(order)) {
+          state.data[existingOrderIndex] = { ...order };
+        }
+      });
+    },
+
+    /**
+     *
+     */
     setOrderConfirmed(state, { orderId, confirmDateTime }) {
       state.data = state.data.map((el) => {
         if (el._id === orderId) {
@@ -264,11 +365,45 @@ export const workOrders = {
         );
         context.commit('setLoadingWorkOrdersResult', { error: false, message: null });
         context.commit('setNewWorkOrdersArray', response.data);
-
+        context.dispatch('reportOnOrdersDelivery', response.data);
       } catch ({ response }) {
         context.commit('setLoadingWorkOrdersResult', { error: false, message: response.data.message });
       }
       context.commit('setLoadingWorkOrdersStatus', false);
+    },
+
+    /**
+     * Для распоряжений, для которых ранее не сообщалось серверу об их доставке на клиентское
+     * рабочее место, сообщает о том, что они доставлены.
+     */
+    async reportOnOrdersDelivery(context, orders) {
+      // Сюда поместим идентификаторы тех распоряжений, о доставке которых необходимо сообщить серверу.
+      const newDeliveredOrderIds = !orders ? [] :
+        orders.filter((order) => !order.deliverDateTime).map((order) => order._id);
+      if (!newDeliveredOrderIds.length) {
+        return;
+      }
+      context.commit('setReportingOnOrderDeliveryStatus', true);
+      context.commit('clearReportOnOrdersDeliveryResult');
+      try {
+        const headers = {
+          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
+        };
+        const deliverDateTime = new Date();
+        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
+          {
+            workPoligonType: context.getters.getUserWorkPoligon.type,
+            workPoligonId: context.getters.getUserWorkPoligon.code,
+            orderIds: newDeliveredOrderIds,
+            deliverDateTime,
+          },
+          { headers }
+        );
+        context.commit('setReportOnOrdersDeliveryResult', { error: false, message: response.data.message });
+      } catch ({ response }) {
+        context.commit('setReportOnOrdersDeliveryResult', { error: true, message: response.data.message });
+      }
+      context.commit('setReportingOnOrderDeliveryStatus', false);
     },
 
     /**
@@ -293,7 +428,6 @@ export const workOrders = {
         );
         context.commit('setConfirmOrderResult', { error: false, message: response.data.message });
         context.commit('setOrderConfirmed', { orderId: response.data.id, confirmDateTime });
-
       } catch ({ response }) {
         context.commit('setConfirmOrderResult', { error: true, message: response.data.message });
       }

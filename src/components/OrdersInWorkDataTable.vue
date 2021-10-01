@@ -11,8 +11,8 @@
       <template #header>
         <div class="dy58-table-title">
           {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
+          <Badge :value="getWorkingOrdersNumber"></Badge>
         </div>
-        <p class="dy58-table-upper-comment">Количество записей: {{ getWorkingOrdersNumber }}</p>
       </template>
 
       <Column
@@ -41,13 +41,13 @@
             </span>
             <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus"
             >
-              <p v-if="slotProps.data[col.field]().notDelivered > 0">
+              <p v-if="slotProps.data[col.field].notDelivered > 0">
                 <span class="dy58-margin-after">Не доставлено:</span>
-                <Badge class="not-delivered-order" :value="slotProps.data[col.field]().notDelivered"></Badge>
+                <Badge class="not-delivered-order" :value="slotProps.data[col.field].notDelivered"></Badge>
               </p>
-              <p v-if="slotProps.data[col.field]().notConfirmed > 0">
+              <p v-if="slotProps.data[col.field].notConfirmed > 0">
                 <span class="dy58-margin-after">Не подтверждено:</span>
-                <Badge class="not-confirmed-order" :value="slotProps.data[col.field]().notConfirmed"></Badge>
+                <Badge class="not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
               </p>
             </div>
             <img v-if="col.field === getWorkMessTblColumnsTitles.state"
@@ -141,13 +141,16 @@
 <style lang="scss" scoped>
   .confirmed-order {
     background-color: var(--dy58-confirmed-order-bg-color) !important;
+    color: black;
   }
 
   .not-delivered-order {
     background-color: var(--dy58-not-read-order-bg-color) !important;
+    color: black;
   }
 
   .not-confirmed-order {
     background-color: var(--dy58-read-order-bg-color) !important;
+    color: black;
   }
 </style>

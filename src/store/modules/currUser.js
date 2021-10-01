@@ -91,7 +91,7 @@ export const currUser = {
     surname: '',      // фамилия
     post: '',         // должность
     service: '',      // принадлежность службе
-    token: null,
+    token: null,      // token пользователя
     possibleCredentialsWithPoligons: null, // все полномочия пользователя в данной системе с соответствующими возможными
                                            // рабочими полигонами (из них необходимо выбрать одно полномочие и один полигон)
     credential: null, // конкретное (одно) полномочие пользователя в данной системе
@@ -151,6 +151,9 @@ export const currUser = {
   },
 
   mutations: {
+    /**
+     *
+     */
     setUserCredential(state, credential) {
       if (credential) {
         state.credential = credential;
@@ -161,6 +164,9 @@ export const currUser = {
       }
     },
 
+    /**
+     *
+     */
     setUserWorkPoligon(state, workPoligon) {
       if (workPoligon) {
         state.workPoligon = workPoligon;

@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <div class="p-grid">
     <div class="p-col-6">
       <SelectButton v-model="state.selectedOrderInputType" :options="getOrderInputTypes" optionLabel="label" />
@@ -23,21 +24,36 @@
         </div>
         <!-- ДАТА И ВРЕМЯ СОЗДАНИЯ РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-6 p-d-flex p-flex-column">
-          <label for="createDateTime" :class="{'p-error':v$.createDateTime.$invalid && submitted}">
+          <label for="createDateTimeString" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
           </label>
           <InputText
-            id="createDateTime"
+            id="createDateTimeString"
             disabled
-            v-model="v$.createDateTime.$model"
-            :class="{'p-invalid':v$.createDateTime.$invalid && submitted}"
+            v-model="v$.createDateTimeString.$model"
+            :class="{'p-invalid':v$.createDateTimeString.$invalid && submitted}"
           />
           <small
-            v-if="(v$.createDateTime.$invalid && submitted) || v$.createDateTime.$pending.$response"
+            v-if="(v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response"
             class="p-error"
           >
             Не определены дата и время создания распоряжения
           </small>
+        </div>
+        <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
+        <div
+          v-if="orderType !== getOrderTypes.ECD_ORDER"
+          class="p-field p-col-12 p-d-flex p-flex-column"
+        >
+          <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
+            <span class="p-text-bold">На распоряжение</span>
+          </label>
+          <TreeSelect
+            placeholder="Выберите действующее распоряжение"
+            v-model="v$.prevRelatedOrder.$model"
+            :options="getActiveOrders"
+            style="width:100%"
+          />
         </div>
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
         <div
@@ -89,7 +105,7 @@
           <order-text
             id="orderText"
             :value="v$.orderText.$model"
-            :orderPatterns="state.allOrderPatterns"
+            :orderPatterns="getOrderPatterns"
             @input="v$.orderText.$model = $event"
           />
           <small
@@ -99,6 +115,7 @@
             Пожалуйста, определите все параметры текста распоряжения
           </small>
         </div>
+        <!-- ЛИЦО, СОЗДАЮЩЕЕ РАСПОРЯЖЕНИЕ -->
         <div class="p-d-flex p-ai-center p-mt-2 p-flex-wrap">
           <div class="p-text-bold p-mr-3">
             {{ getUserPostFIO }}
@@ -113,7 +130,7 @@
     <div class="p-col-6">
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
       <Accordion :multiple="true">
-        <AccordionTab>
+        <AccordionTab v-if="orderType !== getOrderTypes.NOTIFICATION">
           <template #header>
             <span><b>ДСП:</b> <span v-html="selectedDSPString"></span></span>
           </template>
@@ -123,7 +140,7 @@
             @input="v$.dspSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab>
+        <AccordionTab v-if="!isDNC || !(orderType === getOrderTypes.REQUEST || orderType === getOrderTypes.NOTIFICATION)">
           <template #header>
             <span><b>ДНЦ:</b> <span v-html="selectedDNCString"></span></span>
           </template>
@@ -133,7 +150,7 @@
             @input="v$.dncSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab v-if="isDNC">
+        <AccordionTab v-if="orderType === getOrderTypes.ORDER || orderType === getOrderTypes.NOTIFICATION">
           <template #header>
             <span><b>ЭЦД:</b> <span v-html="selectedECDString"></span></span>
           </template>
@@ -161,8 +178,9 @@
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
+  import { CurrShiftGetOrderStatus } from '../../constants/orders';
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
-  import { CurrShiftGetOrderStatus, OrderTypes } from '../../constants/orders';
+  import { useToast } from 'primevue/usetoast';
 
   export default {
     name: 'dy58-new-order-block',
@@ -183,28 +201,31 @@
       ECDToSendOrderDataTable,
     },
 
-    computed: {
+    /*computed: {
       nextOrderNumber: function() {
-        return this.$store.getters.getNextOrdersNumber;
+        return this.$store.getters.getNextOrdersNumber(this.orderType);
       },
       getOrderTypes: function() {
         return OrderTypes;
       },
-    },
+    },*/
 
-    watch: {
+    /*watch: {
       nextOrderNumber: function(newVal) {
         this.state.number = newVal;
       },
-    },
+    },*/
 
-    setup() {
+    setup(props) {
       const store = useStore();
+      const toast = useToast();
 
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
-        number: store.getters.getNextOrdersNumber,
-        createDateTime: null,
+        number: store.getters.getNextOrdersNumber(props.orderType),
+        createDateTime: store.getters.getCurrDateTime,
+        createDateTimeString: store.getters.getCurrDateString,
+        prevRelatedOrder: null,
         place: {
           place: null,
           value: null,
@@ -219,7 +240,8 @@
           orderTitle: null,
           orderText: null,
         },
-        allOrderPatterns: [],
+        //allOrderPatterns: [],
+        //allActiveOrders: [],
         selectedPattern: null,
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
@@ -235,6 +257,10 @@
 
       //watch(getSelectedOrderInputType, (newVal) => store.commit('setCurrentOrderInputType', newVal));
 
+      const nextOrderNumber = computed(() => store.getters.getNextOrdersNumber(props.orderType));
+      watch(nextOrderNumber, (newVal) => state.number = newVal);
+
+      const getOrderTypes = computed(() => ORDER_PATTERN_TYPES);
       const isDNC = computed(() => store.getters.isDNC);
 
       const endDateNoLessStartDate = (value) =>
@@ -243,18 +269,10 @@
 
       const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
-      const rules = {
+      let rules = {
         number: { required },
         createDateTime: { required },
-        place: {
-          place: { required },
-          value: { required },
-        },
-        timeSpan: {
-          start: { required },
-          end: { endDateNoLessStartDate },
-          tillCancellation: { cancelOrEndDate },
-        },
+        createDateTimeString: { required },
         orderText: {
           orderTextSource: { required },
           orderTitle: { required },
@@ -266,14 +284,69 @@
         ecdSectorsToSendOrder: { minLength: minLength(1) },
       };
 
+      const placeRules = {
+        place: { required },
+        value: { required },
+      };
+
+      const timeSpanRules = {
+        start: { required },
+        end: { endDateNoLessStartDate },
+        tillCancellation: { cancelOrEndDate },
+      };
+
+      switch (props.orderType) {
+        case ORDER_PATTERN_TYPES.ORDER:
+        case ORDER_PATTERN_TYPES.ECD_ORDER:
+          rules.place = placeRules;
+          rules.timeSpan = timeSpanRules;
+          rules.prevRelatedOrder = {};
+          break;
+        case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
+          rules.place = placeRules;
+          rules.timeSpan = timeSpanRules;
+          rules.prevRelatedOrder = { required };
+          break;
+        case ORDER_PATTERN_TYPES.REQUEST:
+        case ORDER_PATTERN_TYPES.NOTIFICATION:
+          rules.prevRelatedOrder = {};
+          break;
+        default:
+          break;
+      }
+
       const submitted = ref(false);
 
       const v$ = useVuelidate(rules, state);
 
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
-      const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
+
+      // Дата и время
       const getCurrDateTime = computed(() => store.getters.getCurrDateTime);
-      const getOrderPatternsToDisplayInTreeSelect = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(ORDER_PATTERN_TYPES.ORDER));
+      const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
+      // Каждый раз, когда происходит изменение текущего времени, производим проверку на
+      // совпадение месяца и года текущего времени с месяцем и годом даты последнего изданного
+      // распоряжения данного типа. Если не совпадает, то производим переход на новый "журнал"
+      // путем сброса номера распоряжений заданного типа.
+      watch(getCurrDateTime, (newVal) => {
+        const lastOrderDateTime = store.getters.getLastOrderDateTime(props.orderType);
+        if (lastOrderDateTime) {
+          if (
+            (newVal.getMonth() !== lastOrderDateTime.getMonth()) ||
+            (newVal.getFullYear() !== lastOrderDateTime.getFullYear())
+          ) {
+            store.commit('resetOrderNumbersData');
+          }
+        }
+        state.createDateTime = newVal;
+      });
+      // Для оперативного отображения текущих даты и времени
+      watch(getCurrDateTimeString, (newVal) => {
+        state.createDateTimeString = newVal;
+      });
+
+      const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
+      const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
       const getOrderInputTypes = computed(() => OrderInputTypes);
       const getSectorStations = computed(() =>
         store.getters.getSectorStations.map((station) => {
@@ -391,13 +464,50 @@
         return resultString;
       });
 
-      watch(getCurrDateTimeString, (newVal) => {
-        state.createDateTime = newVal;
+      /**
+       *
+       */
+      onMounted(() => {
+        store.commit('chooseOnlyOnlinePersonal');
       });
 
-      onMounted(() => {
-        state.allOrderPatterns = getOrderPatternsToDisplayInTreeSelect;
-        store.commit('chooseOnlyOnlinePersonal');
+      /**
+       *
+       */
+      const showSuccessMessage = (message) => {
+        toast.add({
+          severity: 'success',
+          summary: 'Информация',
+          detail: message,
+          life: 3000,
+        });
+      };
+
+      /**
+       *
+       */
+      const showErrMessage = (message) => {
+        toast.add({
+          severity: 'error',
+          summary: 'Ошибка',
+          detail: message,
+          life: 3000,
+        });
+      };
+
+      /**
+       * Для отображения результата операции издания распоряжения (отправки на сервер).
+       */
+      const getDispatchOrderResult = computed(() => store.getters.getDispatchOrderResult);
+      watch(getDispatchOrderResult, (newVal) => {
+        if (!newVal || newVal.orderType !== props.orderType) {
+          return;
+        }
+        if (!newVal.error) {
+          showSuccessMessage(newVal.message);
+        } else {
+          showErrMessage(newVal.message);
+        }
       });
 
       /**
@@ -410,30 +520,36 @@
           return;
         }
 
+        const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
+        const relatedOrderId = chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;
+
         state.waitingForServerResponse = true;
         store.dispatch('dispatchOrder', {
-          type: ORDER_PATTERN_TYPES.ORDER,
+          type: props.orderType,
           number: state.number,
-          createDateTime: getCurrDateTime.value.toISOString(),
-          place: state.place,
-          timeSpan: state.timeSpan,
+          createDateTime: state.createDateTime,
+          place: state.place.place ? state.place : null,
+          timeSpan: state.timeSpan.start ? state.timeSpan : null,
           orderText: state.orderText,
           dncToSend: state.dncSectorsToSendOrder,
           dspToSend: state.dspSectorsToSendOrder,
           ecdToSend: state.ecdSectorsToSendOrder,
+          prevOrderId: relatedOrderId,
         });
       };
 
       return {
         state,
+        getOrderTypes,
         isDNC,
         v$,
         submitted,
         getUserPostFIO,
         getCurrDateTimeString,
-        getOrderPatternsToDisplayInTreeSelect,
         getOrderInputTypes,
         handleSubmit,
+        getOrderPatterns,
+        getActiveOrders,
         getSectorStations,
         getSectorBlocks,
         selectedDSPString,

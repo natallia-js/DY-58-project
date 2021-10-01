@@ -1,11 +1,11 @@
 <template>
-  <ShowIncomingOrderDlg
-    :showDlg="showIncomingOrderDlg"
-    :order="chosenOrder"
-    @close="hideOrderInfo"
-  >
-  </ShowIncomingOrderDlg>
   <div>
+    <ShowIncomingOrderDlg
+      :showDlg="showIncomingOrderDlg"
+      :order="chosenOrder"
+      @close="hideOrderInfo"
+    >
+    </ShowIncomingOrderDlg>
     <DataTable
       :value="getIncomingOrders"
       class="p-datatable-gridlines"
@@ -16,8 +16,8 @@
       <template #header>
         <div class="dy58-table-title">
           Входящие {{ isDSP ? 'документы' : 'уведомления' }}
+          <Badge :value="getIncomingOrdersNumber"></Badge>
         </div>
-        <p class="dy58-table-upper-comment">Количество записей: {{ getIncomingOrdersNumber }}</p>
         <Button
           v-if="chosenOrder"
           label="Подробнее"
@@ -81,6 +81,25 @@
 
       getIncomingNotificationsStates() {
         return WorkMessStates;
+      },
+    },
+
+    watch: {
+      /**
+       * Каждый раз при изменении списка входящих уведомлений смотрим, если в этом списке chosenOrder
+       * (если он не null). Если нет, делаем chosenOrder = null.
+       */
+      getIncomingOrders: function(val) {
+        if (!this.chosenOrder) {
+          return;
+        }
+        if (val && val.length) {
+          if (!val.find((order) => order.id === this.chosenOrder.id)) {
+            this.chosenOrder = null;
+          }
+        } else {
+          this.chosenOrder = null;
+        }
       },
     },
 

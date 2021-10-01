@@ -165,11 +165,11 @@ export const personal = {
     },
 
     getLoadingCurrSectorsShiftStatus: (state) => {
-      return state.loadingCurrSectorsShift;
+      return state.loadingCurrShift;
     },
 
     getErrorLoadingCurrSectorsShift: (state) => {
-      return state.errorLoadingCurrSectorsShift;
+      return state.errorLoadingCurrShift;
     },
   },
 

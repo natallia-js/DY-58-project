@@ -7,8 +7,12 @@
     <TabPanel v-if="isDNC || isDSP" :header="getOrderTypes.REQUEST">
       <new-order :orderType="getOrderTypes.REQUEST" />
     </TabPanel>
-    <TabPanel v-if="isDNC || isECD || isDSP" :header="isDNC || isDSP ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION">
-      <new-notification/>
+    <TabPanel
+      v-if="isDNC || isECD || isDSP"
+      :header="isDNC || isDSP ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION"
+    >
+      <new-order v-if="isDNC || isDSP" :orderType="getOrderTypes.NOTIFICATION" />
+      <new-order v-if="isECD" :orderType="getOrderTypes.ECD_NOTIFICATION" />
     </TabPanel>
   </TabView>
 </template>
@@ -17,16 +21,14 @@
 <script>
   import { mapGetters } from 'vuex';
   import NewOrder from '../components/CreateOrders/NewOrder';
-  import NewNotification from '../components/CreateOrders/NewNotification';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import { OrderTypes } from '../constants/orders';
+  import { ORDER_PATTERN_TYPES } from '../constants/orderPatterns';
 
   export default {
     name: 'dy58-new-order-page',
 
     components: {
       NewOrder,
-      NewNotification,
     },
 
     computed: {
@@ -41,7 +43,7 @@
       },
 
       getOrderTypes() {
-        return OrderTypes;
+        return ORDER_PATTERN_TYPES;
       },
     },
 

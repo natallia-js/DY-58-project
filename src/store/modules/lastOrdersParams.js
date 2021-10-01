@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
 
 
 /**
@@ -27,18 +26,21 @@ export const lastOrdersParams = {
       return state.errorLoadingParams;
     },
 
-    getNextOrdersNumber: (state) => {
-      const ordersParams = state.params.find((params) => params.ordersType === ORDER_PATTERN_TYPES.ORDER);
+    getLastOrderDateTime: (state) => (orderType) => {
+      const ordersParams = state.params.find((params) => params.ordersType === orderType);
+      if (ordersParams) {
+        return ordersParams.lastOrderDateTime;
+      }
+      return null;
+    },
+
+    getNextOrdersNumber: (state) => (orderType) => {
+      const ordersParams = state.params.find((params) => params.ordersType === orderType);
       if (ordersParams) {
         return ordersParams.lastOrderNumber + 1;
       }
       return 1;
     },
-
-    /*REQUEST
-    NOTIFICATION
-    ORDER_PROHIBITION
-    NOTIFICATION_PROHIBITION_CANCELLATION*/
   },
 
   mutations: {
@@ -48,16 +50,25 @@ export const lastOrdersParams = {
       }
     },
 
-    setLastOrdersNumber(state, { ordersType, number }) {
+    setLastOrdersNumber(state, { ordersType, number, createDateTime }) {
       const ordersParams = state.params.find((params) => params.ordersType === ordersType);
       if (ordersParams) {
         ordersParams.lastOrderNumber = number;
+        ordersParams.lastOrderDateTime = createDateTime;
       } else {
         state.params.push({
           ordersType,
           lastOrderNumber: number,
+          lastOrderDateTime: createDateTime,
         });
       }
+    },
+
+    resetOrderNumbersData(state) {
+      state.params.forEach((param) => {
+        param.lastOrderNumber = 0;
+        param.lastOrderDateTime = null;
+      });
     },
   },
 
@@ -89,6 +100,7 @@ export const lastOrdersParams = {
           return {
             ordersType: param.ordersType,
             lastOrderNumber: +param.lastOrderNumber,
+            lastOrderDateTime: param.lastOrderDateTime ? new Date(param.lastOrderDateTime) : null,
           };
         });
       } catch (err) {

@@ -41,12 +41,28 @@ export const mainMenuItems = {
         if (item.key === MainMenuItemsKeys.sectorStructure && getters.getLoadingCurrWorkPoligonStructureStatus) {
           return {
             ...item,
+            // На пункте меню "Рабочий полигон" отображаем статус загрузки информации о структуре рабочего полигона
             icon: 'pi pi-spin pi-spinner',
           };
         }
         if (item.key === MainMenuItemsKeys.sectorStructure && getters.getErrorLoadingCurrWorkPoligonStructure) {
           return {
             ...item,
+            // На пункте меню "Рабочий полигон" отображаем факт ошибки загрузки информации о структуре рабочего полигона
+            icon: 'pi pi-exclamation-circle',
+          };
+        }
+        if (item.key === MainMenuItemsKeys.currShift && getters.getLoadingCurrSectorsShiftStatus) {
+          return {
+            ...item,
+            // На пункте меню "Персонал" отображаем статус загрузки информации о персонале рабочего полигона
+            icon: 'pi pi-spin pi-spinner',
+          };
+        }
+        if (item.key === MainMenuItemsKeys.currShift && getters.getErrorLoadingCurrSectorsShift) {
+          return {
+            ...item,
+            // На пункте меню "Персонал" отображаем факт ошибки загрузки информации о персонале рабочего полигона
             icon: 'pi pi-exclamation-circle',
           };
         }

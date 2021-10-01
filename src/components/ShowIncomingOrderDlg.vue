@@ -11,8 +11,10 @@
       {{ (order && order.post) ? order.post : '?' }} &#160;
       {{ (order && order.fio) ? order.fio : '?' }}
     </p>
+    <p><span class="p-text-bold">Тип:</span> &#160; {{ (order && order.type) ? order.type : '?' }}</p>
     <p><span class="p-text-bold">Номер:</span> &#160; {{ (order && order.orderNum) ? order.orderNum : '?' }}</p>
     <p><span class="p-text-bold">Время издания:</span> &#160; {{ (order && order.time) ? order.time : '?' }}</p>
+    <p><span class="p-text-bold">Время действия:</span> &#160; {{ (order && order.timeSpan) ? order.timeSpan : '?' }}</p>
     <p><span class="p-text-bold">Наименование:</span> &#160; {{ (order && order.orderTitle) ? order.orderTitle : '?' }}</p>
     <p><span class="p-text-bold">Текст:</span>
       <br />
@@ -57,7 +59,7 @@
 
     watch: {
       showDlg: function (val) {
-        this.dlgVisible = val;
+        this.dlgVisible = val;console.log(this.order)
       },
     },
 

@@ -2,7 +2,6 @@
   <div class="dy58-title-small p-text-center p-mb-3">
     Редактирование шаблона
   </div>
-
   <div
     v-for="(array, arrayIndex) of orderPatternArrays"
     :key="arrayIndex"

@@ -17,6 +17,11 @@
   @include dy58-btn-general-style(#00897b, #00897b);
 }
 
+.dy58-curr-user-button {
+  @include dy58-btn-general-style(#6ead3a, #6ead3a);
+  border-radius: 5px !important;
+}
+
 .dy58-addon-button {
   background-color: var(--surface-b) !important;
   border-color: var(--surface-b) !important;

@@ -18,7 +18,7 @@
         :sectorObj="getWorkPoligon"
       />
     </div>
-    <div v-else>
+    <div v-else class="dy58-error p-mt-2 p-mb-2">
       {{ getErrorLoadingCurrWorkPoligonStructure }}
     </div>
   </div>

@@ -2,8 +2,8 @@ export const ORDER_PATTERN_TYPES = Object.freeze({
   ORDER: 'распоряжение',
   REQUEST: 'заявка',
   NOTIFICATION: 'уведомление',
-  ORDER_PROHIBITION: 'распоряжение/запрет',
-  NOTIFICATION_PROHIBITION_CANCELLATION: 'уведомление/отмена запрещения',
+  ECD_ORDER: 'распоряжение/запрещение',
+  ECD_NOTIFICATION: 'уведомление/отмена запрещения',
 });
 
 export const OrderPatternsNodeType = Object.freeze({

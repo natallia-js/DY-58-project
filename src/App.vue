@@ -11,7 +11,8 @@
   import NavBar from './components/NavBar';
   import FooterBar from './components/FooterBar';
   import useWebSocket from './hooks/useWebSocket.hook';
-  import { WS_SERVER_ADDRESS } from './constants/servers';
+
+  const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
   export default {
     name: 'dy-58-app',

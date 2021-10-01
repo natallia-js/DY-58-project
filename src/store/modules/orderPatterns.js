@@ -54,16 +54,17 @@ export const orderPatterns = {
         const groupedOrders = [];
         orders.forEach((order) => {
           const categoryGroup = groupedOrders.find((group) => group.key === order.category);
+          const childItem = { key: order._id, label: order.title, data: order };
           if (!categoryGroup) {
             groupedOrders.push({
               key: order.category,
               label: order.category,
               data: order.category,
               selectable: false,
-              children: [{ key: order._id, label: order.title, data: order }],
+              children: [childItem],
             });
           } else {
-            categoryGroup.children.push({ key: order._id, label: order.title, data: order });
+            categoryGroup.children.push(childItem);
           }
         });
         return groupedOrders;

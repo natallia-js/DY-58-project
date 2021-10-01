@@ -46,6 +46,7 @@ export default function useWebSocket({ socketUrl }) {
     if (newRetryNum === 0 || !retryOnCloseWSConnection.value) {
       return;
     }
+
     state.ws = new WebSocket(socketUrl);
 
     const sendMessageToServer = (message) => {

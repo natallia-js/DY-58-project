@@ -11,6 +11,12 @@ export const orders = {
   },
 
   getters: {
+    getDispatchOrderResult(state) {
+      return state.dispatchOrderResult;
+    },
+    getDispatchOrdersBeingProcessed(state) {
+      return state.dispatchOrdersBeingProcessed;
+    },
   },
 
   mutations: {
@@ -26,9 +32,10 @@ export const orders = {
       state.dispatchOrdersBeingProcessed -= 1;
     },
 
-    setDispatchOrderResult(state, { error, message }) {
+    setDispatchOrderResult(state, { error, orderType, message }) {
       state.dispatchOrderResult = {
         error,
+        orderType,
         message,
       };
     },
@@ -56,6 +63,7 @@ export const orders = {
         dncToSend,
         dspToSend,
         ecdToSend,
+        prevOrderId,
       } = params;
 
       context.commit('clearDispatchOrderResult');
@@ -69,7 +77,7 @@ export const orders = {
           {
             type,
             number,
-            createDateTime,
+            createDateTime: createDateTime.toISOString(),
             place,
             timeSpan,
             orderText,
@@ -104,15 +112,16 @@ export const orders = {
               post: context.getters.getUserPost,
               fio: context.getters.getUserFIO,
             },
+            prevOrderId,
           },
           { headers }
         );
-        context.commit('setDispatchOrderResult', { error: false, message: response.data.message });
+        context.commit('setDispatchOrderResult', { error: false, orderType: type, message: response.data.message });
         context.commit('addOrder', response.data.order);
-        context.commit('setLastOrdersNumber', { ordersType: type, number });
+        context.commit('setLastOrdersNumber', { ordersType: type, number, createDateTime });
 
       } catch ({ response }) {
-        context.commit('setDispatchOrderResult', { error: true, message: response.data.message });
+        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: response.data.message });
       }
 
       context.commit('subOrdersBeingDispatchedNumber');

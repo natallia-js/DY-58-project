@@ -1,12 +1,12 @@
 <template>
-  <ShowChoosePersonDlg
-    :showDlg="showChoosePersonDlg"
-    :personal="sectorPersonal"
-    :personalPost="getDSPPost"
-    :sector="station"
-    @close="hideChoosePersonDlg"
-  ></ShowChoosePersonDlg>
   <div>
+    <ShowChoosePersonDlg
+      :showDlg="showChoosePersonDlg"
+      :personal="sectorPersonal"
+      :personalPost="getDSPPost"
+      :sector="station"
+      @close="hideChoosePersonDlg"
+    ></ShowChoosePersonDlg>
     <DataTable
       :value="getDSPShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
@@ -127,7 +127,7 @@
     CurrStationsShiftTblColumnNames,
     CurrStationsShiftTblColumns,
   } from '../../store/modules/personal';
-  import ShowChoosePersonDlg from '../../components/ShowChoosePersonDlg';
+  import ShowChoosePersonDlg from './ShowChoosePersonDlg';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',
@@ -138,7 +138,7 @@
       return {
         showChoosePersonDlg: false,
         sectorPersonal: [],
-        station: null,
+        station: '',
       };
     },
 

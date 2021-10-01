@@ -3,13 +3,16 @@
   <div class="p-grid">
     <div class="p-col-3">
       <div class="dy58-date-user-block p-p-3 p-d-flex p-jc-center p-ai-center p-flex-wrap">
-        <p class="dy58-text-big p-m-2 p-text-center">{{ getCurrDateTimeString }}</p>
+        <p class="dy58-text-big p-m-2 p-text-center p-text-bold" style="width:100%">
+          {{ getCurrDateTimeString }}
+        </p>
         <Button
           :label="getUserPostFIO"
           icon="pi pi-user"
-          class="p-button-info"
           @click="showUserInfo"
           v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
+          style="width:100%;"
+          class="dy58-curr-user-button"
         />
       </div>
       <side-menu />

@@ -1,5 +1,4 @@
-const AUTH_SERVER_ADDRESS = 'http://localhost:5000';
-export const WS_SERVER_ADDRESS = 'ws://localhost:5000';
+const AUTH_SERVER_ADDRESS = process.env.VUE_APP_AUTH_SERVER_ADDRESS;
 
 export const WS_SERVER_PARAMS = Object.freeze({
   RETRY_CONNECTION_INTERVAL: 5000,
@@ -49,4 +48,5 @@ export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
   getWorkOrders: `${AUTH_SERVER_ADDRESS}/api/workOrders/data`,
   dispatchOrder: `${AUTH_SERVER_ADDRESS}/api/orders/add`,
   confirmOrder: `${AUTH_SERVER_ADDRESS}/api/workOrders/confirmOrder`,
+  reportOnOrdersDelivery: `${AUTH_SERVER_ADDRESS}/api/workOrders/reportOnDelivery`,
 });
