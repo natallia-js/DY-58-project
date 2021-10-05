@@ -12,12 +12,6 @@
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
     >
-      <!--<template #header>
-        <div class="dy58-table-title">
-          ДНЦ
-        </div>
-      </template>-->
-
       <Column v-for="col of getCurrSectorsShiftTblColumns"
         :field="col.field"
         :header="col.title"
@@ -51,7 +45,7 @@
               </a>
             </span>
           </div>
-          <div v-if="col.field === getCurrSectorsShiftTblColumnNames.notification">
+          <div v-else>
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginalToDNC === getCurrShiftGetOrderStatus.sendOriginal,

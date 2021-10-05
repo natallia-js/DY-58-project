@@ -16,9 +16,11 @@
     <p><span class="p-text-bold">Время издания:</span> &#160; {{ (order && order.time) ? order.time : '?' }}</p>
     <p><span class="p-text-bold">Время действия:</span> &#160; {{ (order && order.timeSpan) ? order.timeSpan : '?' }}</p>
     <p><span class="p-text-bold">Наименование:</span> &#160; {{ (order && order.orderTitle) ? order.orderTitle : '?' }}</p>
-    <p><span class="p-text-bold">Текст:</span>
+    <p>
+      <span class="p-text-bold">Текст:</span>
       <br />
-      {{ (order && order.orderText) ? order.orderText : '?' }}</p>
+      <span v-html="(order && order.orderText) ? order.orderText : '?'"></span>
+    </p>
     <template #footer>
       <Button label="Подтвердить" @click="confirmOrder" />
       <Button label="Закрыть" @click="closeDialog" />

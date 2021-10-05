@@ -119,11 +119,23 @@
           </small>
         </div>
         <!-- ЛИЦО, СОЗДАЮЩЕЕ РАСПОРЯЖЕНИЕ -->
-        <div class="p-d-flex p-ai-center p-mt-2 p-flex-wrap">
-          <div class="p-text-bold p-mr-3">
-            {{ getUserPostFIO }}
+        <div class="p-col-12 p-d-flex p-mt-2 p-flex-wrap">
+          <div class="p-text-bold p-grid" style="width:70%">
+            <div class="p-col-12">
+              {{ getUserPostFIO }}
+            </div>
+            <div
+              v-if="[getOrderTypes.REQUEST,getOrderTypes.NOTIFICATION].includes(orderType)"
+              class="p-col-12"
+            >
+              От имени
+              <InputText
+                v-model="v$.createdOnBehalfOf.$model"
+                :class="{'p-invalid':v$.createdOnBehalfOf.$invalid && submitted}"
+              />
+            </div>
           </div>
-          <div>
+          <div class="p-as-stretch p-d-flex p-ai-center" style="width:30%">
             <Button type="submit" label="Передать" />
           </div>
         </div>
@@ -163,6 +175,16 @@
             @input="v$.ecdSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
+        <AccordionTab>
+          <template #header>
+            <span><b>Иные адресаты:</b> <span v-html="selectedOtherAddresseesString"></span></span>
+          </template>
+          <!-- Таблица иных адресатов -->
+          <OtherToSendOrderDataTable
+            :value="v$.otherSectorsToSendOrder.$model"
+            @input="v$.otherSectorsToSendOrder.$model = $event"
+          />
+        </AccordionTab>
       </Accordion>
     </div>
   </div>
@@ -177,6 +199,7 @@
   import DSPToSendOrderDataTable from './DSPToSendOrderDataTable';
   import DNCToSendOrderDataTable from './DNCToSendOrderDataTable';
   import ECDToSendOrderDataTable from './ECDToSendOrderDataTable';
+  import OtherToSendOrderDataTable from './OtherToSendOrderDataTable';
   import { OrderInputTypes } from '../../constants/orderInputTypes';
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
@@ -202,22 +225,8 @@
       DSPToSendOrderDataTable,
       DNCToSendOrderDataTable,
       ECDToSendOrderDataTable,
+      OtherToSendOrderDataTable,
     },
-
-    /*computed: {
-      nextOrderNumber: function() {
-        return this.$store.getters.getNextOrdersNumber(this.orderType);
-      },
-      getOrderTypes: function() {
-        return OrderTypes;
-      },
-    },*/
-
-    /*watch: {
-      nextOrderNumber: function(newVal) {
-        this.state.number = newVal;
-      },
-    },*/
 
     setup(props) {
       const store = useStore();
@@ -243,12 +252,13 @@
           orderTitle: null,
           orderText: null,
         },
-        //allOrderPatterns: [],
-        //allActiveOrders: [],
         selectedPattern: null,
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
         ecdSectorsToSendOrder: [],
+        otherSectorsToSendOrder: [],
+        // от имени кого издается распоряжение
+        createdOnBehalfOf: null,
         // true - ожидается ответ сервера на запрос об издании распоряжения, false - запроса не ожидается
         waitingForServerResponse: false,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
@@ -281,10 +291,11 @@
           orderTitle: { required },
           orderText: { required },
         },
-        // ! minLength: minLength(1) означает, что минимальная длина массива должна быть равна нулю
+        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
         dncSectorsToSendOrder: { minLength: minLength(1) },
         dspSectorsToSendOrder: { minLength: minLength(1) },
         ecdSectorsToSendOrder: { minLength: minLength(1) },
+        otherSectorsToSendOrder: { minLength: minLength(1) },
       };
 
       const placeRules = {
@@ -313,6 +324,7 @@
         case ORDER_PATTERN_TYPES.REQUEST:
         case ORDER_PATTERN_TYPES.NOTIFICATION:
           rules.prevRelatedOrder = {};
+          rules.createdOnBehalfOf = {};
           break;
         default:
           break;
@@ -338,7 +350,7 @@
             (newVal.getMonth() !== lastOrderDateTime.getMonth()) ||
             (newVal.getFullYear() !== lastOrderDateTime.getFullYear())
           ) {
-            store.commit('resetOrderNumbersData');
+            store.commit('resetOrderNumbersData', props.orderType);
           }
         }
         state.createDateTime = newVal;
@@ -468,6 +480,11 @@
         return resultString;
       });
 
+      // Строка для отображения информации о выбранных иных адресатах
+      const selectedOtherAddresseesString = computed(() => {
+        return '';
+      });
+
       /**
        *
        */
@@ -538,7 +555,9 @@
           dncToSend: state.dncSectorsToSendOrder,
           dspToSend: state.dspSectorsToSendOrder,
           ecdToSend: state.ecdSectorsToSendOrder,
+          otherToSend: state.otherSectorsToSendOrder,
           prevOrderId: relatedOrderId,
+          createdOnBehalfOf: state.createdOnBehalfOf,
         });
       };
 
@@ -559,8 +578,9 @@
         selectedDSPString,
         selectedDNCString,
         selectedECDString,
+        selectedOtherAddresseesString,
         getDispatchOrdersBeingProcessed,
-      }
+      };
     },
   };
 </script>

@@ -62,11 +62,8 @@
 
       <template #expansion="slotProps">
         <div class="p-grid" style="width:100%">
-
-          <div class="p-col">
-            {{ slotProps.data.orderText }}
+          <div class="p-col" v-html="slotProps.data.orderText">
           </div>
-
           <div class="p-col">
             <DataTable :value="slotProps.data.receivers()">
               <Column v-for="col2 of getWorkMessReceiversTblColumns"

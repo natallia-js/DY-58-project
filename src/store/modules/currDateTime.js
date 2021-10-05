@@ -1,7 +1,4 @@
-import {
-  getLocaleDateString,
-  getLocaleDateTimeString,
-} from '../../additional/dateTimeConvertions';
+import { getLocaleDateString, getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
 
 export const currDateTime = {
   state: {
@@ -18,7 +15,7 @@ export const currDateTime = {
     },
 
     getCurrDateTimeString(state) {
-      return getLocaleDateTimeString(state.dateTime, true, false);
+      return getLocaleDateTimeString(state.dateTime, true);
     },
   },
 

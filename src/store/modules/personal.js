@@ -5,6 +5,7 @@ import {
   getStationsWorkPoligonsUsers,
   getECDSectorsWorkPoligonsUsers,
 } from '../../serverRequests/users.requests';
+import objectId from '../../additional/objectId.generator';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -31,16 +32,29 @@ export const CurrStationsShiftTblColumns = [
   { field: CurrStationsShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
 ];
 
+export const OtherShiftTblColumnNames = Object.freeze({
+  place: 'place',
+  post: 'post',
+  fio: 'fio',
+  notification: 'notification',
+});
+
+export const OtherShiftTblColumns = [
+  { field: OtherShiftTblColumnNames.place, title: 'Место', width: '25%', },
+  { field: OtherShiftTblColumnNames.post, title: 'Должность', width: '25%', },
+  { field: OtherShiftTblColumnNames.fio, title: 'ФИО', width: '25%', },
+  { field: OtherShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
+];
+
 const getUserFIOString = ({ name, fatherName, surname }) => {
   return `${surname} ${name.charAt(0)}.${fatherName ? fatherName.charAt(0) + '.': ''}`;
 };
 
-/*const getUserPostFIOString = ({ post, name, fatherName, surname }) => {
-  return `${post} ${getUserFIOString({ name, fatherName, surname })}`;
-};*/
 
 /**
- * Для работы со сменным персоналом смежных, ближайших участков (ДНЦ, ЭЦД) и станций
+ * Для работы со сменным персоналом смежных, ближайших участков (ДНЦ, ЭЦД) и станций.
+ * А также для работы с виртуальным персоналом (персоналом, не зарегистрированным в системе,
+ * но который должен фигурировать в текстах распоряжений).
  */
 export const personal = {
   state: {
@@ -59,7 +73,7 @@ export const personal = {
 
     /**
      * Возвращает идентификаторы всех лиц, входящих в состав полигона управления
-     * (т.е. идентификаторы всего персонала).
+     * (т.е. идентификаторы всего зарегистрированного в системе персонала).
      */
     getShiftPersonalIds: (state) => {
       const ids = [];
@@ -164,10 +178,27 @@ export const personal = {
       });
     },
 
+    /**
+     * Возвращает информацию о виртуальном персонале (который реально не зарегистрирован в системе,
+     * но должен присутствовать в текстах распоряжений).
+     */
+    getOtherShiftForSendingData: (state) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
+        return [];
+      }
+      return state.sectorPersonal.otherShift;
+    },
+
+    /**
+     *
+     */
     getLoadingCurrSectorsShiftStatus: (state) => {
       return state.loadingCurrShift;
     },
 
+    /**
+     *
+     */
     getErrorLoadingCurrSectorsShift: (state) => {
       return state.errorLoadingCurrShift;
     },
@@ -292,6 +323,45 @@ export const personal = {
     },
 
     /**
+     * Оригинал/Копия/Ничего всем виртуальным получателям распоряжения.
+     */
+     setGetOrderStatusToAllOtherShift(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.otherShift) {
+        state.sectorPersonal.otherShift.forEach((el) => {
+          if (el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
+          }
+        });
+      }
+    },
+
+    /**
+     * Оригинал/Копия/Ничего конкретному виртуальному получателю распоряжения.
+     */
+     setGetOrderStatusToDefinitOtherShift(state, { otherId, getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.otherShift) {
+        const sector = state.sectorPersonal.otherShift.find(el => el.id === otherId);
+        if (sector && sector.sendOriginal !== getOrderStatus) {
+          sector.sendOriginal = getOrderStatus;
+        }
+      }
+    },
+
+    /**
+     * Оригинал/Копия/Ничего всем оставшимся виртуальным получателям распоряжения.
+     */
+     setGetOrderStatusToAllLeftOtherShift(state, { getOrderStatus }) {
+      if (state.sectorPersonal && state.sectorPersonal.otherShift) {
+        state.sectorPersonal.otherShift.forEach(el => {
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
+          }
+        });
+      }
+    },
+
+    /**
      * Для всего персонала полигона управления позволяет установить признак
      * нахождения online: для лиц, id которых находятся в массиве onlineUsersIds,
      * online = true, для остальных online = false.
@@ -384,6 +454,48 @@ export const personal = {
       if (findUserAndSetChosenStatus(state.sectorPersonal.DNCSectorsShift)) return;
       if (findUserAndSetChosenStatus(state.sectorPersonal.sectorStationsShift)) return;
       if (findUserAndSetChosenStatus(state.sectorPersonal.ECDSectorsShift)) return;
+    },
+
+    /**
+     *
+     */
+    addOtherGetOrderRecord(state, { place, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend }) {
+      if (!state.sectorPersonal) {
+        state.sectorPersonal = {};
+      }
+      if (!state.sectorPersonal.otherShift) {
+        state.sectorPersonal.otherShift = [];
+      }
+      state.sectorPersonal.otherShift.push({ id: objectId(), place, post, fio, sendOriginal });
+    },
+
+    /**
+     *
+     */
+    editOtherGetOrderRecord(state, { id, place, post, fio } ) {
+      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
+        return;
+      }
+      const recIndex = state.sectorPersonal.otherShift.findIndex((item) => item.id === id);
+      if (recIndex < 0) {
+        return;
+      }
+      state.sectorPersonal.otherShift[recIndex] = {
+        ...state.sectorPersonal.otherShift[recIndex],
+        place,
+        post,
+        fio,
+      };
+    },
+
+    /**
+     *
+     */
+    delOtherGetOrderRecord(state, id) {
+      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
+        return;
+      }
+      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item.id !== id);
     },
   },
 

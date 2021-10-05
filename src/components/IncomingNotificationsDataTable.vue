@@ -36,11 +36,15 @@
       >
         <template #body="slotProps">
           <div style="width:100%;height:100%">
-            <span v-if="col.field !== getInputMessTblColumnsTitles.state"
-            >
+            <span v-if="![getInputMessTblColumnsTitles.state, getInputMessTblColumnsTitles.orderText].includes(col.field)">
               {{ slotProps.data[col.field] }}
             </span>
-            <img v-if="col.field === getInputMessTblColumnsTitles.state"
+            <span
+              v-else-if="col.field === getInputMessTblColumnsTitles.orderText"
+              v-html="slotProps.data[col.field]"
+            ></span>
+            <img
+              v-else-if="col.field === getInputMessTblColumnsTitles.state"
               :src="slotProps.data[col.field] === getIncomingNotificationsStates.cameRecently ? require('../assets/img/hourglass_black.png') :
                     (slotProps.data[col.field] === getIncomingNotificationsStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
               :alt="slotProps.data[col.field]"

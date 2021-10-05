@@ -14,12 +14,6 @@
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
       sortMode="single" :sortField="getCurrShiftTblColumnNames.sector" :sortOrder="1"
     >
-      <!--<template #header>
-        <div class="dy58-table-title">
-          ДСП
-        </div>
-      </template>-->
-
       <Column
         :field="getCurrShiftTblColumnNames.sector"
         :header="getCurrShiftTblColumnNames.sector"
@@ -59,7 +53,7 @@
               </a>
             </span>
           </div>
-          <div v-if="col.field === getCurrShiftTblColumnNames.notification">
+          <div v-else>
             <div class="dy58-tbl-send-btns-block">
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginalToDSP === getCurrShiftGetOrderStatus.sendOriginal,

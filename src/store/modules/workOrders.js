@@ -3,6 +3,7 @@ import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { filterObj } from '../../additional/filterObject';
 import { ReceiversPosts, WorkMessStates, RECENTLY } from '../../constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '../../additional/dateTimeConvertions';
+import { formOrderText } from '../../additional/formOrderText';
 
 const InputMessTblColumnsTitles = Object.freeze({
   state: 'state',
@@ -32,11 +33,71 @@ const WorkMessReceiversTblColumnsTitles = Object.freeze({
   fio: 'fio',
 });
 
-export function formOrderText(orderTextArray) {
-  return orderTextArray.reduce((prevVal, currVal) => {
-    return prevVal + (currVal.value || ' ');
-  }, '');
+function getWorkOrderObject(order) {
+  return {
+    _id: order._id,
+    confirmDateTime: order.confirmDateTime ? new Date(order.confirmDateTime) : null,
+    createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
+    creator: order.creator,
+    deliverDateTime: order.deliverDateTime ? new Date(order.deliverDateTime) : null,
+    dncToSend: order.dncToSend.map((item) => {
+      return {
+        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+        deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        fio: item.fio,
+        id: +item.id,
+        placeTitle: item.placeTitle,
+        sendOriginal: Boolean(item.sendOriginal),
+        type: item.type,
+        _id: item._id,
+      };
+    }),
+    dspToSend: order.dspToSend.map((item) => {
+      return {
+        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+        deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        fio: item.fio,
+        id: +item.id,
+        placeTitle: item.placeTitle,
+        sendOriginal: Boolean(item.sendOriginal),
+        type: item.type,
+        _id: item._id,
+      };
+    }),
+    ecdToSend: order.ecdToSend.map((item) => {
+      return {
+        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+        deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        fio: item.fio,
+        id: +item.id,
+        placeTitle: item.placeTitle,
+        sendOriginal: Boolean(item.sendOriginal),
+        type: item.type,
+        _id: item._id,
+      };
+    }),
+    nextRelatedOrderId: order.nextRelatedOrderId,
+    number: order.number,
+    orderText: order.orderText,
+    place: order.place ? { place: order.place.place, value: +order.place.value } : null,
+    senderWorkPoligon: order.senderWorkPoligon ? {
+      id: order.senderWorkPoligon.id,
+      type: order.senderWorkPoligon.type,
+      title: order.senderWorkPoligon.title,
+    } : null,
+    timeSpan: order.timeSpan ? {
+      start: order.timeSpan.start ? new Date(order.timeSpan.start) : null,
+      end: order.timeSpan.end ? new Date(order.timeSpan.end) : null,
+      tillCancellation: Boolean(order.timeSpan.tillCancellation),
+    } : null,
+    type: order.type,
+    workPoligon: order.workPoligon ? {
+      id: order.workPoligon.id,
+      type: order.workPoligon.type,
+    } : null,
+  };
 }
+
 
 export const workOrders = {
   state: {
@@ -50,6 +111,9 @@ export const workOrders = {
   },
 
   getters: {
+    /**
+     *
+     */
     getInputMessTblColumnsTitles(_state, _getters, _rootState, rootGetters) {
       if (rootGetters.isDSP) {
         return InputMessTblColumnsTitles;
@@ -57,6 +121,9 @@ export const workOrders = {
       return filterObj(InputMessTblColumnsTitles, (key) => key !== 'title');
     },
 
+    /**
+     *
+     */
     getInputMessTblColumns(_state, _getters, _rootState, rootGetters) {
       const isDSP = rootGetters.isDSP;
       const tblCols = [
@@ -77,10 +144,16 @@ export const workOrders = {
       return tblCols;
     },
 
+    /**
+     *
+     */
     getWorkMessTblColumnsTitles() {
       return WorkMessTblColumnsTitles;
     },
 
+    /**
+     *
+     */
     getWorkMessTblColumns() {
       return [
         { field: WorkMessTblColumnsTitles.expander, title: '', width: '4%', align: 'center' },
@@ -93,6 +166,9 @@ export const workOrders = {
       ];
     },
 
+    /**
+     *
+     */
     getWorkMessReceiversTblColumns(_state, _getters, _rootState, rootGetters) {
       let tblCols = [
         { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '33%', },
@@ -110,6 +186,9 @@ export const workOrders = {
       });
     },
 
+    /**
+     *
+     */
     getIncomingOrders(state) {
       const now = new Date();
       return state.data
@@ -118,16 +197,16 @@ export const workOrders = {
           return {
             id: item._id,
             type: item.type,
-            state: now - new Date(item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
+            state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
-            time: getLocaleDateTimeString(new Date(item.createDateTime), false, true),
+            time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
             orderText: formOrderText(item.orderText.orderText),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
-            fio: item.creator.fio,
+            fio: item.creator.fio + (item.createdOnBehalfOf ? ` ( от имени ${item.createdOnBehalfOf})` : ''),
           };
         });
     },
@@ -153,7 +232,7 @@ export const workOrders = {
         const typeGroup = groupedOrders.find((group) => group.key === order.type);
         const childItem = {
           key: order._id,
-          label: `№ ${order.number} от ${getLocaleDateTimeString(new Date(order.createDateTime), false, false)} - ${order.orderText.orderTitle}`,
+          label: `№ ${order.number} от ${getLocaleDateTimeString(order.createDateTime, false)} - ${order.orderText.orderTitle}`,
           data: order,
         };
         if (!typeGroup) {
@@ -177,7 +256,7 @@ export const workOrders = {
         .map((item, index) => {
           return {
             id: item._id,
-            state: now - new Date(item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
+            state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
             time: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
@@ -304,7 +383,7 @@ export const workOrders = {
         return;
       }
       if (!state.data || !state.data.length) {
-        state.data = newData;
+        state.data = newData.map((order) => getWorkOrderObject(order));
         return;
       }
       // Вначале удалим те элементы существующего массива, которых нет в новом массиве
@@ -322,9 +401,9 @@ export const workOrders = {
       newData.forEach((order) => {
         const existingOrderIndex = state.data.findIndex((item) => item._id === order._id);
         if (existingOrderIndex < 0) {
-          state.data.push({ ...order });
+          state.data.push(getWorkOrderObject(order));
         } else if (JSON.stringify(state.data[existingOrderIndex]) !== JSON.stringify(order)) {
-          state.data[existingOrderIndex] = { ...order };
+          state.data[existingOrderIndex] = getWorkOrderObject(order);
         }
       });
     },
@@ -389,13 +468,12 @@ export const workOrders = {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        const deliverDateTime = new Date();
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
             orderIds: newDeliveredOrderIds,
-            deliverDateTime,
+            deliverDateTime: new Date(),
           },
           { headers }
         );

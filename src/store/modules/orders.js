@@ -64,6 +64,7 @@ export const orders = {
         dspToSend,
         ecdToSend,
         prevOrderId,
+        createdOnBehalfOf,
       } = params;
 
       context.commit('clearDispatchOrderResult');
@@ -112,6 +113,7 @@ export const orders = {
               post: context.getters.getUserPost,
               fio: context.getters.getUserFIO,
             },
+            createdOnBehalfOf,
             prevOrderId,
           },
           { headers }

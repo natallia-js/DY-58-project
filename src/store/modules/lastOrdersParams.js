@@ -64,12 +64,29 @@ export const lastOrdersParams = {
       }
     },
 
-    resetOrderNumbersData(state) {
-      state.params.forEach((param) => {
-        param.lastOrderNumber = 0;
-        param.lastOrderDateTime = null;
-      });
+    resetOrderNumbersData(state, ordersType) {
+      const arrayIndex = state.params.findIndex((item) => item.ordersType === ordersType);
+      if (arrayIndex >= 0) {
+        state.params[arrayIndex] = {
+          lastOrderNumber: 0,
+          lastOrderDateTime: null,
+        };
+      }
     },
+
+    setLastOrdersParams(state, params) {
+      if (!params || !params.length) {
+        state.params = [];
+        return;
+      }
+      state.params = params.map((param) => {
+        return {
+          ordersType: param.ordersType,
+          lastOrderNumber: +param.lastOrderNumber,
+          lastOrderDateTime: param.lastOrderDateTime ? new Date(param.lastOrderDateTime) : null,
+        };
+      });
+    }
   },
 
   actions: {
@@ -96,13 +113,7 @@ export const lastOrdersParams = {
           },
           { headers }
         );
-        context.state.params = response.data.map((param) => {
-          return {
-            ordersType: param.ordersType,
-            lastOrderNumber: +param.lastOrderNumber,
-            lastOrderDateTime: param.lastOrderDateTime ? new Date(param.lastOrderDateTime) : null,
-          };
-        });
+        context.commit('setLastOrdersParams', response.data);
       } catch (err) {
         context.state.errorLoadingParams = err;
       }
