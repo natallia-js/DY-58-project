@@ -33,14 +33,14 @@ export const CurrStationsShiftTblColumns = [
 ];
 
 export const OtherShiftTblColumnNames = Object.freeze({
-  place: 'place',
+  placeTitle: 'placeTitle',
   post: 'post',
   fio: 'fio',
   notification: 'notification',
 });
 
 export const OtherShiftTblColumns = [
-  { field: OtherShiftTblColumnNames.place, title: 'Место', width: '25%', },
+  { field: OtherShiftTblColumnNames.placeTitle, title: 'Место', width: '25%', },
   { field: OtherShiftTblColumnNames.post, title: 'Должность', width: '25%', },
   { field: OtherShiftTblColumnNames.fio, title: 'ФИО', width: '25%', },
   { field: OtherShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
@@ -115,7 +115,7 @@ export const personal = {
                 online: el.online,
               };
             }),
-          sendOriginalToDNC: item.sendOriginalToDNC,
+          sendOriginal: item.sendOriginal,
         };
       });
     },
@@ -144,7 +144,7 @@ export const personal = {
                 online: el.online,
               };
             }),
-          sendOriginalToDSP: item.sendOriginalToDSP,
+          sendOriginal: item.sendOriginal,
         };
       });
       return arr;
@@ -173,7 +173,7 @@ export const personal = {
                 online: el.online,
               };
             }),
-          sendOriginalToECD: item.sendOriginalToECD,
+          sendOriginal: item.sendOriginal,
         };
       });
     },
@@ -186,7 +186,7 @@ export const personal = {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return [];
       }
-      return state.sectorPersonal.otherShift;
+      return state.sectorPersonal.otherShift.map((item) => ({ ...item }));
     },
 
     /**
@@ -211,8 +211,8 @@ export const personal = {
     setGetOrderStatusToAllDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         state.sectorPersonal.DNCSectorsShift.forEach((el) => {
-          if (el.sendOriginalToDNC !== getOrderStatus) {
-            el.sendOriginalToDNC = getOrderStatus;
+          if (el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -224,8 +224,8 @@ export const personal = {
     setGetOrderStatusToDefinitDNCSector(state, { dncSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         const sector = state.sectorPersonal.DNCSectorsShift.find(el => el.sectorId === dncSectorId);
-        if (sector && sector.sendOriginalToDNC !== getOrderStatus) {
-          sector.sendOriginalToDNC = getOrderStatus;
+        if (sector && sector.sendOriginal !== getOrderStatus) {
+          sector.sendOriginal = getOrderStatus;
         }
       }
     },
@@ -236,9 +236,9 @@ export const personal = {
     setGetOrderStatusToAllLeftDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         state.sectorPersonal.DNCSectorsShift.forEach(el => {
-          if (el.sendOriginalToDNC === CurrShiftGetOrderStatus.doNotSend &&
-              el.sendOriginalToDNC !== getOrderStatus) {
-            el.sendOriginalToDNC = getOrderStatus;
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -250,8 +250,8 @@ export const personal = {
     setGetOrderStatusToAllDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => {
-          if (el.sendOriginalToDSP !== getOrderStatus) {
-            el.sendOriginalToDSP = getOrderStatus;
+          if (el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -263,8 +263,8 @@ export const personal = {
     setGetOrderStatusToDefinitDSP(state, { stationId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         const station = state.sectorPersonal.sectorStationsShift.find(el => el.stationId === stationId);
-        if (station && station.sendOriginalToDSP !== getOrderStatus) {
-          station.sendOriginalToDSP = getOrderStatus;
+        if (station && station.sendOriginal !== getOrderStatus) {
+          station.sendOriginal = getOrderStatus;
         }
       }
     },
@@ -275,9 +275,9 @@ export const personal = {
     setGetOrderStatusToAllLeftDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach(el => {
-          if (el.sendOriginalToDSP === CurrShiftGetOrderStatus.doNotSend &&
-              el.sendOriginalToDSP !== getOrderStatus) {
-            el.sendOriginalToDSP = getOrderStatus;
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -289,8 +289,8 @@ export const personal = {
      setGetOrderStatusToAllECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         state.sectorPersonal.ECDSectorsShift.forEach((el) => {
-          if (el.sendOriginalToECD !== getOrderStatus) {
-            el.sendOriginalToECD = getOrderStatus;
+          if (el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -302,8 +302,8 @@ export const personal = {
      setGetOrderStatusToDefinitECDSector(state, { ecdSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         const sector = state.sectorPersonal.ECDSectorsShift.find(el => el.sectorId === ecdSectorId);
-        if (sector && sector.sendOriginalToECD !== getOrderStatus) {
-          sector.sendOriginalToECD = getOrderStatus;
+        if (sector && sector.sendOriginal !== getOrderStatus) {
+          sector.sendOriginal = getOrderStatus;
         }
       }
     },
@@ -314,9 +314,9 @@ export const personal = {
      setGetOrderStatusToAllLeftECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         state.sectorPersonal.ECDSectorsShift.forEach(el => {
-          if (el.sendOriginalToECD === CurrShiftGetOrderStatus.doNotSend &&
-              el.sendOriginalToECD !== getOrderStatus) {
-            el.sendOriginalToECD = getOrderStatus;
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
+              el.sendOriginal !== getOrderStatus) {
+            el.sendOriginal = getOrderStatus;
           }
         });
       }
@@ -340,7 +340,7 @@ export const personal = {
      */
      setGetOrderStatusToDefinitOtherShift(state, { otherId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.otherShift) {
-        const sector = state.sectorPersonal.otherShift.find(el => el.id === otherId);
+        const sector = state.sectorPersonal.otherShift.find(el => el._id === otherId);
         if (sector && sector.sendOriginal !== getOrderStatus) {
           sector.sendOriginal = getOrderStatus;
         }
@@ -459,30 +459,32 @@ export const personal = {
     /**
      *
      */
-    addOtherGetOrderRecord(state, { place, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend }) {
+    addOtherGetOrderRecord(state, props) {
+      const { placeTitle, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend } = props;
+
       if (!state.sectorPersonal) {
         state.sectorPersonal = {};
       }
       if (!state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift = [];
       }
-      state.sectorPersonal.otherShift.push({ id: objectId(), place, post, fio, sendOriginal });
+      state.sectorPersonal.otherShift.push({ _id: objectId(), placeTitle, post, fio, sendOriginal });
     },
 
     /**
      *
      */
-    editOtherGetOrderRecord(state, { id, place, post, fio } ) {
+    editOtherGetOrderRecord(state, { _id, placeTitle, post, fio } ) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
-      const recIndex = state.sectorPersonal.otherShift.findIndex((item) => item.id === id);
+      const recIndex = state.sectorPersonal.otherShift.findIndex((item) => item._id === _id);
       if (recIndex < 0) {
         return;
       }
       state.sectorPersonal.otherShift[recIndex] = {
         ...state.sectorPersonal.otherShift[recIndex],
-        place,
+        placeTitle,
         post,
         fio,
       };
@@ -495,7 +497,7 @@ export const personal = {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
-      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item.id !== id);
+      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
     },
   },
 
@@ -524,7 +526,7 @@ export const personal = {
             sectorId: sector.DNCS_ID,
             sectorTitle: sector.DNCS_Title,
             people: [],
-            sendOriginalToDNC: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
         // Здесь будет информация о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
@@ -537,7 +539,7 @@ export const personal = {
             stationUNMC: station.St_UNMC,
             stationTitle: station.St_Title,
             people: [],
-            sendOriginalToDSP: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
         // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, ближайших к
@@ -547,7 +549,7 @@ export const personal = {
             sectorId: sector.ECDS_ID,
             sectorTitle: sector.ECDS_Title,
             people: [],
-            sendOriginalToECD: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
       };
@@ -625,7 +627,7 @@ export const personal = {
             sectorId: sector.ECDS_ID,
             sectorTitle: sector.ECDS_Title,
             people: [],
-            sendOriginalToECD: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
         // Здесь будет информация о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
@@ -638,7 +640,7 @@ export const personal = {
             stationUNMC: station.St_UNMC,
             stationTitle: station.St_Title,
             people: [],
-            sendOriginalToDSP: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
         // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, ближайших к
@@ -648,7 +650,7 @@ export const personal = {
             sectorId: sector.DNCS_ID,
             sectorTitle: sector.DNCS_Title,
             people: [],
-            sendOriginalToDNC: CurrShiftGetOrderStatus.doNotSend,
+            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
       };

@@ -11,7 +11,7 @@
       :value="getOtherShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
-      v-model:selection="selectedUser" selectionMode="single" dataKey="id"
+      v-model:selection="selectedUser" selectionMode="single" dataKey="_id"
     >
       <template #header>
         <Button class="p-mr-2" label="Добавить" @click="handleAddNewRec" />
@@ -31,11 +31,11 @@
           <div v-if="col.field !== getOtherShiftTblColumnNames.notification"
               :class="[
                 'dy58-send-table-data-cell',
-                {'dy58-send-original': [getOtherShiftTblColumnNames.place,
+                {'dy58-send-original': [getOtherShiftTblColumnNames.placeTitle,
                                         getOtherShiftTblColumnNames.post,
                                         getOtherShiftTblColumnNames.fio].includes(col.field)
                                         && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
-                {'dy58-send-copy': [getOtherShiftTblColumnNames.place,
+                {'dy58-send-copy': [getOtherShiftTblColumnNames.placeTitle,
                                     getOtherShiftTblColumnNames.post,
                                     getOtherShiftTblColumnNames.fio].includes(col.field)
                                     && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
@@ -48,21 +48,21 @@
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
-                  @click="() => sendOriginalToDefinitSector(slotProps.data.id)"
+                  @click="() => sendOriginalToDefinitSector(slotProps.data._id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
-                  @click="() => sendCopyToDefinitSector(slotProps.data.id)"
+                  @click="() => sendCopyToDefinitSector(slotProps.data._id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
-                  @click="() => doNotSendToDefinitSector(slotProps.data.id)"
+                  @click="() => doNotSendToDefinitSector(slotProps.data._id)"
               >
                 &#9747;
               </a>
@@ -229,7 +229,7 @@
       },
 
       handleDelRec() {
-        this.$store.commit('delOtherGetOrderRecord', this.selectedUser.id);
+        this.$store.commit('delOtherGetOrderRecord', this.selectedUser._id);
         this.selectedUser = null;
       },
 

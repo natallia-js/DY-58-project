@@ -63,6 +63,7 @@ export const orders = {
         dncToSend,
         dspToSend,
         ecdToSend,
+        otherToSend,
         prevOrderId,
         createdOnBehalfOf,
       } = params;
@@ -85,22 +86,28 @@ export const orders = {
             dncToSend: dncToSend.map((item) => {
               return {
                 ...item,
-                sendOriginal: item.sendOriginalToDNC === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
                 placeTitle: item.sector,
               };
             }),
             dspToSend : dspToSend.map((item) => {
               return {
                 ...item,
-                sendOriginal: item.sendOriginalToDSP === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
                 placeTitle: item.station,
               };
             }),
             ecdToSend: ecdToSend.map((item) => {
               return {
                 ...item,
-                sendOriginal: item.sendOriginalToECD === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
                 placeTitle: item.sector,
+              };
+            }),
+            otherToSend: otherToSend.map((item) => {
+              return {
+                ...item,
+                sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
               };
             }),
             workPoligon: {

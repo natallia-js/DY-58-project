@@ -144,6 +144,7 @@
     <!-- АДРЕСАТЫ -->
     <div class="p-col-6">
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
+      <p class="p-mb-2">(адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ)</p>
       <Accordion :multiple="true">
         <AccordionTab v-if="orderType !== getOrderTypes.NOTIFICATION">
           <template #header>
@@ -186,6 +187,48 @@
           />
         </AccordionTab>
       </Accordion>
+      <small
+            v-if="v$.prevRelatedOrder && ((v$.prevRelatedOrder.$invalid && submitted) || v$.prevRelatedOrder.$pending.$response)"
+            class="p-error"
+          >
+            prevRelatedOrder
+          </small>
+          <small
+            v-if="v$.createdOnBehalfOf && ((v$.createdOnBehalfOf.$invalid && submitted) || v$.createdOnBehalfOf.$pending.$response)"
+            class="p-error"
+          >
+            createdOnBehalfOf
+          </small>
+          <small
+            v-if="v$.createDateTimeString && ((v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response)"
+            class="p-error"
+          >
+            createDateTimeString
+          </small>
+          <small
+            v-if="v$.dncSectorsToSendOrder && ((v$.dncSectorsToSendOrder.$invalid && submitted) || v$.dncSectorsToSendOrder.$pending.$response)"
+            class="p-error"
+          >
+            dncSectorsToSendOrder
+          </small>
+          <small
+            v-if="v$.dspSectorsToSendOrder && ((v$.dspSectorsToSendOrder.$invalid && submitted) || v$.dspSectorsToSendOrder.$pending.$response)"
+            class="p-error"
+          >
+            dspSectorsToSendOrder
+          </small>
+          <small
+            v-if="v$.ecdSectorsToSendOrder && ((v$.ecdSectorsToSendOrder.$invalid && submitted) || v$.ecdSectorsToSendOrder.$pending.$response)"
+            class="p-error"
+          >
+            ecdSectorsToSendOrder
+          </small>
+          <small
+            v-if="v$.otherSectorsToSendOrder && ((v$.otherSectorsToSendOrder.$invalid && submitted) || v$.otherSectorsToSendOrder.$pending.$response)"
+            class="p-error"
+          >
+            otherSectorsToSendOrder
+          </small>
     </div>
   </div>
 </template>
@@ -292,10 +335,10 @@
           orderText: { required },
         },
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        dncSectorsToSendOrder: { minLength: minLength(1) },
-        dspSectorsToSendOrder: { minLength: minLength(1) },
-        ecdSectorsToSendOrder: { minLength: minLength(1) },
-        otherSectorsToSendOrder: { minLength: minLength(1) },
+        dncSectorsToSendOrder: { minLength: minLength(0) },
+        dspSectorsToSendOrder: { minLength: minLength(0) },
+        ecdSectorsToSendOrder: { minLength: minLength(0) },
+        otherSectorsToSendOrder: { minLength: minLength(0) },
       };
 
       const placeRules = {
@@ -381,27 +424,25 @@
       );
       const getDispatchOrdersBeingProcessed = computed(() => store.getters.getDispatchOrdersBeingProcessed);
 
-      // Строка для отображения информации о выбранных ДСП
-      const selectedDSPString = computed(() => {
-        if (!state.dspSectorsToSendOrder) {
+      // Возвращает строку для отображения персонала (конкретного типа), выбранного в качестве получателей распоряжения
+      const formSelectedPersonalString = (personalArray, placeFieldName) => {
+        if (!personalArray) {
           return '';
         }
         let originalToString = '';
         let copyToString = '';
-        const sendOriginalTo = state.dspSectorsToSendOrder
-          .filter((el) => el.sendOriginalToDSP === CurrShiftGetOrderStatus.sendOriginal);
+        const sendOriginalTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal);
         if (sendOriginalTo.length) {
           originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
             sendOriginalTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.station}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              accumulator + `${currentValue[placeFieldName]}${!currentValue.post ? '' : ' ' + currentValue.post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
               `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
         }
-        const sendCopyTo = state.dspSectorsToSendOrder
-          .filter((el) => el.sendOriginalToDSP === CurrShiftGetOrderStatus.sendCopy);
+        const sendCopyTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendCopy);
         if (sendCopyTo.length) {
           copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
             sendCopyTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.station}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+              accumulator + `${currentValue[placeFieldName]}${!currentValue.post ? '' : ' ' + currentValue.post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
               `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
         }
         let resultString = '';
@@ -412,78 +453,19 @@
           resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
         }
         return resultString;
-      });
+      };
+
+      // Строка для отображения информации о выбранных ДСП
+      const selectedDSPString = computed(() => formSelectedPersonalString(state.dspSectorsToSendOrder, 'station'));
 
       // Строка для отображения информации о выбранных ДНЦ
-      const selectedDNCString = computed(() => {
-        if (!state.dncSectorsToSendOrder) {
-          return '';
-        }
-        let originalToString = '';
-        let copyToString = '';
-        const sendOriginalTo = state.dncSectorsToSendOrder
-          .filter((el) => el.sendOriginalToDNC === CurrShiftGetOrderStatus.sendOriginal);
-        if (sendOriginalTo.length) {
-          originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
-            sendOriginalTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-              `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
-        }
-        const sendCopyTo = state.dncSectorsToSendOrder
-          .filter((el) => el.sendOriginalToDNC === CurrShiftGetOrderStatus.sendCopy);
-        if (sendCopyTo.length) {
-          copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
-            sendCopyTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-              `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
-        }
-        let resultString = '';
-        if (originalToString) {
-          resultString = originalToString;
-        }
-        if (copyToString) {
-          resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
-        }
-        return resultString;
-      });
+      const selectedDNCString = computed(() => formSelectedPersonalString(state.dncSectorsToSendOrder, 'sector'));
 
       // Строка для отображения информации о выбранных ДСП
-      const selectedECDString = computed(() => {
-        if (!state.ecdSectorsToSendOrder) {
-          return '';
-        }
-        let originalToString = '';
-        let copyToString = '';
-        const sendOriginalTo = state.ecdSectorsToSendOrder
-          .filter((el) => el.sendOriginalToECD === CurrShiftGetOrderStatus.sendOriginal);
-        if (sendOriginalTo.length) {
-          originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
-            sendOriginalTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-              `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
-        }
-        const sendCopyTo = state.ecdSectorsToSendOrder
-          .filter((el) => el.sendOriginalToECD === CurrShiftGetOrderStatus.sendCopy);
-        if (sendCopyTo.length) {
-          copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
-            sendCopyTo.reduce((accumulator, currentValue, index) =>
-              accumulator + `${currentValue.sector}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-              `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
-        }
-        let resultString = '';
-        if (originalToString) {
-          resultString = originalToString;
-        }
-        if (copyToString) {
-          resultString = !resultString ? copyToString : `${resultString}; ${copyToString}`;
-        }
-        return resultString;
-      });
+      const selectedECDString = computed(() => formSelectedPersonalString(state.ecdSectorsToSendOrder, 'sector'));
 
       // Строка для отображения информации о выбранных иных адресатах
-      const selectedOtherAddresseesString = computed(() => {
-        return '';
-      });
+      const selectedOtherAddresseesString = computed(() => formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle'));
 
       /**
        *
@@ -535,9 +517,36 @@
        * Издание распоряжения (отправка и сервер и передача всем причастным).
        */
       const handleSubmit = (isFormValid) => {
+        console.log(v$.value.$invalid, v$.value.number ? v$.value.number.$invalid : 'v$.number',
+        v$.value.createDateTime ? v$.value.createDateTime.$invalid : 'v$.createDateTime',
+        v$.value.createDateTimeString ? v$.value.createDateTimeString.$invalid : 'v$.createDateTimeString',
+        v$.value.orderText ? {
+        1: v$.value.orderText.orderTextSource ? v$.value.orderText.orderTextSource.$invalid : 'v$.orderText.orderTextSource',
+          2: v$.value.orderText.orderTitle ? v$.value.orderText.orderTitle.$invalid : 'v$.orderText.orderTitle',
+          3: v$.value.orderText.orderText ? v$.value.orderText.orderText.$invalid : 'v$.orderText.orderText',
+        } : 'v$.orderText',
+        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
+        v$.value.dncSectorsToSendOrder ? v$.value.dncSectorsToSendOrder.$invalid : 'v$.dncSectorsToSendOrder',
+        v$.value.dspSectorsToSendOrder ? v$.value.dspSectorsToSendOrder.$invalid : 'v$.dspSectorsToSendOrder',
+        v$.value.ecdSectorsToSendOrder ? v$.value.ecdSectorsToSendOrder.$invalid : 'v$.ecdSectorsToSendOrder',
+        v$.value.otherSectorsToSendOrder ? v$.value.otherSectorsToSendOrder.$invalid : 'v$.otherSectorsToSendOrder',
+        v$.value.place ? {
+          1: v$.value.place.place ? v$.value.place.place.$invalid : 'v$.place.place',
+          2: v$.value.place.value ? v$.value.place.value.$invalid : 'v$.place.value',
+        } : 'v$.place',
+        v$.value.timeSpan ? {
+          1: v$.value.timeSpan.start ? v$.value.timeSpan.start.$invalid : 'v$.timeSpan.start',
+          2: v$.value.timeSpan.end ? v$.value.timeSpan.end.$invalid : 'v$.timeSpan.end',
+          3: v$.value.timeSpan.tillCancellation ? v$.value.timeSpan.tillCancellation.$invalid : 'v$.timeSpan.tillCancellation',
+        } : 'v$.timeSpan',
+        v$.value.prevRelatedOrder ? v$.value.prevRelatedOrder.$invalid : 'v$.prevRelatedOrder',
+        v$.value.createdOnBehalfOf ? v$.value.createdOnBehalfOf.$invalid : 'v$.createdOnBehalfOf',
+        );
+
         submitted.value = true;
 
         if (!isFormValid) {
+          showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
           return;
         }
 

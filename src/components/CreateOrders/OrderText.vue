@@ -101,7 +101,7 @@
 
       watch(getCurrentOrderText, (newVal) =>
         emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.nopattern,
+          orderTextSource: state.orderTextSource,
           orderTitle: state.orderTitle,
           orderText: [{
             type: OrderPatternElementType.TEXT,
@@ -114,12 +114,12 @@
       const handleFocusDropdown = () => {
         if (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) {
           state.orderTextSource = ORDER_TEXT_SOURCE.pattern;
-          emit('input', {
-            orderTextSource: ORDER_TEXT_SOURCE.pattern,
-            orderTitle: getSelectedOrderPattern.value.title,
-            orderText: state.orderPatternText,
-          });
         }
+        emit('input', {
+          orderTextSource: state.orderTextSource,
+          orderTitle: getSelectedOrderPattern.value.title,
+          orderText: state.orderPatternText,
+        });
       };
 
       const handleChooseOrderPattern = () => {
@@ -127,7 +127,7 @@
           return { ...element };
         });
         emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.pattern,
+          orderTextSource: state.orderTextSource,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: getSelectedOrderPattern.value.elements,
         });
@@ -136,27 +136,27 @@
       const handleFocusInput = () => {
         if (state.orderTextSource !== ORDER_TEXT_SOURCE.nopattern) {
           state.orderTextSource = ORDER_TEXT_SOURCE.nopattern;
-          emit('input', {
-            orderTextSource: ORDER_TEXT_SOURCE.nopattern,
-            orderTitle: state.orderTitle,
-            orderText: [{
-              type: OrderPatternElementType.TEXT,
-              ref: null,
-              value: state.orderText,
-            }]
-          });
         }
+        emit('input', {
+          orderTextSource: state.orderTextSource,
+          orderTitle: state.orderTitle,
+          orderText: [{
+            type: OrderPatternElementType.TEXT,
+            ref: null,
+            value: state.orderText,
+          }],
+        });
       };
 
       const handleChangeOrderTitle = (event) => {
         emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.nopattern,
+          orderTextSource: state.orderTextSource,
           orderTitle: event.target.value,
           orderText: [{
             type: OrderPatternElementType.TEXT,
             ref: null,
             value: state.orderText,
-          }]
+          }],
         });
       };
 
@@ -167,7 +167,7 @@
           }
         });
         emit('input', {
-          orderTextSource: ORDER_TEXT_SOURCE.pattern,
+          orderTextSource: state.orderTextSource,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: state.orderPatternText,
         });

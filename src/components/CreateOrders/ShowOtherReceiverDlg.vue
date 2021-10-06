@@ -9,18 +9,18 @@
     <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
       <!-- МЕСТО ОТПРАВКИ РАСПОРЯЖЕНИЯ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
-        <label for="place" :class="{'p-error':v$.place.$invalid && submitted}">
+        <label for="placeTitle" :class="{'p-error':v$.placeTitle.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Куда</span>
         </label>
         <allow-clear-input-text
-          id="place"
-          :value="v$.place.$model"
-          @input="v$.place.$model = $event"
+          id="placeTitle"
+          :value="v$.placeTitle.$model"
+          @input="v$.placeTitle.$model = $event"
           style="width:100%"
-          :inputClass="{'p-invalid':v$.place.$invalid && submitted}"
+          :inputClass="{'p-invalid':v$.placeTitle.$invalid && submitted}"
         />
         <small
-          v-if="(v$.place.$invalid && submitted) || v$.place.$pending.$response"
+          v-if="(v$.placeTitle.$invalid && submitted) || v$.placeTitle.$pending.$response"
           class="p-error"
         >
           Не определено место отправки распоряжения
@@ -100,13 +100,13 @@
     setup(props, context) {
       const state = reactive({
         dlgVisible: false,
-        place: '',
+        placeTitle: '',
         post: '',
         fio: '',
       });
 
       const rules = {
-        place: { required },
+        placeTitle: { required },
         post: { required },
         fio: {},
       };
@@ -120,7 +120,7 @@
       watch(showDlgProp, (val) => {
         state.dlgVisible = val;
         if (val) {
-          state.place = props.user ? props.user.place : '';
+          state.placeTitle = props.user ? props.user.placeTitle : '';
           state.post = props.user ? props.user.post : '';
           state.fio = props.user ? props.user.fio : '';
           submitted.value = false;
@@ -133,8 +133,8 @@
           return;
         }
         context.emit('input', {
-          id: props.user ? props.user.id : null,
-          place: state.place,
+          _id: props.user ? props.user._id : null,
+          placeTitle: state.placeTitle,
           post: state.post,
           fio: state.fio,
         });

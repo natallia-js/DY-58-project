@@ -76,6 +76,15 @@ function getWorkOrderObject(order) {
         _id: item._id,
       };
     }),
+    otherToSend: order.otherToSend.map((item) => {
+      return {
+        _id: item._id,
+        post: item.post,
+        fio: item.fio,
+        placeTitle: item.placeTitle,
+        sendOriginal: Boolean(item.sendOriginal),
+      };
+    }),
     nextRelatedOrderId: order.nextRelatedOrderId,
     number: order.number,
     orderText: order.orderText,
@@ -203,7 +212,7 @@ export const workOrders = {
             timeSpan: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
-            orderText: formOrderText(item.orderText.orderText),
+            orderText: formOrderText({ orderTextArray: item.orderText.orderText }),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` ( от имени ${item.createdOnBehalfOf})` : ''),
@@ -261,7 +270,13 @@ export const workOrders = {
             time: getTimeSpanString(item.timeSpan),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
-            orderText: formOrderText(item.orderText.orderText),
+            orderText: formOrderText({
+              orderTextArray: item.orderText.orderText,
+              dncToSend: item.dncToSend,
+              dspToSend: item.dspToSend,
+              ecdToSend: item.ecdToSend,
+              otherToSend: item.otherToSend,
+            }),
             orderReceiveStatus: {
               notDelivered:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0) +
@@ -402,8 +417,11 @@ export const workOrders = {
         const existingOrderIndex = state.data.findIndex((item) => item._id === order._id);
         if (existingOrderIndex < 0) {
           state.data.push(getWorkOrderObject(order));
-        } else if (JSON.stringify(state.data[existingOrderIndex]) !== JSON.stringify(order)) {
-          state.data[existingOrderIndex] = getWorkOrderObject(order);
+        } else {
+          const modifiedObject = getWorkOrderObject(order);
+          if (JSON.stringify(state.data[existingOrderIndex]) !== JSON.stringify(modifiedObject)) {
+            state.data[existingOrderIndex] = modifiedObject;
+          }
         }
       });
     },
