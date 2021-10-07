@@ -57,6 +57,24 @@ export const currWorkPoligonStructure = {
       }
     },
 
+    /**
+     *
+     */
+    getSectorStationOrBlockTitleById(_state, getters) {
+      return (id) => {
+        /*let place = getters.getSectorStations.find((station) => station.St_ID === id);
+        if (place) {
+          return place.St_Title;
+        }
+        place = getters.getSectorBlocks.find((block) => block.Bl_ID === id);
+        if (place) {
+          return place.Bl_Title;
+        }*/
+console.log(getters,id)
+        return null;
+      };
+    },
+
     getSectorStations(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
         return [];
@@ -68,7 +86,7 @@ export const currWorkPoligonStructure = {
           return;
         }
         stations.push(...sector.TStations);
-      });
+      });console.log(stations)
       return stations;
     },
 

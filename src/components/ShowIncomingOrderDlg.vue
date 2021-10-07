@@ -6,6 +6,7 @@
     :modal="true"
     @hide="closeDialog"
   >
+    <p style="textAlign:center"><span class="p-text-bold">{{(order && order.sendOriginal) ? 'Оригинал' : 'Копия'}}</span></p>
     <p><span class="p-text-bold">Отправитель:</span> &#160;
       {{ (order && order.place) ? order.place : '?' }} &#160;
       {{ (order && order.post) ? order.post : '?' }} &#160;
@@ -61,7 +62,7 @@
 
     watch: {
       showDlg: function (val) {
-        this.dlgVisible = val;console.log(this.order)
+        this.dlgVisible = val;
       },
     },
 

@@ -130,7 +130,9 @@ export const orders = {
         context.commit('setLastOrdersNumber', { ordersType: type, number, createDateTime });
 
       } catch ({ response }) {
-        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при отправке распоряжения';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: errMessage });
       }
 
       context.commit('subOrdersBeingDispatchedNumber');

@@ -15,8 +15,12 @@
     >
       <template #header>
         <div class="dy58-table-title">
+          <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
           Входящие {{ isDSP ? 'документы' : 'уведомления' }}
           <Badge :value="getIncomingOrdersNumber"></Badge>
+          <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
+            {{ getErrorLoadingWorkOrders }}
+          </p>
         </div>
         <Button
           v-if="chosenOrder"
@@ -76,6 +80,8 @@
 
     computed: {
       ...mapGetters([
+        'getLoadingWorkOrdersStatus',
+        'getErrorLoadingWorkOrders',
         'getIncomingOrders',
         'getIncomingOrdersNumber',
         'isDSP',

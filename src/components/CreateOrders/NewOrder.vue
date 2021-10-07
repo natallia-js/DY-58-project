@@ -57,6 +57,9 @@
             :options="getActiveOrders"
             style="width:100%"
           />
+          <div v-if="relatedOrderObject">
+            Перегон / станция {{ getSectorStationOrBlockTitleById(relatedOrderObject.place.value) }}
+          </div>
         </div>
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
         <div
@@ -362,8 +365,25 @@
       });
 
       const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
+
       const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
+
+      const relatedOrderId = computed(() => {
+        const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
+        return chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;
+      });
+
+      const relatedOrderObject = computed(() => {
+        if (!relatedOrderId.value) {
+          return null;
+        }
+        return store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value);
+      });
+
       const getOrderInputTypes = computed(() => OrderInputTypes);
+
+      const getSectorStationOrBlockTitleById = computed(() => store.getters.getSectorStationOrBlockTitleById);
+
       const getSectorStations = computed(() =>
         store.getters.getSectorStations.map((station) => {
           return {
@@ -372,6 +392,7 @@
           };
         })
       );
+
       const getSectorBlocks = computed(() =>
         store.getters.getSectorBlocks.map((block) => {
           return {
@@ -501,9 +522,6 @@
           return;
         }
 
-        const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
-        const relatedOrderId = chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;
-
         state.waitingForServerResponse = true;
         store.dispatch('dispatchOrder', {
           type: props.orderType,
@@ -516,7 +534,7 @@
           dspToSend: state.dspSectorsToSendOrder,
           ecdToSend: state.ecdSectorsToSendOrder,
           otherToSend: state.otherSectorsToSendOrder,
-          prevOrderId: relatedOrderId,
+          prevOrderId: relatedOrderId.value,
           createdOnBehalfOf: state.createdOnBehalfOf,
         });
       };
@@ -533,6 +551,8 @@
         handleSubmit,
         getOrderPatterns,
         getActiveOrders,
+        relatedOrderObject,
+        getSectorStationOrBlockTitleById,
         getSectorStations,
         getSectorBlocks,
         selectedDSPString,

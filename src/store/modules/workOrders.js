@@ -104,6 +104,7 @@ function getWorkOrderObject(order) {
       id: order.workPoligon.id,
       type: order.workPoligon.type,
     } : null,
+    sendOriginal: order.sendOriginal,
   };
 }
 
@@ -120,6 +121,17 @@ export const workOrders = {
   },
 
   getters: {
+    getLoadingWorkOrdersStatus(state) {
+      return state.loadingWorkOrders;
+    },
+
+    getErrorLoadingWorkOrders(state) {
+      if (state.loadingWorkOrdersResult && state.loadingWorkOrdersResult.error) {
+        return state.loadingWorkOrdersResult.message;
+      }
+      return null;
+    },
+
     /**
      *
      */
@@ -205,6 +217,7 @@ export const workOrders = {
         .map((item, index) => {
           return {
             id: item._id,
+            sendOriginal: item.sendOriginal,
             type: item.type,
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
@@ -225,6 +238,13 @@ export const workOrders = {
      */
     getIncomingOrdersNumber(state) {
       return state.data.filter((item) => !item.confirmDateTime).length;
+    },
+
+    /**
+     *
+     */
+    getActiveOrders(state) {
+      return state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId);
     },
 
     /**
@@ -336,10 +356,53 @@ export const workOrders = {
       return state.data.filter((item) => item.confirmDateTime).length;
     },
 
+    /**
+     * Позволяет получить информацию о входящем уведомлении по id этого уведомления.
+     */
     getIncomingOrder(state) {
       return (id) => {
         return state.data.find((item) => item._id === id);
       };
+    },
+
+    /**
+     * Позволяет получить количество экземпляров не доставленных и находящихся в работе распоряжений.
+     */
+    getNotDeliveredOrdersNumber(state) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      let notDeliveredInstances = 0;
+      workingOrders.forEach((order) => {
+        if (order.dspToSend) {
+          notDeliveredInstances += order.dspToSend.filter((item) => !item.deliverDateTime).length;
+        }
+        if (order.dncToSend) {
+          notDeliveredInstances += order.dncToSend.filter((item) => !item.deliverDateTime).length;
+        }
+        if (order.ecdToSend) {
+          notDeliveredInstances += order.ecdToSend.filter((item) => !item.deliverDateTime).length;
+        }
+      })
+      return notDeliveredInstances;
+    },
+
+    /**
+     * Позволяет получить количество экземпляров не подтвержденных и находящихся в работе распоряжений.
+     */
+    getNotConfirmedOrdersNumber(state) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      let notConfirmedInstances = 0;
+      workingOrders.forEach((order) => {
+        if (order.dspToSend) {
+          notConfirmedInstances += order.dspToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        if (order.dncToSend) {
+          notConfirmedInstances += order.dncToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        if (order.ecdToSend) {
+          notConfirmedInstances += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+      })
+      return notConfirmedInstances;
     },
   },
 
@@ -464,7 +527,9 @@ export const workOrders = {
         context.commit('setNewWorkOrdersArray', response.data);
         context.dispatch('reportOnOrdersDelivery', response.data);
       } catch ({ response }) {
-        context.commit('setLoadingWorkOrdersResult', { error: false, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setLoadingWorkOrdersResult', { error: true, message: errMessage });
       }
       context.commit('setLoadingWorkOrdersStatus', false);
     },
@@ -497,13 +562,15 @@ export const workOrders = {
         );
         context.commit('setReportOnOrdersDeliveryResult', { error: false, message: response.data.message });
       } catch ({ response }) {
-        context.commit('setReportOnOrdersDeliveryResult', { error: true, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при сообщении серверу о доставке распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setReportOnOrdersDeliveryResult', { error: true, message: errMessage });
       }
       context.commit('setReportingOnOrderDeliveryStatus', false);
     },
 
     /**
-     *
+     * Позволяет для данного входящего уведомления выставить статус "подтверждено" на сервере.
      */
     async confirmOrder(context, { orderId }) {
       context.commit('setConfirmingOrderStatus', true);
@@ -525,7 +592,9 @@ export const workOrders = {
         context.commit('setConfirmOrderResult', { error: false, message: response.data.message });
         context.commit('setOrderConfirmed', { orderId: response.data.id, confirmDateTime });
       } catch ({ response }) {
-        context.commit('setConfirmOrderResult', { error: true, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при попытке подтвердить распоряжение на сервере';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setConfirmOrderResult', { error: true, message: errMessage });
       }
       context.commit('setConfirmingOrderStatus', false);
     },

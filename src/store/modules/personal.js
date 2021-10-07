@@ -597,7 +597,6 @@ export const personal = {
         }
         context.state.sectorPersonal = shiftPersonal || {};
       } catch (err) {
-        console.log(err)
         context.state.errorLoadingCurrShift = err;
       }
       context.state.loadingCurrShift = false;

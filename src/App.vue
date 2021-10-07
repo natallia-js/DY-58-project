@@ -39,7 +39,7 @@
 
       onMounted(() => {
         timerId = setInterval(updateCurrDateTime, 1000);
-        updateDataTimerId = setInterval(updateAppState, 5000);
+        updateDataTimerId = setInterval(updateAppState, 10000);
       });
 
       onUnmounted(() => {

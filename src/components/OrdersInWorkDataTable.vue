@@ -10,8 +10,12 @@
     >
       <template #header>
         <div class="dy58-table-title">
+          <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
           {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
           <Badge :value="getWorkingOrdersNumber"></Badge>
+          <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
+            {{ getErrorLoadingWorkOrders }}
+          </p>
         </div>
       </template>
 
@@ -61,7 +65,7 @@
       </Column>
 
       <template #expansion="slotProps">
-        <div class="p-grid" style="width:100%">
+        <div class="p-grid" style="width:100%;background:var(--dy58-expand-row-bg-color);margin:0;">
           <div class="p-col" v-html="slotProps.data.orderText">
           </div>
           <div class="p-col">
@@ -110,6 +114,8 @@
 
     computed: {
       ...mapGetters([
+        'getLoadingWorkOrdersStatus',
+        'getErrorLoadingWorkOrders',
         'getWorkingOrders',
         'getWorkingOrdersNumber',
         'isDSP',

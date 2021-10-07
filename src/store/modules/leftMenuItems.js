@@ -1,12 +1,18 @@
 export const leftMenuItems = {
   getters: {
-    getDSPLeftMenuItems(_state, getters) {
+    getCommonLeftMenuItems(_state, getters) {
       return [
         { label: 'Входящие за смену' },
         { label: 'Не подтверждено', itemClass: 'dy58-subitem dy58-important-item', info: getters.getIncomingOrdersNumber },
-        { label: 'Документы в работе' },
-        { label: 'В доставке', itemClass: 'dy58-subitem dy58-important-item' },
-        { label: 'Не доставленные', itemClass: 'dy58-subitem dy58-important-item' },
+        { label: 'Документы в работе', info: getters.getWorkingOrdersNumber },
+        { label: 'Не доставлено экземпляров', itemClass: 'dy58-subitem dy58-important-item', info: getters.getNotDeliveredOrdersNumber },
+        { label: 'Не подтверждено экземпляров', itemClass: 'dy58-subitem dy58-important-item', info: getters.getNotConfirmedOrdersNumber },
+      ];
+    },
+
+    getDSPLeftMenuItems(_state, getters) {
+      return [
+        ...getters.getCommonLeftMenuItems,
         /*{ label: 'Действующие' },
         { label: 'Не отмененные', itemClass: 'dy58-subitem' },
         { label: 'Черновики' },*/
@@ -15,11 +21,7 @@ export const leftMenuItems = {
 
     getDNCLeftMenuItems(_state, getters) {
       return [
-        { label: 'Входящие за смену' },
-        { label: 'Не подтверждено', itemClass: 'dy58-subitem dy58-important-item', info: getters.getIncomingOrdersNumber },
-        { label: 'Распоряжения в работе' },
-        { label: 'В доставке', itemClass: 'dy58-subitem dy58-important-item' },
-        { label: 'Не доставленные', itemClass: 'dy58-subitem dy58-important-item' },
+        ...getters.getCommonLeftMenuItems,
         /*{ label: 'Поезда ВМ' },
         { label: 'Поезда ПВ' },
         { label: 'Поезда ПД' },
@@ -33,11 +35,7 @@ export const leftMenuItems = {
 
     getECDLeftMenuItems(_state, getters) {
       return [
-        { label: 'Входящие за смену' },
-        { label: 'Не подтверждено', itemClass: 'dy58-subitem dy58-important-item', info: getters.getIncomingOrdersNumber },
-        { label: 'Распоряжения в работе' },
-        { label: 'В доставке', itemClass: 'dy58-subitem dy58-important-item' },
-        { label: 'Не доставленные', itemClass: 'dy58-subitem dy58-important-item' },
+        ...getters.getCommonLeftMenuItems,
         /*{ label: 'Действующие' },
         { label: 'Разрешение', itemClass: 'dy58-subitem' },
         { label: 'Запрещение на ЭПС', itemClass: 'dy58-subitem' },

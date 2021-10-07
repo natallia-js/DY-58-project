@@ -344,7 +344,7 @@ export const orderPatterns = {
       context.commit('clearLoadingOrderPatternsResult');
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit('setLoadingOrderPatternsResult', { error: true, message: 'No user work poligon' });
+        context.commit('setLoadingOrderPatternsResult', { error: true, message: 'Не определен рабочий полигон пользователя' });
         return;
       }
       try {
@@ -361,7 +361,9 @@ export const orderPatterns = {
         context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
         context.commit('setNewOrderPatternsArray', response.data);
       } catch ({ response }) {
-        context.commit('setLoadingOrderPatternsResult', { error: true, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при получении информации о шаблонах распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setLoadingOrderPatternsResult', { error: true, message: errMessage });
       }
       context.commit('setLoadingOrderPatternsStatus', false);
     },
@@ -392,9 +394,11 @@ export const orderPatterns = {
           newTitle: response.data.newTitle,
         });
       } catch ({ response }) {
+        const defaultErrMessage = 'Произошла неизвестная ошибка при редактировании наименования категории распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
         context.commit('setModifyOrderCategoryTitleResult', {
           error: true,
-          message: response.data.message,
+          message: errMessage,
           newTitle: null,
         });
       }
@@ -418,7 +422,9 @@ export const orderPatterns = {
         context.commit('setDelOrderPatternResult', { error: false, message: response.data.message });
         context.commit('delOrderPattern', orderPatternId);
       } catch ({ response }) {
-        context.commit('setDelOrderPatternResult', { error: true, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при удалении шаблона распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setDelOrderPatternResult', { error: true, message: errMessage });
       }
       context.commit('subDelOrderPatternRecsBeingProcessed');
     },
@@ -447,9 +453,11 @@ export const orderPatterns = {
           newOrderPattern: response.data.orderPattern,
         });
       } catch ({ response }) {
+        const defaultErrMessage = 'Произошла неизвестная ошибка при редактировании шаблона распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
         context.commit('setModOrderPatternResult', {
           error: true,
-          message: response.data.message,
+          message: errMessage,
           orderPattern: null,
         });
       }
@@ -464,7 +472,7 @@ export const orderPatterns = {
       context.commit('addCreateOrderPatternRecsBeingProcessed');
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit('setCreateOrderPatternResult', { error: true, message: 'No user work poligon' });
+        context.commit('setCreateOrderPatternResult', { error: true, message: 'Не определен рабочий полигон пользователя' });
         return;
       }
       try {
@@ -487,7 +495,9 @@ export const orderPatterns = {
         context.commit('setCreateOrderPatternResult', { error: false, message: response.data.message });
         context.commit('addNewOrderPattern', response.data.orderPattern);
       } catch ({ response }) {
-        context.commit('setCreateOrderPatternResult', { error: true, message: response.data.message });
+        const defaultErrMessage = 'Произошла неизвестная ошибка при создании шаблона распоряжений';
+        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+        context.commit('setCreateOrderPatternResult', { error: true, message: errMessage });
       }
       context.commit('subCreateOrderPatternRecsBeingProcessed');
     },

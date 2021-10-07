@@ -95,3 +95,8 @@
   grid-template-columns: repeat(3, 1fr);
   grid-row-gap: 5px;
 }
+
+.p-datatable.p-datatable-sm .p-datatable-tbody > tr > td {
+  padding: 0 !important;
+  margin: 0 !important;
+}
