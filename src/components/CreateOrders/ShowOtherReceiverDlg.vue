@@ -6,21 +6,21 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
+    <form @submit.prevent="handleFormSubmit(!vv$.$invalid)" class="p-grid">
       <!-- МЕСТО ОТПРАВКИ РАСПОРЯЖЕНИЯ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
-        <label for="placeTitle" :class="{'p-error':v$.placeTitle.$invalid && submitted}">
+        <label for="placeTitle" :class="{'p-error':vv$.placeTitle.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Куда</span>
         </label>
         <allow-clear-input-text
           id="placeTitle"
-          :value="v$.placeTitle.$model"
-          @input="v$.placeTitle.$model = $event"
+          :value="vv$.placeTitle.$model"
+          @input="vv$.placeTitle.$model = $event"
           style="width:100%"
-          :inputClass="{'p-invalid':v$.placeTitle.$invalid && submitted}"
+          :inputClass="{'p-invalid':vv$.placeTitle.$invalid && submitted}"
         />
         <small
-          v-if="(v$.placeTitle.$invalid && submitted) || v$.placeTitle.$pending.$response"
+          v-if="(vv$.placeTitle.$invalid && submitted) || vv$.placeTitle.$pending.$response"
           class="p-error"
         >
           Не определено место отправки распоряжения
@@ -28,18 +28,18 @@
       </div>
       <!-- ДОЛЖНОСТЬ ЛИЦА, КОТОРОМУ АДРЕСУЕТСЯ РАСПОРЯЖЕНИЕ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
-        <label for="post" :class="{'p-error':v$.post.$invalid && submitted}">
+        <label for="post" :class="{'p-error':vv$.post.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Должность</span>
         </label>
         <allow-clear-input-text
           id="post"
-          :value="v$.post.$model"
-          @input="v$.post.$model = $event"
+          :value="vv$.post.$model"
+          @input="vv$.post.$model = $event"
           style="width:100%"
-          :inputClass="{'p-invalid':v$.post.$invalid && submitted}"
+          :inputClass="{'p-invalid':vv$.post.$invalid && submitted}"
         />
         <small
-          v-if="(v$.post.$invalid && submitted) || v$.post.$pending.$response"
+          v-if="(vv$.post.$invalid && submitted) || vv$.post.$pending.$response"
           class="p-error"
         >
           Не определена должность
@@ -47,15 +47,15 @@
       </div>
       <!-- ФИО ЛИЦА, КОТОРОМУ АДРЕСУЕТСЯ РАСПОРЯЖЕНИЕ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
-        <label for="fio" :class="{'p-error':v$.fio.$invalid && submitted}">
+        <label for="fio" :class="{'p-error':vv$.fio.$invalid && submitted}">
           <span class="p-text-bold">ФИО</span>
         </label>
         <allow-clear-input-text
           id="fio"
-          :value="v$.fio.$model"
-          @input="v$.fio.$model = $event"
+          :value="vv$.fio.$model"
+          @input="vv$.fio.$model = $event"
           style="width:100%"
-          :inputClass="{'p-invalid':v$.fio.$invalid && submitted}"
+          :inputClass="{'p-invalid':vv$.fio.$invalid && submitted}"
         />
       </div>
       <div class="p-field p-col-12 p-d-flex p-jc-end">
@@ -113,7 +113,7 @@
 
       const submitted = ref(false);
 
-      const v$ = useVuelidate(rules, state);
+      const vv$ = useVuelidate(rules, state);
 
       const showDlgProp = computed(() => props.showDlg);
 
@@ -127,7 +127,7 @@
         }
       });
 
-      const handleSubmit = (isFormValid) => {
+      const handleFormSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
           return;
@@ -147,9 +147,9 @@
 
       return {
         state,
-        v$,
+        vv$,
         submitted,
-        handleSubmit,
+        handleFormSubmit,
         closeDialog,
       };
     },

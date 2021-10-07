@@ -7,7 +7,7 @@
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения/заявки/уведомления. Ожидаю ответ...
       </div>
-      <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
+      <form @submit.prevent="handleSubmit()" class="p-grid">
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
         <div class="p-field p-col-4 p-d-flex p-flex-column">
           <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
@@ -144,7 +144,7 @@
     <!-- АДРЕСАТЫ -->
     <div class="p-col-6">
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
-      <p class="p-mb-2">(адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ)</p>
+      <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
       <Accordion :multiple="true">
         <AccordionTab v-if="orderType !== getOrderTypes.NOTIFICATION">
           <template #header>
@@ -187,48 +187,6 @@
           />
         </AccordionTab>
       </Accordion>
-      <small
-            v-if="v$.prevRelatedOrder && ((v$.prevRelatedOrder.$invalid && submitted) || v$.prevRelatedOrder.$pending.$response)"
-            class="p-error"
-          >
-            prevRelatedOrder
-          </small>
-          <small
-            v-if="v$.createdOnBehalfOf && ((v$.createdOnBehalfOf.$invalid && submitted) || v$.createdOnBehalfOf.$pending.$response)"
-            class="p-error"
-          >
-            createdOnBehalfOf
-          </small>
-          <small
-            v-if="v$.createDateTimeString && ((v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response)"
-            class="p-error"
-          >
-            createDateTimeString
-          </small>
-          <small
-            v-if="v$.dncSectorsToSendOrder && ((v$.dncSectorsToSendOrder.$invalid && submitted) || v$.dncSectorsToSendOrder.$pending.$response)"
-            class="p-error"
-          >
-            dncSectorsToSendOrder
-          </small>
-          <small
-            v-if="v$.dspSectorsToSendOrder && ((v$.dspSectorsToSendOrder.$invalid && submitted) || v$.dspSectorsToSendOrder.$pending.$response)"
-            class="p-error"
-          >
-            dspSectorsToSendOrder
-          </small>
-          <small
-            v-if="v$.ecdSectorsToSendOrder && ((v$.ecdSectorsToSendOrder.$invalid && submitted) || v$.ecdSectorsToSendOrder.$pending.$response)"
-            class="p-error"
-          >
-            ecdSectorsToSendOrder
-          </small>
-          <small
-            v-if="v$.otherSectorsToSendOrder && ((v$.otherSectorsToSendOrder.$invalid && submitted) || v$.otherSectorsToSendOrder.$pending.$response)"
-            class="p-error"
-          >
-            otherSectorsToSendOrder
-          </small>
     </div>
   </div>
 </template>
@@ -335,10 +293,10 @@
           orderText: { required },
         },
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        dncSectorsToSendOrder: { minLength: minLength(0) },
-        dspSectorsToSendOrder: { minLength: minLength(0) },
-        ecdSectorsToSendOrder: { minLength: minLength(0) },
-        otherSectorsToSendOrder: { minLength: minLength(0) },
+        dncSectorsToSendOrder: { minLength: minLength(1) },
+        dspSectorsToSendOrder: { minLength: minLength(1) },
+        ecdSectorsToSendOrder: { minLength: minLength(1) },
+        otherSectorsToSendOrder: { minLength: minLength(1) },
       };
 
       const placeRules = {
@@ -516,32 +474,25 @@
       /**
        * Издание распоряжения (отправка и сервер и передача всем причастным).
        */
-      const handleSubmit = (isFormValid) => {
-        console.log(v$.value.$invalid, v$.value.number ? v$.value.number.$invalid : 'v$.number',
-        v$.value.createDateTime ? v$.value.createDateTime.$invalid : 'v$.createDateTime',
-        v$.value.createDateTimeString ? v$.value.createDateTimeString.$invalid : 'v$.createDateTimeString',
-        v$.value.orderText ? {
-        1: v$.value.orderText.orderTextSource ? v$.value.orderText.orderTextSource.$invalid : 'v$.orderText.orderTextSource',
-          2: v$.value.orderText.orderTitle ? v$.value.orderText.orderTitle.$invalid : 'v$.orderText.orderTitle',
-          3: v$.value.orderText.orderText ? v$.value.orderText.orderText.$invalid : 'v$.orderText.orderText',
-        } : 'v$.orderText',
-        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        v$.value.dncSectorsToSendOrder ? v$.value.dncSectorsToSendOrder.$invalid : 'v$.dncSectorsToSendOrder',
-        v$.value.dspSectorsToSendOrder ? v$.value.dspSectorsToSendOrder.$invalid : 'v$.dspSectorsToSendOrder',
-        v$.value.ecdSectorsToSendOrder ? v$.value.ecdSectorsToSendOrder.$invalid : 'v$.ecdSectorsToSendOrder',
-        v$.value.otherSectorsToSendOrder ? v$.value.otherSectorsToSendOrder.$invalid : 'v$.otherSectorsToSendOrder',
-        v$.value.place ? {
-          1: v$.value.place.place ? v$.value.place.place.$invalid : 'v$.place.place',
-          2: v$.value.place.value ? v$.value.place.value.$invalid : 'v$.place.value',
-        } : 'v$.place',
-        v$.value.timeSpan ? {
-          1: v$.value.timeSpan.start ? v$.value.timeSpan.start.$invalid : 'v$.timeSpan.start',
-          2: v$.value.timeSpan.end ? v$.value.timeSpan.end.$invalid : 'v$.timeSpan.end',
-          3: v$.value.timeSpan.tillCancellation ? v$.value.timeSpan.tillCancellation.$invalid : 'v$.timeSpan.tillCancellation',
-        } : 'v$.timeSpan',
-        v$.value.prevRelatedOrder ? v$.value.prevRelatedOrder.$invalid : 'v$.prevRelatedOrder',
-        v$.value.createdOnBehalfOf ? v$.value.createdOnBehalfOf.$invalid : 'v$.createdOnBehalfOf',
-        );
+      const handleSubmit = () => {
+        // Здесь я столкулась с такой проблемой: у текущего компонента есть вложенный компонент
+        // OtherToSendOrderDataTable, у которого, в свою очередь, есть вложенная форма (в диалоговом
+        // окне). Попытка валидации текущей формы (т.е. текущего компонента) приводит к автоматической
+        // валидации формы того диалогового окна. Справится с этим простым переименованием переменных и
+        // методов не получается. Потому идея такова: если форма признана невалидной в результате
+        // валидации, то ищу те поля, на которые форма "ругается", и смотрю, есть ли они в списке тех
+        // полей, которые я заявила ранее на проверку. Если нет - то полагаю, что форма валидна.
+        v$.value.$touch();
+        v$.value.$validate();
+        let isFormValid = !v$.value.$invalid;
+        if (!isFormValid) {
+          const invalidProperties = v$.value.$errors.map((err) => err.$property);
+          const rulesProperties = Object.keys(rules);
+          const intersection = rulesProperties.filter((el) => invalidProperties.includes(el));
+          if (!intersection.length) {
+            isFormValid = true;
+          }
+        }
 
         submitted.value = true;
 
