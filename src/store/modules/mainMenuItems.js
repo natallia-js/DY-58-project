@@ -66,6 +66,20 @@ export const mainMenuItems = {
             icon: 'pi pi-exclamation-circle',
           };
         }
+        if (item.key === MainMenuItemsKeys.orderPatterns && getters.getLoadingOrderPatternsStatus) {
+          return {
+            ...item,
+            // На пункте меню "Шаблоны распоряжений" отображаем статус загрузки информации о шаблонах распоряжений
+            icon: 'pi pi-spin pi-spinner',
+          };
+        }
+        if (item.key === MainMenuItemsKeys.orderPatterns && getters.getErrorLoadingPatterns) {
+          return {
+            ...item,
+            // На пункте меню "Шаблоны распоряжений" отображаем факт ошибки загрузки информации о шаблонах распоряжений
+            icon: 'pi pi-exclamation-circle',
+          };
+        }
         return item;
       });
     },

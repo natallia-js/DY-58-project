@@ -39,6 +39,10 @@
 
     data() {
       return {
+        // массив элементов шаблона распоряжения, разбитый на подмассивы для удобства отображения
+        // (подмассив - один абзац исходного текста: от начала текста до элемента linebreak, либо от
+        // одного элемента linebreak до другого элемента linebreak, либо от элемента linebreak до
+        // конца текста)
         orderPatternArrays: [],
       };
     },
@@ -53,7 +57,6 @@
       getOrderPatternElementTypes() {
         return OrderPatternElementType;
       },
-
       getElementSizesCorrespondence() {
         return ElementSizesCorrespondence;
       },
@@ -64,17 +67,26 @@
     },
 
     watch: {
-      value: function(newVal) {
-        this.analyzeNewOrderPattern(newVal);
+      value: {
+        handler(newVal) {
+          this.analyzeNewOrderPattern(newVal);
+        },
       },
     },
 
     methods: {
+      /**
+       * Производит разбиение массива элементов текста распоряжения на подмассивы (отдельные абзацы).
+       */
       analyzeNewOrderPattern(newOrderPattern) {
         if (!newOrderPattern || !newOrderPattern.length) {
-          this.orderPatternArrays = [];
+          if (this.orderPatternArrays.length) {
+            this.orderPatternArrays = [];
+          }
           return;
         }
+        // Формируем массив массивов (учитываем разбиение на абзацы) элементов, которые
+        // необходимо отрисовать
         const linebreakElementsIndexes = [];
         newOrderPattern.forEach((element, index) => {
           if (element.type === OrderPatternElementType.LINEBREAK) {

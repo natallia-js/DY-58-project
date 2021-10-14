@@ -32,7 +32,7 @@ export const orderPatterns = {
     },
 
     getErrorLoadingPatterns(state) {
-      return state.errorLoadingPatterns;
+      return state.loadingOrderPatternsResult && state.loadingOrderPatternsResult.error;
     },
 
     getCurrentUserOrderCategories(state, getters) {
@@ -100,7 +100,7 @@ export const orderPatterns = {
             'pi pi-file' : 'pi pi-file-excel',
         };
       };
-      const orderCategoryNodeObject = (orderPattern) => {
+      const orderCategoryNodeObject = (orderPattern) => {console.log(state.patterns)
         return {
           label: orderPattern.category,
           key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
@@ -110,11 +110,12 @@ export const orderPatterns = {
             orderType: orderPattern.type,
           },
           // если значение personalCategory = true, то пользователь сможет отредактировать
-          // наименование категории распоряжений
-          personalCategory: /*state.patterns.find((item) =>
+          // наименование категории распоряжений; такое может быть лишь в том случае, если
+          // автором всех распоряжений категории является текущий пользователь
+          personalCategory: !state.patterns.find((item) =>
             item.service === orderPattern.service && item.type === orderPattern.type &&
             item.category === orderPattern.category && String(item.personalPattern) !== String(getters.getUserId)
-          ) ? false : */ true,
+          ),
           children: [orderPatternNodeObject(orderPattern)],
         };
       };
@@ -183,6 +184,10 @@ export const orderPatterns = {
       return state.modOrderPatternResult;
     },
 
+    getCreateOrderPatternRecsBeingProcessed(state) {
+      return state.createOrderPatternRecsBeingProcessed;
+    },
+
     getCreateOrderPatternResult(state) {
       return state.createOrderPatternResult;
     },
@@ -192,7 +197,6 @@ export const orderPatterns = {
     delCurrOrderPatternsData(state) {
       state.patterns = [];
       state.loadingOrderPatterns = false;
-      state.errorLoadingPatterns = null;
       state.modifyOrderCategoryTitleResult = null;
       state.modifyOrderCategoryTitleRecsBeingProcessed = 0;
       state.delOrderPatternResult = null;
@@ -355,9 +359,10 @@ export const orderPatterns = {
           {
             workPoligonType: workPoligon.type,
             workPoligonId: workPoligon.code,
+            getChildPatterns: true,
           },
           { headers }
-        );
+        );console.log(response.data)
         context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
         context.commit('setNewOrderPatternsArray', response.data);
       } catch ({ response }) {

@@ -4,6 +4,7 @@ import { filterObj } from '../../additional/filterObject';
 import { ReceiversPosts, WorkMessStates, RECENTLY } from '../../constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '../../additional/dateTimeConvertions';
 import { formOrderText } from '../../additional/formOrderText';
+import { OrderPatternElementType } from '../../constants/orderPatterns';
 
 const InputMessTblColumnsTitles = Object.freeze({
   state: 'state',
@@ -32,6 +33,22 @@ const WorkMessReceiversTblColumnsTitles = Object.freeze({
   post: 'post',
   fio: 'fio',
 });
+
+function getOrderTextElementTypedValue(element) {
+  if (!element) {
+    return;
+  }
+  switch (element.type) {
+    case OrderPatternElementType.DATE:
+    case OrderPatternElementType.TIME:
+    case OrderPatternElementType.DATETIME:
+      return new Date(element.value);
+    case OrderPatternElementType.DR_TRAIN_TABLE:
+      return element.value;
+    default:
+      return element.value;
+  }
+}
 
 function getWorkOrderObject(order) {
   return {
@@ -87,7 +104,16 @@ function getWorkOrderObject(order) {
     }),
     nextRelatedOrderId: order.nextRelatedOrderId,
     number: order.number,
-    orderText: order.orderText,
+    orderText: !order.orderText ? null : {
+      ...order.orderText,
+      orderText: !order.orderText.orderText ? null :
+        order.orderText.orderText.map((el) => {
+          return {
+            ...el,
+            value: getOrderTextElementTypedValue(el),
+          };
+        })
+    },
     place: order.place ? { place: order.place.place, value: +order.place.value } : null,
     senderWorkPoligon: order.senderWorkPoligon ? {
       id: order.senderWorkPoligon.id,

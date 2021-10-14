@@ -1,17 +1,17 @@
 <template>
   <span v-if="element.type === getOrderPatternElementTypes.TEXT">
-    {{ element.value }}
+    {{ elementModelValue }}
   </span>
   <InputText
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
-    :modelValue="element.value"
+    v-model="elementModelValue"
     @input="handleChangeInputText"
   />
   <Dropdown
     v-else-if="element.type === getOrderPatternElementTypes.SELECT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
-    :modelValue="element.value"
+    v-model="elementModelValue"
     @input="handleChangeInputText"
   />
   <Calendar
@@ -82,7 +82,6 @@
 
     data() {
       return {
-        orderPatternArrays: [],
         elementModelValue: null,
       };
     },
@@ -96,6 +95,17 @@
       },
       getDRTrainTableColumns() {
         return DRTrainTableColumns;
+      },
+    },
+
+    watch: {
+      element: {
+        deep: true, // для отслеживания изменения значения поля value объекта element в родительском компоненте
+        handler(newVal) {
+          if (newVal) {
+            this.elementModelValue = newVal.value;
+          }
+        },
       },
     },
 

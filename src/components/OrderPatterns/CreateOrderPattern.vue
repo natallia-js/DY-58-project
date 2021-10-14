@@ -4,11 +4,11 @@
   <div class="p-grid">
     <div class="p-col-4">
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
-        <div v-if="!state.waitingForServerResponse" class="p-col-12 p-text-right">
+        <div v-if="getCreateOrderPatternRecsBeingProcessed === 0" class="p-col-12 p-text-right">
           <Button type="submit" label="Создать шаблон" />
         </div>
-        <div v-else class="p-col-12">
-          <ProgressSpinner />
+        <div v-else class="p-col-12 dy58-warning">
+          На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона распоряжения. Ожидаю ответ...
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="service" :class="{'p-error': v$.service.$invalid && submitted}">
@@ -156,8 +156,6 @@
         orderTitle: '',
         orderPattern: [],
         insertOrderElementPos: 0,
-        // true - ожидается ответ сервера на запрос о создании шаблона, false - запроса не ожидается
-        waitingForServerResponse: false,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
         // запроса о создании нового шаблона распоряжения
         orderPatternFieldsErrs: null,
@@ -180,6 +178,10 @@
           .map((item) => item.category)
       );
 
+      const getCreateOrderPatternRecsBeingProcessed = computed(() => {
+        return store.getters.getCreateOrderPatternRecsBeingProcessed;
+      });
+
       const createOrderPatternResult = computed(() => {
         return store.getters.getCreateOrderPatternResult;
       });
@@ -188,7 +190,6 @@
        *
        */
       watch(createOrderPatternResult, (newVal) => {
-        state.waitingForServerResponse = false;
         if (!newVal) {
           return;
         }
@@ -204,12 +205,9 @@
        */
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
-
         if (!isFormValid) {
           return;
         }
-
-        state.waitingForServerResponse = true;
         store.dispatch('createOrderPattern', {
           service: state.service,
           type: state.orderType,
@@ -324,6 +322,7 @@
         orderCategories,
         v$,
         submitted,
+        getCreateOrderPatternRecsBeingProcessed,
         handleSubmit,
         handleAddOrderPatternElement,
         handleDelOrderPatternElement,

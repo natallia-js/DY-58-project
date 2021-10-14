@@ -44,6 +44,9 @@
       <div v-if="getModOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
         На сервер отправлено {{ getModOrderPatternRecsBeingProcessed }} запросов на редактирование шаблона распоряжения. Ожидаю ответ...
       </div>
+      <div v-if="getCreateOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
+        На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона распоряжения. Ожидаю ответ...
+      </div>
 
       <div v-if="selectedOrderCategory && selectedOrderCategory.personalCategory">
         <div class="dy58-title-small p-mb-4">
@@ -185,6 +188,7 @@
         'getDelOrderPatternRecsBeingProcessed',
         'getModOrderPatternResult',
         'getModOrderPatternRecsBeingProcessed',
+        'getCreateOrderPatternRecsBeingProcessed',
       ]),
     },
 

@@ -30,13 +30,13 @@ export function formOrderText(props) {
       case OrderPatternElementType.SELECT:
         break;
       case OrderPatternElementType.DATE:
-        substring = getLocaleDateString(new Date(currVal.value));
+        substring = getLocaleDateString(currVal.value);
         break;
       case OrderPatternElementType.TIME:
-        substring = getLocaleTimeString(new Date(currVal.value));
+        substring = getLocaleTimeString(currVal.value);
         break;
       case OrderPatternElementType.DATETIME:
-        substring = getLocaleDateTimeString(new Date(currVal.value), false);
+        substring = getLocaleDateTimeString(currVal.value, false);
         break;
       case OrderPatternElementType.DR_TRAIN_TABLE:
         break;

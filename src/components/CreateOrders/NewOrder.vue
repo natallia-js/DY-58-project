@@ -49,7 +49,7 @@
           class="p-field p-col-12 p-d-flex p-flex-column"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
-            <span class="p-text-bold">На распоряжение</span>
+            <span class="p-text-bold">На распоряжение{{orderType === getOrderTypes.ECD_NOTIFICATION ? '/запрещение' : ''}}</span>
           </label>
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
@@ -57,8 +57,33 @@
             :options="getActiveOrders"
             style="width:100%"
           />
-          <div v-if="relatedOrderObject">
-            Перегон / станция {{ getSectorStationOrBlockTitleById(relatedOrderObject.place.value) }}
+          <div v-if="relatedOrderObject" class="p-mt-2">
+            <p v-if="getSectorStationOrBlockTitleById">
+              Станция/Перегон действия: {{ getSectorStationOrBlockTitleById }}
+            </p>
+            <p v-if="relatedOrderObjectStartDateTimeString">
+              Время начала действия: {{ relatedOrderObjectStartDateTimeString }}
+            </p>
+            <div v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-mb-2 p-mt-2">
+              <label for="cancelOrderDateTime" :class="{'p-error':v$.cancelOrderDateTime.$invalid && submitted}">
+                <span class="p-text-bold">Отменяется с &#160;</span>
+              </label>
+              <Calendar
+                :showTime="true"
+                hourFormat="24"
+                :hideOnDateTimeSelect="true"
+                :showIcon="true"
+                :manualInput="false"
+                v-model="v$.cancelOrderDateTime.$model"
+              />
+              <br/>
+              <small
+                v-if="(v$.cancelOrderDateTime.$invalid && submitted) || v$.cancelOrderDateTime.$pending.$response"
+                class="p-error"
+              >
+                Не определены дата и время отмены распоряжения
+              </small>
+            </div>
           </div>
         </div>
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
@@ -111,8 +136,9 @@
           <order-text
             id="orderText"
             :value="v$.orderText.$model"
-            :orderPatterns="getOrderPatterns"
             @input="v$.orderText.$model = $event"
+            :orderPatterns="getOrderPatterns"
+            :parentOrderText="relatedOrderObject ? relatedOrderObject.orderText : null"
           />
           <small
             v-if="(v$.orderText.$invalid && submitted) || v$.orderText.$pending.$response"
@@ -211,6 +237,7 @@
   import { CurrShiftGetOrderStatus } from '../../constants/orders';
   import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
   import { useToast } from 'primevue/usetoast';
+  import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-new-order-block',
@@ -242,6 +269,7 @@
         createDateTime: store.getters.getCurrDateTime,
         createDateTimeString: store.getters.getCurrDateString,
         prevRelatedOrder: null,
+        cancelOrderDateTime: null,
         place: {
           place: null,
           value: null,
@@ -253,10 +281,10 @@
         },
         orderText: {
           orderTextSource: null,
+          patternId: null,
           orderTitle: null,
           orderText: null,
         },
-        selectedPattern: null,
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
         ecdSectorsToSendOrder: [],
@@ -292,6 +320,7 @@
         createDateTimeString: { required },
         orderText: {
           orderTextSource: { required },
+          patternId: {},
           orderTitle: { required },
           orderText: { required },
         },
@@ -321,9 +350,8 @@
           rules.prevRelatedOrder = {};
           break;
         case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
-          rules.place = placeRules;
-          rules.timeSpan = timeSpanRules;
           rules.prevRelatedOrder = { required };
+          rules.cancelOrderDateTime = { required };
           break;
         case ORDER_PATTERN_TYPES.REQUEST:
         case ORDER_PATTERN_TYPES.NOTIFICATION:
@@ -380,9 +408,21 @@
         return store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value);
       });
 
+      const relatedOrderObjectStartDateTimeString = computed(() => {
+        if (!relatedOrderObject.value || !relatedOrderObject.value.timeSpan) {
+          return null;
+        }
+        return getLocaleDateTimeString(relatedOrderObject.value.timeSpan.start);
+      });
+
       const getOrderInputTypes = computed(() => OrderInputTypes);
 
-      const getSectorStationOrBlockTitleById = computed(() => store.getters.getSectorStationOrBlockTitleById);
+      const getSectorStationOrBlockTitleById = computed(() => {
+        if (relatedOrderObject.value && relatedOrderObject.value.place) {
+          return store.getters.getSectorStationOrBlockTitleById(relatedOrderObject.value.place.value);
+        }
+        return '?';
+      });
 
       const getSectorStations = computed(() =>
         store.getters.getSectorStations.map((station) => {
@@ -528,7 +568,11 @@
           number: state.number,
           createDateTime: state.createDateTime,
           place: state.place.place ? state.place : null,
-          timeSpan: state.timeSpan.start ? state.timeSpan : null,
+          timeSpan: state.timeSpan.start
+            ? state.timeSpan
+            : state.cancelOrderDateTime
+              ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false}
+              : null,
           orderText: state.orderText,
           dncToSend: state.dncSectorsToSendOrder,
           dspToSend: state.dspSectorsToSendOrder,
@@ -552,6 +596,7 @@
         getOrderPatterns,
         getActiveOrders,
         relatedOrderObject,
+        relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
         getSectorStations,
         getSectorBlocks,

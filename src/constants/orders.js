@@ -17,3 +17,8 @@ export const ReceiversPosts = Object.freeze({
   DSP: 'ДСП',
   ECD: 'ЭЦД',
 });
+
+export const ORDER_TEXT_SOURCE = Object.freeze({
+  pattern: 'pattern',
+  nopattern: 'nopattern',
+});

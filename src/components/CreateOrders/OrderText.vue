@@ -58,6 +58,7 @@
   import { useStore } from 'vuex';
   import OrderPatternText from './OrderPatternText';
   import { OrderPatternElementType } from '../../constants/orderPatterns';
+  import { ORDER_TEXT_SOURCE } from '../../constants/orders';
 
   export default {
     name: 'dy58-order-text',
@@ -69,18 +70,24 @@
     emits: ['input'],
 
     props: {
+      // Объект информации о распоряжении (не используется для анализа и отображения, нужен лишь
+      // для того, чтобы "наверху" можно было сделать аналог v-model)
+      value: {
+        type: Object,
+      },
+      // список шаблонов распоряжений для отображения
       orderPatterns: {
         type: Array,
       },
+      // объект родительского распоряжения (если указан, то его поля используются для
+      // заполнения полей текущего выбранного текста распоряжения)
+      parentOrderText: {
+        type: Object,
+      },
     },
 
-    setup(_props, { emit }) {
+    setup(props, { emit }) {
       const store = useStore();
-
-      const ORDER_TEXT_SOURCE = {
-        pattern: 'pattern',
-        nopattern: 'nopattern',
-      };
 
       const state = reactive({
         // источник текста распоряжения (шаблон либо не шаблон)
@@ -93,15 +100,67 @@
         orderText: '',
       });
 
+      // возвращает объект выбранного из списка шаблона распоряжения
       const getSelectedOrderPattern = computed(() =>
         state.orderPattern ? store.getters.getOrderPatternById(Object.keys(state.orderPattern)[0]) : {}
       );
 
+      // для отслеживания изменения объекта родительского распоряжения
+      const parentOrderText = computed(() => props.parentOrderText);
+
+      // позволяет заполнить поля издаваемого распоряжения на основании полей выбранного предшествующего
+      // (родительского) распоряжения; возвращает логическое значение: true - если было найдено хотя бы
+      // одно родительское поле, на основании которого было заполнено соответствующее дочернее поле,
+      // false - если ни одно из дочерних полей на основании родительских полей заполнено не было
+      const fillChildOrderTextFieldsWithParentOrderTextFields = () => {
+        if (!parentOrderText.value || !parentOrderText.value.orderText || (parentOrderText.value.orderTextSource !== ORDER_TEXT_SOURCE.pattern) ||
+            (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) || !state.orderPatternText) {
+          return;
+        }
+        const parentPattern = store.getters.getOrderPatternById(parentOrderText.value.patternId);
+        if (!parentPattern || !parentPattern.childPatterns) {
+          return;
+        }
+        const parentChildRelations = parentPattern.childPatterns.find((relation) => relation.childPatternId === getSelectedOrderPattern.value._id);
+        if (!parentChildRelations) {
+          return;
+        }
+        let atLeastOneChange = false;
+        state.orderPatternText.forEach((element, index) => {
+          const parentMatch = parentChildRelations.patternsParamsMatchingTable.find((match) => match.childParamId === element._id);
+          if (parentMatch) {
+            const parentParam = parentOrderText.value.orderText.find((el) => el._id === parentMatch.baseParamId);
+            const parentParamValue = parentParam ? parentParam.value : null;
+            if (parentParamValue !== state.orderPatternText[index].value) {
+              state.orderPatternText[index].value = parentParamValue;
+              atLeastOneChange = true;
+            }
+          }
+        });
+        return atLeastOneChange;
+      };
+
+      // при изменении объекта родительского распоряжения принимаем меры по заполнению
+      // полей текста объекта дочернего распоряжения
+      watch(parentOrderText, () => {
+        const atLeastOneChildFieldFilled = fillChildOrderTextFieldsWithParentOrderTextFields();
+        if (atLeastOneChildFieldFilled) {
+          emit('input', {
+            orderTextSource: state.orderTextSource,
+            patternId: getSelectedOrderPattern.value._id,
+            orderTitle: getSelectedOrderPattern.value.title,
+            orderText: getSelectedOrderPattern.value.elements,
+          });
+        }
+      });
+
       const getCurrentOrderText = computed(() => state.orderText);
 
+      // реагируем на ввод текста бесшаблонного распоряжения
       watch(getCurrentOrderText, (newVal) =>
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: null,
           orderTitle: state.orderTitle,
           orderText: [{
             type: OrderPatternElementType.TEXT,
@@ -117,6 +176,7 @@
         }
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: state.orderPatternText,
         });
@@ -126,8 +186,10 @@
         state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => {
           return { ...element };
         });
+        fillChildOrderTextFieldsWithParentOrderTextFields();
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: getSelectedOrderPattern.value.elements,
         });
@@ -139,6 +201,7 @@
         }
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: null,
           orderTitle: state.orderTitle,
           orderText: [{
             type: OrderPatternElementType.TEXT,
@@ -151,6 +214,7 @@
       const handleChangeOrderTitle = (event) => {
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: null,
           orderTitle: event.target.value,
           orderText: [{
             type: OrderPatternElementType.TEXT,
@@ -160,7 +224,7 @@
         });
       };
 
-      const handleChangeOrderPatternElementValue = (event) => {
+      const handleChangeOrderPatternElementValue = (event) => {console.log('handleChangeOrderPatternElementValue')
         state.orderPatternText.forEach((element) => {
           if (element._id === event.elementId) {
             element.value = event.value;
@@ -168,6 +232,7 @@
         });
         emit('input', {
           orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: state.orderPatternText,
         });
