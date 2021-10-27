@@ -10,6 +10,7 @@ import { webSocket } from './modules/webSocket';
 import { lastOrdersParams } from './modules/lastOrdersParams';
 import { orders } from './modules/orders';
 import { workOrders } from './modules/workOrders';
+import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
 
 export const store = createStore({
   modules: {
@@ -24,5 +25,6 @@ export const store = createStore({
     lastOrdersParams,
     orders,
     workOrders,
+    orderPatternsElementsRefs,
   },
 });

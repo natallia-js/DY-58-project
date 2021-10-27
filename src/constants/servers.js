@@ -37,6 +37,7 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   getECDSectorsWorkPoligonsUsers: `${AUTH_SERVER_ADDRESS}/api/workPoligons/ecdSectors/definitData`,
 
   getOrderPatterns: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/data`,
+  getOrderPatternsElementsRefs: `${AUTH_SERVER_ADDRESS}/api/orderPatternElementRefs/data`,
   modOrderCategoryTitle: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/modCategoryTitle`,
   delOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/del`,
   modOrderPattern: `${AUTH_SERVER_ADDRESS}/api/orderPatterns/mod`,

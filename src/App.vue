@@ -72,12 +72,14 @@
         if (!workPoligonNew) {
           store.commit('delCurrWorkPoligonData');
           store.commit('delCurrOrderPatternsData');
+          store.commit('delOrderPatternsElementsRefs');
           if (state.wsClient) {
             state.wsClient.closeWSConnection();
           }
         } else {
           store.dispatch('loadCurrWorkPoligonData');
           store.dispatch('loadOrderPatterns');
+          store.dispatch('loadOrderPatternsElementsRefs');
           if (!state.wsClient) {
             state.wsClient = useWebSocket({ socketUrl: WS_SERVER_ADDRESS });
           }

@@ -18,26 +18,38 @@
         >
           Введите текст:
         </div>
-        <div v-else class="p-mb-1">Образец:</div>
+        <div v-else class="p-mb-1">Образец</div>
         <selected-pattern-element-view
           :element="selectedPatternElement"
           @changePatternElementValue="handleChangePatternElementValue"
         />
       </div>
-      <div
-        v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.INPUT ||
+      <div class="p-grid">
+        <div v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.INPUT ||
           selectedPatternElement.type === getOrderPatternElementTypesObject.SELECT"
-        class="p-grid"
-      >
-        <div class="p-col">
-          <span class="p-mr-2">Размер:</span>
+          class="p-col-fixed"
+          style="width:130px"
+        >
+          <div class="p-mb-1">Размер</div>
           <element-size-chooser
             :chosenSize="selectedPatternElement.size"
             @changeSize="(value) => handleChangePatternElementSize(value)"
           />
         </div>
+        <div v-if="selectedPatternElement.type !== getOrderPatternElementTypesObject.TEXT &&
+          selectedPatternElement.type !== getOrderPatternElementTypesObject.DR_TRAIN_TABLE &&
+          selectedPatternElement.type !== getOrderPatternElementTypesObject.LINEBREAK"
+          class="p-col"
+        >
+          <div class="p-mb-1">Смысловое значение</div>
+          <element-ref-chooser
+            :chosenRef="selectedPatternElement.ref"
+            :elementType="selectedPatternElement.type"
+            @changeRef="(value) => handleChangePatternElementRef(value)"
+          />
+        </div>
       </div>
-      <div>
+      <div class="p-mt-2">
         <Button type="button" :label="okButtonText" @click="handleSubmitOrderPatternElement" />
       </div>
     </div>
@@ -51,6 +63,7 @@
    */
   import SelectedPatternElementView from './SelectedPatternElementView';
   import ElementSizeChooser from './ElementSizeChooser';
+  import ElementRefChooser from './ElementRefChooser';
   import {
     OrderPatternElementType,
     OrderPatternElementTypeNames,
@@ -71,6 +84,7 @@
 
     components: {
       ElementSizeChooser,
+      ElementRefChooser,
       SelectedPatternElementView,
     },
 
@@ -194,6 +208,16 @@
         this.selectedPatternElement = {
           ...this.selectedPatternElement,
           size: newSize,
+        };
+      },
+
+      handleChangePatternElementRef(newRef) {
+        if (this.selectedPatternElement.ref === newRef) {
+          return;
+        }
+        this.selectedPatternElement = {
+          ...this.selectedPatternElement,
+          ref: newRef,
         };
       },
     },

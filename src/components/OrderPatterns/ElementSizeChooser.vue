@@ -1,6 +1,6 @@
 <template>
   <Dropdown
-    style="width:120"
+    style="width:100%"
     v-model="selectedSize"
     :options="getPossibleElementSizes"
     placeholder="Выберите размер элемента"

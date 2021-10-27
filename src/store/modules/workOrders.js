@@ -460,7 +460,9 @@ export const workOrders = {
     },
 
     clearConfirmOrderResult(state) {
-      state.orderConfirmResult = null;
+      if (state.orderConfirmResult) {
+        state.orderConfirmResult = null;
+      }
     },
 
     setConfirmingOrderStatus(state, status) {

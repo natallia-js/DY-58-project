@@ -7,13 +7,18 @@
     :style="{ width: getElementSizesCorrespondence[element.size] }"
     v-model="elementModelValue"
     @input="handleChangeInputText"
+    v-tooltip="element.ref"
+    :placeholder="element.ref"
   />
-  <Dropdown
-    v-else-if="element.type === getOrderPatternElementTypes.SELECT"
-    :style="{ width: getElementSizesCorrespondence[element.size] }"
-    v-model="elementModelValue"
-    @input="handleChangeInputText"
-  />
+  <div v-else-if="element.type === getOrderPatternElementTypes.SELECT" v-tooltip="element.ref">
+    <Dropdown
+      :style="{ width: getElementSizesCorrespondence[element.size] }"
+      v-model="elementModelValue"
+      @input="handleChangeInputText"
+      v-tooltip="element.ref"
+      :placeholder="element.ref"
+    />
+  </div>
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
     :showIcon="true"
@@ -22,6 +27,7 @@
     :manualInput="false"
     v-model="elementModelValue"
     @dateSelect="handleChangeDateTime"
+    v-tooltip="element.ref"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.TIME"
@@ -33,6 +39,7 @@
     placeholder="время"
     v-model="elementModelValue"
     @dateSelect="handleChangeDateTime"
+    v-tooltip="element.ref"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
@@ -43,6 +50,7 @@
     :manualInput="false"
     v-model="elementModelValue"
     @dateSelect="handleChangeDateTime"
+    v-tooltip="element.ref"
   />
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
