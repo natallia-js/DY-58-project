@@ -66,7 +66,11 @@
 
       <template #expansion="slotProps">
         <div class="p-grid" style="width:100%;background:var(--dy58-expand-row-bg-color);margin:0;">
-          <div class="p-col" v-html="slotProps.data.orderText">
+          <div class="p-col">
+            <div v-if="!slotProps.data.sendOriginal"><b>КОПИЯ</b></div>
+            <div class="dy58-order-pattern-border p-p-1" v-html="slotProps.data.orderText"></div>
+            <div><b>Из:</b> {{ slotProps.data.place }}</div>
+            <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
           </div>
           <div class="p-col">
             <DataTable :value="slotProps.data.receivers()">

@@ -100,7 +100,7 @@ export const orderPatterns = {
             'pi pi-file' : 'pi pi-file-excel',
         };
       };
-      const orderCategoryNodeObject = (orderPattern) => {console.log(state.patterns)
+      const orderCategoryNodeObject = (orderPattern) => {
         return {
           label: orderPattern.category,
           key: `${orderPattern.service}${orderPattern.type}${orderPattern.category}`,
@@ -362,7 +362,7 @@ export const orderPatterns = {
             getChildPatterns: true,
           },
           { headers }
-        );console.log(response.data)
+        );
         context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
         context.commit('setNewOrderPatternsArray', response.data);
       } catch ({ response }) {

@@ -22,3 +22,8 @@ export const ORDER_TEXT_SOURCE = Object.freeze({
   pattern: 'pattern',
   nopattern: 'nopattern',
 });
+
+export const ORDER_PLACE_VALUES = Object.freeze({
+  station: 'station',
+  span: 'span',
+});

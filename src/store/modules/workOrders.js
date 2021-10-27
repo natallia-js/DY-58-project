@@ -311,6 +311,7 @@ export const workOrders = {
         .map((item, index) => {
           return {
             id: item._id,
+            sendOriginal: item.sendOriginal,
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
             time: getTimeSpanString(item.timeSpan),
@@ -323,6 +324,9 @@ export const workOrders = {
               ecdToSend: item.ecdToSend,
               otherToSend: item.otherToSend,
             }),
+            place: item.senderWorkPoligon.title,
+            post: item.creator.post,
+            fio: item.creator.fio + (item.createdOnBehalfOf ? ` ( от имени ${item.createdOnBehalfOf})` : ''),
             orderReceiveStatus: {
               notDelivered:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0) +

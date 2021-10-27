@@ -235,7 +235,7 @@
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
   import { CurrShiftGetOrderStatus } from '../../constants/orders';
-  import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
+  import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '../../constants/orderPatterns';
   import { useToast } from 'primevue/usetoast';
   import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
 
@@ -314,6 +314,15 @@
 
       const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
+      const orderTextFieldsNotEmpty = (orderText) => {
+        for (let orderTextElement of orderText) {
+          if (orderTextElement.type !== OrderPatternElementType.LINEBREAK && !orderTextElement.value) {
+            return false;
+          }
+        }
+        return true;
+      };
+
       let rules = {
         number: { required },
         createDateTime: { required },
@@ -322,7 +331,7 @@
           orderTextSource: { required },
           patternId: {},
           orderTitle: { required },
-          orderText: { required },
+          orderText: { required, orderTextFieldsNotEmpty },
         },
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
         dncSectorsToSendOrder: { minLength: minLength(1) },
@@ -419,7 +428,10 @@
 
       const getSectorStationOrBlockTitleById = computed(() => {
         if (relatedOrderObject.value && relatedOrderObject.value.place) {
-          return store.getters.getSectorStationOrBlockTitleById(relatedOrderObject.value.place.value);
+          return store.getters.getSectorStationOrBlockTitleById({
+            placeType: relatedOrderObject.value.place.place,
+            id: relatedOrderObject.value.place.value,
+          });
         }
         return '?';
       });
@@ -608,6 +620,15 @@
       };
     },
   };
+
+  /*navigator.clipboard.readText()
+    .then(text => {
+      const obj = JSON.parse(text)
+      console.log('TEXT',obj);
+    })
+    .catch(err => {
+      console.log('Something went wrong', err);
+    })*/
 </script>
 
 

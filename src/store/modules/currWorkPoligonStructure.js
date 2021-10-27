@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
+import { ORDER_PLACE_VALUES } from '../../constants/orders';
 
 export const currWorkPoligonStructure = {
   state: {
@@ -58,20 +59,33 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * По заданному id станции / перегона (placeType) позволяет получить ее / его наименование.
+     * Данный метод имеет смысл вызывать лишь в том случае, если рабочий полигон - участок ДНЦ / ЭЦД.
+     * Если метод ничего не находит, то возвращает null.
      */
-    getSectorStationOrBlockTitleById: (_state, getters) => (id) => {
-      let place = getters.getSectorStations.find((station) => String(station.St_ID) === String(id));
-      if (place) {
-        return `${place.St_Title} (${place.St_UNMC})`;
-      }
-      place = getters.getSectorBlocks.find((block) => block.Bl_ID === id);
-      if (place) {
-        return place.Bl_Title;
+    getSectorStationOrBlockTitleById: (_state, getters) => ({ placeType, id }) => {
+      let place;
+      switch (placeType) {
+        case ORDER_PLACE_VALUES.station:
+          place = getters.getSectorStations.find((station) => String(station.St_ID) === String(id));
+          if (place) {
+            return `${place.St_Title} (${place.St_UNMC})`;
+          }
+          break;
+        case ORDER_PLACE_VALUES.span:
+          place = getters.getSectorBlocks.find((block) => block.Bl_ID === id);
+          if (place) {
+            return place.Bl_Title;
+          }
+          break;
       }
       return null;
     },
 
+    /**
+     * Возвращает список станций текущего полигона управления (если полигон управления -
+     * участок ДНЦ / ЭЦД).
+     */
     getSectorStations(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
         return [];
@@ -87,6 +101,10 @@ export const currWorkPoligonStructure = {
       return stations;
     },
 
+    /**
+     * Возвращает список станций текущего полигона управления (если полигон управления -
+     * участок ДНЦ / ЭЦД) с привязкой к соответствующему поездному участку).
+     */
     getSectorStationsWithTrainSectors(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
         return [];
@@ -113,6 +131,9 @@ export const currWorkPoligonStructure = {
       return stations;
     },
 
+    /**
+     *
+     */
     getSectorBlocks(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
         return [];
@@ -180,9 +201,25 @@ export const currWorkPoligonStructure = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsDefinitData,
-          { stationIds: [stationId] },
+          { stationIds: [stationId], includeSectors: true },
           { headers }
         );
+        /*const dncTrainSectorsIds = new Set();
+        if (response.dncTrainSectors) {
+          response.dncTrainSectors.forEach((sector) => dncTrainSectorsIds.add(sector.dncSectorId));
+        }
+        const ecdTrainSectorsIds = new Set();
+        if (response.ecdTrainSectors) {
+          response.ecdTrainSectors.forEach((sector) => ecdTrainSectorsIds.add(sector.ecdSectorId));
+        }
+        let sectorResponse;
+        for (let sectorId of dncTrainSectorsIds) {
+          sectorResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsDefinitData,
+            { sectorId },
+            { headers }
+          );
+        }
+        */
         context.state.station = !response.data || !response.data.length ? null : response.data[0];
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;

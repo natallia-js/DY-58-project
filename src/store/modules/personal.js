@@ -367,26 +367,33 @@ export const personal = {
      * online = true, для остальных online = false.
      */
     setOnlineShiftPersonal: (state, onlineUsersIds) => {
-      if (!onlineUsersIds || !onlineUsersIds.length) {
-        return;
-      }
       function setOnlineSectorsShift(sectorsArray) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
-            if (sector.people) {
-              sector.people.forEach((user) => {
-                user.online = onlineUsersIds.includes(user._id);
-              });
-              if (!sector.lastUserChoice) {
-                const onlineUser = sector.people.find((user) => user.online);
-                if (onlineUser) {
-                  sector.lastUserChoice = getUserFIOString({
-                    name: onlineUser.name,
-                    fatherName: onlineUser.fatherName,
-                    surname: onlineUser.surname,
-                  });
-                  sector.lastUserChoiceOnline = onlineUser.online;
-                }
+            if (!sector.people || !sector.people.length) {
+              return;
+            }
+            sector.people.forEach((user) => {
+              const userOnlineStatus = onlineUsersIds.includes(user._id);
+              if (user.online !== userOnlineStatus) {
+                user.online = userOnlineStatus;
+              }
+            });
+            if (!sector.lastUserChoiceId) {
+              const onlineUser = sector.people.find((user) => user.online);
+              if (onlineUser) {
+                sector.lastUserChoiceId = onlineUser._id;
+                sector.lastUserChoice = getUserFIOString({
+                  name: onlineUser.name,
+                  fatherName: onlineUser.fatherName,
+                  surname: onlineUser.surname,
+                });
+                sector.lastUserChoiceOnline = onlineUser.online;
+              }
+            } else {
+              const lastChosenUser = sector.people.find((user) => user._id === sector.lastUserChoiceId);
+              if (sector.lastUserChoiceOnline !== lastChosenUser.online) {
+                sector.lastUserChoiceOnline = lastChosenUser.online;
               }
             }
           });
@@ -398,9 +405,10 @@ export const personal = {
     },
 
     /**
-     * В качестве последнего выбора пользователя (среди персонала полигона управления)
-     * для каждого участка полигона определяет online-пользователя данного участка
-     * (первого в списке имеющихся online-пользователей).
+     * Данный метод создан специально для окна создания нового распоряжения.
+     * Он вызывается при открытии данного окна и позволяет заполнить таблицы в секции "Кому".
+     * Заполнение происходит путем определения для каждого участка / станции первого из
+     * online-пользователей данного участка / станции.
      */
     chooseOnlyOnlinePersonal(state) {
       function setOnlineSectorsShift(sectorsArray) {
@@ -409,6 +417,7 @@ export const personal = {
             if (sector.people) {
               const onlineUser = sector.people.find((user) => user.online);
               if (onlineUser) {
+                sector.lastUserChoiceId = onlineUser._id;
                 sector.lastUserChoice = getUserFIOString({
                   name: onlineUser.name,
                   fatherName: onlineUser.fatherName,
@@ -416,6 +425,7 @@ export const personal = {
                 });
                 sector.lastUserChoiceOnline = onlineUser.online;
               } else {
+                sector.lastUserChoiceId = null;
                 sector.lastUserChoice = null;
                 sector.lastUserChoiceOnline = false;
               }
@@ -429,7 +439,11 @@ export const personal = {
     },
 
     /**
-     *
+     * Данный метод создан специально для диалога выбора получателя распоряжения,
+     * открываемого из таблиц секции "Кому" окна создания распоряжения.
+     * Метод позволяет зафиксировать выбор пользователя в диалоговом окне:
+     * сохраняется информация о ФИО выбранного пользователя и его online-статуса
+     * для соответствующего участка / станции.
      */
     setUserChosenStatus(state, userId) {
       function findUserAndSetChosenStatus(sectorsArray) {
@@ -438,6 +452,7 @@ export const personal = {
             if (sector.people) {
               const neededUser = sector.people.find((user) => user._id === userId);
               if (neededUser) {
+                sector.lastUserChoiceId = neededUser._id;
                 sector.lastUserChoice = getUserFIOString({
                   name: neededUser.name,
                   fatherName: neededUser.fatherName,
@@ -722,6 +737,7 @@ export const personal = {
       }
       switch (workPoligon.type) {
         case WORK_POLIGON_TYPES.STATION:
+          await context.dispatch('loadShiftDataForDSP');
           break;
         case WORK_POLIGON_TYPES.DNC_SECTOR:
           await context.dispatch('loadShiftDataForDNC');

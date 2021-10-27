@@ -224,7 +224,7 @@
         });
       };
 
-      const handleChangeOrderPatternElementValue = (event) => {console.log('handleChangeOrderPatternElementValue')
+      const handleChangeOrderPatternElementValue = (event) => {
         state.orderPatternText.forEach((element) => {
           if (element._id === event.elementId) {
             element.value = event.value;
