@@ -203,13 +203,13 @@ export const workOrders = {
      */
     getWorkMessTblColumns() {
       return [
-        { field: WorkMessTblColumnsTitles.expander, title: '', width: '4%', align: 'center' },
+        { field: WorkMessTblColumnsTitles.expander, title: '', width: '5%', align: 'center' },
         { field: WorkMessTblColumnsTitles.state, title: '', width: '4%', align: 'center' },
         { field: WorkMessTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left' },
         { field: WorkMessTblColumnsTitles.time, title: 'Время действия', width: '10%', align: 'left' },
         { field: WorkMessTblColumnsTitles.orderNum, title: 'Номер', width: '10%', 'align': 'left' },
         { field: WorkMessTblColumnsTitles.orderTitle, title: 'Наименование', width: '44%', align: 'left' },
-        { field: WorkMessTblColumnsTitles.orderReceiveStatus, title: 'Статус', width: '24%', align: 'left' },
+        { field: WorkMessTblColumnsTitles.orderReceiveStatus, title: 'Статус', width: '23%', align: 'left' },
       ];
     },
 

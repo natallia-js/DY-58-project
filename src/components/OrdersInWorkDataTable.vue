@@ -21,7 +21,7 @@
 
       <Column
         :expander="true"
-        :bodyStyle="{ minWidth: getExpanderColumnObject.width, textAlign: getExpanderColumnObject.align }"
+        :style="{ minWidth: getExpanderColumnObject.width, textAlign: getExpanderColumnObject.align, alignItems: 'center', justifyContent: 'center' }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-content-cell-class"
       />
@@ -80,7 +80,7 @@
                 :key="col2.field"
                 :style="{ width: col2.width, }"
                 headerClass="dy58-table-header-cell-class"
-                bodyClass="dy58-table-content-cell-class"
+                bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
               >
                 <template #body="slotProps">
                   <div style="width:100%"
@@ -137,8 +137,7 @@
       },
 
       getExpanderColumnObject() {
-        const obj = this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
-        return obj || { width: '50px', align: 'left' };
+        return this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
       },
     },
   }

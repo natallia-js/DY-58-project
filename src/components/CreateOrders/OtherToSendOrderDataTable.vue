@@ -25,12 +25,11 @@
         :key="col.field"
         :style="{ width: col.width }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
       >
         <template #body="slotProps">
           <div v-if="col.field !== getOtherShiftTblColumnNames.notification"
               :class="[
-                'dy58-send-table-data-cell',
                 {'dy58-send-original': [getOtherShiftTblColumnNames.placeTitle,
                                         getOtherShiftTblColumnNames.post,
                                         getOtherShiftTblColumnNames.fio].includes(col.field)

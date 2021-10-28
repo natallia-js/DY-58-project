@@ -18,12 +18,11 @@
         :key="col.field"
         :style="{ width: col.width }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrSectorsShiftTblColumnNames.notification"
               :class="[
-                'dy58-send-table-data-cell',
                 {'dy58-send-original': [getCurrSectorsShiftTblColumnNames.sector,
                                         getCurrSectorsShiftTblColumnNames.fio].includes(col.field)
                                         && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
