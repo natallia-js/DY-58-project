@@ -13,8 +13,11 @@
   <div v-else-if="element.type === getOrderPatternElementTypes.SELECT" v-tooltip="element.ref">
     <Dropdown
       :style="{ width: getElementSizesCorrespondence[element.size] }"
+      :options="dropdownValues"
+      optionLabel="label"
+      optionValue="value"
       v-model="elementModelValue"
-      @input="handleChangeInputText"
+      @change="handleChangeDropdown"
       v-tooltip="element.ref"
       :placeholder="element.ref"
     />
@@ -22,7 +25,7 @@
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
     :showIcon="true"
-    placeholder="дата"
+    :placeholder="element.ref || 'дата'"
     :hideOnDateTimeSelect="true"
     :manualInput="false"
     v-model="elementModelValue"
@@ -36,7 +39,7 @@
     :showIcon="true"
     :hideOnDateTimeSelect="true"
     :manualInput="false"
-    placeholder="время"
+    :placeholder="element.ref || 'время'"
     v-model="elementModelValue"
     @dateSelect="handleChangeDateTime"
     v-tooltip="element.ref"
@@ -45,7 +48,7 @@
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
     :showTime="true"
     :showIcon="true"
-    placeholder="дата-время"
+    :placeholder="element.ref || 'дата-время'"
     :hideOnDateTimeSelect="true"
     :manualInput="false"
     v-model="elementModelValue"
@@ -84,7 +87,16 @@
   export default {
     name: 'dy58-order-pattern-element-view',
 
-    props: ['element'],
+    props: {
+      element: {
+        type: Object,
+        required: true,
+      },
+      dropdownValues: {
+        type: Array,
+        required: false,
+      },
+    },
 
     emits: ['input'],
 
@@ -104,16 +116,19 @@
       getDRTrainTableColumns() {
         return DRTrainTableColumns;
       },
+      elementValue() {
+        return this.element ? this.element.value : null;
+      },
     },
 
     watch: {
-      element: {
-        deep: true, // для отслеживания изменения значения поля value объекта element в родительском компоненте
+      // для отслеживания изменения значения поля value объекта element в родительском компоненте
+      // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
+      // значениям соответствующих полей связанного распоряжения)
+      elementValue: {
         handler(newVal) {
-          if (newVal) {
-            this.elementModelValue = newVal.value;
-          }
-        },
+          this.elementModelValue = newVal;
+        }
       },
     },
 
@@ -126,6 +141,10 @@
     methods: {
       handleChangeInputText(event) {
         this.$emit('input', { elementId: this.element._id, value: event.target.value });
+      },
+
+      handleChangeDropdown(event) {
+        this.$emit('input', { elementId: this.element._id, value: event.value });
       },
 
       handleChangeDateTime(value) {

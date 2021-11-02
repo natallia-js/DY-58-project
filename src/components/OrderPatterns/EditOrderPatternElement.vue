@@ -59,7 +59,7 @@
 
 <script>
   /**
-   * Данный компонент озволяет создать новый либо отредактировать существующий элемент шаблона распоряжения
+   * Данный компонент позволяет создать новый либо отредактировать существующий элемент шаблона распоряжения
    */
   import SelectedPatternElementView from './SelectedPatternElementView';
   import ElementSizeChooser from './ElementSizeChooser';

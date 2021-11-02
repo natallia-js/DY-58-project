@@ -12,7 +12,7 @@
       <TreeSelect
         placeholder="Выберите шаблон распоряжения"
         v-model="state.orderPattern"
-        :options="orderPatterns"
+        :options="getOrderPatterns"
         style="width:100%"
         @show="handleFocusDropdown"
         @change="handleChooseOrderPattern"
@@ -70,14 +70,14 @@
     emits: ['input'],
 
     props: {
-      // Объект информации о распоряжении (не используется для анализа и отображения, нужен лишь
+      // объект информации о распоряжении (не используется для анализа и отображения, нужен лишь
       // для того, чтобы "наверху" можно было сделать аналог v-model)
       value: {
         type: Object,
       },
-      // список шаблонов распоряжений для отображения
-      orderPatterns: {
-        type: Array,
+      // тип распоряжения
+      orderType: {
+        type: String,
       },
       // объект родительского распоряжения (если указан, то его поля используются для
       // заполнения полей текущего выбранного текста распоряжения)
@@ -99,6 +99,9 @@
         orderTitle: '',
         orderText: '',
       });
+
+      // список шаблонов распоряжений для отображения
+      const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
 
       // возвращает объект выбранного из списка шаблона распоряжения
       const getSelectedOrderPattern = computed(() =>
@@ -149,7 +152,7 @@
             orderTextSource: state.orderTextSource,
             patternId: getSelectedOrderPattern.value._id,
             orderTitle: getSelectedOrderPattern.value.title,
-            orderText: getSelectedOrderPattern.value.elements,
+            orderText: state.orderPatternText,//getSelectedOrderPattern.value.elements,
           });
         }
       });
@@ -191,7 +194,7 @@
           orderTextSource: state.orderTextSource,
           patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
-          orderText: getSelectedOrderPattern.value.elements,
+          orderText: state.orderPatternText,//getSelectedOrderPattern.value.elements,
         });
       };
 
@@ -225,11 +228,11 @@
       };
 
       const handleChangeOrderPatternElementValue = (event) => {
-        state.orderPatternText.forEach((element) => {
-          if (element._id === event.elementId) {
-            element.value = event.value;
-          }
-        });
+        const orderPatternElementIndex = state.orderPatternText.findIndex((el) => el._id === event.elementId);
+        if (orderPatternElementIndex < 0) {
+          return;
+        }
+        state.orderPatternText[orderPatternElementIndex].value = event.value;
         emit('input', {
           orderTextSource: state.orderTextSource,
           patternId: getSelectedOrderPattern.value._id,
@@ -241,6 +244,7 @@
       return {
         state,
         ORDER_TEXT_SOURCE,
+        getOrderPatterns,
         getSelectedOrderPattern,
         handleFocusDropdown,
         handleChooseOrderPattern,

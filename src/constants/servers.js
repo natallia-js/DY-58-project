@@ -23,9 +23,13 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   getDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortDefinitData`,
   getECDSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortDefinitData`,
 
-  getStationsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/definitData`,
-  getDNCSectorsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/definitData`,
-  getECDSectorsDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/definitData`,
+  getDefinitStationData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/definitData`,
+  getDefinitDNCSectorData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/definitData`,
+  getDefinitECDSectorData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/definitData`,
+
+  getStationBlocksData: `${AUTH_SERVER_ADDRESS}/api/nsi/blocks/stationData`,
+  getStationDNCSectorsData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortStationData`,
+  getStationECDSectorsData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortStationData`,
 
   getAdjacentDNCSectorsShortDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/adjacentDNCSectors/definitData`,
   getAdjacentECDSectorsShortDefinitData: `${AUTH_SERVER_ADDRESS}/api/nsi/adjacentECDSectors/definitData`,

@@ -83,6 +83,13 @@ export const currWorkPoligonStructure = {
     },
 
     /**
+     *
+     */
+    getSectorStationByTitle: (_state, getters) => (stationTitle) => {
+      return getters.getSectorStations.find((station) => station.St_Title === stationTitle);
+    },
+
+    /**
      * Возвращает список станций текущего полигона управления (если полигон управления -
      * участок ДНЦ / ЭЦД).
      */
@@ -133,6 +140,19 @@ export const currWorkPoligonStructure = {
 
     /**
      *
+     */
+     getSectorBlocksByStationTitle: (_state, getters) => (stationTitle) => {
+       const stationObject = getters.getSectorStationByTitle(stationTitle);
+       if (!stationObject) {
+         return [];
+       }
+       const stationId = stationObject.St_ID;
+       return getters.getSectorBlocks.filter((block) => block.Bl_StationID1 === stationId || block.Bl_StationID2 === stationId);
+    },
+
+    /**
+     * Возвращает список перегонов текущего полигона управления (если полигон управления -
+     * участок ДНЦ / ЭЦД).
      */
     getSectorBlocks(state) {
       if (!state.sector || (!state.sector.TDNCTrainSectors && !state.sector.TECDTrainSectors)) {
@@ -200,27 +220,29 @@ export const currWorkPoligonStructure = {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsDefinitData,
-          { stationIds: [stationId], includeSectors: true },
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitStationData,
+          { stationId },
           { headers }
         );
-        /*const dncTrainSectorsIds = new Set();
-        if (response.dncTrainSectors) {
-          response.dncTrainSectors.forEach((sector) => dncTrainSectorsIds.add(sector.dncSectorId));
-        }
-        const ecdTrainSectorsIds = new Set();
-        if (response.ecdTrainSectors) {
-          response.ecdTrainSectors.forEach((sector) => ecdTrainSectorsIds.add(sector.ecdSectorId));
-        }
-        let sectorResponse;
-        for (let sectorId of dncTrainSectorsIds) {
-          sectorResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsDefinitData,
-            { sectorId },
-            { headers }
-          );
-        }
-        */
-        context.state.station = !response.data || !response.data.length ? null : response.data[0];
+        const blocksResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationBlocksData,
+          { stationId },
+          { headers }
+        );
+        const dncSectorsResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationDNCSectorsData,
+          { stationId },
+          { headers }
+        );
+        const ecdSectorsResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationECDSectorsData,
+          { stationId },
+          { headers }
+        );
+        context.state.station = {
+          ...response.data,
+          TBlocks: blocksResponse.data,
+          TDNCSectors: dncSectorsResponse.data,
+          TECDSectors: ecdSectorsResponse.data,
+        };
+        console.log(context.state.station)
       } catch (err) {
         context.state.errorLoadingCurrWorkPoligonStructure = err;
       }
@@ -237,7 +259,7 @@ export const currWorkPoligonStructure = {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsDefinitData,
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitDNCSectorData,
           { sectorId },
           { headers }
         );
@@ -270,7 +292,7 @@ export const currWorkPoligonStructure = {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getECDSectorsDefinitData,
+        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitECDSectorData,
           { sectorId },
           { headers }
         );

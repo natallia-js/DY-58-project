@@ -1,5 +1,20 @@
 <template>
   <Toast />
+  <PreviewNewOrderDlg
+    :showDlg="state.showPreviewNewOrderDlg"
+    :type="orderType"
+    :number="state.number"
+    :prevRelatedOrder="relatedOrderObject"
+    :place="state.place"
+    :timeSpan="getIssuedOrderTimeSpanObject"
+    :orderText="state.orderText"
+    :dncToSend="state.dncSectorsToSendOrder"
+    :dspToSend="state.dspSectorsToSendOrder"
+    :ecdToSend="state.ecdSectorsToSendOrder"
+    :otherToSend="state.otherSectorsToSendOrder"
+    @dispatch="dispatchOrder"
+    @close="hidePreviewNewOrderDlg">
+  </PreviewNewOrderDlg>
   <div class="p-grid">
     <div class="p-col-6">
       <SelectButton v-model="state.selectedOrderInputType" :options="getOrderInputTypes" optionLabel="label" />
@@ -135,9 +150,9 @@
           </label>
           <order-text
             id="orderText"
+            :orderType="orderType"
             :value="v$.orderText.$model"
             @input="v$.orderText.$model = $event"
-            :orderPatterns="getOrderPatterns"
             :parentOrderText="relatedOrderObject ? relatedOrderObject.orderText : null"
           />
           <small
@@ -234,10 +249,11 @@
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
-  import { CurrShiftGetOrderStatus } from '../../constants/orders';
+  import { CurrShiftGetOrderStatus, ORDER_ELEMENTS_CAN_BE_EMPTY } from '../../constants/orders';
   import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '../../constants/orderPatterns';
   import { useToast } from 'primevue/usetoast';
   import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
+  import PreviewNewOrderDlg from './PreviewNewOrderDlg.vue';
 
   export default {
     name: 'dy58-new-order-block',
@@ -257,6 +273,7 @@
       DNCToSendOrderDataTable,
       ECDToSendOrderDataTable,
       OtherToSendOrderDataTable,
+      PreviewNewOrderDlg,
     },
 
     setup(props) {
@@ -296,6 +313,7 @@
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
         // запроса об издании распоряжения
         orderFieldsErrs: null,
+        showPreviewNewOrderDlg: false,
       });
 
       //const getSelectedOrderInputType = computed(() => state.selectedOrderInputType);
@@ -314,9 +332,15 @@
 
       const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
+      // Проверка элементов шаблона распоряжения на наличие в них значений.
+      // Значение должно присутствовать у всех элементов шаблона, кроме элемента типа
+      // 'перенос строки', а также элементов, смысловые значения которых находятся в
+      // определенном списке
       const orderTextFieldsNotEmpty = (orderText) => {
         for (let orderTextElement of orderText) {
-          if (orderTextElement.type !== OrderPatternElementType.LINEBREAK && !orderTextElement.value) {
+          if (orderTextElement.type !== OrderPatternElementType.LINEBREAK &&
+            !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) &&
+            !orderTextElement.value) {
             return false;
           }
         }
@@ -400,8 +424,6 @@
       watch(getCurrDateTimeString, (newVal) => {
         state.createDateTimeString = newVal;
       });
-
-      const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
 
       const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
 
@@ -545,7 +567,14 @@
       });
 
       /**
-       * Издание распоряжения (отправка и сервер и передача всем причастным).
+       *
+       */
+      const hidePreviewNewOrderDlg = () => {
+        state.showPreviewNewOrderDlg = false;
+      };
+
+      /**
+       *
        */
       const handleSubmit = () => {
         // Здесь я столкулась с такой проблемой: у текущего компонента есть вложенный компонент
@@ -574,17 +603,29 @@
           return;
         }
 
+        state.showPreviewNewOrderDlg = true;
+      };
+
+      const getIssuedOrderTimeSpanObject = computed(() => {
+        return state.timeSpan.start
+          ? state.timeSpan
+          : state.cancelOrderDateTime
+            ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false}
+            : null;
+      });
+
+      /**
+       * Издание распоряжения (отправка и сервер и передача всем причастным).
+       */
+      const dispatchOrder = () => {
         state.waitingForServerResponse = true;
+
         store.dispatch('dispatchOrder', {
           type: props.orderType,
           number: state.number,
           createDateTime: state.createDateTime,
           place: state.place.place ? state.place : null,
-          timeSpan: state.timeSpan.start
-            ? state.timeSpan
-            : state.cancelOrderDateTime
-              ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false}
-              : null,
+          timeSpan: getIssuedOrderTimeSpanObject,
           orderText: state.orderText,
           dncToSend: state.dncSectorsToSendOrder,
           dspToSend: state.dspSectorsToSendOrder,
@@ -605,7 +646,7 @@
         getCurrDateTimeString,
         getOrderInputTypes,
         handleSubmit,
-        getOrderPatterns,
+        dispatchOrder,
         getActiveOrders,
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
@@ -617,6 +658,8 @@
         selectedECDString,
         selectedOtherAddresseesString,
         getDispatchOrdersBeingProcessed,
+        hidePreviewNewOrderDlg,
+        getIssuedOrderTimeSpanObject,
       };
     },
   };
@@ -630,7 +673,3 @@
       console.log('Something went wrong', err);
     })*/
 </script>
-
-
-<style lang="scss" scoped>
-</style>

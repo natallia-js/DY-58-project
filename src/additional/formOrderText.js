@@ -25,9 +25,8 @@ export function formOrderText(props) {
     switch (currVal.type) {
       case OrderPatternElementType.TEXT:
       case OrderPatternElementType.INPUT:
-        substring = currVal.value ? currVal.value : '';
-        break;
       case OrderPatternElementType.SELECT:
+        substring = currVal.value ? currVal.value : '';
         break;
       case OrderPatternElementType.DATE:
         substring = getLocaleDateString(currVal.value);
