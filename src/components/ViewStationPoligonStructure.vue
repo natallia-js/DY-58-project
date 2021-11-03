@@ -24,12 +24,12 @@
             <p class="p-mb-2">
               <span class="p-text-bold">Пути перегона:</span>
             </p>
-            <div v-if="block.TBlockTracks && block.TBlockTracks.length">
+            <div v-if="block.TBlockTracks && block.TBlockTracks.length" class="p-mb-2">
               <p v-for="track of block.TBlockTracks" :key="track.BT_ID" class="p-ml-4">
                 {{ track.BT_Name }}
               </p>
             </div>
-            <div v-else>
+            <div v-else class="p-mb-2">
               Не определены
             </div>
             <p class="p-mb-2">
@@ -45,7 +45,7 @@
                   {{ track.ST_Name }}
                 </p>
               </div>
-              <div v-else>
+              <div v-else class="p-mb-2">
                 Не определены
               </div>
             </div>
@@ -55,7 +55,7 @@
                   {{ track.ST_Name }}
                 </p>
               </div>
-              <div v-else>
+              <div v-else class="p-mb-2">
                 Не определены
               </div>
             </div>

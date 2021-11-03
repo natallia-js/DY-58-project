@@ -4,6 +4,7 @@ import {
   getLocaleTimeString,
   getLocaleDateTimeString,
 } from './dateTimeConvertions';
+import { CurrShiftGetOrderStatus } from '../constants/orders';
 
 
 /**
@@ -46,7 +47,9 @@ export function formOrderText(props) {
     return prevVal + ' ' + substring;
   }, '');
 
+  // Строка с информацией о том, кому отправляется оригинал распоряжения
   let originalToString = '';
+  // Строка с информацией о том, кому отправляется копия распоряжения
   let copyToString = '';
 
   const toSubstring = (array, substringFunction) => {
@@ -57,11 +60,30 @@ export function formOrderText(props) {
     return '';
   };
 
+  // Данная функция позволяет проверить, что отправлять: оригинал или копию.
+  // Причем в зависимости от того, какой тип входного параметра.
+  // Тип входного параметра - логический, если информация из БД.
+  // Если распоряжение не из БД, а только создается, то значение входного параметра
+  // может быть одним из заданного множества возможных значений.
+  const sendOriginal = (dataToCheck) => {
+    if (typeof dataToCheck === 'boolean') {
+      return dataToCheck;
+    }
+    if (dataToCheck === CurrShiftGetOrderStatus.sendOriginal) {
+      return true;
+    }
+    return false;
+  };
+
   const formToStrings = (array, substringFunction) => {
-    let to = toSubstring(array.filter((el) => el.sendOriginal), substringFunction);
-    originalToString += !originalToString ? to : `, ${to}`;
-    to = toSubstring(array.filter((el) => !el.sendOriginal), substringFunction);
-    copyToString += !copyToString ? to : `, ${to}`;
+    let to = toSubstring(array.filter((el) => sendOriginal(el.sendOriginal)), substringFunction);
+    if (to.length) {
+      originalToString += !originalToString ? to : `, ${to}`;
+    }
+    to = toSubstring(array.filter((el) => !sendOriginal(el.sendOriginal)), substringFunction);
+    if (to.length) {
+      copyToString += !copyToString ? to : `, ${to}`;
+    }
   };
 
   if (dncToSend && dncToSend.length) {

@@ -133,10 +133,8 @@
 
       getStationBlocks(stationElementRef) {
         const patternStationElement = this.value.find((el) => el.ref === stationElementRef);
-        console.log(patternStationElement)
         if (patternStationElement) {
           const blocks = this.getSectorBlocksByStationTitle(patternStationElement.value);
-          console.log(blocks)
           return blocks;
         }
         return [];

@@ -3,6 +3,7 @@
     <ShowChoosePersonDlg
       :showDlg="showChoosePersonDlg"
       :personal="sectorPersonal"
+      :selectedPerson="selectedPerson"
       :personalPost="getDNCPost"
       :sector="sector"
       @close="hideChoosePersonDlg"
@@ -38,7 +39,12 @@
               {{ slotProps.data[col.field] }}
               <a
                 :class="['dy58-send-status-btn']"
-                @click="() => openChoosePersonDlg(slotProps.data.people, slotProps.data.sector)"
+                @click="() => openChoosePersonDlg(slotProps.data.people,
+                  slotProps.data.fioId
+                    ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline }
+                    : null,
+                  slotProps.data.sector
+                )"
               >
                 ...
               </a>
@@ -116,6 +122,7 @@
       return {
         showChoosePersonDlg: false,
         sectorPersonal: [],
+        selectedPerson: null,
         sector: '',
       };
     },
@@ -205,8 +212,9 @@
           { dncSectorId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
-      openChoosePersonDlg(people, sector) {
+      openChoosePersonDlg(people, selectedPerson, sector) {
         this.sectorPersonal = people || [];
+        this.selectedPerson = selectedPerson;
         this.sector = sector;
         this.showChoosePersonDlg = true;
       },

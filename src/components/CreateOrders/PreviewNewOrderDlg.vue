@@ -108,9 +108,9 @@
         if (this.orderText && this.orderText.orderText) {
           return formOrderText({
             orderTextArray: this.orderText.orderText,
-            dncToSend: this.dncToSend,
-            dspToSend: this.dspToSend,
-            ecdToSend: this.ecdToSend,
+            dncToSend: (!this.dncToSend || !this.dncToSend.length) ? [] : this.dncToSend.map((el) => ({ ...el, placeTitle: el.sector })),
+            dspToSend: (!this.dspToSend || !this.dspToSend.length) ? [] : this.dspToSend.map((el) => ({ ...el, placeTitle: el.station })),
+            ecdToSend: (!this.ecdToSend || !this.ecdToSend.length) ? [] : this.ecdToSend.map((el) => ({ ...el, placeTitle: el.sector })),
             otherToSend: this.otherToSend,
           });
         }

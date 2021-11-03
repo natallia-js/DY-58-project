@@ -8,9 +8,9 @@
     :place="state.place"
     :timeSpan="getIssuedOrderTimeSpanObject"
     :orderText="state.orderText"
-    :dncToSend="state.dncSectorsToSendOrder"
-    :dspToSend="state.dspSectorsToSendOrder"
-    :ecdToSend="state.ecdSectorsToSendOrder"
+    :dncToSend="dncSectorsToSendOrderNoDupl"
+    :dspToSend="dspSectorsToSendOrderNoDupl"
+    :ecdToSend="ecdSectorsToSendOrderNoDupl"
     :otherToSend="state.otherSectorsToSendOrder"
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg">
@@ -347,16 +347,18 @@
         return true;
       };
 
+      const orderTextRules = {
+        orderTextSource: { required },
+        patternId: {},
+        orderTitle: { required },
+        orderText: { required, orderTextFieldsNotEmpty },
+      };
+
       let rules = {
         number: { required },
         createDateTime: { required },
         createDateTimeString: { required },
-        orderText: {
-          orderTextSource: { required },
-          patternId: {},
-          orderTitle: { required },
-          orderText: { required, orderTextFieldsNotEmpty },
-        },
+        orderText: orderTextRules,
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
         dncSectorsToSendOrder: { minLength: minLength(1) },
         dspSectorsToSendOrder: { minLength: minLength(1) },
@@ -477,6 +479,33 @@
       );
       const getDispatchOrdersBeingProcessed = computed(() => store.getters.getDispatchOrdersBeingProcessed);
 
+      const dspSectorsToSendOrderNoDupl = computed(() => {
+        if (!state.dspSectorsToSendOrder || !state.dspSectorsToSendOrder.length) {
+          return [];
+        }
+        return state.dspSectorsToSendOrder.filter((item, index) => {
+          return state.dspSectorsToSendOrder.findIndex((el) => el.id === item.id) === index;
+        });
+      });
+
+      const dncSectorsToSendOrderNoDupl = computed(() => {
+        if (!state.dncSectorsToSendOrder || !state.dncSectorsToSendOrder.length) {
+          return [];
+        }
+        return state.dncSectorsToSendOrder.filter((item, index) => {
+          return state.dncSectorsToSendOrder.findIndex((el) => el.id === item.id) === index;
+        });
+      });
+
+      const ecdSectorsToSendOrderNoDupl = computed(() => {
+        if (!state.ecdSectorsToSendOrder || !state.ecdSectorsToSendOrder.length) {
+          return [];
+        }
+        return state.ecdSectorsToSendOrder.filter((item, index) => {
+          return state.ecdSectorsToSendOrder.findIndex((el) => el.id === item.id) === index;
+        });
+      });
+
       // Возвращает строку для отображения персонала (конкретного типа), выбранного в качестве получателей распоряжения
       const formSelectedPersonalString = (personalArray, placeFieldName) => {
         if (!personalArray) {
@@ -491,7 +520,7 @@
               accumulator + `${currentValue[placeFieldName]}${!currentValue.post ? '' : ' ' + currentValue.post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
               `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
         }
-        const sendCopyTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendCopy);
+        let sendCopyTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendCopy);
         if (sendCopyTo.length) {
           copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
             sendCopyTo.reduce((accumulator, currentValue, index) =>
@@ -509,13 +538,13 @@
       };
 
       // Строка для отображения информации о выбранных ДСП
-      const selectedDSPString = computed(() => formSelectedPersonalString(state.dspSectorsToSendOrder, 'station'));
+      const selectedDSPString = computed(() => formSelectedPersonalString(dspSectorsToSendOrderNoDupl.value, 'station'));
 
       // Строка для отображения информации о выбранных ДНЦ
-      const selectedDNCString = computed(() => formSelectedPersonalString(state.dncSectorsToSendOrder, 'sector'));
+      const selectedDNCString = computed(() => formSelectedPersonalString(dncSectorsToSendOrderNoDupl.value, 'sector'));
 
       // Строка для отображения информации о выбранных ДСП
-      const selectedECDString = computed(() => formSelectedPersonalString(state.ecdSectorsToSendOrder, 'sector'));
+      const selectedECDString = computed(() => formSelectedPersonalString(ecdSectorsToSendOrderNoDupl.value, 'sector'));
 
       // Строка для отображения информации о выбранных иных адресатах
       const selectedOtherAddresseesString = computed(() => formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle'));
@@ -590,6 +619,15 @@
         if (!isFormValid) {
           const invalidProperties = v$.value.$errors.map((err) => err.$property);
           const rulesProperties = Object.keys(rules);
+          if (rulesProperties.includes('orderText')) {
+            rulesProperties.push(...Object.keys(orderTextRules));
+          }
+          if (rulesProperties.includes('place')) {
+            rulesProperties.push(...Object.keys(placeRules));
+          }
+          if (rulesProperties.includes('timeSpan')) {
+            rulesProperties.push(...Object.keys(timeSpanRules));
+          }
           const intersection = rulesProperties.filter((el) => invalidProperties.includes(el));
           if (!intersection.length) {
             isFormValid = true;
@@ -625,11 +663,11 @@
           number: state.number,
           createDateTime: state.createDateTime,
           place: state.place.place ? state.place : null,
-          timeSpan: getIssuedOrderTimeSpanObject,
+          timeSpan: getIssuedOrderTimeSpanObject.value,
           orderText: state.orderText,
-          dncToSend: state.dncSectorsToSendOrder,
-          dspToSend: state.dspSectorsToSendOrder,
-          ecdToSend: state.ecdSectorsToSendOrder,
+          dncToSend: dncSectorsToSendOrderNoDupl.value,
+          dspToSend: dspSectorsToSendOrderNoDupl.value,
+          ecdToSend: ecdSectorsToSendOrderNoDupl.value,
           otherToSend: state.otherSectorsToSendOrder,
           prevOrderId: relatedOrderId.value,
           createdOnBehalfOf: state.createdOnBehalfOf,
@@ -660,6 +698,9 @@
         getDispatchOrdersBeingProcessed,
         hidePreviewNewOrderDlg,
         getIssuedOrderTimeSpanObject,
+        dspSectorsToSendOrderNoDupl,
+        dncSectorsToSendOrderNoDupl,
+        ecdSectorsToSendOrderNoDupl,
       };
     },
   };

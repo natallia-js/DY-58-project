@@ -6,6 +6,9 @@
       <ProgressSpinner />
     </div>
     <div v-else-if="!getErrorLoadingCurrSectorsShift" class="p-ml-2 p-mt-2 p-mr-4 p-mb-4">
+      <view-shift-for-d-s-p
+        v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.STATION"
+      />
       <view-shift-for-d-n-c
         v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.DNC_SECTOR"
       />
@@ -23,6 +26,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
+  import ViewShiftForDSP from '../components/ViewShiftForDSP';
   import ViewShiftForDNC from '../components/ViewShiftForDNC';
   import ViewShiftForECD from '../components/ViewShiftForECD';
   import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
@@ -31,6 +35,7 @@
     name: 'dy58-shift-page',
 
     components: {
+      ViewShiftForDSP,
       ViewShiftForDNC,
       ViewShiftForECD,
     },

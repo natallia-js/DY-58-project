@@ -14,7 +14,12 @@
       </template>
     </Listbox>
     <template #footer>
-      <Button v-if="selectedUser" label="Выбрать" @click="chooseUser" />
+      <Button
+        v-if="selectedUser && (!selectedPerson || selectedUser.id !== selectedPerson.id)"
+        label="Выбрать"
+        @click="chooseUser"
+      />
+      <Button v-if="selectedPerson" label="Отменить текущий выбор" @click="unChooseUser" />
       <Button label="Отмена" @click="closeDialog" />
     </template>
   </Dialog>
@@ -47,6 +52,10 @@
         type: Array,
         required: true,
       },
+      selectedPerson: {
+        type: Object,
+        required: false,
+      },
       sector: {
         type: String,
         required: true,
@@ -56,12 +65,21 @@
     watch: {
       showDlg: function (val) {
         this.dlgVisible = val;
+        if (val) {
+          this.selectedUser = this.selectedPerson;
+        }
       },
     },
 
     methods: {
       chooseUser() {
-        this.$store.commit('setUserChosenStatus', this.selectedUser.id);
+        this.$store.commit('setUserChosenStatus', { userId: this.selectedUser.id, chooseUser: true });
+        this.closeDialog();
+      },
+
+      unChooseUser() {
+        this.$store.commit('setUserChosenStatus', { userId: this.selectedUser.id, chooseUser: false });
+        this.selectedUser = null;
         this.closeDialog();
       },
 
@@ -72,7 +90,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-</style>
