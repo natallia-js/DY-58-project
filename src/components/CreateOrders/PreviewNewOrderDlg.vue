@@ -27,6 +27,9 @@
       <br />
       <span v-html="getOrderText"></span>
     </p>
+    <p><span class="p-text-bold">Издатель:</span> &#160;
+      {{ getUserPostFIO }}<span v-if="createdOnBehalfOf"> (от имени {{ createdOnBehalfOf }})</span>
+    </p>
     <template #footer>
       <Button label="Издать" @click="dispatchOrder" />
       <Button label="Отмена" @click="closeDialog" />
@@ -96,12 +99,17 @@
         type: Array,
         required: false,
       },
+      createdOnBehalfOf: {
+        type: String,
+        required: false,
+      },
     },
 
     computed: {
       ...mapGetters([
         'getCurrDateTimeString',
         'getSectorStationOrBlockTitleById',
+        'getUserPostFIO',
       ]),
 
       getOrderText() {

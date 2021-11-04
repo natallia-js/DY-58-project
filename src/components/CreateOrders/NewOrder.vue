@@ -12,6 +12,7 @@
     :dspToSend="dspSectorsToSendOrderNoDupl"
     :ecdToSend="ecdSectorsToSendOrderNoDupl"
     :otherToSend="state.otherSectorsToSendOrder"
+    :createdOnBehalfOf="state.createdOnBehalfOf"
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg">
   </PreviewNewOrderDlg>
@@ -64,7 +65,9 @@
           class="p-field p-col-12 p-d-flex p-flex-column"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
-            <span class="p-text-bold">На распоряжение{{orderType === getOrderTypes.ECD_NOTIFICATION ? '/запрещение' : ''}}</span>
+            <span class="p-text-bold">
+              {{orderType === getOrderTypes.ECD_NOTIFICATION ? 'На распоряжение/запрещение' : 'Предыдущее распоряжение в цепочке'}}
+            </span>
           </label>
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
@@ -180,7 +183,7 @@
             </div>
           </div>
           <div class="p-as-stretch p-d-flex p-ai-center" style="width:30%">
-            <Button type="submit" label="Передать" />
+            <Button type="submit" label="Просмотреть и издать" />
           </div>
         </div>
       </form>

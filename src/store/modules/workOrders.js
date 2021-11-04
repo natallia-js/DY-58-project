@@ -56,6 +56,7 @@ function getWorkOrderObject(order) {
     confirmDateTime: order.confirmDateTime ? new Date(order.confirmDateTime) : null,
     createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
     creator: order.creator,
+    createdOnBehalfOf: order.createdOnBehalfOf,
     deliverDateTime: order.deliverDateTime ? new Date(order.deliverDateTime) : null,
     dncToSend: order.dncToSend.map((item) => {
       return {
@@ -306,7 +307,7 @@ export const workOrders = {
     },
 
     getWorkingOrders(state) {
-      const now = new Date();
+      const now = new Date();console.log(state.data)
       return state.data.filter((item) => item.confirmDateTime)
         .map((item, index) => {
           return {
@@ -487,9 +488,11 @@ export const workOrders = {
     /**
      * Позволяет запомнить массив "рабочих" распоряжений.
      */
-    setNewWorkOrdersArray(state, newData) {
+    setNewWorkOrdersArray(state, newData) {console.log('newData',newData)
       if (!newData || !newData.length) {
-        state.data = [];
+        if (state.data.length) {
+          state.data = [];
+        }
         return;
       }
       if (!state.data || !state.data.length) {
@@ -518,7 +521,7 @@ export const workOrders = {
             state.data[existingOrderIndex] = modifiedObject;
           }
         }
-      });
+      });console.log('state.data',state.data)
     },
 
     /**

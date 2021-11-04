@@ -36,11 +36,16 @@
       />
     </div>
     <div v-if="state.orderTextSource === ORDER_TEXT_SOURCE.nopattern" class="p-col-12">
+      <Button
+        label="Вставить перенос строки"
+        @click="handleInsertRowbreak"
+      />
       <textarea
         v-model="state.orderText"
         rows="5"
         :style="{ width: '100%', minWidth: '100%', maxWidth: '100%' }"
         class="p-component p-p-2"
+        ref="textarea"
       />
     </div>
     <div v-else-if="state.orderPattern" class="dy58-order-pattern-border p-col-12">
@@ -54,7 +59,7 @@
 
 
 <script>
-  import { computed, reactive, watch } from 'vue';
+  import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import OrderPatternText from './OrderPatternText';
   import { OrderPatternElementType } from '../../constants/orderPatterns';
@@ -88,6 +93,8 @@
 
     setup(props, { emit }) {
       const store = useStore();
+
+      const textarea = ref(null);
 
       const state = reactive({
         // источник текста распоряжения (шаблон либо не шаблон)
@@ -241,8 +248,14 @@
         });
       };
 
+      const handleInsertRowbreak = () => {
+        state.orderText += '<br />';
+        textarea.value.focus();
+      };
+
       return {
         state,
+        textarea,
         ORDER_TEXT_SOURCE,
         getOrderPatterns,
         getSelectedOrderPattern,
@@ -251,6 +264,7 @@
         handleFocusInput,
         handleChangeOrderTitle,
         handleChangeOrderPatternElementValue,
+        handleInsertRowbreak,
       };
     },
   };
