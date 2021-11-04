@@ -140,15 +140,30 @@
 
     methods: {
       handleChangeInputText(event) {
-        this.$emit('input', { elementId: this.element._id, value: event.target.value });
+        this.$emit('input', {
+          elementId: this.element._id,
+          value: event.target.value,
+          elementType: this.element.type,
+          elementRef: this.element.ref,
+        });
       },
 
       handleChangeDropdown(event) {
-        this.$emit('input', { elementId: this.element._id, value: event.value });
+        this.$emit('input', {
+          elementId: this.element._id,
+          value: event.value,
+          elementType: this.element.type,
+          elementRef: this.element.ref,
+        });
       },
 
       handleChangeDateTime(value) {
-        this.$emit('input', { elementId: this.element._id, value });
+        this.$emit('input', {
+          elementId: this.element._id,
+          value,
+          elementType: this.element.type,
+          elementRef: this.element.ref,
+        });
       },
     },
   };

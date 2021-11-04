@@ -271,14 +271,32 @@ export const workOrders = {
      *
      */
     getActiveOrders(state) {
-      return state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId);
+      return state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId) || [];
     },
 
     /**
      *
      */
-    getActiveOrdersToDisplayInTreeSelect(state) {
-      const orders = state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId);
+    getActiveOrdersOfGivenType(_state, getters) {
+      return (ordersType) => {
+        return getters.getActiveOrders.filter((item) => item.type === ordersType) || [];
+      };
+    },
+
+    /**
+     *
+     */
+    getActiveOrderByNumber(_state, getters) {
+      return (orderType, orderNumber) => {
+        return getters.getActiveOrdersOfGivenType(orderType).find((item) => String(item.number) === String(orderNumber));
+      };
+    },
+
+    /**
+     *
+     */
+    getActiveOrdersToDisplayInTreeSelect(_state, getters) {
+      const orders = getters.getActiveOrders;
       const groupedOrders = [{
         key: null,
         label: '-',
@@ -307,7 +325,7 @@ export const workOrders = {
     },
 
     getWorkingOrders(state) {
-      const now = new Date();console.log(state.data)
+      const now = new Date();
       return state.data.filter((item) => item.confirmDateTime)
         .map((item, index) => {
           return {
@@ -488,7 +506,7 @@ export const workOrders = {
     /**
      * Позволяет запомнить массив "рабочих" распоряжений.
      */
-    setNewWorkOrdersArray(state, newData) {console.log('newData',newData)
+    setNewWorkOrdersArray(state, newData) {
       if (!newData || !newData.length) {
         if (state.data.length) {
           state.data = [];
@@ -521,7 +539,7 @@ export const workOrders = {
             state.data[existingOrderIndex] = modifiedObject;
           }
         }
-      });console.log('state.data',state.data)
+      });
     },
 
     /**
