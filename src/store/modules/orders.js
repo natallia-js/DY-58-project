@@ -66,6 +66,7 @@ export const orders = {
         otherToSend,
         prevOrderId,
         createdOnBehalfOf,
+        showOnGID,
       } = params;
 
       context.commit('clearDispatchOrderResult');
@@ -122,6 +123,7 @@ export const orders = {
             },
             createdOnBehalfOf,
             prevOrderId,
+            showOnGID,
           },
           { headers }
         );

@@ -255,7 +255,7 @@ export const workOrders = {
             orderText: formOrderText({ orderTextArray: item.orderText.orderText }),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
-            fio: item.creator.fio + (item.createdOnBehalfOf ? ` ( от имени ${item.createdOnBehalfOf})` : ''),
+            fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
           };
         });
     },
@@ -345,7 +345,7 @@ export const workOrders = {
             }),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
-            fio: item.creator.fio + (item.createdOnBehalfOf ? ` ( от имени ${item.createdOnBehalfOf})` : ''),
+            fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
             orderReceiveStatus: {
               notDelivered:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0) +

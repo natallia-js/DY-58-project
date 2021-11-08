@@ -7,7 +7,6 @@ import NewOrderPage from '../views/NewOrderPage.vue';
 import OrderPatternsPage from '../views/OrderPatternsPage.vue';
 import CurrJournalPage from '../views/CurrJournalPage.vue';
 import ShiftPage from '../views/ShiftPage.vue';
-import ArchivePage from '../views/ArchivePage.vue';
 import HelpPage from '../views/HelpPage.vue';
 import Logout from '../views/Logout.vue';
 import { store } from '../store';
@@ -73,14 +72,6 @@ const routes = [
     path: '/orderPatternsPage',
     name: 'OrderPatternsPage',
     component: OrderPatternsPage,
-    meta: {
-      requiresAuth: true,
-    },
-  },
-  {
-    path: '/archivePage',
-    name: 'ArchivePage',
-    component: ArchivePage,
     meta: {
       requiresAuth: true,
     },

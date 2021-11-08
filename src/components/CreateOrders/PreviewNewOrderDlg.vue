@@ -16,8 +16,8 @@
     <p v-if="place"><span class="p-text-bold">Место действия:</span> &#160;
       {{ getSectorStationOrBlockTitleById({ placeType: place.place, id: place.value }) }}
     </p>
-    <p v-if="timeSpan"><span class="p-text-bold">Время действия:</span> &#160;
-      {{ orderTimeSpanString }}
+    <p><span class="p-text-bold">Время действия:</span> &#160;
+      {{ timeSpan ? orderTimeSpanString : 'Время издания' }}
     </p>
     <p><span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}

@@ -5,8 +5,10 @@
     :type="orderType"
     :number="state.number"
     :prevRelatedOrder="relatedOrderObject"
-    :place="state.place"
-    :timeSpan="getIssuedOrderTimeSpanObject"
+    :place="showOnGID.value ? state.orderPlace : null"
+    :timeSpan="defineOrderTimeSpan.value ? state.timeSpan : state.cancelOrderDateTime
+      ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
+      : null"
     :orderText="state.orderText"
     :dncToSend="dncSectorsToSendOrderNoDupl"
     :dspToSend="dspSectorsToSendOrderNoDupl"
@@ -25,7 +27,7 @@
       </div>
       <form @submit.prevent="handleSubmit()" class="p-grid">
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
-        <div class="p-field p-col-4 p-d-flex p-flex-column">
+        <div class="p-field p-col-4 p-d-flex p-flex-column p-m-0">
           <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
           </label>
@@ -42,7 +44,7 @@
           </small>
         </div>
         <!-- ДАТА И ВРЕМЯ СОЗДАНИЯ РАСПОРЯЖЕНИЯ -->
-        <div class="p-field p-col-6 p-d-flex p-flex-column">
+        <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
           <label for="createDateTimeString" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
           </label>
@@ -62,11 +64,14 @@
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
         <div
           v-if="orderType !== getOrderTypes.ECD_ORDER"
-          class="p-field p-col-12 p-d-flex p-flex-column"
+          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
-            <span class="p-text-bold">
-              {{orderType === getOrderTypes.ECD_NOTIFICATION ? 'На распоряжение/запрещение' : 'Предыдущее распоряжение в цепочке'}}
+            <span v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-text-bold">
+              <span style="color:red">*</span> На распоряжение/запрещение
+            </span>
+            <span v-else class="p-text-bold">
+              Предыдущее распоряжение в цепочке
             </span>
           </label>
           <TreeSelect
@@ -104,32 +109,41 @@
             </div>
           </div>
         </div>
+        <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
+        <div v-if="orderType === getOrderTypes.ORDER" class="p-field p-col-12 p-m-0">
+          <SelectButton v-model="showOnGID" :options="showOnGIDOptions" optionLabel="name" />
+        </div>
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
         <div
-          v-if="[getOrderTypes.ORDER,getOrderTypes.ECD_ORDER].includes(orderType)"
-          class="p-field p-col-12 p-d-flex p-flex-column"
+          v-if="(orderType === getOrderTypes.ORDER && showOnGID.value) || (orderType === getOrderTypes.ECD_ORDER)"
+          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
-          <label for="place" :class="{'p-error':v$.place.$invalid && submitted}">
-            <span class="p-text-bold"><span style="color:red">*</span> Место действия</span>
+          <label for="orderPlace" :class="{'p-error':v$.orderPlace.$invalid && submitted}">
+            <span class="p-text-bold">
+              <span style="color:red">*</span> Место действия</span>
           </label>
           <order-place-chooser
-            id="place"
+            id="orderPlace"
             :spans="getSectorBlocks"
             :stations="getSectorStations"
-            :value="v$.place.$model"
-            @input="v$.place.$model = $event"
+            :value="v$.orderPlace.$model"
+            @input="v$.orderPlace.$model = $event"
           />
           <small
-            v-if="(v$.place.$invalid && submitted) || v$.place.$pending.$response"
+            v-if="(v$.orderPlace.$invalid && submitted) || v$.orderPlace.$pending.$response"
             class="p-error"
           >
             Пожалуйста, определите место действия распоряжения
           </small>
         </div>
+        <!-- ФЛАГ УТОЧНЕНИЯ ВРЕМЕНИ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+        <div v-if="orderType === getOrderTypes.ORDER" class="p-field p-col-12 p-m-0">
+          <SelectButton v-model="defineOrderTimeSpan" :options="defineOrderTimeSpanOptions" optionLabel="name" />
+        </div>
         <!-- ВРЕМЯ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
         <div
-          v-if="[getOrderTypes.ORDER,getOrderTypes.ECD_ORDER].includes(orderType)"
-          class="p-field p-col-12 p-d-flex p-flex-column"
+          v-if="(orderType === getOrderTypes.ORDER && defineOrderTimeSpan.value) || (orderType === getOrderTypes.ECD_ORDER)"
+          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="timeSpan" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Время действия</span>
@@ -147,7 +161,7 @@
           </small>
         </div>
         <!-- НАИМЕНОВАНИЕ И ТЕКСТ РАСПОРЯЖЕНИЯ -->
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderText" :class="{'p-error':v$.orderText.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Текст распоряжения</span>
           </label>
@@ -290,7 +304,7 @@
         createDateTimeString: store.getters.getCurrDateString,
         prevRelatedOrder: null,
         cancelOrderDateTime: null,
-        place: {
+        orderPlace: {
           place: null,
           value: null,
         },
@@ -318,6 +332,20 @@
         orderFieldsErrs: null,
         showPreviewNewOrderDlg: false,
       });
+
+      // Отображать издаваемое распоряжение на ГИД, или не отображать
+      const showOnGIDOptions = ref([
+        { name: 'Не отображать на ГИД', value: false },
+        { name: 'Отобразить на ГИД', value: true },
+      ]);
+      const showOnGID = ref(showOnGIDOptions.value[0]);
+
+      // Уточнять время действия издаваемого распоряжения либо не уточнять
+      const defineOrderTimeSpanOptions = ref([
+        { name: 'Время действия по умолчанию', value: false },
+        { name: 'Уточнить время действия', value: true },
+      ]);
+      const defineOrderTimeSpan = ref(defineOrderTimeSpanOptions.value[0]);
 
       //const getSelectedOrderInputType = computed(() => state.selectedOrderInputType);
 
@@ -357,18 +385,6 @@
         orderText: { required, orderTextFieldsNotEmpty },
       };
 
-      let rules = {
-        number: { required },
-        createDateTime: { required },
-        createDateTimeString: { required },
-        orderText: orderTextRules,
-        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        dncSectorsToSendOrder: { minLength: minLength(1) },
-        dspSectorsToSendOrder: { minLength: minLength(1) },
-        ecdSectorsToSendOrder: { minLength: minLength(1) },
-        otherSectorsToSendOrder: { minLength: minLength(1) },
-      };
-
       const placeRules = {
         place: { required },
         value: { required },
@@ -380,10 +396,26 @@
         tillCancellation: { cancelOrEndDate },
       };
 
+      const rules = reactive({
+        number: { required },
+        createDateTime: { required },
+        createDateTimeString: { required },
+        orderText: orderTextRules,
+        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
+        dncSectorsToSendOrder: { minLength: minLength(1) },
+        dspSectorsToSendOrder: { minLength: minLength(1) },
+        ecdSectorsToSendOrder: { minLength: minLength(1) },
+        otherSectorsToSendOrder: { minLength: minLength(1) },
+      });
+
       switch (props.orderType) {
         case ORDER_PATTERN_TYPES.ORDER:
+          rules.orderPlace = showOnGID.value.value ? placeRules : {};
+          rules.timeSpan = defineOrderTimeSpan.value.value ? timeSpanRules : {};
+          rules.prevRelatedOrder = {};
+          break;
         case ORDER_PATTERN_TYPES.ECD_ORDER:
-          rules.place = placeRules;
+          rules.orderPlace = placeRules;
           rules.timeSpan = timeSpanRules;
           rules.prevRelatedOrder = {};
           break;
@@ -400,8 +432,23 @@
           break;
       }
 
-      const submitted = ref(false);
+      watch(showOnGID, (newVal) => {
+        rules.orderPlace = newVal.value ? placeRules : {};
+        state.orderPlace = {
+          place: null,
+          value: null,
+        };
+      });
+      watch(defineOrderTimeSpan, (newVal) => {
+        rules.timeSpan = newVal.value ? timeSpanRules : {};
+        state.timeSpan = {
+          start: null,
+          end: null,
+          tillCancellation: null,
+        };
+      });
 
+      const submitted = ref(false);
       const v$ = useVuelidate(rules, state);
 
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
@@ -587,6 +634,7 @@
        * Для отображения результата операции издания распоряжения (отправки на сервер).
        */
       const getDispatchOrderResult = computed(() => store.getters.getDispatchOrderResult);
+
       watch(getDispatchOrderResult, (newVal) => {
         if (!newVal || newVal.orderType !== props.orderType) {
           return;
@@ -616,6 +664,7 @@
         // методов не получается. Потому идея такова: если форма признана невалидной в результате
         // валидации, то ищу те поля, на которые форма "ругается", и смотрю, есть ли они в списке тех
         // полей, которые я заявила ранее на проверку. Если нет - то полагаю, что форма валидна.
+        submitted.value = true;
         v$.value.$touch();
         v$.value.$validate();
         let isFormValid = !v$.value.$invalid;
@@ -625,7 +674,7 @@
           if (rulesProperties.includes('orderText')) {
             rulesProperties.push(...Object.keys(orderTextRules));
           }
-          if (rulesProperties.includes('place')) {
+          if (rulesProperties.includes('orderPlace')) {
             rulesProperties.push(...Object.keys(placeRules));
           }
           if (rulesProperties.includes('timeSpan')) {
@@ -637,8 +686,6 @@
           }
         }
 
-        submitted.value = true;
-
         if (!isFormValid) {
           showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
           return;
@@ -647,12 +694,22 @@
         state.showPreviewNewOrderDlg = true;
       };
 
+      // Время действия издаваемого распоряжения:
+      //   - если установлен флаг "Уточнить время действия распоряжения", то полагаем, что пользователь
+      // определил временной интервал действия распоряжения;
+      //   - если указанный выше флаг не установлен, то смотрим, указаны ли дата-время отмены действия
+      // предшествующего распоряжения:
+      //     * если определены дата-время отмены действия предшествующего распоряжения, то полагаем, что
+      // издаваемое распоряжение действует одномоментно и время его действия равно указанной дате-времени
+      // отмены действия предшествующего распоряжения;
+      //     * в противном случае полагаеам дату-время действия распоряжения равными дате-времени его издания
       const getIssuedOrderTimeSpanObject = computed(() => {
-        return state.timeSpan.start
-          ? state.timeSpan
-          : state.cancelOrderDateTime
-            ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false}
-            : null;
+        if (defineOrderTimeSpan.value.value) {
+          return state.timeSpan;
+        }
+        return state.cancelOrderDateTime
+          ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
+          : { start: state.createDateTime, end: state.createDateTime, tillCancellation: false };
       });
 
       /**
@@ -665,7 +722,7 @@
           type: props.orderType,
           number: state.number,
           createDateTime: state.createDateTime,
-          place: state.place.place ? state.place : null,
+          place: showOnGID.value.value ? state.orderPlace : null,
           timeSpan: getIssuedOrderTimeSpanObject.value,
           orderText: state.orderText,
           dncToSend: dncSectorsToSendOrderNoDupl.value,
@@ -674,11 +731,16 @@
           otherToSend: state.otherSectorsToSendOrder,
           prevOrderId: relatedOrderId.value,
           createdOnBehalfOf: state.createdOnBehalfOf,
+          showOnGID: showOnGID.value.value,
         });
       };
 
       return {
         state,
+        showOnGID,
+        showOnGIDOptions,
+        defineOrderTimeSpan,
+        defineOrderTimeSpanOptions,
         getOrderTypes,
         isDNC,
         v$,

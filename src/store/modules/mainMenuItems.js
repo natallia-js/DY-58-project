@@ -5,10 +5,8 @@ export const MainMenuItemsKeys = Object.freeze({
   currJournal: 3,
   createOrder: 4,
   orderPatterns: 5,
-  report: 6,
-  archive: 7,
-  help: 8,
-  exit: 9,
+  help: 6,
+  exit: 7,
 });
 
 
@@ -21,8 +19,6 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.currJournal, label: 'Журнал', to: '/currJournalPage' },
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', to: '/newOrderPage' },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
-      { key: MainMenuItemsKeys.report, label: 'Отчет', to: '#!' },
-      { key: MainMenuItemsKeys.archive, label: 'Архив', to: '/archivePage' },
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
       { key: MainMenuItemsKeys.exit, label: 'Выход', to: '/logout' },
     ],
