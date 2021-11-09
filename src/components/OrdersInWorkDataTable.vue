@@ -10,11 +10,13 @@
     >
       <template #header>
         <div class="dy58-table-title">
-          <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
-          {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
-          <Badge :value="getWorkingOrdersNumber"></Badge>
+          <div class="p-mb-2">
+            <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
+            {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
+            <Badge :value="getWorkingOrdersNumber"></Badge>
+          </div>
           <div class="dy58-table-comment">
-            извлекаются распоряжения, действующие с
+            извлекаются цепочки распоряжений, действовавшие с
             <Calendar
               v-model="startDateToGetData"
               :showTime="true"
