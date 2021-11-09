@@ -6,17 +6,18 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <p><span class="p-text-bold">Фамилия:</span> &#160; {{ getUserSurname || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Имя:</span> &#160; {{ getUserName || 'Не определено' }}</p>
-    <p><span class="p-text-bold">Отчество:</span> &#160; {{ getUserFatherName || 'Не определено' }}</p>
-    <p><span class="p-text-bold">Должность:</span> &#160; {{ getUserPost || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Служба:</span> &#160; {{ getUserService || 'Не определена' }}</p>
-    <p><span class="p-text-bold">Полномочие:</span> &#160; {{ getUserCredential || 'Не определено' }}</p>
+    <p><span class="p-text-bold">Фамилия:</span> &#160; {{ getUserSurname || '?' }}</p>
+    <p><span class="p-text-bold">Имя:</span> &#160; {{ getUserName || '?' }}</p>
+    <p><span class="p-text-bold">Отчество:</span> &#160; {{ getUserFatherName || '?' }}</p>
+    <p><span class="p-text-bold">Должность:</span> &#160; {{ getUserPost || '?' }}</p>
+    <p><span class="p-text-bold">Служба:</span> &#160; {{ getUserService || '?' }}</p>
+    <p><span class="p-text-bold">Полномочие:</span> &#160; {{ getUserCredential || '?' }}</p>
     <p>
       <span class="p-text-bold">Рабочий полигон:</span> &#160;
-      {{ getUserWorkPoligon ? getUserWorkPoligon.type : 'Не определен тип' }} &#160;
+      {{ getUserWorkPoligon ? getUserWorkPoligon.type : '?' }} &#160;
       {{ getUserWorkPoligonName }}
     </p>
+    <p><span class="p-text-bold">Время входя в систему:</span> &#160; {{ getUserLoginDateTimeString || '?' }}</p>
 
     <template #footer>
       <Button label="Закрыть" @click="closeDialog" />
@@ -27,6 +28,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-user-info-dialog',
@@ -56,7 +58,12 @@
         'getUserCredential',
         'getUserWorkPoligon',
         'getUserWorkPoligonName',
+        'getLoginDateTime',
       ]),
+
+      getUserLoginDateTimeString() {
+        return this.getLoginDateTime ? getLocaleDateTimeString(this.getLoginDateTime, true) : null;
+      },
     },
 
     watch: {

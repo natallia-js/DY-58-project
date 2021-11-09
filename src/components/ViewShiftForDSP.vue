@@ -1,7 +1,7 @@
 <template>
   <div v-if="!getSectorPersonal">Сменный персонал не определен</div>
   <div v-else>
-    <Fieldset legend="Персонал станций" :toggleable="true">
+    <Fieldset legend="Персонал смежных станций" :toggleable="true">
       <div v-if="getSectorPersonal.sectorStationsShift && getSectorPersonal.sectorStationsShift.length">
         <div v-for="station of getSectorPersonal.sectorStationsShift" :key="station.stationId" class="p-ml-4">
           <span class="p-text-bold">{{ station.stationTitle }}</span>

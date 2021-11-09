@@ -5,10 +5,8 @@
     :type="orderType"
     :number="state.number"
     :prevRelatedOrder="relatedOrderObject"
-    :place="showOnGID.value ? state.orderPlace : null"
-    :timeSpan="defineOrderTimeSpan.value ? state.timeSpan : state.cancelOrderDateTime
-      ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
-      : null"
+    :place="getIssuedOrderPlaceObject"
+    :timeSpan="getPreviewOrderTimeSpanObject"
     :orderText="state.orderText"
     :dncToSend="dncSectorsToSendOrderNoDupl"
     :dspToSend="dspSectorsToSendOrderNoDupl"
@@ -104,7 +102,7 @@
                 v-if="(v$.cancelOrderDateTime.$invalid && submitted) || v$.cancelOrderDateTime.$pending.$response"
                 class="p-error"
               >
-                Не определены дата и время отмены распоряжения
+                Не определены/неверно определены дата и время отмены распоряжения
               </small>
             </div>
           </div>
@@ -378,6 +376,13 @@
         return true;
       };
 
+      const cancelOrderDateTimeNoLessOrderStartDate = (value) => {
+        if (!relatedOrderObject.value) {
+          return true;
+        }
+        return relatedOrderObject.value.timeSpan.start <= value;
+      };
+
       const orderTextRules = {
         orderTextSource: { required },
         patternId: {},
@@ -421,7 +426,7 @@
           break;
         case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
           rules.prevRelatedOrder = { required };
-          rules.cancelOrderDateTime = { required };
+          rules.cancelOrderDateTime = { required, cancelOrderDateTimeNoLessOrderStartDate };
           break;
         case ORDER_PATTERN_TYPES.REQUEST:
         case ORDER_PATTERN_TYPES.NOTIFICATION:
@@ -694,6 +699,27 @@
         state.showPreviewNewOrderDlg = true;
       };
 
+      /**
+       *
+      */
+      const getIssuedOrderPlaceObject = computed(() => {
+        return ((props.orderType === ORDER_PATTERN_TYPES.ORDER && showOnGID.value.value) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) ? state.orderPlace : null;
+      });
+
+      /**
+       *
+      */
+      const getPreviewOrderTimeSpanObject = computed(() => {
+        if ((props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) {
+          return state.timeSpan;
+        }
+        return state.cancelOrderDateTime
+          ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
+          : null;
+      });
+
       // Время действия издаваемого распоряжения:
       //   - если установлен флаг "Уточнить время действия распоряжения", то полагаем, что пользователь
       // определил временной интервал действия распоряжения;
@@ -704,7 +730,8 @@
       // отмены действия предшествующего распоряжения;
       //     * в противном случае полагаеам дату-время действия распоряжения равными дате-времени его издания
       const getIssuedOrderTimeSpanObject = computed(() => {
-        if (defineOrderTimeSpan.value.value) {
+        if ((props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) {
           return state.timeSpan;
         }
         return state.cancelOrderDateTime
@@ -722,7 +749,7 @@
           type: props.orderType,
           number: state.number,
           createDateTime: state.createDateTime,
-          place: showOnGID.value.value ? state.orderPlace : null,
+          place: getIssuedOrderPlaceObject.value,
           timeSpan: getIssuedOrderTimeSpanObject.value,
           orderText: state.orderText,
           dncToSend: dncSectorsToSendOrderNoDupl.value,
@@ -762,6 +789,8 @@
         selectedOtherAddresseesString,
         getDispatchOrdersBeingProcessed,
         hidePreviewNewOrderDlg,
+        getIssuedOrderPlaceObject,
+        getPreviewOrderTimeSpanObject,
         getIssuedOrderTimeSpanObject,
         dspSectorsToSendOrderNoDupl,
         dncSectorsToSendOrderNoDupl,

@@ -36,6 +36,7 @@
       const getUserCredential = computed(() => store.getters.getUserCredential);
       const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
       const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
+      const getLoginDateTime = computed(() => store.getters.getLoginDateTime);
 
       onMounted(() => {
         timerId = setInterval(updateCurrDateTime, 1000);
@@ -61,6 +62,13 @@
           store.dispatch('loadWorkOrders');
         }
       };
+
+      /**
+       *
+       */
+      watch(getLoginDateTime, (newLoginDateTime) => {
+        store.commit('setStartDateToGetData', newLoginDateTime);
+      });
 
       /**
        * При смене рабочего полигона пользователя подгружаем информацию о:

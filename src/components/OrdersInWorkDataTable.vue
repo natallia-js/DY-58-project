@@ -13,6 +13,15 @@
           <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
           {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
           <Badge :value="getWorkingOrdersNumber"></Badge>
+          <div class="dy58-table-comment">
+            извлекаются распоряжения, действующие с
+            <Calendar
+              v-model="startDateToGetData"
+              :showTime="true"
+              :showIcon="true"
+            />
+            по настоящее время
+          </div>
           <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
             {{ getErrorLoadingWorkOrders }}
           </p>
@@ -113,11 +122,13 @@
     data() {
       return {
         expandedRows: [],
+        startDateToGetData: new Date(),
       };
     },
 
     computed: {
       ...mapGetters([
+        'getStartDateToGetData',
         'getLoadingWorkOrdersStatus',
         'getErrorLoadingWorkOrders',
         'getWorkingOrders',
@@ -139,6 +150,20 @@
       getExpanderColumnObject() {
         return this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
       },
+    },
+
+    watch: {
+      startDateToGetData(newVal) {
+        this.$store.commit('setStartDateToGetDataNoCheck', newVal);
+      },
+
+      getStartDateToGetData(newVal) {
+        this.startDateToGetData = newVal;
+      },
+    },
+
+    mounted() {
+      this.startDateToGetData = this.getStartDateToGetData;
     },
   }
 </script>

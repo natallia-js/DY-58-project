@@ -272,10 +272,6 @@ export const personal = {
             el.sendOriginal = getOrderStatus;
           }
         });
-        /*const station = state.sectorPersonal.sectorStationsShift.find(el => el.stationId === stationId);
-        if (station && station.sendOriginal !== getOrderStatus) {
-          station.sendOriginal = getOrderStatus;
-        }*/
       }
     },
 
@@ -540,8 +536,11 @@ export const personal = {
       const dncSectorsIds = context.getters.getStationDNCSectors.map((sector) => sector.DNCS_ID);
       // id участков ЭЦД
       const ecdSectorsIds = context.getters.getStationECDSectors.map((sector) => sector.ECDS_ID);
-      // id всех ближайших станций и самой станции (полигона управления)
-      const stationsIds = context.getters.getSectorStations.map((station) => station.St_ID);
+      // id всех смежных станций
+      const currStationWorkPoligon = context.getters.getUserWorkPoligonData;
+      const stationsIds = context.getters.getSectorStations
+        .filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
+        .map((station) => station.St_ID);
       // Сюда поместим информацию о персонале, необходимую ДСП. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {
@@ -565,16 +564,18 @@ export const personal = {
             sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
-        // Здесь будет информация о тех пользователях, которые работают на текущей станции
-        // (полигоне управления) и станциях, смежных с нею
-        sectorStationsShift: context.getters.getSectorStations.map((station) => {
-          return {
-            stationId: station.St_ID,
-            stationUNMC: station.St_UNMC,
-            stationTitle: station.St_Title,
-            people: [],
-            sendOriginal: CurrShiftGetOrderStatus.doNotSend,
-          };
+        // Здесь будет информация о тех пользователях, которые работают на станциях, смежных с
+        // текущей (т.е. текущим полигоном управления)
+        sectorStationsShift: context.getters.getSectorStations
+          .filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
+          .map((station) => {
+            return {
+              stationId: station.St_ID,
+              stationUNMC: station.St_UNMC,
+              stationTitle: station.St_Title,
+              people: [],
+              sendOriginal: CurrShiftGetOrderStatus.doNotSend,
+            };
         }),
       };
       // Извлекаем информацию из БД
@@ -615,7 +616,7 @@ export const personal = {
             });
           }
         }
-        // Извлекаем информацию о тех пользователях, которые работают на станциях
+        // Извлекаем информацию о тех пользователях, которые работают на смежных станциях
         if (stationsIds.length) {
           const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
           if (responseData && responseData.length) {

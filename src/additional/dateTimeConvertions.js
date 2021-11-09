@@ -54,6 +54,9 @@ export function getTimeSpanString(timeSpan) {
   if (!timeSpan || !timeSpan.start) {
     return '';
   }
+  if (timeSpan.start && timeSpan.end && getLocaleDateTimeString(timeSpan.start, false) === getLocaleDateTimeString(timeSpan.end, false)) {
+    return getLocaleDateTimeString(timeSpan.start, false);
+  }
   const startString = `с ${getLocaleDateTimeString(timeSpan.start, false)}`;
   const endString = timeSpan.end ? ` по ${getLocaleDateTimeString(timeSpan.end, false)}` : ' до отмены';
   return startString + endString;

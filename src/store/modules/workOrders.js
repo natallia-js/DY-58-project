@@ -139,6 +139,7 @@ function getWorkOrderObject(order) {
 export const workOrders = {
   state: {
     data: [],
+    startDateToGetData: new Date(),
     loadingWorkOrders: false,
     loadingWorkOrdersResult: null,
     reportingOnOrdersDelivery: false,
@@ -148,6 +149,10 @@ export const workOrders = {
   },
 
   getters: {
+    getStartDateToGetData(state) {
+      return state.startDateToGetData;
+    },
+
     getLoadingWorkOrdersStatus(state) {
       return state.loadingWorkOrders;
     },
@@ -456,6 +461,33 @@ export const workOrders = {
   },
 
   mutations: {
+    /**
+     *
+     */
+    setStartDateToGetData(state, userLoginDateTime) {
+      if (!userLoginDateTime) {
+        state.startDateToGetData = new Date();
+        return;
+      }
+      const today = new Date();
+      // если функция Date вызывается в качестве конструктора с более чем одним аргументом,
+      // то указанные аргументы интерпретируются как локальное время
+      const checkDate1 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 30, 0, 0);
+      const checkDate2 = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 19, 30, 0, 0);
+      if (checkDate1 <= userLoginDateTime && userLoginDateTime <= checkDate2) {
+        state.startDateToGetData = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0, 0, 0);
+      } else {
+        state.startDateToGetData = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 19, 0, 0, 0);
+      }
+    },
+
+    setStartDateToGetDataNoCheck(state, date) {
+      if (!(date instanceof Date)) {
+        return;
+      }
+      state.startDateToGetData = date;
+    },
+
     clearLoadingWorkOrdersResult(state) {
       state.loadingWorkOrdersResult = null;
     },
@@ -573,6 +605,7 @@ export const workOrders = {
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
+            startDate: context.getters.getStartDateToGetData,
           },
           { headers }
         );

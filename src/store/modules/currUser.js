@@ -92,6 +92,7 @@ export const currUser = {
     post: '',         // должность
     service: '',      // принадлежность службе
     token: null,      // token пользователя
+    loginDateTime: null, // время входа в систему (время, когда в системе вызывается метод login)
     possibleCredentialsWithPoligons: null, // все полномочия пользователя в данной системе с соответствующими возможными
                                            // рабочими полигонами (из них необходимо выбрать одно полномочие и один полигон)
     credential: null, // конкретное (одно) полномочие пользователя в данной системе
@@ -126,6 +127,9 @@ export const currUser = {
     },
     getUserToken(state) {
       return state.token;
+    },
+    getLoginDateTime(state) {
+      return state.loginDateTime;
     },
     getAllPossibleCredentialsWithPoligons(state) {
       return state.possibleCredentialsWithPoligons;
@@ -246,6 +250,7 @@ export const currUser = {
       state.workPoligon = userWorkPoligon;
 
       state.isAuthenticated = true;
+      state.loginDateTime = new Date();
     },
 
     /**
@@ -297,6 +302,7 @@ export const currUser = {
       localStorage.removeItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME);
 
       state.isAuthenticated = false;
+      state.loginDateTime = null;
     },
   },
 };

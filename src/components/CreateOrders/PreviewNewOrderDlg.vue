@@ -6,7 +6,7 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <p style="textAlign:center" class="p-text-bold p-text-uppercase">{{ type ? type : '?' }}</p>
+    <p style="textAlign:center" class="p-text-bold p-text-uppercase p-mb-2">{{ type ? type : '?' }}</p>
     <p><span class="p-text-bold">Номер:</span> &#160; {{ number ? number : '?' }}</p>
     <p><span class="p-text-bold">Время издания:</span> &#160; {{ getCurrDateTimeString }}</p>
     <p v-if="prevRelatedOrder"><span class="p-text-bold">На распоряжение:</span> &#160;
