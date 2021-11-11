@@ -17,6 +17,7 @@
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
     :showIcon="true"
     placeholder="дата"
+    :manualInput="false"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.TIME"
@@ -24,12 +25,14 @@
     :timeOnly="true"
     :showIcon="true"
     placeholder="время"
+    :manualInput="false"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
     :showTime="true"
     :showIcon="true"
     placeholder="дата-время"
+    :manualInput="false"
   />
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"

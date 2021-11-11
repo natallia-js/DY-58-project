@@ -21,6 +21,7 @@
               v-model="startDateToGetData"
               :showTime="true"
               :showIcon="true"
+              :manualInput="false"
             />
             по настоящее время
           </div>

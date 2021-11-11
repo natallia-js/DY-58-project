@@ -48,9 +48,11 @@ export function getLocaleDateTimeString(date, showSeconds) {
  * Позволяет для данного объекта timeSpan получить его строковое представление.
  *
  * @param {Object} timeSpan - объект с полями start, end, tillCancellation
+ * @param {boolean} isECD - true (строку необходимо сформировать для ЭЦД) или
+ * false (строку необходимо сформировать не для ЭЦД)
  * @returns строковое представление объекта timeSpan
  */
-export function getTimeSpanString(timeSpan) {
+export function getTimeSpanString(timeSpan, isECD) {
   if (!timeSpan || !timeSpan.start) {
     return '';
   }
@@ -58,6 +60,6 @@ export function getTimeSpanString(timeSpan) {
     return getLocaleDateTimeString(timeSpan.start, false);
   }
   const startString = `с ${getLocaleDateTimeString(timeSpan.start, false)}`;
-  const endString = timeSpan.end ? ` по ${getLocaleDateTimeString(timeSpan.end, false)}` : ' до отмены';
+  const endString = timeSpan.end ? ` по ${getLocaleDateTimeString(timeSpan.end, false)}` : (!isECD ? ' до отмены' : ' до уведомления');
   return startString + endString;
 }

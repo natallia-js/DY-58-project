@@ -96,6 +96,7 @@
                 :showIcon="true"
                 :manualInput="false"
                 v-model="v$.cancelOrderDateTime.$model"
+                @dateSelect="handleChangeCancelOrderDateTime"
               />
               <br/>
               <small
@@ -355,9 +356,10 @@
       const getOrderTypes = computed(() => ORDER_PATTERN_TYPES);
       const isDNC = computed(() => store.getters.isDNC);
 
-      const endDateNoLessStartDate = (value) =>
-        !value ? true :
-          !state.timeSpan.start ? true : value >= state.timeSpan.start;
+      const endDateNoLessStartDate = (value) => {
+        console.log(state.timeSpan.start, value)
+        return !value ? true :
+          !state.timeSpan.start ? true : value >= state.timeSpan.start;}
 
       const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
@@ -652,6 +654,18 @@
       });
 
       /**
+       * Обнуляем значения секунд и миллисекунд у выбранного значения времени
+       * (чтобы не было проблем при сравнении с датой начала действия соответствующего распоряжения,
+       * например, когда необходимо отменить в то же время, когда оно начало действовать, если издано
+       * было случайно)
+       */
+      const handleChangeCancelOrderDateTime = (value) => {
+        if (value) {
+          state.cancelOrderDateTime.setSeconds(0, 0);
+        }
+      };
+
+      /**
        *
        */
       const hidePreviewNewOrderDlg = () => {
@@ -788,6 +802,7 @@
         selectedECDString,
         selectedOtherAddresseesString,
         getDispatchOrdersBeingProcessed,
+        handleChangeCancelOrderDateTime,
         hidePreviewNewOrderDlg,
         getIssuedOrderPlaceObject,
         getPreviewOrderTimeSpanObject,

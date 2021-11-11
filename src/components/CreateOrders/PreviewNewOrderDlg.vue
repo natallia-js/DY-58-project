@@ -110,6 +110,7 @@
         'getCurrDateTimeString',
         'getSectorStationOrBlockTitleById',
         'getUserPostFIO',
+        'isECD',
       ]),
 
       getOrderText() {
@@ -130,7 +131,7 @@
       },
 
       orderTimeSpanString() {
-        return this.timeSpan ? getTimeSpanString(this.timeSpan) : '?';
+        return this.timeSpan ? getTimeSpanString(this.timeSpan, this.isECD) : '?';
       },
     },
 

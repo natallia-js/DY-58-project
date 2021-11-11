@@ -65,17 +65,23 @@
       });
 
       const handleChangeStartDateTime = (value) => {
+        if (value) {
+          state.startDateTime.setSeconds(0, 0);
+        }
         emit('input', {
-          start: value,
+          start: state.startDateTime,
           end: state.tillCancellation ? null : state.endDateTime,
           tillCancellation: state.tillCancellation,
         });
       };
 
       const handleChangeEndDateTime = (value) => {
+        if (value) {
+          state.endDateTime.setSeconds(0, 0);
+        }
         emit('input', {
           start: state.startDateTime,
-          end: state.tillCancellation ? null : value,
+          end: state.tillCancellation ? null : state.endDateTime,
           tillCancellation: state.tillCancellation,
         });
       };
@@ -84,7 +90,7 @@
         emit('input', {
           start: state.startDateTime,
           end: newVal ? null : state.endDateTime,
-          tillCancellation: state.tillCancellation,
+          tillCancellation: newVal,
         });
       });
 

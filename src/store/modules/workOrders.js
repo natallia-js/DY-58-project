@@ -242,7 +242,7 @@ export const workOrders = {
     /**
      *
      */
-    getIncomingOrders(state) {
+    getIncomingOrders(state, getters) {
       const now = new Date();
       return state.data
         .filter((item) => !item.confirmDateTime)
@@ -254,7 +254,7 @@ export const workOrders = {
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
             time: getLocaleDateTimeString(item.createDateTime, false),
-            timeSpan: getTimeSpanString(item.timeSpan),
+            timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
             orderText: formOrderText({ orderTextArray: item.orderText.orderText }),
@@ -329,7 +329,7 @@ export const workOrders = {
       return groupedOrders;
     },
 
-    getWorkingOrders(state) {
+    getWorkingOrders(state, getters) {
       const now = new Date();
       return state.data.filter((item) => item.confirmDateTime)
         .map((item, index) => {
@@ -338,7 +338,7 @@ export const workOrders = {
             sendOriginal: item.sendOriginal,
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
-            time: getTimeSpanString(item.timeSpan),
+            time: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
             orderText: formOrderText({
