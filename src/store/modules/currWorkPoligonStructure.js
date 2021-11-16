@@ -287,6 +287,24 @@ export const currWorkPoligonStructure = {
       }
       return state.station.TECDSectors;
     },
+
+    /**
+     *
+     */
+    getStructuralDivisions(state) {
+      if (!state.sector || !state.sector.TECDStructuralDivisions || !state.sector.TECDStructuralDivisions.length) {
+        return [];
+      }
+      return state.sector.TECDStructuralDivisions.map((division) => {
+        return {
+          additionalId: division.ECDSD_ID, // именно накое название поля, как в otherShift (см. personal)
+          placeTitle: division.ECDSD_Title,
+          post: division.ECDSD_Post,
+          fio: division.ECDSD_FIO,
+          fullInfo: `${division.ECDSD_Title}${division.ECDSD_Post ? ' ' + division.ECDSD_Post : ''}${division.ECDSD_FIO ? ' ' + division.ECDSD_FIO : ''}`,
+        };
+      });
+    },
   },
 
   mutations: {

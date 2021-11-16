@@ -29,7 +29,7 @@
       <!-- ДОЛЖНОСТЬ ЛИЦА, КОТОРОМУ АДРЕСУЕТСЯ РАСПОРЯЖЕНИЕ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
         <label for="post" :class="{'p-error':vv$.post.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Должность</span>
+          <span class="p-text-bold">Должность</span>
         </label>
         <allow-clear-input-text
           id="post"
@@ -107,7 +107,7 @@
 
       const rules = {
         placeTitle: { required },
-        post: { required },
+        post: {},
         fio: {},
       };
 

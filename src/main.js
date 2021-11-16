@@ -42,6 +42,7 @@ import Badge from 'primevue/badge';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Listbox from 'primevue/listbox';
+import MultiSelect from 'primevue/multiselect';
 
 const app = createApp(App);
 
@@ -81,5 +82,6 @@ app.component('Badge', Badge);
 app.component('Accordion', Accordion);
 app.component('AccordionTab', AccordionTab);
 app.component('Listbox', Listbox);
+app.component('MultiSelect', MultiSelect);
 
 app.mount('#app');

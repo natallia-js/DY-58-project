@@ -14,9 +14,20 @@
       v-model:selection="selectedUser" selectionMode="single" dataKey="_id"
     >
       <template #header>
-        <Button class="p-mr-2" label="Добавить" @click="handleAddNewRec" />
-        <Button v-if="selectedUser" class="p-mr-2" label="Редактировать" @click="handleEditRec" />
-        <Button v-if="selectedUser" label="Удалить" @click="handleDelRec" />
+        <div class="p-mb-2">
+          <Button class="p-mr-2" label="Добавить" @click="handleAddNewRec" />
+          <Button v-if="selectedUser" class="p-mr-2" label="Редактировать" @click="handleEditRec" />
+          <Button v-if="selectedUser" label="Удалить" @click="handleDelRec" />
+        </div>
+        <MultiSelect
+          v-if="isECD"
+          v-model="selectedDivisions"
+          :options="getStructuralDivisions"
+          optionLabel="fullInfo"
+          placeholder="Выберите структурные подразделения"
+          display="chip"
+          style="width:100%"
+        />
       </template>
 
       <Column v-for="col of getOtherShiftTblColumns"
@@ -114,6 +125,7 @@
         selectedUser: null,
         user: null,
         addNewRec: true, // true = add, false = edit
+        selectedDivisions: null,
       };
     },
 
@@ -124,6 +136,8 @@
     computed: {
       ...mapGetters([
         'getOtherShiftForSendingData',
+        'isECD',
+        'getStructuralDivisions',
       ]),
 
       getOtherShiftTblColumnNames() {
@@ -154,6 +168,25 @@
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
+      },
+
+      selectedDivisions(newVal, prevVal) {
+        // Проверяем, была ли добавлена запись
+        if (!prevVal || prevVal.length < newVal.length) {
+          for (let item of newVal) {
+            if (!prevVal || !prevVal.length || !prevVal.find((el) => el.additionalId === item.additionalId)) {
+              this.$store.commit('addOtherGetOrderRecord', { ...item });
+              return;
+            }
+          }
+        }
+        // Проверяем, была ли удалена запись
+        for (let item of prevVal) {
+          if (!newVal || !newVal.length || !newVal.find((el) => el.additionalId === item.additionalId)) {
+            this.$store.commit('delOtherGetOrderRecordByAdditionalId', item.additionalId);
+            return;
+          }
+        }
       },
     },
 
@@ -228,6 +261,9 @@
       },
 
       handleDelRec() {
+        if (this.selectedUser.additionalId > 0) {
+          this.selectedDivisions = this.selectedDivisions.filter((el) => el.additionalId !== this.selectedUser.additionalId);
+        }
         this.$store.commit('delOtherGetOrderRecord', this.selectedUser._id);
         this.selectedUser = null;
       },

@@ -10,6 +10,12 @@ export const currDateTime = {
       return state.dateTime;
     },
 
+    getCurrDateTimeWithoutMilliseconds(state) {
+      const returnValue = new Date(state.dateTime);
+      returnValue.setMilliseconds(0);
+      return returnValue;
+    },
+
     getCurrDateString(state) {
       return getLocaleDateString(state.dateTime);
     },

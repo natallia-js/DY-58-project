@@ -68,6 +68,7 @@ export const lastOrdersParams = {
       const arrayIndex = state.params.findIndex((item) => item.ordersType === ordersType);
       if (arrayIndex >= 0) {
         state.params[arrayIndex] = {
+          ...state.params[arrayIndex],
           lastOrderNumber: 0,
           lastOrderDateTime: null,
         };
@@ -86,7 +87,7 @@ export const lastOrdersParams = {
           lastOrderDateTime: param.lastOrderDateTime ? new Date(param.lastOrderDateTime) : null,
         };
       });
-    }
+    },
   },
 
   actions: {

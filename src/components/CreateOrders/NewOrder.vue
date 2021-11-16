@@ -299,7 +299,7 @@
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
         number: store.getters.getNextOrdersNumber(props.orderType),
-        createDateTime: store.getters.getCurrDateTime,
+        createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
         prevRelatedOrder: null,
         cancelOrderDateTime: null,
@@ -357,7 +357,6 @@
       const isDNC = computed(() => store.getters.isDNC);
 
       const endDateNoLessStartDate = (value) => {
-        console.log(state.timeSpan.start, value)
         return !value ? true :
           !state.timeSpan.start ? true : value >= state.timeSpan.start;}
 
@@ -461,13 +460,13 @@
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
 
       // Дата и время
-      const getCurrDateTime = computed(() => store.getters.getCurrDateTime);
+      const getCurrDateTimeWithoutMilliseconds = computed(() => store.getters.getCurrDateTimeWithoutMilliseconds);
       const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
       // Каждый раз, когда происходит изменение текущего времени, производим проверку на
       // совпадение месяца и года текущего времени с месяцем и годом даты последнего изданного
       // распоряжения данного типа. Если не совпадает, то производим переход на новый "журнал"
       // путем сброса номера распоряжений заданного типа.
-      watch(getCurrDateTime, (newVal) => {
+      watch(getCurrDateTimeWithoutMilliseconds, (newVal) => {
         const lastOrderDateTime = store.getters.getLastOrderDateTime(props.orderType);
         if (lastOrderDateTime) {
           if (

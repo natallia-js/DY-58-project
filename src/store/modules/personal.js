@@ -482,7 +482,7 @@ export const personal = {
      *
      */
     addOtherGetOrderRecord(state, props) {
-      const { placeTitle, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend } = props;
+      const { additionalId, placeTitle, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend } = props;
 
       if (!state.sectorPersonal) {
         state.sectorPersonal = {};
@@ -490,7 +490,14 @@ export const personal = {
       if (!state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift = [];
       }
-      state.sectorPersonal.otherShift.push({ _id: objectId(), placeTitle, post, fio, sendOriginal });
+      state.sectorPersonal.otherShift.push({
+        _id: objectId(),
+        additionalId: additionalId || -1, // называть 'id' нельзя
+        placeTitle,
+        post,
+        fio,
+        sendOriginal,
+      });
     },
 
     /**
@@ -520,6 +527,16 @@ export const personal = {
         return;
       }
       state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
+    },
+
+    /**
+     *
+     */
+     delOtherGetOrderRecordByAdditionalId(state, additionalId) {
+      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
+        return;
+      }
+      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item.additionalId !== additionalId);
     },
   },
 
