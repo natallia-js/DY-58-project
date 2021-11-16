@@ -46,7 +46,7 @@
             <span v-else :class="{'dy58-info': slotProps.data.fioOnline}">
               {{ slotProps.data[col.field] }}
               <a
-                :class="['dy58-send-status-btn']"
+                class="dy58-send-status-btn"
                 @click="() => openChoosePersonDlg(slotProps.data.people,
                   slotProps.data.fioId
                     ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline }

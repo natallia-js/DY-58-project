@@ -43,3 +43,12 @@
   color: #fff;
   padding: 10px;
 }
+
+.dy58-work-orders-tabview {
+  background-color: var(--surface-b) !important;
+  border: 1px solid #dee2e6;
+}
+
+.dy58-work-orders-tabview > .p-tabview-panels {
+  padding: 0 !important;
+}

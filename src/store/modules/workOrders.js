@@ -12,7 +12,7 @@ const InputMessTblColumnsTitles = Object.freeze({
   time: 'time', // Время издания распоряжения
   orderNum: 'orderNum',
   orderTitle: 'orderTitle',
-  orderText: 'orderText', // Только для ДСП
+  orderText: 'shortOrderText', // Только для ДСП
   place: 'place',
   post: 'post',
   fio: 'fio',
@@ -257,10 +257,18 @@ export const workOrders = {
             timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
-            orderText: formOrderText({ orderTextArray: item.orderText.orderText }),
+            shortOrderText: formOrderText({ orderTextArray: item.orderText.orderText }),
+            orderText: formOrderText({
+              orderTextArray: item.orderText.orderText,
+              dncToSend: item.dncToSend,
+              dspToSend: item.dspToSend,
+              ecdToSend: item.ecdToSend,
+              otherToSend: item.otherToSend,
+            }),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
+            nextRelatedOrderId: item.nextRelatedOrderId,
           };
         });
     },
@@ -327,6 +335,54 @@ export const workOrders = {
         }
       });
       return groupedOrders;
+    },
+
+    getWorkingOrdersToDisplayAsTree(state) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      const groupedWorkingOrders = [];
+
+      const findNodeInNodesChain = (upperLevelNode, nodeId) => {
+        if (!upperLevelNode) {
+          return null;
+        }
+        if (upperLevelNode.nextRelatedOrderId === nodeId) {
+          return upperLevelNode;
+        }
+        return findNodeInNodesChain(upperLevelNode.children && upperLevelNode.children.length ? upperLevelNode.children[0] : null, nodeId);
+      };
+
+      const findNodeReferencingNodeWithGivenKey = (nodeId) => {
+        for (let group of groupedWorkingOrders) {
+          const node = findNodeInNodesChain(group, nodeId);
+          if (node) {
+            return node;
+          }
+        }
+        return null;
+      };
+
+      // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке.
+      // Это обязательно!!!
+      workingOrders.forEach((order) => {console.log('order',order)
+        const parentNode = findNodeReferencingNodeWithGivenKey(order._id);console.log('parentNode',parentNode)
+
+        const orderNodeData = {
+          key: order._id,
+          type: order.type,
+          number: order.number,
+          orderText: order.orderText,
+          createDateTime: order.createDateTime,
+          nextRelatedOrderId: order.nextRelatedOrderId,
+          children: [],
+        };
+
+        if (!parentNode) {
+          groupedWorkingOrders.push(orderNodeData);
+        } else {
+          parentNode.children.push(orderNodeData);
+        }
+      });
+      return groupedWorkingOrders;
     },
 
     getWorkingOrders(state, getters) {

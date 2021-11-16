@@ -50,10 +50,39 @@
           <IncomingNotificationsDataTable />
         </div>
         <br>
-        <div>
-          <!-- Таблица распоряжений в работе -->
-          <OrdersInWorkDataTable />
+        <!-- Информация о распоряжениях в работе -->
+        <div class="p-datatable-header dy58-work-orders-tabview p-pt-3">
+          <div class="dy58-table-title p-pb-2">
+            <div class="p-mb-2">
+              <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
+              {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
+              <Badge :value="getWorkingOrdersNumber"></Badge>
+            </div>
+            <div class="dy58-table-comment">
+              извлекаются цепочки распоряжений, действовавшие с
+              <Calendar
+                v-model="startDateToGetData"
+                :showTime="true"
+                :showIcon="true"
+                :manualInput="false"
+              />
+              по настоящее время
+            </div>
+            <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
+              {{ getErrorLoadingWorkOrders }}
+            </p>
+          </div>
         </div>
+        <TabView class="dy58-work-orders-tabview">
+          <TabPanel header="Табличный вид">
+            <!-- Таблица распоряжений в работе -->
+            <orders-in-work-data-table />
+          </TabPanel>
+          <TabPanel header="В виде дерева">
+            <!-- Дерево распоряжений в работе -->
+            <orders-in-work-tree />
+          </TabPanel>
+        </TabView>
       </div>
     </div>
   </div>
@@ -67,6 +96,7 @@
   import IncomingNotificationsDataTable from '../components/IncomingNotificationsDataTable';
   import ShowUserDataDlg from '../components/ShowUserDataDlg';
   import OrdersInWorkDataTable from '../components/OrdersInWorkDataTable';
+  import OrdersInWorkTree from '@/components/OrdersInWorkTree.vue';
 
   export default {
     name: 'dy58-main-page',
@@ -74,6 +104,7 @@
     data() {
       return {
         showUserDataDlg: false,
+        startDateToGetData: new Date(),
       };
     },
 
@@ -82,6 +113,7 @@
       IncomingNotificationsDataTable,
       OrdersInWorkDataTable,
       ShowUserDataDlg,
+      OrdersInWorkTree,
     },
 
     computed: {
@@ -89,6 +121,11 @@
         'getCurrDateTimeString',
         'getUserPostFIO',
         'getUserCredential',
+        'getStartDateToGetData',
+        'getLoadingWorkOrdersStatus',
+        'getWorkingOrdersNumber',
+        'getErrorLoadingWorkOrders',
+        'isDSP',
       ]),
 
       getMainMenuItemsKeys() {
@@ -96,8 +133,19 @@
       },
     },
 
+    watch: {
+      startDateToGetData(newVal) {
+        this.$store.commit('setStartDateToGetDataNoCheck', newVal);
+      },
+
+      getStartDateToGetData(newVal) {
+        this.startDateToGetData = newVal;
+      },
+    },
+
     mounted() {
       this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.mainPage);
+      this.startDateToGetData = this.getStartDateToGetData;
     },
 
     methods: {
@@ -109,6 +157,7 @@
         this.showUserDataDlg = false;
       },
 
+/*
       createNewOrder() {
         //if (isAuthenticated) {
           //this.$router.push('/dashboard')
@@ -116,6 +165,7 @@
           this.$router.push('/newOrderPage');
         //}
       },
+    */
     },
   };
 </script>

@@ -8,29 +8,6 @@
       :scrollable="true" scrollHeight="flex"
       v-model:expandedRows="expandedRows"
     >
-      <template #header>
-        <div class="dy58-table-title">
-          <div class="p-mb-2">
-            <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
-            {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
-            <Badge :value="getWorkingOrdersNumber"></Badge>
-          </div>
-          <div class="dy58-table-comment">
-            извлекаются цепочки распоряжений, действовавшие с
-            <Calendar
-              v-model="startDateToGetData"
-              :showTime="true"
-              :showIcon="true"
-              :manualInput="false"
-            />
-            по настоящее время
-          </div>
-          <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
-            {{ getErrorLoadingWorkOrders }}
-          </p>
-        </div>
-      </template>
-
       <Column
         :expander="true"
         :style="{ minWidth: getExpanderColumnObject.width, textAlign: getExpanderColumnObject.align, alignItems: 'center', justifyContent: 'center' }"
@@ -125,13 +102,11 @@
     data() {
       return {
         expandedRows: [],
-        startDateToGetData: new Date(),
       };
     },
 
     computed: {
       ...mapGetters([
-        'getStartDateToGetData',
         'getLoadingWorkOrdersStatus',
         'getErrorLoadingWorkOrders',
         'getWorkingOrders',
@@ -153,20 +128,6 @@
       getExpanderColumnObject() {
         return this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
       },
-    },
-
-    watch: {
-      startDateToGetData(newVal) {
-        this.$store.commit('setStartDateToGetDataNoCheck', newVal);
-      },
-
-      getStartDateToGetData(newVal) {
-        this.startDateToGetData = newVal;
-      },
-    },
-
-    mounted() {
-      this.startDateToGetData = this.getStartDateToGetData;
     },
   }
 </script>
