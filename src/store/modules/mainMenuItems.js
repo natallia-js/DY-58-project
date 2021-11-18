@@ -1,3 +1,6 @@
+import { store } from '../../store';
+
+
 export const MainMenuItemsKeys = Object.freeze({
   mainPage: 0,
   sectorStructure: 1,
@@ -20,7 +23,14 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', to: '/newOrderPage' },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
-      { key: MainMenuItemsKeys.exit, label: 'Выход', to: '/logout' },
+      {
+        key: MainMenuItemsKeys.exit,
+        label: 'Выход',
+        items: [
+          { label: 'Без сдачи дежурства', command: () => store.commit('prepareForLogout', false) },
+          { label: 'Со сдачей дежурства', command: () => store.commit('prepareForLogout', true) },
+        ],
+      },
     ],
   },
 

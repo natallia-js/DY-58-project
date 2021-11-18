@@ -1,5 +1,5 @@
 <template>
-  <MegaMenu :model="getMainMenuItems" class="main-menu-tool-bar" />
+  <Menubar class="dy58-1" :model="getMainMenuItems" />
 </template>
 
 
@@ -15,6 +15,8 @@
   };
 </script>
 
-
 <style scoped>
+  .dy58-1 {
+    z-index: 900000 !important;
+  }
 </style>

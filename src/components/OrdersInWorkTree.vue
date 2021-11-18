@@ -2,19 +2,21 @@
   <div>
     <ShowIncomingOrderDlg
       :showDlg="showIncomingOrderDlg"
+      dlgTitle="Информация о рабочем распоряжении"
       :order="chosenOrder"
+      :orderNeedsToBeConfirmed="false"
       @close="hideOrderInfo"
     >
     </ShowIncomingOrderDlg>
     <Tree
       :value="getWorkingOrdersToDisplayAsTree"
       selectionMode="single"
-      v-model:selectionKeys="chosenOrder"
+      @node-select="onNodeSelect"
     >
       <template #default="slotProps">
-        <b>{{ slotProps.node.type }}, №{{ slotProps.node.number || '?' }}</b>,
-        {{ (slotProps.node.orderText && slotProps.node.orderText.orderTitle) ? slotProps.node.orderText.orderTitle : '?' }},
-        от {{ getLocDateTimeString(slotProps.node.createDateTime) }}
+        <b>{{ slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}</b>,
+        {{ slotProps.node.orderTitle || '?' }},
+        от {{ slotProps.node.time }}
         <a
           class="dy58-send-status-btn"
           @click="() => showOrderInfo(slotProps.node.key)"
@@ -65,6 +67,10 @@
 
       hideOrderInfo() {
         this.showIncomingOrderDlg = false;
+      },
+
+      onNodeSelect(node) {
+        this.chosenOrder = node;
       },
     },
   }

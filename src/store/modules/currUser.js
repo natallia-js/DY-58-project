@@ -1,9 +1,12 @@
+import axios from 'axios';
+import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import {
   APP_CODE_NAME,
   APP_CREDENTIALS,
   USER_CREDENTIALS_LOCAL_STORAGE_NAME,
   WORK_POLIGON_TYPES,
 } from '../../constants/appCredentials';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 /**
@@ -93,11 +96,18 @@ export const currUser = {
     service: '',      // принадлежность службе
     token: null,      // token пользователя
     loginDateTime: null, // время входа в систему (время, когда в системе вызывается метод login)
+    lastTakeDutyTime: null, // время последнего принятия дежурства
+    lastPassDutyTime: null, // время последней сдачи дежурства
     possibleCredentialsWithPoligons: null, // все полномочия пользователя в данной системе с соответствующими возможными
                                            // рабочими полигонами (из них необходимо выбрать одно полномочие и один полигон)
     credential: null, // конкретное (одно) полномочие пользователя в данной системе
     workPoligon: null,  // информация о рабочем полигоне (одном) пользователя
     isAuthenticated: false, // true (прошел) либо false (не прошел) пользователь аутентификацию в системе
+    startLogout: false,
+    logoutWithDutyPass: false,
+    logoutStarted: false,
+    logoutFinished: false,
+    logoutError: null,
   },
 
   getters: {
@@ -128,6 +138,12 @@ export const currUser = {
     getUserToken(state) {
       return state.token;
     },
+    getLastTakeDutyTime(state) {
+      return state.lastTakeDutyTime;
+    },
+    getLastPassDutyTime(state) {
+      return state.lastPassDutyTime;
+    },
     getLoginDateTime(state) {
       return state.loginDateTime;
     },
@@ -151,6 +167,21 @@ export const currUser = {
     },
     isECD(state) {
       return state.credential === APP_CREDENTIALS.ECD_FULL;
+    },
+    getStartLogout(state) {console.log('getStartLogout')
+      return state.startLogout;
+    },
+    getlogoutWithDutyPass(state) {console.log('getlogoutWithDutyPass')
+      return state.logoutWithDutyPass;
+    },
+    getLogoutStarted(state) {console.log('getLogoutStarted')
+      return state.logoutStarted;
+    },
+    getLogoutFinished(state) {console.log('getLogoutFinished')
+      return state.logoutFinished;
+    },
+    getLogoutError(state) {console.log('getLogoutError')
+      return state.logoutError;
     },
   },
 
@@ -189,6 +220,8 @@ export const currUser = {
         userId,
         jtwToken,
         userInfo,
+        lastTakeDutyTime,
+        lastPassDutyTime,
         credentials,
         workPoligons,
         lastCredential,
@@ -232,6 +265,8 @@ export const currUser = {
         userId,
         userToken: jtwToken,
         userInfo,
+        lastTakeDutyTime,
+        lastPassDutyTime,
         userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
         userWorkPoligons: workPoligons,
         lastCredential: userCredential,
@@ -248,6 +283,8 @@ export const currUser = {
       state.possibleCredentialsWithPoligons = userCredsWithPoligons; // именно все возможные полномочия в данном приложении!
       state.credential = userCredential;
       state.workPoligon = userWorkPoligon;
+      state.lastTakeDutyTime = lastTakeDutyTime ? new Date(lastTakeDutyTime) : null,
+      state.lastPassDutyTime = lastPassDutyTime ? new Date(lastPassDutyTime) : null,
 
       state.isAuthenticated = true;
       state.loginDateTime = new Date();
@@ -273,6 +310,8 @@ export const currUser = {
           userId: locStorUserData.userId,
           jtwToken: locStorUserData.userToken,
           userInfo: locStorUserData.userInfo,
+          lastTakeDutyTime: locStorUserData.lastTakeDutyTime,
+          lastPassDutyTime: locStorUserData.lastPassDutyTime,
           credentials: locStorUserData.userCredentials,
           workPoligons: locStorUserData.userWorkPoligons,
           lastCredential: locStorUserData.lastCredential,
@@ -285,9 +324,33 @@ export const currUser = {
     },
 
     /**
-     *
+     * passDuty - true (выйти и сдать дежурство) / false (выйти без сдачи дежурства)
      */
-    logout(state) {
+    async logout(state) {console.log('logout')
+      state.logoutStarted = true;
+
+      if (state.logoutWithDutyPass) {
+        try {
+          // Запрос на сдачу дежурства вначале обрабатывается на сервере
+          const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass, {},
+            { headers: getRequestAuthorizationHeader() }
+          );
+          console.log(response.data)
+          if (!response.data || String(response.data.id) !== String(state.id)) {
+            state.logoutStarted = false;
+            state.logoutFinished = true;
+            state.logoutError = 'some error';
+            return;
+          }
+        }
+        catch (err) {
+          state.logoutStarted = false;
+          state.logoutFinished = true;
+          state.logoutError = err || 'some error';
+          return;
+        }
+      }
+
       state.id = null;
       state.token = null;
       state.name = '';
@@ -298,11 +361,28 @@ export const currUser = {
       state.possibleCredentialsWithPoligons = null;
       state.credential = null;
       state.workPoligon = null;
+      state.lastTakeDutyTime = null;
+      state.lastPassDutyTime = null;
 
       localStorage.removeItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME);
 
       state.isAuthenticated = false;
       state.loginDateTime = null;
+
+      state.logoutStarted = false;
+      state.logoutFinished = true;
+    },
+
+    cancelLogout(state) {console.log('cancelLogout')
+      state.startLogout = false;
+      state.logoutStarted = false;
+      state.logoutFinished = false;
+      state.logoutError = null;
+    },
+
+    prepareForLogout(state, logoutWithDutyPass) {console.log('prepareForLogout')
+      state.logoutWithDutyPass = logoutWithDutyPass;
+      state.startLogout = true;
     },
   },
 };

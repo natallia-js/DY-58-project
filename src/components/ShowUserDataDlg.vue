@@ -17,7 +17,9 @@
       {{ getUserWorkPoligon ? getUserWorkPoligon.type : '?' }} &#160;
       {{ getUserWorkPoligonName }}
     </p>
-    <p><span class="p-text-bold">Время входя в систему:</span> &#160; {{ getUserLoginDateTimeString || '?' }}</p>
+    <p><span class="p-text-bold">Время последнего приема дежурства:</span> &#160; {{ getUserLastTakeDutyTimeString }}</p>
+    <p><span class="p-text-bold">Время последней сдачи дежурства:</span> &#160; {{ getUserLastPassDutyTimeString }}</p>
+    <p><span class="p-text-bold">Время входя в систему:</span> &#160; {{ getUserLoginDateTimeString }}</p>
 
     <template #footer>
       <Button label="Закрыть" @click="closeDialog" />
@@ -59,10 +61,20 @@
         'getUserWorkPoligon',
         'getUserWorkPoligonName',
         'getLoginDateTime',
+        'getLastTakeDutyTime',
+        'getLastPassDutyTime',
       ]),
 
       getUserLoginDateTimeString() {
-        return this.getLoginDateTime ? getLocaleDateTimeString(this.getLoginDateTime, true) : null;
+        return this.getLoginDateTime ? getLocaleDateTimeString(this.getLoginDateTime, true) : '?';
+      },
+
+      getUserLastTakeDutyTimeString() {
+        return this.getLastTakeDutyTime ? getLocaleDateTimeString(this.getLastTakeDutyTime, true) : '?';
+      },
+
+      getUserLastPassDutyTimeString() {
+        return this.getLastPassDutyTime ? getLocaleDateTimeString(this.getLastPassDutyTime, true) : '?';
       },
     },
 
@@ -75,7 +87,7 @@
     methods: {
       closeDialog() {
         this.$emit('close');
-        this.dlgVisible = false;
+        //this.dlgVisible = false;
       },
     },
   };

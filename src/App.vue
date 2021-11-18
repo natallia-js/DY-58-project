@@ -1,4 +1,9 @@
 <template>
+  <ShowBeforeLogoutDlg
+    :showDlg="state.showBeforeLogoutDlg"
+    @close="hideBeforeLogoutDlg"
+  >
+  </ShowBeforeLogoutDlg>
   <nav-bar v-if="isUserAuthenticated && getUserCredential && getUserWorkPoligon" />
   <router-view />
   <footer-bar v-if="isUserAuthenticated && getUserCredential && getUserWorkPoligon" />
@@ -11,6 +16,7 @@
   import NavBar from './components/NavBar';
   import FooterBar from './components/FooterBar';
   import useWebSocket from './hooks/useWebSocket.hook';
+  import ShowBeforeLogoutDlg from './components/ShowBeforeLogoutDlg';
 
   const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
@@ -20,6 +26,7 @@
     components: {
       NavBar,
       FooterBar,
+      ShowBeforeLogoutDlg,
     },
 
     setup() {
@@ -30,6 +37,7 @@
 
       const state = reactive({
         wsClient: null,
+        showBeforeLogoutDlg: false,
       });
 
       const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
@@ -37,6 +45,7 @@
       const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
       const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
       const getLoginDateTime = computed(() => store.getters.getLoginDateTime);
+      const getStartLogout = computed(() => store.getters.getStartLogout);
 
       onMounted(() => {
         timerId = setInterval(updateCurrDateTime, 1000);
@@ -111,10 +120,22 @@
         }
       });
 
+      watch(getStartLogout, (startLogoutVal) => {
+        if (startLogoutVal) {console.log('watch(getStartLogout')
+          state.showBeforeLogoutDlg = true;
+        }
+      });
+
+      const hideBeforeLogoutDlg = () => {console.log('hideBeforeLogoutDlg')
+        state.showBeforeLogoutDlg = false;
+      };
+
       return {
+        state,
         isUserAuthenticated,
         getUserCredential,
         getUserWorkPoligon,
+        hideBeforeLogoutDlg,
       };
     },
   };

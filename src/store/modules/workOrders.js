@@ -337,7 +337,7 @@ export const workOrders = {
       return groupedOrders;
     },
 
-    getWorkingOrdersToDisplayAsTree(state) {
+    getWorkingOrdersToDisplayAsTree(state, getters) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       const groupedWorkingOrders = [];
 
@@ -363,15 +363,27 @@ export const workOrders = {
 
       // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке.
       // Это обязательно!!!
-      workingOrders.forEach((order) => {console.log('order',order)
-        const parentNode = findNodeReferencingNodeWithGivenKey(order._id);console.log('parentNode',parentNode)
+      workingOrders.forEach((order) => {
+        const parentNode = findNodeReferencingNodeWithGivenKey(order._id);
 
         const orderNodeData = {
           key: order._id,
           type: order.type,
-          number: order.number,
-          orderText: order.orderText,
-          createDateTime: order.createDateTime,
+          sendOriginal: order.sendOriginal,
+          place: order.senderWorkPoligon.title,
+          post: order.creator.post,
+          fio: order.creator.fio + (order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''),
+          orderNum: order.number,
+          time: getLocaleDateTimeString(order.createDateTime, false),
+          timeSpan: getTimeSpanString(order.timeSpan, getters.isECD),
+          orderTitle: order.orderText.orderTitle,
+          orderText: formOrderText({
+            orderTextArray: order.orderText.orderText,
+            dncToSend: order.dncToSend,
+            dspToSend: order.dspToSend,
+            ecdToSend: order.ecdToSend,
+            otherToSend: order.otherToSend,
+          }),
           nextRelatedOrderId: order.nextRelatedOrderId,
           children: [],
         };
@@ -668,9 +680,18 @@ export const workOrders = {
         context.commit('setLoadingWorkOrdersResult', { error: false, message: null });
         context.commit('setNewWorkOrdersArray', response.data);
         context.dispatch('reportOnOrdersDelivery', response.data);
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка получения информации о рабочих распоряжениях: ' + error.response.data ? error.response.data.message : '?';
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка получения информации о рабочих распоряжениях: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях: ' + error.message || '?';
+        }
         context.commit('setLoadingWorkOrdersResult', { error: true, message: errMessage });
       }
       context.commit('setLoadingWorkOrdersStatus', false);

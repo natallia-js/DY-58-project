@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    header="Информация о входящем уведомлении"
+    :header="dlgTitle"
     v-model:visible="dlgVisible"
     style="width:auto; maxWidth:50%"
     :modal="true"
@@ -25,7 +25,7 @@
       <span v-if="order" v-html="order.orderText"></span>
     </p>
     <template #footer>
-      <Button label="Подтвердить" @click="confirmOrder" />
+      <Button v-if="orderNeedsToBeConfirmed" label="Подтвердить" @click="confirmOrder" />
       <Button label="Закрыть" @click="closeDialog" />
     </template>
   </Dialog>
@@ -49,8 +49,16 @@
         type: Boolean,
         required: true,
       },
+      dlgTitle: {
+        type: String,
+        required: true,
+      },
       order: {
         type: Object,
+      },
+      orderNeedsToBeConfirmed: {
+        type: Boolean,
+        required: true,
       },
     },
 
@@ -70,7 +78,7 @@
 
       closeDialog() {
         this.$emit('close');
-        this.dlgVisible = false;
+        //this.dlgVisible = false;
       },
     },
   };

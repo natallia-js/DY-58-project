@@ -18,6 +18,7 @@ export const WS_SERVER_PARAMS = Object.freeze({
 
 export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   login: `${AUTH_SERVER_ADDRESS}/api/auth/login`,
+  logoutWithDutyPass: `${AUTH_SERVER_ADDRESS}/api/auth/logoutWithDutyPass`,
 
   getStationsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/shortDefinitData`,
   getDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortDefinitData`,

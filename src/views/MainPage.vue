@@ -68,6 +68,9 @@
               />
               по настоящее время
             </div>
+            <div class="dy58-table-comment">
+              (изменение времени запроса информации будет применено при очередном обновлении данных)
+            </div>
             <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
               {{ getErrorLoadingWorkOrders }}
             </p>

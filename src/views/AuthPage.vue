@@ -39,6 +39,12 @@
             Введите пароль
           </small>
         </div>
+        <div class="p-field p-col-12 p-d-flex p-flex-column">
+          <div class="p-field-checkbox">
+            <Checkbox id="takeDuty" v-model="takeDuty" :binary="true" />
+            <label for="takeDuty">Принять дежурство</label>
+          </div>
+        </div>
         <div v-if="!waitingForServerResponse" class="p-col-12">
           <Button type="submit" label="Войти" />
         </div>
@@ -66,6 +72,7 @@
       return {
         userName: '',
         password: '',
+        takeDuty: false,
         submitted: false,
         waitingForServerResponse: false,
       };
@@ -120,6 +127,7 @@
           const response = await thisComponent.$http.post(AUTH_SERVER_ACTIONS_PATHS.login, {
             login: thisComponent.userName,
             password: thisComponent.password,
+            takeDuty: thisComponent.takeDuty,
           });
 
           const workPoligons = [];
@@ -146,6 +154,8 @@
             userId: response.data.userId,
             jtwToken: response.data.token,
             userInfo: response.data.userInfo,
+            lastTakeDutyTime: response.data.lastTakeDutyTime,
+            lastPassDutyTime: response.data.lastPassDutyTime,
             credentials: response.data.credentials,
             workPoligons,
           });
@@ -186,7 +196,3 @@
     },
   }
 </script>
-
-
-<style lang="scss" scoped>
-</style>

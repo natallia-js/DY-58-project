@@ -13,7 +13,6 @@ import 'primeicons/primeicons.css';
 import './assets/theme/bootstrap4-light-blue/theme.css';
 import PrimeVue from 'primevue/config';
 import DataTable from 'primevue/datatable';
-import MegaMenu from 'primevue/megamenu';
 import PanelMenu from 'primevue/panelmenu';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -43,6 +42,7 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Listbox from 'primevue/listbox';
 import MultiSelect from 'primevue/multiselect';
+import Menubar from 'primevue/menubar';
 
 const app = createApp(App);
 
@@ -55,12 +55,12 @@ app.use(ConfirmationService);
 
 app.directive('tooltip', Tooltip);
 
+app.component('Menubar', Menubar);
 app.component('DataTable', DataTable);
 app.component('Column', Column);
 app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('Toast', Toast);
-app.component('MegaMenu', MegaMenu);
 app.component('PanelMenu', PanelMenu);
 app.component('Card', Card);
 app.component('TabView', TabView);

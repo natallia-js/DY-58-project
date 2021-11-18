@@ -9,6 +9,10 @@
   export default {
     name: 'dy58-logout',
 
+    props: {
+      //
+    },
+
     mounted() {
       this.logout();
       this.$router.push({ name: 'AuthPage' });

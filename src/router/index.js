@@ -8,7 +8,6 @@ import OrderPatternsPage from '../views/OrderPatternsPage.vue';
 import CurrJournalPage from '../views/CurrJournalPage.vue';
 import ShiftPage from '../views/ShiftPage.vue';
 import HelpPage from '../views/HelpPage.vue';
-import Logout from '../views/Logout.vue';
 import { store } from '../store';
 
 const routes = [
@@ -80,14 +79,6 @@ const routes = [
     path: '/helpPage',
     name: 'HelpPage',
     component: HelpPage,
-    meta: {
-      requiresAuth: true,
-    },
-  },
-  {
-    path: '/logout',
-    name: 'Logout',
-    component: Logout,
     meta: {
       requiresAuth: true,
     },

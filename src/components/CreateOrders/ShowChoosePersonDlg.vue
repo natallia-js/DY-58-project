@@ -85,7 +85,7 @@
 
       closeDialog() {
         this.$emit('close');
-        this.dlgVisible = false;
+        //this.dlgVisible = false;
       },
     },
   };
