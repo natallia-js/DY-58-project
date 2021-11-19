@@ -245,7 +245,7 @@ export const orderPatterns = {
       state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
     },
 
-    setOrderCategoryTitle(state, { service, orderType, title, newTitle}) {
+    setOrderCategoryTitle(state, { service, orderType, title, newTitle }) {
       state.patterns = state.patterns.map((pattern) => {
         if (pattern.service === service && pattern.type === orderType && pattern.category === title) {
           return {

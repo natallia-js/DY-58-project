@@ -720,36 +720,38 @@
           (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) ? state.orderPlace : null;
       });
 
-      /**
-       *
-      */
+      // Время действия издаваемого распоряжения:
+      //   1. если установлен флаг "Уточнить время действия распоряжения" либо издается распоряжение ЭЦД,
+      // то полагаем, что пользователь определил временной интервал действия распоряжения;
+      //   2. если п.1. не выполняется, то смотрим, указаны ли дата-время отмены действия
+      // предшествующего распоряжения; если определены дата-время отмены действия предшествующего
+      // распоряжения, то полагаем, что издаваемое распоряжение действует одномоментно и время его
+      // действия равно указанной дате-времени отмены действия предшествующего распоряжения;
+      //   3. если п.1 и п.2 не выполняются, то дату-время действия распоряжения определяем по следующему
+      // алгоритму:
+      //     3.1. если издается заявка либо уведомление, то время начала его действия равно дате-времени
+      //          его издания, а время окончания действия - до отмены (это нужно для того, чтобы завка /
+      //          уведомление не исчезло из списка рабочих распоряжений до тех пор, пока на основании его
+      //          не будет издано распоряжение)
+      //     3.2. в противном случае время начала и окончания действия распоряжения равны дате и времени
+      //          его издания
       const getPreviewOrderTimeSpanObject = computed(() => {
         if ((props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
           (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) {
           return state.timeSpan;
         }
-        return state.cancelOrderDateTime
-          ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
-          : null;
+        if (state.cancelOrderDateTime) {
+          return { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false };
+        }
+        if (props.orderType === ORDER_PATTERN_TYPES.REQUEST || props.orderType === ORDER_PATTERN_TYPES.NOTIFICATION) {
+          return { start: state.createDateTime, end: null, tillCancellation: true };
+        }
+        return null; // этот момент нужен для отслеживания пункта 3.2 разными компонентами
       });
 
-      // Время действия издаваемого распоряжения:
-      //   - если установлен флаг "Уточнить время действия распоряжения", то полагаем, что пользователь
-      // определил временной интервал действия распоряжения;
-      //   - если указанный выше флаг не установлен, то смотрим, указаны ли дата-время отмены действия
-      // предшествующего распоряжения:
-      //     * если определены дата-время отмены действия предшествующего распоряжения, то полагаем, что
-      // издаваемое распоряжение действует одномоментно и время его действия равно указанной дате-времени
-      // отмены действия предшествующего распоряжения;
-      //     * в противном случае полагаеам дату-время действия распоряжения равными дате-времени его издания
       const getIssuedOrderTimeSpanObject = computed(() => {
-        if ((props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
-          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) {
-          return state.timeSpan;
-        }
-        return state.cancelOrderDateTime
-          ? { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false }
-          : { start: state.createDateTime, end: state.createDateTime, tillCancellation: false };
+        const tso = getPreviewOrderTimeSpanObject.value;
+        return tso ? tso : { start: state.createDateTime, end: state.createDateTime, tillCancellation: false };
       });
 
       /**

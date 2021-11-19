@@ -9,7 +9,7 @@ import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { webSocket } from './modules/webSocket';
 import { lastOrdersParams } from './modules/lastOrdersParams';
 import { orders } from './modules/orders';
-import { workOrders } from './modules/workOrders';
+import { workOrders } from './modules/workOrders/index';
 import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
 
 export const store = createStore({

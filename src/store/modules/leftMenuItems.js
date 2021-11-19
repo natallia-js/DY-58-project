@@ -2,8 +2,8 @@ export const leftMenuItems = {
   getters: {
     getCommonLeftMenuItems(_state, getters) {
       return [
-        { label: 'Входящие за смену' },
-        { label: 'Не подтверждено', itemClass: 'dy58-subitem dy58-important-item', info: getters.getIncomingOrdersNumber },
+        { label: 'Входящие за смену', info: getters.getNumberOfIncomingOrdersPerShift },
+        { label: 'Не подтверждено', itemClass: 'dy58-important-item', info: getters.getIncomingOrdersNumber },
         { label: 'Документы в работе', info: getters.getWorkingOrdersNumber },
         { label: 'Не доставлено экземпляров', itemClass: 'dy58-subitem dy58-important-item', info: getters.getNotDeliveredOrdersNumber },
         { label: 'Не подтверждено экземпляров', itemClass: 'dy58-subitem dy58-important-item', info: getters.getNotConfirmedOrdersNumber },
@@ -47,7 +47,7 @@ export const leftMenuItems = {
       ];
     },
 
-    getLeftMenuItems(state, getters) {
+    getLeftMenuItems(_state, getters) {
       if (getters.isDSP) {
         return getters.getDSPLeftMenuItems;
       } else if (getters.isDNC) {

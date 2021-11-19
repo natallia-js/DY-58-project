@@ -67,7 +67,6 @@
 
       const updateAppState = () => {
         if (getUserWorkPoligonData.value) {
-          //store.dispatch('loadCurrSectorsShift');
           store.dispatch('loadWorkOrders');
         }
       };
@@ -76,7 +75,11 @@
        *
        */
       watch(getLoginDateTime, (newLoginDateTime) => {
-        store.commit('setStartDateToGetData', newLoginDateTime);
+        if (newLoginDateTime) {
+          store.commit('setStartDateToGetData', newLoginDateTime);
+          store.commit('determineLogoutItemAction');
+          store.dispatch('loadNumberOfIncomingOrdersPerShift');
+        }
       });
 
       /**
@@ -121,12 +124,12 @@
       });
 
       watch(getStartLogout, (startLogoutVal) => {
-        if (startLogoutVal) {console.log('watch(getStartLogout')
+        if (startLogoutVal) {
           state.showBeforeLogoutDlg = true;
         }
       });
 
-      const hideBeforeLogoutDlg = () => {console.log('hideBeforeLogoutDlg')
+      const hideBeforeLogoutDlg = () => {
         state.showBeforeLogoutDlg = false;
       };
 

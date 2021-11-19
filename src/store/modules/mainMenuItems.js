@@ -1,6 +1,5 @@
 import { store } from '../../store';
 
-
 export const MainMenuItemsKeys = Object.freeze({
   mainPage: 0,
   sectorStructure: 1,
@@ -23,14 +22,9 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', to: '/newOrderPage' },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
-      {
-        key: MainMenuItemsKeys.exit,
-        label: 'Выход',
-        items: [
-          { label: 'Без сдачи дежурства', command: () => store.commit('prepareForLogout', false) },
-          { label: 'Со сдачей дежурства', command: () => store.commit('prepareForLogout', true) },
-        ],
-      },
+      // В поле 'command' определено действие по умолчанию на случай, когда пользователь не принимает
+      // дежурство (именно такое состояние - isUserOnDuty = false - является состоянием по умолчанию)
+      { key: MainMenuItemsKeys.exit, label: 'Выход', command: () => store.commit('prepareForLogout', false) },
     ],
   },
 
@@ -92,6 +86,23 @@ export const mainMenuItems = {
   },
 
   mutations: {
+    determineLogoutItemAction(state) {
+      const logoutItem = state.mainMenuItems.find((item) => item.key === MainMenuItemsKeys.exit);
+      if (!logoutItem) {
+        return;
+      }
+      if (!store.getters.isUserOnDuty) {
+        delete logoutItem.items;
+        logoutItem.command = () => store.commit('prepareForLogout', false);
+      } else {
+        delete logoutItem.command;
+        logoutItem.items = [
+          { label: 'Без сдачи дежурства', command: () => store.commit('prepareForLogout', false) },
+          { label: 'Со сдачей дежурства', command: () => store.commit('prepareForLogout', true) },
+        ];
+      }
+    },
+
     setActiveMainMenuItem(state, activeMainMenuItemKey) {
       state.mainMenuItems.forEach((item) => {
         if (item.key === activeMainMenuItemKey) {

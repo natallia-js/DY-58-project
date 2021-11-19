@@ -27,6 +27,7 @@
           placeholder="Выберите структурные подразделения"
           display="chip"
           style="width:100%"
+          @selectall-change="() => {}"
         />
       </template>
 
@@ -170,21 +171,23 @@
           : []);
       },
 
+      // Учитываем, что могло измениться как одно значение, так и сразу несколько
+      // (когда устанавливается / снимается флаг выделения всех записей)
       selectedDivisions(newVal, prevVal) {
-        // Проверяем, была ли добавлена запись
+        // Проверяем, были ли добавлены записи
         if (!prevVal || prevVal.length < newVal.length) {
           for (let item of newVal) {
-            if (!prevVal || !prevVal.length || !prevVal.find((el) => el.additionalId === item.additionalId)) {
+            if (!prevVal || !prevVal.find((el) => el.additionalId === item.additionalId)) {
               this.$store.commit('addOtherGetOrderRecord', { ...item });
-              return;
             }
           }
         }
-        // Проверяем, была ли удалена запись
-        for (let item of prevVal) {
-          if (!newVal || !newVal.length || !newVal.find((el) => el.additionalId === item.additionalId)) {
-            this.$store.commit('delOtherGetOrderRecordByAdditionalId', item.additionalId);
-            return;
+        if (prevVal) {
+          // Проверяем, были ли удалены записи
+          for (let item of prevVal) {
+            if (!newVal || !newVal.find((el) => el.additionalId === item.additionalId)) {
+              this.$store.commit('delOtherGetOrderRecordByAdditionalId', item.additionalId);
+            }
           }
         }
       },

@@ -18,7 +18,7 @@
     </div>
     <template #footer>
       <Button v-if="!getLogoutStarted && !getLogoutFinished" label="Выйти" @click="handleConfirmLogout" />
-      <Button v-if="(!getLogoutStarted && !getLogoutFinished) || getLogoutError" label="Закрыть" @click="handleCloseDialog" />
+      <Button v-if="(!getLogoutStarted && !getLogoutFinished) || getLogoutError" label="Отмена" @click="handleCloseDialog" />
     </template>
   </Dialog>
 </template>
@@ -59,7 +59,6 @@
         this.dlgVisible = val;
         if (!val) {
           this.$store.commit('cancelLogout');
-          //this.handleCloseDialog();
         }
       },
 
@@ -78,7 +77,6 @@
 
       handleCloseDialog() {
         this.$emit('close');
-        //this.dlgVisible = false;
       },
     },
   };

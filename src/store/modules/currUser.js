@@ -168,20 +168,32 @@ export const currUser = {
     isECD(state) {
       return state.credential === APP_CREDENTIALS.ECD_FULL;
     },
-    getStartLogout(state) {console.log('getStartLogout')
+    getStartLogout(state) {
       return state.startLogout;
     },
-    getlogoutWithDutyPass(state) {console.log('getlogoutWithDutyPass')
+    getlogoutWithDutyPass(state) {
       return state.logoutWithDutyPass;
     },
-    getLogoutStarted(state) {console.log('getLogoutStarted')
+    getLogoutStarted(state) {
       return state.logoutStarted;
     },
-    getLogoutFinished(state) {console.log('getLogoutFinished')
+    getLogoutFinished(state) {
       return state.logoutFinished;
     },
-    getLogoutError(state) {console.log('getLogoutError')
+    getLogoutError(state) {
       return state.logoutError;
+    },
+    isUserOnDuty(state) {
+      if (!state.lastTakeDutyTime) {
+        return false;
+      }
+      if (!state.lastPassDutyTime) {
+        return true;
+      }
+      if (state.lastTakeDutyTime <= state.lastPassDutyTime) {
+        return false;
+      }
+      return true;
     },
   },
 
@@ -326,7 +338,7 @@ export const currUser = {
     /**
      * passDuty - true (выйти и сдать дежурство) / false (выйти без сдачи дежурства)
      */
-    async logout(state) {console.log('logout')
+    async logout(state) {
       state.logoutStarted = true;
 
       if (state.logoutWithDutyPass) {
@@ -335,7 +347,6 @@ export const currUser = {
           const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass, {},
             { headers: getRequestAuthorizationHeader() }
           );
-          console.log(response.data)
           if (!response.data || String(response.data.id) !== String(state.id)) {
             state.logoutStarted = false;
             state.logoutFinished = true;
@@ -373,14 +384,14 @@ export const currUser = {
       state.logoutFinished = true;
     },
 
-    cancelLogout(state) {console.log('cancelLogout')
+    cancelLogout(state) {
       state.startLogout = false;
       state.logoutStarted = false;
       state.logoutFinished = false;
       state.logoutError = null;
     },
 
-    prepareForLogout(state, logoutWithDutyPass) {console.log('prepareForLogout')
+    prepareForLogout(state, logoutWithDutyPass) {
       state.logoutWithDutyPass = logoutWithDutyPass;
       state.startLogout = true;
     },

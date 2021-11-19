@@ -16,9 +16,7 @@
     <p v-if="place"><span class="p-text-bold">Место действия:</span> &#160;
       {{ getSectorStationOrBlockTitleById({ placeType: place.place, id: place.value }) }}
     </p>
-    <p><span class="p-text-bold">Время действия:</span> &#160;
-      {{ timeSpan ? orderTimeSpanString : 'Время издания' }}
-    </p>
+    <p><span class="p-text-bold">Время действия:</span> &#160; {{ orderTimeSpanString }}</p>
     <p><span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
@@ -131,7 +129,10 @@
       },
 
       orderTimeSpanString() {
-        return this.timeSpan ? getTimeSpanString(this.timeSpan, this.isECD) : '?';
+        if (!this.timeSpan) {
+          return 'Время издания';
+        }
+        return getTimeSpanString(this.timeSpan, this.isECD);
       },
     },
 
@@ -149,7 +150,6 @@
 
       closeDialog() {
         this.$emit('close');
-        //this.dlgVisible = false;
       },
     },
   };
