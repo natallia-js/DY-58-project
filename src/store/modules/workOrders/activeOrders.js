@@ -1,5 +1,8 @@
 import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions';
 
+/**
+ * Данный модуль предназначен для работы с действующими распоряжениями.
+ */
 export const activeOrders = {
   getters: {
     /**
@@ -12,6 +15,22 @@ export const activeOrders = {
      * (распоряжения, изданные заранее)
      */
     getActiveOrders(state) {
+      return state.data.filter((item) =>
+        item.confirmDateTime &&
+        !item.nextRelatedOrderId &&
+        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date())) || [];
+    },
+
+    /**
+     * Возвращает массив действующих распоряжений, каждое из которых - последнее в цепочке
+     * распоряжений, которой оно принадлежит.
+     * Действующим является такое рабочее распоряжение:
+     * - у которого есть дата подтверждения его получения,
+     * - которое действует до отмены либо дата окончания его действия еще не наступила
+     * ! В данный перечень войдут также те распоряжения, дата начала действия которых еще не наступила
+     * (распоряжения, изданные заранее)
+     */
+    getLastInChainActiveOrders(state) {
       return state.data.filter((item) =>
         item.confirmDateTime &&
         !item.nextRelatedOrderId &&

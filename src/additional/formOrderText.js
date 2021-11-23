@@ -129,7 +129,7 @@ export function formOrderText(props) {
 
   if (otherToSend && otherToSend.length) {
     const substring = (obj) => {
-      return `${obj.placeTitle} ${obj.post}${!obj.fio ? '' : ' ' + obj.fio}`;
+      return `${obj.placeTitle}${!obj.post ? '' : ' ' + obj.post}${!obj.fio ? '' : ' ' + obj.fio}`;
     };
     formToStrings(otherToSend, substring);
   }

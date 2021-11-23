@@ -145,7 +145,17 @@ export const getWorkOrders = {
      *
      */
     getWorkingOrdersToDisplayAsTree(_state, getters) {
-      const workingOrders = getters.getRawWorkingOrders;
+      // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке.
+      // Это обязательно!!!
+      const workingOrders = getters.getRawWorkingOrders.sort((a, b) => {
+        if (a.createDateTime < b.createDateTime) {
+          return -1;
+        }
+        if (a.createDateTime < b.createDateTime) {
+          return 1;
+        }
+        return 0;
+      });
       const groupedWorkingOrders = [];
 
       const findNodeInNodesChain = (upperLevelNode, nodeId) => {
@@ -168,8 +178,6 @@ export const getWorkOrders = {
         return null;
       };
 
-      // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке.
-      // Это обязательно!!!
       workingOrders.forEach((order) => {
         const parentNode = findNodeReferencingNodeWithGivenKey(order._id);
 

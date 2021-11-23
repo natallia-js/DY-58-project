@@ -94,9 +94,23 @@
       />
       <Button
         icon="pi pi-plus"
-        class="p-button-rounded p-button-info p-mr-1"
+        class="p-button-rounded p-button-primary p-mr-1"
         v-tooltip.right="DR_TABLE_MENU_ITEMS.INSERT"
         @click="newDRTableRecord"
+      />
+      <Button
+        v-if="selectedDRTableRecord"
+        icon="pi pi-arrow-up"
+        class="p-button-rounded p-button-info p-mr-1"
+        v-tooltip.right="DR_TABLE_MENU_ITEMS.INSERT_BEFORE"
+        @click="newDRTableRecordBefore"
+      />
+      <Button
+        v-if="selectedDRTableRecord"
+        icon="pi pi-arrow-down"
+        class="p-button-rounded p-button-help p-mr-1"
+        v-tooltip.right="DR_TABLE_MENU_ITEMS.INSERT_AFTER"
+        @click="newDRTableRecordAfter"
       />
       <Button
         v-if="selectedDRTableRecord"
@@ -136,7 +150,7 @@
       </template>
     </ContextMenu>
     <Dialog
-      header="Добавить запись о поезде ДР"
+      :header="addDRTableRecDlgTitle"
       v-model:visible="newDRRecordDialog"
       :style="{width: '450px'}"
       :modal="true"
@@ -252,16 +266,29 @@
       });
 
       const selectedDRTableRecord = ref();
+      const addDRTableRecDlgTitle = ref('');
       const newDRRecordDialog = ref(false);
       const drTableRec = ref({});
       const submitted = ref(false);
+      const insertNewDRRecPos = ref();
+      // true - когда значение insertNewDRRecPos после добавления очередной записи нужно поменять
+      // (когда запись в таблицу ДР добавляется в конец списка либо перед выбранной записью);
+      // false - когда значение insertNewDRRecPos после добавления очередной записи менять не нужно
+      // (когда запись вставляется после текущей)
+      const moveInsertNewDRRecPos = ref(true);
 
       const DR_TABLE_MENU_ITEMS = {
         PASTE: 'Вставить из буфера обмена',
         CLEAR: 'Очистить таблицу',
         INSERT: 'Добавить запись',
+        INSERT_BEFORE: 'Добавить перед',
+        INSERT_AFTER: 'Добавить после',
         DELETE: 'Удалить запись',
       };
+
+      const ADD_DR_TABLE_REC_DLG_TITLE = 'Добавить запись о поезде ДР';
+      const ADD_DR_TABLE_REC_BEFORE_DLG_TITLE = 'Добавить запись о поезде ДР перед текущей';
+      const ADD_DR_TABLE_REC_AFTER_DLG_TITLE = 'Добавить запись о поезде ДР после текущей';
 
       const getOrderPatternElementTypes = computed(() => OrderPatternElementType);
       const getElementSizesCorrespondence = computed(() => ElementSizesCorrespondence);
@@ -291,10 +318,20 @@
           handler: () => { newDRTableRecord(); menu.value.hide(); },
         });
         if (selectedDRTableRecord.value) {
-          items.push({
-            label: DR_TABLE_MENU_ITEMS.DELETE,
-            handler: () => { delDRTableRecord(); menu.value.hide(); },
-          });
+          items.push(
+            {
+              label: DR_TABLE_MENU_ITEMS.INSERT_BEFORE,
+              handler: () => { newDRTableRecordBefore(); menu.value.hide(); },
+            },
+            {
+              label: DR_TABLE_MENU_ITEMS.INSERT_AFTER,
+              handler: () => { newDRTableRecordAfter(); menu.value.hide(); },
+            },
+            {
+              label: DR_TABLE_MENU_ITEMS.DELETE,
+              handler: () => { delDRTableRecord(); menu.value.hide(); },
+            }
+          );
         }
         return items;
       });
@@ -376,15 +413,45 @@
         });
       };
 
-      const newDRTableRecord = () => {
+      const showNewDRRecordDialog = (dlgTitle) => {
+        addDRTableRecDlgTitle.value = dlgTitle;
         drTableRec.value = {};
         submitted.value = false;
         newDRRecordDialog.value = true;
+        insertNewDRRecPos.value = null;
+        moveInsertNewDRRecPos.value = true;
+      };
+
+      const newDRTableRecord = () => {
+        showNewDRRecordDialog(ADD_DR_TABLE_REC_DLG_TITLE);
+        insertNewDRRecPos.value = state.elementModelValue ? state.elementModelValue.length : 0;
+      };
+
+      const newDRTableRecordBefore = () => {
+        if (!selectedDRTableRecord.value) {
+          newDRTableRecord(ADD_DR_TABLE_REC_DLG_TITLE);
+        } else {
+          showNewDRRecordDialog(ADD_DR_TABLE_REC_BEFORE_DLG_TITLE);
+          insertNewDRRecPos.value = selectedDRTableRecord.value.orderNumber - 1;
+          moveInsertNewDRRecPos.value = true;
+        }
+      };
+
+      const newDRTableRecordAfter = () => {
+        if (!selectedDRTableRecord.value) {
+          newDRTableRecord(ADD_DR_TABLE_REC_DLG_TITLE);
+        } else {
+          showNewDRRecordDialog(ADD_DR_TABLE_REC_AFTER_DLG_TITLE);
+          insertNewDRRecPos.value = selectedDRTableRecord.value.orderNumber;
+          moveInsertNewDRRecPos.value = false;
+        }
       };
 
       const hideNewDRRecordDialog = () => {
         newDRRecordDialog.value = false;
         submitted.value = false;
+        insertNewDRRecPos.value = null;
+        moveInsertNewDRRecPos.value = true;
       };
 
       const saveNewDRRecord = () => {
@@ -394,11 +461,12 @@
           if (!state.elementModelValue) {
             state.elementModelValue = [];
           }
-          state.elementModelValue.push({
+          const newElement = {
             station: drTableRec.value.station,
             arrivalTime: getLocaleDateTimeString(drTableRec.value.arrivalTime, false),
             departureTime: getLocaleDateTimeString(drTableRec.value.departureTime, false),
-          });
+          };
+          state.elementModelValue.splice(insertNewDRRecPos.value, 0, newElement);
           emit('input', {
             elementId: props.element._id,
             value: state.elementModelValue,
@@ -408,6 +476,18 @@
 
           drTableRec.value = {};
           submitted.value = false;
+
+          // Определяем действия, которые необходимо произвести после добавления новой записи в таблицу
+          // при условии, что требуется сдвинуть позицию вставки следующей записи
+          if (moveInsertNewDRRecPos.value) {
+            // Если в таблице выделена запись и новая запись добавлена была перед нею, то необходимо, чтобы
+            // после добавления новой записи выделение осталось на текущей записи
+            if (selectedDRTableRecord.value && selectedDRTableRecord.value.orderNumber === insertNewDRRecPos.value + 1) {
+              selectedDRTableRecord.value = drTableDataToDisplay.value.find((el) => el.orderNumber === insertNewDRRecPos.value + 2)
+            }
+            // Смещаем позицию вставки очередной записи
+            insertNewDRRecPos.value += 1;
+          }
         }
       };
 
@@ -418,6 +498,7 @@
         state.elementModelValue = state.elementModelValue.filter((_el, index) =>
           (index + 1) !== selectedDRTableRecord.value.orderNumber
         );
+        selectedDRTableRecord.value = null;
         if (!state.elementModelValue.length) {
           state.elementModelValue = null;
         }
@@ -475,8 +556,10 @@
         state,
         selectedDRTableRecord,
         menu,
+        addDRTableRecDlgTitle,
         drTableRec,
         submitted,
+        insertNewDRRecPos,
         drTableDataToDisplay,
         DR_TABLE_MENU_ITEMS,
         getSectorStations,
@@ -492,6 +575,8 @@
         pasteDRTrainTable,
         clearDRTrainTable,
         newDRTableRecord,
+        newDRTableRecordBefore,
+        newDRTableRecordAfter,
         delDRTableRecord,
         newDRRecordDialog,
         hideNewDRRecordDialog,
