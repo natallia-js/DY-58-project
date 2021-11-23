@@ -18,7 +18,12 @@
   </PreviewNewOrderDlg>
   <div class="p-grid">
     <div class="p-col-6">
-      <SelectButton v-model="state.selectedOrderInputType" :options="getOrderInputTypes" optionLabel="label" />
+      <SelectButton
+        v-model="state.selectedOrderInputType"
+        :options="getOrderInputTypes"
+        optionLabel="label"
+        disabled
+      />
       <br />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения/заявки/уведомления. Ожидаю ответ...
@@ -814,13 +819,4 @@
       };
     },
   };
-
-  /*navigator.clipboard.readText()
-    .then(text => {
-      const obj = JSON.parse(text)
-      console.log('TEXT',obj);
-    })
-    .catch(err => {
-      console.log('Something went wrong', err);
-    })*/
 </script>

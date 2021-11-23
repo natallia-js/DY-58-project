@@ -8,10 +8,32 @@ export const incomingOrders = {
     /**
      *
      */
-     getIncomingOrders(state, getters) {
+    getRawIncomingOrders(state) {
+      return state.data.filter((item) => !item.confirmDateTime);
+    },
+
+    /**
+     * Позволяет получить количество входящих уведомлений.
+     */
+    getIncomingOrdersNumber(_state, getters) {
+      return getters.getRawIncomingOrders.length;
+    },
+
+    /**
+     *
+     */
+     getIncomingOrders(_state, getters) {
       const now = new Date();
-      return state.data
-        .filter((item) => !item.confirmDateTime)
+      return getters.getRawIncomingOrders
+        .sort((a, b) => {
+          if (a.createDateTime < b.createDateTime) {
+            return -1;
+          }
+          if (a.createDateTime < b.createDateTime) {
+            return 1;
+          }
+          return 0;
+        })
         .map((item, index) => {
           return {
             id: item._id,
@@ -37,13 +59,6 @@ export const incomingOrders = {
             nextRelatedOrderId: item.nextRelatedOrderId,
           };
         });
-    },
-
-    /**
-     * Позволяет получить количество входящих уведомлений.
-     */
-    getIncomingOrdersNumber(state) {
-      return state.data.filter((item) => !item.confirmDateTime).length;
     },
 
 

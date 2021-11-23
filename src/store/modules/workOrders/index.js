@@ -2,7 +2,7 @@ import { tablesColumns } from './tablesColumns';
 import { getWorkOrders } from './getWorkOrders';
 import { reportOnOrdersDelivery } from './reportOnOrdersDelivery';
 import { confirmOrder } from './confirmOrder';
-import { numberOfIncomingOrdersPerShift } from './numberOfIncomingOrdersPerShift';
+import { incomingOrdersPerShift } from './incomingOrdersPerShift';
 import { incomingOrders } from './incomingOrders';
 import { activeOrders } from './activeOrders';
 
@@ -21,9 +21,9 @@ export const workOrders = {
     confirmingOrder: false,
     orderConfirmResult: null,
 
-    numberOfIncomingOrdersPerShift: null,
-    gettingNumberOfIncomingOrdersPerShift: false,
-    gettingNumberOfIncomingOrdersPerShiftResult: null,
+    incomingOrdersPerShift: null,
+    gettingIncomingOrdersPerShift: false,
+    gettingIncomingOrdersPerShiftResult: null,
   },
 
   getters: {
@@ -31,20 +31,20 @@ export const workOrders = {
     ...tablesColumns.getters,
     ...incomingOrders.getters,
     ...activeOrders.getters,
-    ...numberOfIncomingOrdersPerShift.getters,
+    ...incomingOrdersPerShift.getters,
   },
 
   mutations: {
     ...reportOnOrdersDelivery.mutations,
     ...getWorkOrders.mutations,
     ...confirmOrder.mutations,
-    ...numberOfIncomingOrdersPerShift.mutations,
+    ...incomingOrdersPerShift.mutations,
   },
 
   actions: {
     ...getWorkOrders.actions,
     ...reportOnOrdersDelivery.actions,
     ...confirmOrder.actions,
-    ...numberOfIncomingOrdersPerShift.actions,
+    ...incomingOrdersPerShift.actions,
   },
 };

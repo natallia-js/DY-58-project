@@ -78,7 +78,6 @@
         if (newLoginDateTime) {
           store.commit('setStartDateToGetData', newLoginDateTime);
           store.commit('determineLogoutItemAction');
-          store.dispatch('loadNumberOfIncomingOrdersPerShift');
         }
       });
 
@@ -100,6 +99,7 @@
           store.dispatch('loadCurrWorkPoligonData');
           store.dispatch('loadOrderPatterns');
           store.dispatch('loadOrderPatternsElementsRefs');
+          store.dispatch('loadIncomingOrdersPerShift');
           if (!state.wsClient) {
             state.wsClient = useWebSocket({ socketUrl: WS_SERVER_ADDRESS });
           }

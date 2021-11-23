@@ -50,7 +50,7 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
 });
 
 export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
-  getOrdersCountFromGivenDate: `${AUTH_SERVER_ADDRESS}/api/orders/ordersCountFromGivenDate`,
+  getOrdersCreatedFromGivenDate: `${AUTH_SERVER_ADDRESS}/api/orders/ordersCreatedFromGivenDate`,
   getLastOrdersParams: `${AUTH_SERVER_ADDRESS}/api/lastOrdersParams/data`,
   getWorkOrders: `${AUTH_SERVER_ADDRESS}/api/workOrders/data`,
   dispatchOrder: `${AUTH_SERVER_ADDRESS}/api/orders/add`,

@@ -83,7 +83,21 @@ export const orders = {
             createDateTime: createDateTime.toISOString(),
             place,
             timeSpan,
-            orderText,
+            orderText: {
+              ...orderText,
+              orderText: !orderText.orderText
+                ? null
+                : orderText.orderText.map((el) => {
+                  return {
+                    ...el,
+                    value: !el.value
+                      ? null
+                      : (el.value instanceof Array) // случай таблицы с данными о поезде, идущем ДР
+                        ? JSON.stringify(el.value)
+                        : el.value
+                  }
+                }),
+            },
             dncToSend: dncToSend.map((item) => {
               return {
                 ...item,

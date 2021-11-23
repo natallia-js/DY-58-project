@@ -3,10 +3,19 @@ import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions
 export const activeOrders = {
   getters: {
     /**
-     *
+     * Возвращает массив действующих распоряжений.
+     * Действующим является такое рабочее распоряжение:
+     * - у которого есть дата подтверждения его получения,
+     * - которое является последним в цепочке распоряжений, которой оно принадлежит,
+     * - которое действует до отмены либо дата окончания его действия еще не наступила
+     * ! В данный перечень войдут также те распоряжения, дата начала действия которых еще не наступила
+     * (распоряжения, изданные заранее)
      */
-     getActiveOrders(state) {
-      return state.data.filter((item) => item.confirmDateTime && !item.nextRelatedOrderId) || [];
+    getActiveOrders(state) {
+      return state.data.filter((item) =>
+        item.confirmDateTime &&
+        !item.nextRelatedOrderId &&
+        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date())) || [];
     },
 
     /**

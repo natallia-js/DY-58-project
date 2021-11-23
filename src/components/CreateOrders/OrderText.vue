@@ -180,6 +180,7 @@
         })
       );
 
+      //
       const handleFocusDropdown = () => {
         if (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) {
           state.orderTextSource = ORDER_TEXT_SOURCE.pattern;
@@ -192,6 +193,7 @@
         });
       };
 
+      //
       const handleChooseOrderPattern = () => {
         state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => {
           return { ...element };
@@ -205,6 +207,7 @@
         });
       };
 
+      //
       const handleFocusInput = () => {
         if (state.orderTextSource !== ORDER_TEXT_SOURCE.nopattern) {
           state.orderTextSource = ORDER_TEXT_SOURCE.nopattern;
@@ -221,6 +224,7 @@
         });
       };
 
+      //
       const handleChangeOrderTitle = (event) => {
         emit('input', {
           orderTextSource: state.orderTextSource,
@@ -234,6 +238,7 @@
         });
       };
 
+      //
       const handleChangeOrderPatternElementValue = (event) => {
         const orderPatternElementIndex = state.orderPatternText.findIndex((el) => el._id === event.elementId);
         if (orderPatternElementIndex < 0) {
@@ -248,6 +253,7 @@
         });
       };
 
+      //
       const handleInsertRowbreak = () => {
         state.orderText += '<br />';
         textarea.value.focus();

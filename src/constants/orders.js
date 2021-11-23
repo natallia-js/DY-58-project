@@ -63,3 +63,9 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   DPT_STATION: 'Станция отправления',
   ARR_STATION: 'Станция прибытия',
 });
+
+export const GID_EVENT_TYPE = Object.freeze({
+  ARRIVAL: 1,
+  FOLLOWING: 2,
+  DEPARURE: 3,
+});

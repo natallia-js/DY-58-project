@@ -102,7 +102,7 @@ function getOrderTextElementTypedValue(element) {
     case OrderPatternElementType.DATETIME:
       return new Date(element.value);
     case OrderPatternElementType.DR_TRAIN_TABLE:
-      return element.value;
+      return JSON.parse(element.value);
     default:
       return element.value;
   }
@@ -126,8 +126,26 @@ export const getWorkOrders = {
       return null;
     },
 
-    getWorkingOrdersToDisplayAsTree(state, getters) {
-      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+    /**
+     *
+     */
+    getRawWorkingOrders(state) {
+      return state.data.filter((item) => item.confirmDateTime);
+    },
+
+    /**
+     * Позволяет получить количество распоряжений, находящихся в работе
+     * (действующих распоряжений).
+     */
+    getWorkingOrdersNumber(_state, getters) {
+      return getters.getRawWorkingOrders.length;
+    },
+
+    /**
+     *
+     */
+    getWorkingOrdersToDisplayAsTree(_state, getters) {
+      const workingOrders = getters.getRawWorkingOrders;
       const groupedWorkingOrders = [];
 
       const findNodeInNodesChain = (upperLevelNode, nodeId) => {
@@ -186,9 +204,21 @@ export const getWorkOrders = {
       return groupedWorkingOrders;
     },
 
-    getWorkingOrders(state, getters) {
+    /**
+     *
+     */
+    getWorkingOrders(_state, getters) {
       const now = new Date();
-      return state.data.filter((item) => item.confirmDateTime)
+      return getters.getRawWorkingOrders
+        .sort((a, b) => {
+          if (a.createDateTime < b.createDateTime) {
+            return -1;
+          }
+          if (a.createDateTime < b.createDateTime) {
+            return 1;
+          }
+          return 0;
+        })
         .map((item, index) => {
           return {
             id: item._id,
@@ -260,17 +290,9 @@ export const getWorkOrders = {
     },
 
     /**
-     * Позволяет получить количество распоряжений, находящихся в работе
-     * (действующих распоряжений).
-     */
-    getWorkingOrdersNumber(state) {
-      return state.data.filter((item) => item.confirmDateTime).length;
-    },
-
-    /**
      * Позволяет получить количество экземпляров не доставленных и находящихся в работе распоряжений.
      */
-     getNotDeliveredOrdersNumber(state) {
+    getNotDeliveredOrdersNumber(state) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       let notDeliveredInstances = 0;
       workingOrders.forEach((order) => {
@@ -329,6 +351,9 @@ export const getWorkOrders = {
       }
     },
 
+    /**
+     *
+     */
     setStartDateToGetDataNoCheck(state, date) {
       if (!(date instanceof Date)) {
         return;
@@ -389,6 +414,27 @@ export const getWorkOrders = {
         }
       });
     },
+
+    /**
+     * Обновляет, при необходимости, счетчик входящих распоряжений (за смену).
+     */
+    updateNumberOfIncomingOrdersPerShift(state, { isUserOnDuty, lastTakeDutyTime, userId }) {
+      if (!isUserOnDuty) {
+        return;
+      }
+      if (!state.data || !state.data.length) {
+        return;
+      }
+      if (!state.incomingOrdersPerShift) {
+        state.incomingOrdersPerShift = [];
+      }
+      state.data.forEach((order) => {
+        if ((order.creator.id !== userId) && (order.createDateTime >= lastTakeDutyTime) &&
+          !state.incomingOrdersPerShift.includes(order._id)) {
+          state.incomingOrdersPerShift.push(order._id);
+        }
+      });
+    },
   },
 
   actions: {
@@ -412,6 +458,11 @@ export const getWorkOrders = {
         );
         context.commit('setLoadingWorkOrdersResult', { error: false, message: null });
         context.commit('setNewWorkOrdersArray', response.data);
+        context.commit('updateNumberOfIncomingOrdersPerShift', {
+          isUserOnDuty: context.getters.isUserOnDuty,
+          lastTakeDutyTime: context.getters.getLastTakeDutyTime,
+          userId: context.getters.getUserId,
+        });
         context.dispatch('reportOnOrdersDelivery', response.data);
       } catch (error) {
         let errMessage;

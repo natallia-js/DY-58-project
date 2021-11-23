@@ -5,6 +5,7 @@ import {
   getLocaleDateTimeString,
 } from './dateTimeConvertions';
 import { CurrShiftGetOrderStatus } from '../constants/orders';
+import { DRTrainTableColumns } from '../constants/orderPatterns';
 
 
 /**
@@ -39,6 +40,25 @@ export function formOrderText(props) {
         substring = getLocaleDateTimeString(currVal.value, false);
         break;
       case OrderPatternElementType.DR_TRAIN_TABLE:
+        substring = '<div><table style="width:100%;min-width:600px;text-align:left;border-collapse:collapse"><thead><tr>';
+        DRTrainTableColumns.forEach((column) => {
+          substring += `<th style="width:${column.width};font-weight:400;border:1px solid grey">${column.header}</th>`;
+        });
+        substring += '</tr></thead><tbody>';
+        if (currVal.value instanceof Array) {
+          currVal.value.forEach((row, index) => {
+            substring += '<tr>';
+            DRTrainTableColumns.forEach((column) => {
+              if (column.field === 'orderNumber') {
+                substring += `<td style="border:1px solid grey">${index + 1}</td>`;
+              } else {
+                substring += `<td style="border:1px solid grey">${row[column.field] || ''}</td>`;
+              }
+            });
+            substring += '</tr>';
+          });
+        }
+        substring += '</tbody></table></div>';
         break;
       case OrderPatternElementType.LINEBREAK:
         substring = '<br />';

@@ -2230,7 +2230,7 @@
 }
 .p-datatable .p-datatable-tbody > tr.p-highlight {
   background: #E3F2FD;
-  color: #ffffff;
+  color: var(--text-color); /*#ffffff*/
 }
 .p-datatable .p-datatable-tbody > tr.p-datatable-dragpoint-top > td {
   box-shadow: inset 0 2px 0 0 #007bff;

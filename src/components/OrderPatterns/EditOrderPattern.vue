@@ -199,11 +199,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-  .dy58-context-menu-item {
-    color: var(--primary-color);
-    text-decoration: none;
-  }
-</style>
