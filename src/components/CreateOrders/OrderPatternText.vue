@@ -35,6 +35,7 @@
   } from '../../constants/orderPatterns';
   import { mapGetters } from 'vuex';
   import {
+    CurrShiftGetOrderStatus,
     FILLED_ORDER_DATE_ELEMENTS,
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
@@ -250,6 +251,13 @@
                 value: order.number,
               };
             });
+          case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER:
+             return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION).map((order) => {
+              return {
+                label: order.number,
+                value: order.number,
+              };
+            });
           default:
             return [];
         }
@@ -306,9 +314,9 @@
                   }
                 }
                 break;
-              // Изменился номер действующего распоряжения/запрещения
+              // Изменился номер действующего приказа ЭЦД
               case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER:
-                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего распоряжения/запрещения
+                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего приказа ЭЦД
                 elementToChangeValue = this.value.find((el) =>
                   (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_ORDER_DATE) ||
                   (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_ORDER_DATETIME));
@@ -320,6 +328,35 @@
                   }
                 }
                 break;
+              // Изменился номер действующего запрещения ЭЦД
+              case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_PROHIBITION:
+                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего запрещения ЭЦД
+                elementToChangeValue = this.value.find((el) =>
+                  (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_PROHIBITION_DATE) ||
+                  (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_PROHIBITION_DATETIME));
+                // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
+                if (elementToChangeValue) {
+                  tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ECD_PROHIBITION, event.value);
+                  if (tmp) {
+                    elementToChangeValue.value = tmp.createDateTime;
+                  }
+                }
+                break;
+            }
+            break;
+          case OrderPatternElementType.DR_TRAIN_TABLE:
+            // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
+            this.$store.commit('setGetOrderStatusToAllDSP',
+              { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+            // Затем, при необходимости, назначаем получение оригинала распоряжения тем станциям,
+            // которые присутствуют в таблице поезда, идущего ДР
+            if (event.value && event.value.length) {
+              event.value.forEach((item) => {
+                if (item.stationId) {
+                  this.$store.commit('setGetOrderStatusToDefinitDSP',
+                    { stationId: item.stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+                }
+              });
             }
             break;
         }

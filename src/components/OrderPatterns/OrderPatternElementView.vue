@@ -168,7 +168,6 @@
           :class="{'p-invalid': submitted && !drTableRec.station}"
           :options="getSectorStations"
           optionLabel="title"
-          optionValue="title"
         />
         <small class="p-error" v-if="submitted && !drTableRec.station">Необходимо указать станцию</small>
       </div>
@@ -352,13 +351,16 @@
               const trainTimeTable = [];
               for (let el of obj) {
                 //
-                const stationName = store.getters.getSectorStationTitleByESRCode(el.Station);
+                const stationObject = store.getters.getSectorStationByESRCode(el.Station);
                 //
-                const dispStationNameCode = stationName ? `${stationName} (${el.Station})` : el.Station;
+                const dispStationNameCode = (stationObject && stationObject.St_Title)
+                  ? `${stationObject.St_Title} (${el.Station})`
+                  : el.Station;
 
                 if (!trainTimeTable.length || trainTimeTable[trainTimeTable.length - 1].station !== dispStationNameCode) {
                   //
                   trainTimeTable.push({
+                    stationId: stationObject ? stationObject.St_ID : null,
                     station: dispStationNameCode,
                     departureTime:
                       String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
@@ -462,7 +464,8 @@
             state.elementModelValue = [];
           }
           const newElement = {
-            station: drTableRec.value.station,
+            stationId: drTableRec.value.station.id,
+            station: drTableRec.value.station.title,
             arrivalTime: getLocaleDateTimeString(drTableRec.value.arrivalTime, false),
             departureTime: getLocaleDateTimeString(drTableRec.value.departureTime, false),
           };
@@ -589,6 +592,6 @@
    {"Station":"138507","Time":"2021-11-22T06:05:00","EvType":3},
    {"Station":"141800","Time":"2021-11-22T07:00:00","EvType":2},
    {"Station":"141406","Time":"2021-11-22T07:45:00","EvType":1},
-   {"Station":"165311","Time":"2021-11-22T08:00:00","EvType":1}]
+   {"Station":"111111","Time":"2021-11-22T08:00:00","EvType":1}]
   */
 </script>

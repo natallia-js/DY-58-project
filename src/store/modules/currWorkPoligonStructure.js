@@ -83,13 +83,12 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     * По заданному ЕСР-коду станции позволяет получить ее наименование.
+     * По заданному ЕСР-коду станции позволяет получить ее объект.
      * Рабочий полигон - как участок ДНЦ / ЭЦД, так и станция.
      * Если метод ничего не находит, то возвращает null.
      */
-    getSectorStationTitleByESRCode: (_state, getters) => (esrCode) => {
-      const stationObject = getters.getSectorStations.find((station) => station.St_UNMC === esrCode);
-      return stationObject ? stationObject.St_Title : null;
+    getSectorStationByESRCode: (_state, getters) => (esrCode) => {
+      return getters.getSectorStations.find((station) => station.St_UNMC === esrCode);
     },
 
     /**

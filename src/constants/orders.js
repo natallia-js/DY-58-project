@@ -37,21 +37,24 @@ export const FILLED_ORDER_DATE_ELEMENTS = Object.freeze({
   ORDER_DATE: 'Дата издания действующего распоряжения',
   REQUEST_DATE: 'Дата издания действующей заявки',
   NOTIFICATION_DATE: 'Дата издания действующего уведомления',
-  ECD_ORDER_DATE: 'Дата издания действующего распоряжения/запрещения',
+  ECD_ORDER_DATE: 'Дата издания действующего приказа',
+  ECD_PROHIBITION_DATE: 'Дата издания действующего запрещения',
 });
 
 export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
   ORDER_DATETIME: 'Дата-время издания действующего распоряжения',
   REQUEST_DATETIME: 'Дата-время издания действующей заявки',
   NOTIFICATION_DATETIME: 'Дата-время издания действующего уведомления',
-  ECD_ORDER_DATETIME: 'Дата-время издания действующего распоряжения/запрещения',
+  ECD_ORDER_DATETIME: 'Дата-время издания действующего приказа',
+  ECD_PROHIBITION_DATETIME: 'Дата-время издания действующего запрещения',
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   ORDER_NUMBER: 'Номер действующего распоряжения',
   REQUEST_NUMBER: 'Номер действующей заявки',
   NOTIFICATION_NUMBER: 'Номер действующего уведомления',
-  ECD_ORDER_NUMBER: 'Номер действующего распоряжения/запрещения',
+  ECD_ORDER_NUMBER: 'Номер действующего приказа',
+  ECD_PROHIBITION_NUMBER: 'Номер действующего запрещения',
   BLOCK: 'Перегон',
   DPT_STATION_BLOCK: 'Перегон станции отправления',
   BLOCK_TRACK: 'Путь перегона',

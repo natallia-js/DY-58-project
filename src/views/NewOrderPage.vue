@@ -1,8 +1,13 @@
 <template>
   <TabView>
-    <TabPanel v-if="isDNC || isECD" :header="isDNC ? getOrderTypes.ORDER : getOrderTypes.ECD_ORDER">
-      <new-order v-if="isDNC" :orderType="getOrderTypes.ORDER" />
-      <new-order v-if="isECD" :orderType="getOrderTypes.ECD_ORDER" />
+    <TabPanel v-if="isDNC" :header="getOrderTypes.ORDER">
+      <new-order :orderType="getOrderTypes.ORDER" />
+    </TabPanel>
+    <TabPanel v-if="isECD" :header="getOrderTypes.ECD_ORDER">
+      <new-order :orderType="getOrderTypes.ECD_ORDER" />
+    </TabPanel>
+    <TabPanel v-if="isECD" :header="getOrderTypes.ECD_PROHIBITION">
+      <new-order :orderType="getOrderTypes.ECD_PROHIBITION" />
     </TabPanel>
     <TabPanel v-if="isDNC || isDSP" :header="getOrderTypes.REQUEST">
       <new-order :orderType="getOrderTypes.REQUEST" />
@@ -52,7 +57,3 @@
     },
   }
 </script>
-
-
-<style scoped>
-</style>

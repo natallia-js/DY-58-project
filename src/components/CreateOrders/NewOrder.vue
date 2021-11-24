@@ -16,6 +16,7 @@
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg">
   </PreviewNewOrderDlg>
+
   <div class="p-grid">
     <div class="p-col-6">
       <SelectButton
@@ -26,10 +27,12 @@
       />
       <br />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения/заявки/уведомления. Ожидаю ответ...
+        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения. Ожидаю ответ...
       </div>
       <form @submit.prevent="handleSubmit()" class="p-grid">
+
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
+
         <div class="p-field p-col-4 p-d-flex p-flex-column p-m-0">
           <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
@@ -46,7 +49,9 @@
             Не указан номер распоряжения
           </small>
         </div>
+
         <!-- ДАТА И ВРЕМЯ СОЗДАНИЯ РАСПОРЯЖЕНИЯ -->
+
         <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
           <label for="createDateTimeString" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
@@ -64,9 +69,11 @@
             Не определены дата и время создания распоряжения
           </small>
         </div>
+
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
+
         <div
-          v-if="orderType !== getOrderTypes.ECD_ORDER"
+          v-if="(orderType !== getOrderTypes.ECD_ORDER) && (orderType !== getOrderTypes.ECD_PROHIBITION)"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
@@ -113,13 +120,19 @@
             </div>
           </div>
         </div>
+
         <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
+
         <div v-if="orderType === getOrderTypes.ORDER" class="p-field p-col-12 p-m-0">
           <SelectButton v-model="showOnGID" :options="showOnGIDOptions" optionLabel="name" />
         </div>
+
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+
         <div
-          v-if="(orderType === getOrderTypes.ORDER && showOnGID.value) || (orderType === getOrderTypes.ECD_ORDER)"
+          v-if="(orderType === getOrderTypes.ORDER && showOnGID.value) ||
+            (orderType === getOrderTypes.ECD_ORDER) ||
+            (orderType === getOrderTypes.ECD_PROHIBITION)"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="orderPlace" :class="{'p-error':v$.orderPlace.$invalid && submitted}">
@@ -140,13 +153,19 @@
             Пожалуйста, определите место действия распоряжения
           </small>
         </div>
+
         <!-- ФЛАГ УТОЧНЕНИЯ ВРЕМЕНИ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+
         <div v-if="orderType === getOrderTypes.ORDER" class="p-field p-col-12 p-m-0">
           <SelectButton v-model="defineOrderTimeSpan" :options="defineOrderTimeSpanOptions" optionLabel="name" />
         </div>
+
         <!-- ВРЕМЯ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
+
         <div
-          v-if="(orderType === getOrderTypes.ORDER && defineOrderTimeSpan.value) || (orderType === getOrderTypes.ECD_ORDER)"
+          v-if="(orderType === getOrderTypes.ORDER && defineOrderTimeSpan.value) ||
+            (orderType === getOrderTypes.ECD_ORDER) ||
+            (orderType === getOrderTypes.ECD_PROHIBITION)"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="timeSpan" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
@@ -164,7 +183,9 @@
             Пожалуйста, корректно определите время действия распоряжения
           </small>
         </div>
+
         <!-- НАИМЕНОВАНИЕ И ТЕКСТ РАСПОРЯЖЕНИЯ -->
+
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderText" :class="{'p-error':v$.orderText.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Текст распоряжения</span>
@@ -183,14 +204,16 @@
             Пожалуйста, определите все параметры текста распоряжения
           </small>
         </div>
+
         <!-- ЛИЦО, СОЗДАЮЩЕЕ РАСПОРЯЖЕНИЕ -->
+
         <div class="p-col-12 p-d-flex p-mt-2 p-flex-wrap">
           <div class="p-text-bold p-grid" style="width:70%">
             <div class="p-col-12">
               {{ getUserPostFIO }}
             </div>
             <div
-              v-if="[getOrderTypes.REQUEST,getOrderTypes.NOTIFICATION].includes(orderType)"
+              v-if="[getOrderTypes.REQUEST, getOrderTypes.NOTIFICATION].includes(orderType)"
               class="p-col-12"
             >
               От имени
@@ -206,7 +229,9 @@
         </div>
       </form>
     </div>
+
     <!-- АДРЕСАТЫ -->
+
     <div class="p-col-6">
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
       <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
@@ -272,9 +297,9 @@
   import OrderText from './OrderText';
   import { CurrShiftGetOrderStatus, ORDER_ELEMENTS_CAN_BE_EMPTY } from '../../constants/orders';
   import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '../../constants/orderPatterns';
-  import { useToast } from 'primevue/usetoast';
   import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
   import PreviewNewOrderDlg from './PreviewNewOrderDlg.vue';
+  import showMessage from '../../hooks/showMessage.hook';
 
   export default {
     name: 'dy58-new-order-block',
@@ -299,7 +324,7 @@
 
     setup(props) {
       const store = useStore();
-      const toast = useToast();
+      const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
@@ -426,6 +451,7 @@
           rules.prevRelatedOrder = {};
           break;
         case ORDER_PATTERN_TYPES.ECD_ORDER:
+        case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
           rules.orderPlace = placeRules;
           rules.timeSpan = timeSpanRules;
           rules.prevRelatedOrder = {};
@@ -618,30 +644,6 @@
       });
 
       /**
-       *
-       */
-      const showSuccessMessage = (message) => {
-        toast.add({
-          severity: 'success',
-          summary: 'Информация',
-          detail: message,
-          life: 3000,
-        });
-      };
-
-      /**
-       *
-       */
-      const showErrMessage = (message) => {
-        toast.add({
-          severity: 'error',
-          summary: 'Ошибка',
-          detail: message,
-          life: 3000,
-        });
-      };
-
-      /**
        * Для отображения результата операции издания распоряжения (отправки на сервер).
        */
       const getDispatchOrderResult = computed(() => store.getters.getDispatchOrderResult);
@@ -721,8 +723,11 @@
        *
       */
       const getIssuedOrderPlaceObject = computed(() => {
-        return ((props.orderType === ORDER_PATTERN_TYPES.ORDER && showOnGID.value.value) ||
-          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) ? state.orderPlace : null;
+        return (
+          (props.orderType === ORDER_PATTERN_TYPES.ORDER && showOnGID.value.value) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)
+        ) ? state.orderPlace : null;
       });
 
       // Время действия издаваемого распоряжения:
@@ -741,8 +746,11 @@
       //     3.2. в противном случае время начала и окончания действия распоряжения равны дате и времени
       //          его издания
       const getPreviewOrderTimeSpanObject = computed(() => {
-        if ((props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
-          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER)) {
+        if (
+          (props.orderType === ORDER_PATTERN_TYPES.ORDER && defineOrderTimeSpan.value.value) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_ORDER) ||
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)
+        ) {
           return state.timeSpan;
         }
         if (state.cancelOrderDateTime) {
