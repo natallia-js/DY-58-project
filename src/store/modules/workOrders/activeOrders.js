@@ -1,4 +1,6 @@
 import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions';
+import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
+
 
 /**
  * Данный модуль предназначен для работы с действующими распоряжениями.
@@ -6,19 +8,74 @@ import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions
 export const activeOrders = {
   getters: {
     /**
+     *
+     */
+    isOrderFollowedByOrderOfGivenType(state) {
+      return ({ followerOrderType, order }) => {
+        return state.data.find((item) =>
+          item.orderChainId === order.orderChainId &&
+          item.createDateTime > order.createDateTime &&
+          item.type === followerOrderType
+        ) ? true : false;
+      };
+    },
+
+    /**
+     *
+     */
+    isOrderLastInChain(state) {
+      return (order) => {
+        return state.data.find((item) =>
+          item.orderChainId === order.orderChainId && item.createDateTime > order.createDateTime
+        ) ? false : true;
+      };
+    },
+
+    /**
      * Возвращает массив действующих распоряжений.
-     * Действующим является такое рабочее распоряжение:
+     * Действующим является такое рабочее распоряжение (должны выполняться все условия одновременно):
      * - у которого есть дата подтверждения его получения,
-     * - которое является последним в цепочке распоряжений, которой оно принадлежит,
-     * - которое действует до отмены либо дата окончания его действия еще не наступила
+     * - которое действует до отмены либо дата окончания его действия еще не наступила,
+     * - которое не обязательно последнее в цепочке распоряжений, которой оно принадлежит (см.
+     *   комментарии ниже),
+     * - если речь идет о заявке, то в рамках цепочки распоряжений только 1 заявка (последняя) считается
+     *   действующей при условии, что далее по цепочке (не обязательно сразу) за нею не следует уведомление,
+     * - если речь идет об уведомлении, то оно является действующим только при условии, что оно
+     *   в цепочке распоряжений последнее,
+     * - если речь идет о распоряжении ДНЦ, то в рамках цепочки распоряжений только последнее
+     *   распоряжение ДНЦ может рассматриваться как действующее / недействующее, все же предшествующие
+     *   ему распоряжения ДНЦ автоматически становятся недействующими,
+     * - приказы и запрещения ЭЦД, за которыми следует уведомление (отмена запрещения) считаются
+     *   недействующими,
+     * - уведомление (отмена запрещения) ЭЦД может рассматриваться как действующие при условии, что
+     *   оно в цепочке распоряжений последнее.
      * ! В данный перечень войдут также те распоряжения, дата начала действия которых еще не наступила
      * (распоряжения, изданные заранее)
      */
-    getActiveOrders(state) {
+    getActiveOrders(state, getters) {
+      // Вернётся новый массив с элементами, которые прошли проверку.
+      // Если ни один элемент не прошёл проверку, то будет возвращён пустой массив.
       return state.data.filter((item) =>
         item.confirmDateTime &&
-        !item.nextRelatedOrderId &&
-        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date())) || [];
+        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date()) &&
+        (
+          (
+            (item.type === ORDER_PATTERN_TYPES.REQUEST) &&
+            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.REQUEST, order: item }) &&
+            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.NOTIFICATION, order: item })
+          ) ||
+          ((item.type === ORDER_PATTERN_TYPES.NOTIFICATION) && getters.isOrderLastInChain(item)) ||
+          (
+            (item.type === ORDER_PATTERN_TYPES.ORDER) &&
+            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ORDER, order: item })
+          ) ||
+          (
+            (item.type === ORDER_PATTERN_TYPES.ECD_ORDER || item.type === ORDER_PATTERN_TYPES.ECD_PROHIBITION) &&
+            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION, order: item })
+          ) ||
+          ((item.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) && getters.isOrderLastInChain(item))
+        )
+      );
     },
 
     /**
@@ -30,11 +87,22 @@ export const activeOrders = {
      * ! В данный перечень войдут также те распоряжения, дата начала действия которых еще не наступила
      * (распоряжения, изданные заранее)
      */
-    getLastInChainActiveOrders(state) {
-      return state.data.filter((item) =>
+    getLastInChainActiveOrders(_state, getters) {
+      const workingOrders = getters.getRawWorkingOrders.sort((a, b) => {
+        if (a.createDateTime < b.createDateTime) {
+          return -1;
+        }
+        if (a.createDateTime > b.createDateTime) {
+          return 1;
+        }
+        return 0;
+      });
+      const ordersMap = new Map();
+      workingOrders.forEach((order) => ordersMap.set(order.orderChainId, order));
+      return [...ordersMap.values()].filter((item) =>
         item.confirmDateTime &&
-        !item.nextRelatedOrderId &&
-        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date())) || [];
+        (item.timeSpan.tillCancellation || item.timeSpan.end >= new Date())
+      );
     },
 
     /**
@@ -42,7 +110,7 @@ export const activeOrders = {
      */
     getActiveOrdersOfGivenType(_state, getters) {
       return (ordersType) => {
-        return getters.getActiveOrders.filter((item) => item.type === ordersType) || [];
+        return getters.getActiveOrders.filter((item) => item.type === ordersType);
       };
     },
 
@@ -58,8 +126,8 @@ export const activeOrders = {
     /**
      *
      */
-    getActiveOrdersToDisplayInTreeSelect(_state, getters) {
-      const orders = getters.getActiveOrders;
+    getLastInChainActiveOrdersToDisplayInTreeSelect(_state, getters) {
+      const orders = getters.getLastInChainActiveOrders;
       const groupedOrders = [{
         key: null,
         label: '-',

@@ -64,7 +64,8 @@ export const orders = {
         dspToSend,
         ecdToSend,
         otherToSend,
-        prevOrderId,
+        //prevOrderId,
+        orderChainId,
         createdOnBehalfOf,
         showOnGID,
       } = params;
@@ -136,7 +137,8 @@ export const orders = {
               fio: context.getters.getUserFIO,
             },
             createdOnBehalfOf,
-            prevOrderId,
+            //prevOrderId,
+            orderChainId,
             showOnGID,
           },
           { headers }

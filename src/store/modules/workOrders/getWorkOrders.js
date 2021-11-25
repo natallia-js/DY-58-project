@@ -9,11 +9,11 @@ import { formOrderText } from '../../../additional/formOrderText';
 function getWorkOrderObject(order) {
   return {
     _id: order._id,
-    confirmDateTime: order.confirmDateTime ? new Date(order.confirmDateTime) : null,
     createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
     creator: order.creator,
     createdOnBehalfOf: order.createdOnBehalfOf,
     deliverDateTime: order.deliverDateTime ? new Date(order.deliverDateTime) : null,
+    confirmDateTime: order.confirmDateTime ? new Date(order.confirmDateTime) : null,
     dncToSend: order.dncToSend.map((item) => {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
@@ -59,7 +59,7 @@ function getWorkOrderObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
       };
     }),
-    nextRelatedOrderId: order.nextRelatedOrderId,
+    //nextRelatedOrderId: order.nextRelatedOrderId,
     number: order.number,
     orderText: !order.orderText ? null : {
       ...order.orderText,
@@ -88,6 +88,7 @@ function getWorkOrderObject(order) {
       type: order.workPoligon.type,
     } : null,
     sendOriginal: order.sendOriginal,
+    orderChainId: order.orderChain.chainId,
   };
 }
 
@@ -127,38 +128,43 @@ export const getWorkOrders = {
     },
 
     /**
-     *
+     * Возвращает массив рабочих распоряжений (распоряжений, находящихся в работе) как есть
+     * (без сортировок, вложений и т.д.).
+     * Рабочее распоряжение - такое полученное в рамках соответствующего запроса с сервера
+     * распоряжение, у которого присутствует дата подтверждения его получения.
      */
     getRawWorkingOrders(state) {
       return state.data.filter((item) => item.confirmDateTime);
     },
 
     /**
-     * Позволяет получить количество распоряжений, находящихся в работе
-     * (действующих распоряжений).
+     * Позволяет получить количество распоряжений, находящихся в работе.
      */
     getWorkingOrdersNumber(_state, getters) {
       return getters.getRawWorkingOrders.length;
     },
 
     /**
-     *
+     * Позволяет получить массив рабочих распоряжений, у элементов которого могут быть дочерние
+     * элементы - распоряжения, изданные в рамках этой же цепочки распоряжений, но позднее.
+     * Возвращаемый массив может использоваться для отображения рабочих распоряжений в виде
+     * дерева распоряжений.
      */
     getWorkingOrdersToDisplayAsTree(_state, getters) {
-      // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке.
-      // Это обязательно!!!
+      // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке (по возрастанию
+      // времени их издания). Это обязательно!!!
       const workingOrders = getters.getRawWorkingOrders.sort((a, b) => {
         if (a.createDateTime < b.createDateTime) {
           return -1;
         }
-        if (a.createDateTime < b.createDateTime) {
+        if (a.createDateTime > b.createDateTime) {
           return 1;
         }
         return 0;
       });
       const groupedWorkingOrders = [];
 
-      const findNodeInNodesChain = (upperLevelNode, nodeId) => {
+      /*const findNodeInNodesChain = (upperLevelNode, nodeId) => {
         if (!upperLevelNode) {
           return null;
         }
@@ -176,11 +182,23 @@ export const getWorkOrders = {
           }
         }
         return null;
+      };*/
+
+      const findParentNode = (chainId) => {
+        for (let group of groupedWorkingOrders) {
+          if (group.orderChainId === chainId) {
+            let foundGroup = group;
+            while (foundGroup.children && foundGroup.children.length) {
+              foundGroup = foundGroup.children[0];
+            }
+            return foundGroup;
+          }
+        }
+        return null;
       };
-
       workingOrders.forEach((order) => {
-        const parentNode = findNodeReferencingNodeWithGivenKey(order._id);
-
+        //const parentNode = findNodeReferencingNodeWithGivenKey(order._id);
+        const parentNode = findParentNode(order.orderChainId);
         const orderNodeData = {
           key: order._id,
           type: order.type,
@@ -199,7 +217,8 @@ export const getWorkOrders = {
             ecdToSend: order.ecdToSend,
             otherToSend: order.otherToSend,
           }),
-          nextRelatedOrderId: order.nextRelatedOrderId,
+          //nextRelatedOrderId: order.nextRelatedOrderId,
+          orderChainId: order.orderChainId,
           children: [],
         };
 
@@ -213,7 +232,9 @@ export const getWorkOrders = {
     },
 
     /**
-     *
+     * Возвращает список всех рабочих распоряжений, отсортированный по времени их создания,
+     * со сформированным единым списком получателей распоряжения.
+     * Может использоваться для отображенич списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
       const now = new Date();
@@ -222,7 +243,7 @@ export const getWorkOrders = {
           if (a.createDateTime < b.createDateTime) {
             return -1;
           }
-          if (a.createDateTime < b.createDateTime) {
+          if (a.createDateTime > b.createDateTime) {
             return 1;
           }
           return 0;
@@ -340,7 +361,8 @@ export const getWorkOrders = {
 
   mutations: {
     /**
-     *
+     * Позволяет определить дату-время начала временного интервала запроса информации о рабочих
+     * распоряжениях у сервера.
      */
      setStartDateToGetData(state, userLoginDateTime) {
       if (!userLoginDateTime) {
@@ -360,7 +382,8 @@ export const getWorkOrders = {
     },
 
     /**
-     *
+     * Позволяет изменить дату-время начала временного интервала запроса информации о рабочих
+     * распоряжениях у сервера.
      */
     setStartDateToGetDataNoCheck(state, date) {
       if (!(date instanceof Date)) {
@@ -385,7 +408,7 @@ export const getWorkOrders = {
     },
 
     /**
-     * Позволяет запомнить массив "рабочих" распоряжений.
+     * Позволяет запомнить массив "рабочих" распоряжений, полученный от сервера.
      */
      setNewWorkOrdersArray(state, newData) {
       if (!newData || !newData.length) {

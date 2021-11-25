@@ -115,6 +115,13 @@ export const currWorkPoligonStructure = {
     },
 
     /**
+     *
+     */
+     getSectorBlockById: (_state, getters) => (blockId) => {
+      return getters.getSectorBlocks.find((block) => block.Bl_ID === blockId);
+    },
+
+    /**
      * Возвращает список станций текущего полигона управления.
      * Если полигон управления - участок ДНЦ / ЭЦД, то возвращается список станций,
      * входящих в состав поездных участков.

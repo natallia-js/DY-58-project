@@ -22,14 +22,14 @@ export const incomingOrders = {
     /**
      *
      */
-     getIncomingOrders(_state, getters) {
+    getIncomingOrders(_state, getters) {
       const now = new Date();
       return getters.getRawIncomingOrders
         .sort((a, b) => {
           if (a.createDateTime < b.createDateTime) {
             return -1;
           }
-          if (a.createDateTime < b.createDateTime) {
+          if (a.createDateTime > b.createDateTime) {
             return 1;
           }
           return 0;
@@ -56,7 +56,7 @@ export const incomingOrders = {
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
-            nextRelatedOrderId: item.nextRelatedOrderId,
+            //nextRelatedOrderId: item.nextRelatedOrderId,
           };
         });
     },
@@ -65,7 +65,7 @@ export const incomingOrders = {
     /**
      * Позволяет получить информацию о входящем уведомлении по id этого уведомления.
      */
-     getIncomingOrder(state) {
+    getIncomingOrder(state) {
       return (id) => {
         return state.data.find((item) => item._id === id);
       };

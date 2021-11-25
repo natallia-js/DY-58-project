@@ -78,7 +78,7 @@
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
             <span v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-text-bold">
-              <span style="color:red">*</span> На распоряжение/запрещение
+              <span style="color:red">*</span> На приказ/запрещение
             </span>
             <span v-else class="p-text-bold">
               Предыдущее распоряжение в цепочке
@@ -87,7 +87,7 @@
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
             v-model="v$.prevRelatedOrder.$model"
-            :options="getActiveOrders"
+            :options="getLastInChainActiveOrders"
             style="width:100%"
           />
           <div v-if="relatedOrderObject" class="p-mt-2">
@@ -295,7 +295,7 @@
   import OrderPlaceChooser from './OrderPlaceChooser';
   import OrderTimeSpanChooser from './OrderTimeSpanChooser';
   import OrderText from './OrderText';
-  import { CurrShiftGetOrderStatus, ORDER_ELEMENTS_CAN_BE_EMPTY } from '../../constants/orders';
+  import { CurrShiftGetOrderStatus, ORDER_ELEMENTS_CAN_BE_EMPTY, ORDER_PLACE_VALUES } from '../../constants/orders';
   import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '../../constants/orderPatterns';
   import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
   import PreviewNewOrderDlg from './PreviewNewOrderDlg.vue';
@@ -484,6 +484,29 @@
           tillCancellation: null,
         };
       });
+      const orderActionPlace = computed(() => state.orderPlace);
+      watch(orderActionPlace, (newVal) => {
+        // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
+        store.commit('setGetOrderStatusToAllDSP', { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+        let blockObject;
+        switch (newVal.place) {
+          case ORDER_PLACE_VALUES.station:
+            // Затем назначаем получение оригинала распоряжения выбранной станции
+            store.commit('setGetOrderStatusToDefinitDSP',
+              { stationId: newVal.value, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+            break;
+          case ORDER_PLACE_VALUES.span:
+            // Затем назначаем получение оригинала распоряжения станциям выбранного перегона
+            blockObject = store.getters.getSectorBlockById(newVal.value);
+            if (blockObject) {
+              store.commit('setGetOrderStatusToDefinitDSP',
+                { stationId: blockObject.Bl_StationID1, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+              store.commit('setGetOrderStatusToDefinitDSP',
+                { stationId: blockObject.Bl_StationID2, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+            }
+            break;
+        }
+      });
 
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state);
@@ -514,7 +537,8 @@
         state.createDateTimeString = newVal;
       });
 
-      const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
+      //
+      const getLastInChainActiveOrders = computed(() => store.getters.getLastInChainActiveOrdersToDisplayInTreeSelect);
 
       const relatedOrderId = computed(() => {
         const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
@@ -525,7 +549,7 @@
         if (!relatedOrderId.value) {
           return null;
         }
-        return store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value);
+        return store.getters.getLastInChainActiveOrders.find((order) => order._id === relatedOrderId.value);
       });
 
       const relatedOrderObjectStartDateTimeString = computed(() => {
@@ -784,7 +808,8 @@
           dspToSend: dspSectorsToSendOrderNoDupl.value,
           ecdToSend: ecdSectorsToSendOrderNoDupl.value,
           otherToSend: state.otherSectorsToSendOrder,
-          prevOrderId: relatedOrderId.value,
+          //prevOrderId: relatedOrderId.value,
+          orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
           createdOnBehalfOf: state.createdOnBehalfOf,
           showOnGID: showOnGID.value.value,
         });
@@ -805,7 +830,7 @@
         getOrderInputTypes,
         handleSubmit,
         dispatchOrder,
-        getActiveOrders,
+        getLastInChainActiveOrders,
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
