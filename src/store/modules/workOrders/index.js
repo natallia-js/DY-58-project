@@ -5,6 +5,7 @@ import { confirmOrder } from './confirmOrder';
 import { incomingOrdersPerShift } from './incomingOrdersPerShift';
 import { incomingOrders } from './incomingOrders';
 import { activeOrders } from './activeOrders';
+import { workOrdersActions } from './workOrdersActions';
 
 
 export const workOrders = {
@@ -24,6 +25,9 @@ export const workOrders = {
     incomingOrdersPerShift: null,
     gettingIncomingOrdersPerShift: false,
     gettingIncomingOrdersPerShiftResult: null,
+
+    ordersChainsBeingDeleted: [],
+    deleteOrdersChainsResults: [],
   },
 
   getters: {
@@ -32,6 +36,7 @@ export const workOrders = {
     ...incomingOrders.getters,
     ...activeOrders.getters,
     ...incomingOrdersPerShift.getters,
+    ...workOrdersActions.getters,
   },
 
   mutations: {
@@ -39,6 +44,7 @@ export const workOrders = {
     ...getWorkOrders.mutations,
     ...confirmOrder.mutations,
     ...incomingOrdersPerShift.mutations,
+    ...workOrdersActions.mutations,
   },
 
   actions: {
@@ -46,5 +52,6 @@ export const workOrders = {
     ...reportOnOrdersDelivery.actions,
     ...confirmOrder.actions,
     ...incomingOrdersPerShift.actions,
+    ...workOrdersActions.actions,
   },
 };

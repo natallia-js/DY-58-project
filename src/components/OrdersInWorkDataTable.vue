@@ -1,5 +1,19 @@
 <template>
   <div>
+    <ContextMenu ref="menu" :model="workOrdersTableContextMenuItems">
+      <template #item="{item}">
+        <p class="p-m-2">
+          <a
+            href="#!"
+            class="dy58-context-menu-item"
+            @click="item.handler"
+          >
+            {{ item.label }}
+          </a>
+        </p>
+      </template>
+    </ContextMenu>
+
     <DataTable
       :value="getWorkingOrders"
       class="p-datatable-gridlines p-datatable-sm"
@@ -7,6 +21,9 @@
       dataKey="id"
       :scrollable="true" scrollHeight="flex"
       v-model:expandedRows="expandedRows"
+      contextmenu
+      v-model:contextMenuSelection="selectedWorkOrdersTableRecord"
+      @rowContextmenu="handleWorkOrdersTableRightClick"
     >
       <Column
         :expander="true"
@@ -24,7 +41,13 @@
         bodyClass="dy58-table-content-cell-class"
       >
         <template #body="slotProps">
-          <div style="width:100%;height:100%">
+          <div
+            style="width:100%;height:100%"
+            :class="[{
+              'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)
+                || getDeletedOrdersChains.includes(slotProps.data.orderChainId)
+            }]"
+          >
             <span v-if="![
               getWorkMessTblColumnsTitles.expander,
               getWorkMessTblColumnsTitles.state,
@@ -35,12 +58,12 @@
             <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus"
             >
               <p v-if="slotProps.data[col.field].notDelivered > 0">
-                <span class="dy58-margin-after">Не доставлено:</span>
-                <Badge class="not-delivered-order" :value="slotProps.data[col.field].notDelivered"></Badge>
+                <span class="p-mr-2">Не доставлено:</span>
+                <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDelivered"></Badge>
               </p>
               <p v-if="slotProps.data[col.field].notConfirmed > 0">
-                <span class="dy58-margin-after">Не подтверждено:</span>
-                <Badge class="not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
+                <span class="p-mr-2">Не подтверждено:</span>
+                <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
               </p>
             </div>
             <img v-if="col.field === getWorkMessTblColumnsTitles.state"
@@ -73,9 +96,10 @@
               >
                 <template #body="slotProps">
                   <div style="width:100%"
-                    :class="[{'not-delivered-order': !slotProps.data.deliverDateTime},
-                             {'not-confirmed-order': slotProps.data.deliverDateTime && !slotProps.data.confirmDateTime},
-                             ]"
+                    :class="[
+                              {'dy58-not-delivered-order': !slotProps.data.deliverDateTime},
+                              {'dy58-not-confirmed-order': slotProps.data.deliverDateTime && !slotProps.data.confirmDateTime},
+                            ]"
                   >
                     {{ slotProps.data[col2.field] }}
                   </div>
@@ -102,6 +126,7 @@
     data() {
       return {
         expandedRows: [],
+        selectedWorkOrdersTableRecord: null,
       };
     },
 
@@ -115,6 +140,8 @@
         'getWorkMessTblColumnsTitles',
         'getWorkMessTblColumns',
         'getWorkMessReceiversTblColumns',
+        'getOrdersChainsBeingDeleted',
+        'getDeletedOrdersChains',
       ]),
 
       getWorkMessStates() {
@@ -128,24 +155,39 @@
       getExpanderColumnObject() {
         return this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
       },
+
+      workOrdersTableContextMenuItems() {
+        const items = [];
+        if (this.selectedWorkOrdersTableRecord)
+        {
+          const ordersInChain = this.$store.getters.getOrdersInChain(this.selectedWorkOrdersTableRecord.orderChainId);
+          const confirmDlgMessage = ordersInChain.length === 1
+            ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
+            : `Удалить цепочку распоряжений (${ordersInChain.reduce((accumulator, currentValue, index) =>
+              accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений?`;
+          items.push({
+            label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
+            handler: () => {
+              this.$confirm.require({
+                header: 'Подтвердите удаление',
+                message: confirmDlgMessage,
+                icon: 'pi pi-exclamation-circle',
+                defaultFocus: 'reject',
+                accept: () => {
+                  this.$store.dispatch('delConfirmedOrdersFromChain', this.selectedWorkOrdersTableRecord.orderChainId);
+                },
+              });
+            },
+          });
+        }
+        return items;
+      },
+    },
+
+    methods: {
+      handleWorkOrdersTableRightClick(event) {
+        this.$refs.menu.show(event.originalEvent);
+      },
     },
   }
 </script>
-
-
-<style lang="scss" scoped>
-  .confirmed-order {
-    background-color: var(--dy58-confirmed-order-bg-color) !important;
-    color: black;
-  }
-
-  .not-delivered-order {
-    background-color: var(--dy58-not-read-order-bg-color) !important;
-    color: black;
-  }
-
-  .not-confirmed-order {
-    background-color: var(--dy58-read-order-bg-color) !important;
-    color: black;
-  }
-</style>

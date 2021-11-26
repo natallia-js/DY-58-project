@@ -8,22 +8,36 @@
       @close="hideOrderInfo"
     >
     </ShowIncomingOrderDlg>
+
     <Tree
       :value="getWorkingOrdersToDisplayAsTree"
       selectionMode="single"
       @node-select="onNodeSelect"
     >
       <template #default="slotProps">
-        <b>{{ slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}</b>,
-        {{ slotProps.node.orderTitle || '?' }},
-        от {{ slotProps.node.time }}
-        <a
-          class="dy58-send-status-btn"
-          @click="() => showOrderInfo(slotProps.node.key)"
-          v-tooltip="'Подробнее'"
+        <span
+          :class="[{
+            'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId)
+              || getDeletedOrdersChains.includes(slotProps.node.orderChainId)
+          }]"
         >
-          ...
-        </a>
+          <b>{{ slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}</b>,
+          {{ slotProps.node.orderTitle || '?' }},
+          от {{ slotProps.node.time }}
+        </span>
+        <Button
+          icon="pi pi-ellipsis-h"
+          class="p-button-info p-button-sm p-ml-2 p-mr-1 dy58-tree-order-action-button"
+          v-tooltip.right="'Подробнее'"
+          @click="() => showOrderInfo(slotProps.node.key)"
+        />
+        <Button
+          v-if="slotProps.node.topLevelNode"
+          icon="pi pi-times"
+          class="p-button-secondary p-button-sm p-mr-1 dy58-tree-order-action-button"
+          v-tooltip.right="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
+          @click="() => deleteOrdersChain(slotProps.node.orderChainId)"
+        />
       </template>
     </Tree>
   </div>
@@ -53,6 +67,8 @@
     computed: {
       ...mapGetters([
         'getWorkingOrdersToDisplayAsTree',
+        'getOrdersChainsBeingDeleted',
+        'getDeletedOrdersChains',
       ]),
     },
 
@@ -72,6 +88,31 @@
       onNodeSelect(node) {
         this.chosenOrder = node;
       },
+
+      deleteOrdersChain(chainId) {
+        const ordersInChain = this.$store.getters.getOrdersInChain(chainId);
+        const confirmDlgMessage = ordersInChain.length === 1
+          ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
+          : `Удалить цепочку распоряжений (${ordersInChain.reduce((accumulator, currentValue, index) =>
+            accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений?`;
+        this.$confirm.require({
+          header: 'Подтвердите удаление',
+          message: confirmDlgMessage,
+          icon: 'pi pi-exclamation-circle',
+          defaultFocus: 'reject',
+          accept: () => {
+            this.$store.dispatch('delConfirmedOrdersFromChain', chainId);
+          },
+        });
+      },
     },
   }
 </script>
+
+
+<style scoped>
+  .dy58-tree-order-action-button {
+    width: 20px !important;
+    height: 20px !important;
+  }
+</style>

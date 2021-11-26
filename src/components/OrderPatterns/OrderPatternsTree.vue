@@ -416,8 +416,6 @@
           target: event.currentTarget,
           message: 'Удалить шаблон?',
           icon: 'pi pi-exclamation-circle',
-          acceptLabel: 'Да',
-          rejectLabel: 'Нет',
           accept: () => {
             if (!this.selectedPattern || !this.selectedPattern.key) {
               return;

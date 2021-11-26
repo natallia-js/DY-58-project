@@ -307,8 +307,6 @@
           target: event.currentTarget,
           message: 'Очистить шаблон?',
           icon: 'pi pi-exclamation-circle',
-          acceptLabel: 'Да',
-          rejectLabel: 'Нет',
           accept: () => {
             state.orderPattern = [];
             state.insertOrderElementPos = 0;

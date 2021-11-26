@@ -43,6 +43,7 @@ import AccordionTab from 'primevue/accordiontab';
 import Listbox from 'primevue/listbox';
 import MultiSelect from 'primevue/multiselect';
 import Menubar from 'primevue/menubar';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 const app = createApp(App);
 
@@ -83,5 +84,6 @@ app.component('Accordion', Accordion);
 app.component('AccordionTab', AccordionTab);
 app.component('Listbox', Listbox);
 app.component('MultiSelect', MultiSelect);
+app.component('ConfirmDialog', ConfirmDialog);
 
 app.mount('#app');

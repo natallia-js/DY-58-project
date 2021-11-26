@@ -1,5 +1,10 @@
 <template>
-  <ShowUserDataDlg :showDlg="showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
+  <Toast />
+
+  <ShowUserDataDlg :showDlg="state.showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
+
+  <ConfirmDialog style="max-width:700px"></ConfirmDialog>
+
   <div class="p-grid" style="margin:0">
     <div class="p-col-3 dy58-left-menu-panel">
       <div class="dy58-date-user-block p-p-3 p-d-flex p-jc-center p-ai-center p-flex-wrap">
@@ -61,7 +66,7 @@
             <div class="dy58-table-comment">
               извлекаются цепочки распоряжений, действовавшие с
               <Calendar
-                v-model="startDateToGetData"
+                v-model="state.startDateToGetData"
                 :showTime="true"
                 :showIcon="true"
                 :manualInput="false"
@@ -94,22 +99,17 @@
 
 <script>
   import SideMenu from '../components/SideMenu.vue';
-  import { mapGetters } from 'vuex';
+  import { computed, onMounted, reactive, watch } from 'vue';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
   import IncomingNotificationsDataTable from '../components/IncomingNotificationsDataTable';
   import ShowUserDataDlg from '../components/ShowUserDataDlg';
   import OrdersInWorkDataTable from '../components/OrdersInWorkDataTable';
   import OrdersInWorkTree from '@/components/OrdersInWorkTree.vue';
+  import showMessage from '../hooks/showMessage.hook';
+  import { useStore } from 'vuex';
 
   export default {
     name: 'dy58-main-page',
-
-    data() {
-      return {
-        showUserDataDlg: false,
-        startDateToGetData: new Date(),
-      };
-    },
 
     components: {
       SideMenu,
@@ -119,46 +119,74 @@
       OrdersInWorkTree,
     },
 
-    computed: {
-      ...mapGetters([
-        'getCurrDateTimeString',
-        'getUserPostFIO',
-        'getUserCredential',
-        'getStartDateToGetData',
-        'getLoadingWorkOrdersStatus',
-        'getWorkingOrdersNumber',
-        'getErrorLoadingWorkOrders',
-        'isDSP',
-      ]),
+    setup() {
+      const store = useStore();
+      const { showSuccessMessage, showErrMessage } = showMessage();
 
-      getMainMenuItemsKeys() {
-        return MainMenuItemsKeys;
-      },
+      const state = reactive({
+        showUserDataDlg: false,
+        startDateToGetData: new Date(),
+      });
+
+      const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
+      const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
+      const getUserCredential = computed(() => store.getters.getUserCredential);
+      const getLoadingWorkOrdersStatus = computed(() => store.getters.getLoadingWorkOrdersStatus);
+      const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
+      const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
+      const isDSP = computed(() => store.getters.isDSP);
+      const getMainMenuItemsKeys = computed(() => MainMenuItemsKeys);
+
+      const changedStartDateToGetData = computed(() => state.startDateToGetData);
+      watch(changedStartDateToGetData, (newVal) => {
+        store.commit('setStartDateToGetDataNoCheck', newVal);
+      });
+
+      const getStartDateToGetData = computed(() => store.getters.getStartDateToGetData);
+      watch(getStartDateToGetData, (newVal) => {
+        state.startDateToGetData = newVal;
+      });
+
+      const deleteOrdersChainsResults = computed(() => store.getters.getDeleteOrdersChainsResultsUnseenByUser);
+      watch(deleteOrdersChainsResults, (newVal) => {
+        newVal.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          store.commit('setDeleteOrdersChainResultSeenByUser', result.chainId);
+        });
+      });
+
+      onMounted(() => {
+        store.commit('setActiveMainMenuItem', getMainMenuItemsKeys.value.mainPage);
+        state.startDateToGetData = getStartDateToGetData.value;
+      });
+
+      const showUserInfo = () => {
+        state.showUserDataDlg = true;
+      };
+
+      const hideUserInfo = () => {
+        state.showUserDataDlg = false;
+      };
+
+      return {
+        state,
+        getCurrDateTimeString,
+        getUserPostFIO,
+        getUserCredential,
+        getStartDateToGetData,
+        getLoadingWorkOrdersStatus,
+        getWorkingOrdersNumber,
+        getErrorLoadingWorkOrders,
+        isDSP,
+        getMainMenuItemsKeys,
+        showUserInfo,
+        hideUserInfo,
+      };
     },
-
-    watch: {
-      startDateToGetData(newVal) {
-        this.$store.commit('setStartDateToGetDataNoCheck', newVal);
-      },
-
-      getStartDateToGetData(newVal) {
-        this.startDateToGetData = newVal;
-      },
-    },
-
-    mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.mainPage);
-      this.startDateToGetData = this.getStartDateToGetData;
-    },
-
-    methods: {
-      showUserInfo() {
-        this.showUserDataDlg = true;
-      },
-
-      hideUserInfo() {
-        this.showUserDataDlg = false;
-      },
 
 /*
       createNewOrder() {
@@ -169,10 +197,5 @@
         //}
       },
     */
-    },
   };
 </script>
-
-
-<style lang="scss" scoped>
-</style>

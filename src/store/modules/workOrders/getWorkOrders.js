@@ -110,6 +110,9 @@ function getOrderTextElementTypedValue(element) {
 }
 
 
+/**
+ * Данный модуль предназначен для получения информации о рабочих распоряжениях.
+ */
 export const getWorkOrders = {
   getters: {
     getStartDateToGetData(state) {
@@ -223,6 +226,7 @@ export const getWorkOrders = {
         };
 
         if (!parentNode) {
+          orderNodeData.topLevelNode = true;
           groupedWorkingOrders.push(orderNodeData);
         } else {
           parentNode.children.push(orderNodeData);
@@ -277,6 +281,7 @@ export const getWorkOrders = {
                 (item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
                 (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
             },
+            orderChainId: item.orderChainId,
             receivers: function() {
               const receiversArray = [];
               if (item.dspToSend) {
@@ -356,6 +361,20 @@ export const getWorkOrders = {
         }
       })
       return notConfirmedInstances;
+    },
+
+    getOrdersInChain(state) {
+      return (chainId) => {
+        return state.data.filter((item) => item.orderChainId === chainId).sort((a, b) => {
+          if (a.createDateTime < b.createDateTime) {
+            return -1;
+          }
+          if (a.createDateTime > b.createDateTime) {
+            return 1;
+          }
+          return 0;
+        });
+      };
     },
   },
 
@@ -495,6 +514,7 @@ export const getWorkOrders = {
           userId: context.getters.getUserId,
         });
         context.dispatch('reportOnOrdersDelivery', response.data);
+        context.commit('clearAllDeleteOrdersChainResultsSeenByUser');
       } catch (error) {
         let errMessage;
         if (error.response) {

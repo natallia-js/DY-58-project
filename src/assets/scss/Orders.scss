@@ -1,0 +1,13 @@
+.dy58-not-delivered-order {
+  background-color: var(--dy58-not-read-order-bg-color) !important;
+  color: black !important;
+}
+
+.dy58-not-confirmed-order {
+  background-color: var(--dy58-read-order-bg-color) !important;
+  color: black !important;
+}
+
+.dy58-order-being-deleted {
+  background-color: rgb(240, 210, 210) !important;
+}

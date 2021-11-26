@@ -41,4 +41,7 @@ export default {
   today: 'Сегодня',
 
   dateFormat: 'dd.mm.yy',
+
+  accept: 'Да',
+  reject: 'Отмена',
 };

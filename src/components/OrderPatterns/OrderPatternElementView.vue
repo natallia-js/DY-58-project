@@ -236,7 +236,7 @@
   import showMessage from '../../hooks/showMessage.hook';
   import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
   import { useStore } from 'vuex';
-  import { useConfirm } from "primevue/useconfirm";
+  import { useConfirm } from 'primevue/useconfirm';
 
   export default {
     name: 'dy58-order-pattern-element-view',
@@ -399,9 +399,7 @@
         confirm.require({
           target: event.target,
           message: 'Удалить все записи таблицы?',
-          icon: 'pi pi-exclamation-triangle',
-          acceptLabel: 'Да',
-          rejectLabel: 'Нет',
+          icon: 'pi pi-exclamation-circle',
           accept: () => {
             state.elementModelValue = null;
             emit('input', {
@@ -411,7 +409,6 @@
               elementRef: props.element.ref,
             });
           },
-          reject: () => {},
         });
       };
 
