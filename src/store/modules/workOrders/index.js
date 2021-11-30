@@ -5,7 +5,7 @@ import { confirmOrder } from './confirmOrder';
 import { incomingOrdersPerShift } from './incomingOrdersPerShift';
 import { incomingOrders } from './incomingOrders';
 import { activeOrders } from './activeOrders';
-import { workOrdersActions } from './workOrdersActions';
+import { delWorkOrdersChains } from './delWorkOrdersChains';
 
 
 export const workOrders = {
@@ -19,24 +19,35 @@ export const workOrders = {
     reportingOnOrdersDelivery: false,
     reportOnOrdersDeliveryResult: null,
 
-    confirmingOrder: false,
-    orderConfirmResult: null,
-
     incomingOrdersPerShift: null,
     gettingIncomingOrdersPerShift: false,
     gettingIncomingOrdersPerShiftResult: null,
 
+    // массив id удаляемых цепочек распоряжений (по которым идет процесс удаления)
     ordersChainsBeingDeleted: [],
+    // массив результатов удаления цепочек распоряжений (с привязкой к id цепочек распоряжений)
     deleteOrdersChainsResults: [],
+
+    // массив id распоряжений, для которых идет процесс подтверждения (входящие уведомления)
+    ordersBeingConfirmed: [],
+    // массив результатов подтверждения распоряжений (входящих уведомлений)
+    confirmOrdersResults: [],
+
+    // массив id распоряжений, для которых идет процесс подтверждения (за другие полигоны управления)
+    ordersBeingConfirmedForOthers: [],
+    // массив результатов подтверждения распоряжений за другие полигоны (с привязкой к id распоряжений)
+    confirmOrdersForOthersResults: [],
   },
 
   getters: {
+    ...reportOnOrdersDelivery.getters,
     ...getWorkOrders.getters,
     ...tablesColumns.getters,
     ...incomingOrders.getters,
     ...activeOrders.getters,
     ...incomingOrdersPerShift.getters,
-    ...workOrdersActions.getters,
+    ...delWorkOrdersChains.getters,
+    ...confirmOrder.getters,
   },
 
   mutations: {
@@ -44,7 +55,7 @@ export const workOrders = {
     ...getWorkOrders.mutations,
     ...confirmOrder.mutations,
     ...incomingOrdersPerShift.mutations,
-    ...workOrdersActions.mutations,
+    ...delWorkOrdersChains.mutations,
   },
 
   actions: {
@@ -52,6 +63,6 @@ export const workOrders = {
     ...reportOnOrdersDelivery.actions,
     ...confirmOrder.actions,
     ...incomingOrdersPerShift.actions,
-    ...workOrdersActions.actions,
+    ...delWorkOrdersChains.actions,
   },
 };

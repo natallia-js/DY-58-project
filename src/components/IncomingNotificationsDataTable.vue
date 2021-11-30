@@ -5,9 +5,11 @@
       dlgTitle="Информация о входящем уведомлении"
       :order="chosenOrder"
       :orderNeedsToBeConfirmed="true"
+      :orderIsBeingConfirmed="chosenOrder && isOrderBeingConfirmed(chosenOrder.id)"
       @close="hideOrderInfo"
     >
     </ShowIncomingOrderDlg>
+
     <DataTable
       :value="getIncomingOrders"
       class="p-datatable-gridlines"
@@ -22,6 +24,10 @@
           <Badge :value="getIncomingOrdersNumber"></Badge>
           <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
             {{ getErrorLoadingWorkOrders }}
+          </p>
+          <p v-if="getReportOnOrdersDeliveryResult && getReportOnOrdersDeliveryResult.error"
+            style="color:red;fontSize:1rem;fontWeight:500">
+            {{ getReportOnOrdersDeliveryResult.message }}
           </p>
         </div>
         <Button
@@ -49,19 +55,20 @@
               v-else-if="col.field === getInputMessTblColumnsTitles.orderText"
               v-html="slotProps.data[col.field]"
             ></span>
-            <img
-              v-else-if="col.field === getInputMessTblColumnsTitles.state"
-              :src="slotProps.data[col.field] === getIncomingNotificationsStates.cameRecently ? require('../assets/img/hourglass_black.png') :
-                    (slotProps.data[col.field] === getIncomingNotificationsStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
-              :alt="slotProps.data[col.field]"
-              class="dy58-order-state-img-style"
-            />
+            <div v-else-if="col.field === getInputMessTblColumnsTitles.state">
+              <i v-if="isOrderBeingConfirmed(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
+              <img
+                :src="slotProps.data[col.field] === getIncomingNotificationsStates.cameRecently ? require('../assets/img/hourglass_black.png') :
+                      (slotProps.data[col.field] === getIncomingNotificationsStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
+                :alt="slotProps.data[col.field]"
+                class="dy58-order-state-img-style"
+              />
+            </div>
           </div>
         </template>
       </Column>
     </DataTable>
   </div>
-
 </template>
 
 
@@ -83,12 +90,14 @@
     computed: {
       ...mapGetters([
         'getLoadingWorkOrdersStatus',
+        'getReportOnOrdersDeliveryResult',
         'getErrorLoadingWorkOrders',
         'getIncomingOrders',
         'getIncomingOrdersNumber',
         'isDSP',
         'getInputMessTblColumnsTitles',
         'getInputMessTblColumns',
+        'isOrderBeingConfirmed',
       ]),
 
       getIncomingNotificationsStates() {

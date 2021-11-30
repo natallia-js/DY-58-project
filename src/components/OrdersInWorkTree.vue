@@ -18,7 +18,6 @@
         <span
           :class="[{
             'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId)
-              || getDeletedOrdersChains.includes(slotProps.node.orderChainId)
           }]"
         >
           <b>{{ slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}</b>,
@@ -32,7 +31,7 @@
           @click="() => showOrderInfo(slotProps.node.key)"
         />
         <Button
-          v-if="slotProps.node.topLevelNode"
+          v-if="isUserOnDuty && slotProps.node.topLevelNode"
           icon="pi pi-times"
           class="p-button-secondary p-button-sm p-mr-1 dy58-tree-order-action-button"
           v-tooltip.right="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
@@ -66,9 +65,9 @@
 
     computed: {
       ...mapGetters([
+        'isUserOnDuty',
         'getWorkingOrdersToDisplayAsTree',
         'getOrdersChainsBeingDeleted',
-        'getDeletedOrdersChains',
       ]),
     },
 

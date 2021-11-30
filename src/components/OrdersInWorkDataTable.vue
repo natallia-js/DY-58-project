@@ -45,7 +45,6 @@
             style="width:100%;height:100%"
             :class="[{
               'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)
-                || getDeletedOrdersChains.includes(slotProps.data.orderChainId)
             }]"
           >
             <span v-if="![
@@ -66,12 +65,15 @@
                 <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
               </p>
             </div>
-            <img v-if="col.field === getWorkMessTblColumnsTitles.state"
-              :src="slotProps.data[col.field] === getWorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
-                    (slotProps.data[col.field] === getWorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
-              :alt="slotProps.data[col.field]"
-              class="dy58-order-state-img-style"
-            />
+            <div v-else-if="col.field === getWorkMessTblColumnsTitles.state">
+              <i v-if="isOrderBeingConfirmedForOthers(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
+              <img
+                :src="slotProps.data[col.field] === getWorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
+                      (slotProps.data[col.field] === getWorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
+                :alt="slotProps.data[col.field]"
+                class="dy58-order-state-img-style"
+              />
+            </div>
           </div>
         </template>
       </Column>
@@ -94,19 +96,46 @@
                 headerClass="dy58-table-header-cell-class"
                 bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
               >
-                <template #body="slotProps">
-                  <div style="width:100%"
+                <template #body="slotProps2">
+                  <div v-if="col2.field !== getWorkMessReceiversTblColumnsTitles.confirmDateTime"
+                    style="width:100%"
                     :class="[
-                              {'dy58-not-delivered-order': !slotProps.data.deliverDateTime},
-                              {'dy58-not-confirmed-order': slotProps.data.deliverDateTime && !slotProps.data.confirmDateTime},
-                            ]"
+                      {'dy58-not-delivered-order': !slotProps2.data.deliverDateTime},
+                      {'dy58-not-confirmed-order': slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
+                    ]"
                   >
-                    {{ slotProps.data[col2.field] }}
+                    {{ slotProps2.data[col2.field] }}
+                  </div>
+                  <div v-else>
+                    <span v-if="slotProps2.data[col2.field]">
+                      {{ getDateTimeString(slotProps2.data[col2.field]) }}
+                    </span>
+                    <Button
+                      v-else-if="isUserOnDuty &&
+                        !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                        !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                        orderCanBeConfirmedFor(slotProps.data)"
+                      label="Подтвердить"
+                      class="p-button-primary p-button-text"
+                      @click="confirmOrderForOthers(slotProps.data.id, { type: slotProps2.data.type, id: slotProps2.data.id })"
+                    />
                   </div>
                 </template>
               </Column>
-
             </DataTable>
+            <div style="text-align:right"
+              v-if="isUserOnDuty &&
+                !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                orderCanBeConfirmedFor(slotProps.data) &&
+                getOrderUnconfirmedWorkPoligons(slotProps.data.id).length"
+            >
+              <Button
+                label="Подтвердить все"
+                class="p-button-primary p-button-text"
+                @click="confirmOrderForOthers(slotProps.data.id, null)"
+              />
+            </div>
           </div>
         </div>
       </template>
@@ -119,6 +148,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { WorkMessStates } from '../constants/orders';
+  import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
@@ -138,10 +168,14 @@
         'getWorkingOrdersNumber',
         'isDSP',
         'getWorkMessTblColumnsTitles',
+        'getWorkMessReceiversTblColumnsTitles',
         'getWorkMessTblColumns',
         'getWorkMessReceiversTblColumns',
         'getOrdersChainsBeingDeleted',
-        'getDeletedOrdersChains',
+        'getOrderUnconfirmedWorkPoligons',
+        'getUserWorkPoligon',
+        'isOrderBeingConfirmedForOthers',
+        'isUserOnDuty',
       ]),
 
       getWorkMessStates() {
@@ -158,8 +192,13 @@
 
       workOrdersTableContextMenuItems() {
         const items = [];
-        if (this.selectedWorkOrdersTableRecord)
-        {
+        if (!this.isUserOnDuty) {
+          items.push({
+            label: 'Вы не на дежурстве',
+            handler: () => {},
+          });
+
+        } else if (this.selectedWorkOrdersTableRecord) {
           const ordersInChain = this.$store.getters.getOrdersInChain(this.selectedWorkOrdersTableRecord.orderChainId);
           const confirmDlgMessage = ordersInChain.length === 1
             ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
@@ -182,11 +221,41 @@
         }
         return items;
       },
+
+      orderCanBeConfirmedFor() {
+        return (order) => {
+          return (order.senderWorkPoligon.type === this.getUserWorkPoligon.type) &&
+            (order.senderWorkPoligon.id === this.getUserWorkPoligon.code);
+        };
+      },
     },
 
     methods: {
       handleWorkOrdersTableRightClick(event) {
         this.$refs.menu.show(event.originalEvent);
+      },
+
+      getDateTimeString(datetime, showSeconds) {
+        return getLocaleDateTimeString(datetime, showSeconds);
+      },
+
+      /**
+       * Значение параметра workPoligon - объект с информацией о рабочем полигоне, за который необходимо
+       * подтвердить распоряжение.
+       * Если значение параметра workPoligon null, то распоряжение подтверждается за все рабочие
+       * полигоны, которые его еще не подтвердили.
+      */
+      confirmOrderForOthers(orderId, workPoligon) {
+        let confirmWorkPoligons;
+        if (!workPoligon) {
+          confirmWorkPoligons = this.getOrderUnconfirmedWorkPoligons(orderId);
+        } else {
+          confirmWorkPoligons = [{
+            workPoligonType: workPoligon.type,
+            workPoligonId: workPoligon.id,
+          }];
+        }
+        this.$store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
       },
     },
   }

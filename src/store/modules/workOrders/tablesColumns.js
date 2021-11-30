@@ -1,5 +1,7 @@
 import { filterObj } from '../../../additional/filterObject';
 
+// Условные наименования столбцов таблицы входящих уведомлений (названия столбцов должны
+// соответствовать названию полей массива данных для корректного отображения информации)
 const InputMessTblColumnsTitles = Object.freeze({
   state: 'state',
   seqNum: 'seqNum',
@@ -12,6 +14,8 @@ const InputMessTblColumnsTitles = Object.freeze({
   fio: 'fio',
 });
 
+// Условные наименования столбцов таблицы рабочих распоряжений (названия столбцов должны
+// соответствовать названию полей массива данных для корректного отображения информации)
 const WorkMessTblColumnsTitles = Object.freeze({
   expander: 'expander',
   state: 'state',
@@ -22,17 +26,25 @@ const WorkMessTblColumnsTitles = Object.freeze({
   orderReceiveStatus: 'orderReceiveStatus',
 });
 
+// Условные наименования столбцов таблицы полигонов-приемников рабочих распоряжений
+// (названия столбцов должны соответствовать названию полей массива данных для корректного
+// отображения информации)
 const WorkMessReceiversTblColumnsTitles = Object.freeze({
   place: 'place',
   post: 'post',
   fio: 'fio',
+  confirmDateTime: 'confirmDateTime',
 });
 
 
+/**
+ * Данный модуль предназначен для работы с данными о столбцах таблиц в зависимости от должности
+ * человека, вошедшего в систему.
+ */
 export const tablesColumns = {
   getters: {
     /**
-     *
+     * Возвращает информацию об условных наименованиях столбцов таблицы входящих уведомлений.
      */
      getInputMessTblColumnsTitles(_state, _getters, _rootState, rootGetters) {
       if (rootGetters.isDSP) {
@@ -42,7 +54,7 @@ export const tablesColumns = {
     },
 
     /**
-     *
+     * Возвращает информацию о столбцах таблицы входящих уведомлений.
      */
     getInputMessTblColumns(_state, _getters, _rootState, rootGetters) {
       const isDSP = rootGetters.isDSP;
@@ -65,14 +77,22 @@ export const tablesColumns = {
     },
 
     /**
-     *
+     * Возвращает информацию об условных наименованиях столбцов таблицы рабочих распоряжений.
      */
     getWorkMessTblColumnsTitles() {
       return WorkMessTblColumnsTitles;
     },
 
     /**
-     *
+     * Возвращает информацию об условных наименованиях столбцов таблицы полигонов-приемников
+     * рабочих распоряжений.
+     */
+    getWorkMessReceiversTblColumnsTitles() {
+      return WorkMessReceiversTblColumnsTitles;
+    },
+
+    /**
+     * Возвращает информацию о столбцах таблицы рабочих распоряжений.
      */
     getWorkMessTblColumns() {
       return [
@@ -87,13 +107,14 @@ export const tablesColumns = {
     },
 
     /**
-     *
+     * Возвращает информацию о столбцах таблицы полигонов-приемников рабочих распоряжений.
      */
      getWorkMessReceiversTblColumns(_state, _getters, _rootState, rootGetters) {
       let tblCols = [
-        { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '33%', },
-        { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '33%', },
-        { field: WorkMessReceiversTblColumnsTitles.fio, title: 'ФИО', width: '33%', },
+        { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '25%', },
+        { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '25%', },
+        { field: WorkMessReceiversTblColumnsTitles.fio, title: 'ФИО', width: '25%', },
+        { field: WorkMessReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '25%', },
       ];
       if (!rootGetters.isECD) {
         return tblCols;

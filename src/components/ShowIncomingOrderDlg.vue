@@ -6,8 +6,8 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <p style="textAlign:center" class="p-mb-2">
-      <span class="p-text-bold">{{(order && order.sendOriginal) ? 'Оригинал' : 'Копия'}}</span>
+    <p style="textAlign:center" class="p-text-bold p-text-uppercase p-mb-2">
+      {{ (order && order.sendOriginal) ? 'Оригинал' : 'Копия' }}
     </p>
     <p><span class="p-text-bold">Отправитель:</span> &#160;
       {{ (order && order.place) ? order.place : '?' }} &#160;
@@ -25,7 +25,8 @@
       <span v-if="order" v-html="order.orderText"></span>
     </p>
     <template #footer>
-      <Button v-if="orderNeedsToBeConfirmed" label="Подтвердить" @click="confirmOrder" />
+      <Button v-if="isUserOnDuty && orderNeedsToBeConfirmed && !orderIsBeingConfirmed" label="Подтвердить" @click="confirmOrder" />
+      <span v-if="orderNeedsToBeConfirmed && orderIsBeingConfirmed" class="p-mr-2">Распоряжение подтверждается...</span>
       <Button label="Закрыть" @click="closeDialog" />
     </template>
   </Dialog>
@@ -33,6 +34,8 @@
 
 
 <script>
+  import { mapGetters } from 'vuex';
+
   export default {
     name: 'dy58-show-incoming-order-dialog',
 
@@ -60,17 +63,41 @@
         type: Boolean,
         required: true,
       },
+      orderIsBeingConfirmed: {
+        type: Boolean,
+        required: true,
+      },
+    },
+
+    computed: {
+      ...mapGetters([
+        'isUserOnDuty',
+      ]),
     },
 
     watch: {
       showDlg: function (val) {
         this.dlgVisible = val;
       },
+
+      /**
+       * Может оказаться такая ситуация. Пользователь нажал кнопку "Подтвердить", окно автоматически закрылось,
+       * но процесс подтверждения еще не завершился. Пользователь повторно открывает окно с информацией о
+       * распоряжении, видит надпись "Распоряжение подтверждается...". И тут вдруг процесс подтверждения
+       * завершается успешно. Если бы не было кода ниже, то по окончании процесса подтверждения (успешно)
+       * диалоговое окно оказалось бы висеть с одними вопросами вместо информации о распоряжении, ведь
+       * распоряжения уже в таблице входящих уведомлений нет.
+       */
+      order: function (val) {
+        if (!val) {
+          this.closeDialog();
+        }
+      },
     },
 
     methods: {
       confirmOrder() {
-        if (this.order) {
+        if (this.order && this.orderNeedsToBeConfirmed && !this.orderIsBeingConfirmed) {
           this.$store.dispatch('confirmOrder', { orderId: this.order.id });
         }
         this.closeDialog();

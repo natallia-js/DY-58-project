@@ -131,9 +131,11 @@
       const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
       const getUserCredential = computed(() => store.getters.getUserCredential);
+
       const getLoadingWorkOrdersStatus = computed(() => store.getters.getLoadingWorkOrdersStatus);
       const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
       const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
+
       const isDSP = computed(() => store.getters.isDSP);
       const getMainMenuItemsKeys = computed(() => MainMenuItemsKeys);
 
@@ -156,6 +158,30 @@
             showSuccessMessage(result.message);
           }
           store.commit('setDeleteOrdersChainResultSeenByUser', result.chainId);
+        });
+      });
+
+      const confirmIncomingOrdersResults = computed(() => store.getters.getConfirmOrdersResultsUnseenByUser);
+      watch(confirmIncomingOrdersResults, (newVal) => {
+        newVal.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          store.commit('setConfirmOrderResultSeenByUser', result.orderId);
+        });
+      });
+
+      const confirmIncomingOrdersForOthersResults = computed(() => store.getters.getConfirmOrdersForOthersResultsUnseenByUser);
+      watch(confirmIncomingOrdersForOthersResults, (newVal) => {
+        newVal.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          store.commit('setConfirmOrderForOthersResultSeenByUser', result.orderId);
         });
       });
 

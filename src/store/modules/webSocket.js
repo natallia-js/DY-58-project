@@ -18,12 +18,15 @@ export const webSocket = {
     getLastNServerMessages(state) {
       return state.lastNServerMessages;
     },
+
     getReadyState(state) {
       return state.readyState;
     },
+
     getRetryNum(state) {
       return state.retryNum;
     },
+
     getRetryOnCloseWSConnection(state) {
       return state.retryOnCloseConnection;
     },

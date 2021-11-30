@@ -3,6 +3,7 @@ import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
 import { ORDER_PLACE_VALUES } from '../../constants/orders';
 
+
 export const currWorkPoligonStructure = {
   state: {
     // Для хранения информации об участке ДНЦ / ЭЦД
@@ -115,7 +116,7 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * Возвращает объект перегона участка управления по его id.
      */
      getSectorBlockById: (_state, getters) => (blockId) => {
       return getters.getSectorBlocks.find((block) => block.Bl_ID === blockId);
@@ -305,7 +306,7 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * Для полигона управления, являющегося участком ЭЦД, возвращает его структурные подразделения.
      */
     getStructuralDivisions(state) {
       if (!state.sector || !state.sector.TECDStructuralDivisions || !state.sector.TECDStructuralDivisions.length) {
@@ -336,7 +337,7 @@ export const currWorkPoligonStructure = {
 
   actions: {
     /**
-     *
+     * Подгружает с сервера информацию о полигоне управления "Станция".
      */
     async loadStationData(context, { stationId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
@@ -374,7 +375,7 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * Подгружает с сервера информацию о полигоне управления "Участок ДНЦ".
      */
     async loadDNCSectorData(context, { sectorId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
@@ -407,7 +408,7 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * Подгружает с сервера информацию о полигоне управления "Участок ЭЦД".
      */
     async loadECDSectorData(context, { sectorId }) {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
@@ -440,9 +441,14 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     *
+     * В зависимости от полигона управления пользователя запускает операцию подгрузки
+     * с сервера информацию о данном полигоне управления.
      */
     async loadCurrWorkPoligonData(context) {
+      // если ранее начатая загрузка данных не завершена, то повторно ничего не запускаем
+      if (context.state.loadingCurrWorkPoligonStructure) {
+        return;
+      }
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
         return;

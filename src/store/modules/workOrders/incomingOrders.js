@@ -3,10 +3,13 @@ import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/
 import { formOrderText } from '../../../additional/formOrderText';
 
 
+/**
+ * Данный модуль предназначен для работы со входящими (не подтвержденными) уведомлениями (распоряжениями).
+ */
 export const incomingOrders = {
   getters: {
     /**
-     *
+     * Возвращает массив входящих распоряжений (в том порядке, в котором они были получены с сервера).
      */
     getRawIncomingOrders(state) {
       return state.data.filter((item) => !item.confirmDateTime);
@@ -20,7 +23,8 @@ export const incomingOrders = {
     },
 
     /**
-     *
+     * Возвращает массив входящих уведомлений, отсортированный по дате создания уведомлений
+     * (распоряжений) и адаптированный к отображению в табличном виде.
      */
     getIncomingOrders(_state, getters) {
       const now = new Date();
@@ -56,11 +60,9 @@ export const incomingOrders = {
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
-            //nextRelatedOrderId: item.nextRelatedOrderId,
           };
         });
     },
-
 
     /**
      * Позволяет получить информацию о входящем уведомлении по id этого уведомления.

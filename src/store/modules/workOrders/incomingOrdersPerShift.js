@@ -80,17 +80,18 @@ export const incomingOrdersPerShift = {
         );
         context.commit('setGettingIncomingOrdersPerShiftResult', { error: false, message: null });
         context.commit('setIncomingOrdersPerShift', response.data);
+
       } catch (error) {
         let errMessage;
         if (error.response) {
           // The request was made and server responded
-          errMessage = 'Ошибка получения информации о входящих распоряжениях за смену: ' + error.response.data ? error.response.data.message : '?';
+          errMessage = 'Ошибка получения информации о входящих распоряжениях за смену: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
         } else if (error.request) {
           // The request was made but no response was received
           errMessage = 'Ошибка получения информации о входящих распоряжениях за смену: сервер не отвечает';
         } else {
           // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при получении информации о входящих распоряжениях за смену: ' + error.message || '?';
+          errMessage = 'Произошла неизвестная ошибка при получении информации о входящих распоряжениях за смену: ' + error.message || JSON.stringify(error);
         }
         context.commit('setGettingIncomingOrdersPerShiftResult', { error: true, message: errMessage });
       }

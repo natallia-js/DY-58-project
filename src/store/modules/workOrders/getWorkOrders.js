@@ -59,7 +59,6 @@ function getWorkOrderObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
       };
     }),
-    //nextRelatedOrderId: order.nextRelatedOrderId,
     number: order.number,
     orderText: !order.orderText ? null : {
       ...order.orderText,
@@ -167,26 +166,6 @@ export const getWorkOrders = {
       });
       const groupedWorkingOrders = [];
 
-      /*const findNodeInNodesChain = (upperLevelNode, nodeId) => {
-        if (!upperLevelNode) {
-          return null;
-        }
-        if (upperLevelNode.nextRelatedOrderId === nodeId) {
-          return upperLevelNode;
-        }
-        return findNodeInNodesChain(upperLevelNode.children && upperLevelNode.children.length ? upperLevelNode.children[0] : null, nodeId);
-      };
-
-      const findNodeReferencingNodeWithGivenKey = (nodeId) => {
-        for (let group of groupedWorkingOrders) {
-          const node = findNodeInNodesChain(group, nodeId);
-          if (node) {
-            return node;
-          }
-        }
-        return null;
-      };*/
-
       const findParentNode = (chainId) => {
         for (let group of groupedWorkingOrders) {
           if (group.orderChainId === chainId) {
@@ -200,7 +179,6 @@ export const getWorkOrders = {
         return null;
       };
       workingOrders.forEach((order) => {
-        //const parentNode = findNodeReferencingNodeWithGivenKey(order._id);
         const parentNode = findParentNode(order.orderChainId);
         const orderNodeData = {
           key: order._id,
@@ -220,7 +198,6 @@ export const getWorkOrders = {
             ecdToSend: order.ecdToSend,
             otherToSend: order.otherToSend,
           }),
-          //nextRelatedOrderId: order.nextRelatedOrderId,
           orderChainId: order.orderChainId,
           children: [],
         };
@@ -269,6 +246,10 @@ export const getWorkOrders = {
               otherToSend: item.otherToSend,
             }),
             place: item.senderWorkPoligon.title,
+            senderWorkPoligon: {
+              id: item.senderWorkPoligon.id,
+              type: item.senderWorkPoligon.type,
+            },
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
             orderReceiveStatus: {
@@ -287,6 +268,8 @@ export const getWorkOrders = {
               if (item.dspToSend) {
                 receiversArray.push(...item.dspToSend.map((dsp) => {
                   return {
+                    id: dsp.id,
+                    type: dsp.type,
                     place: dsp.placeTitle,
                     post: ReceiversPosts.DSP,
                     fio: dsp.fio,
@@ -298,6 +281,8 @@ export const getWorkOrders = {
               if (item.dncToSend) {
                 receiversArray.push(...item.dncToSend.map((dnc) => {
                   return {
+                    id: dnc.id,
+                    type: dnc.type,
                     place: dnc.placeTitle,
                     post: ReceiversPosts.DNC,
                     fio: dnc.fio,
@@ -309,6 +294,8 @@ export const getWorkOrders = {
               if (item.ecdToSend) {
                 receiversArray.push(...item.ecdToSend.map((ecd) => {
                   return {
+                    id: ecd.id,
+                    type: ecd.type,
                     place: ecd.placeTitle,
                     post: ReceiversPosts.ECD,
                     fio: ecd.fio,
@@ -489,7 +476,7 @@ export const getWorkOrders = {
 
   actions: {
     /**
-     *
+     * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
      */
      async loadWorkOrders(context) {
       context.commit('clearLoadingWorkOrdersResult');
@@ -515,17 +502,20 @@ export const getWorkOrders = {
         });
         context.dispatch('reportOnOrdersDelivery', response.data);
         context.commit('clearAllDeleteOrdersChainResultsSeenByUser');
+        context.commit('clearAllConfirmOrdersResultsSeenByUser');
+        context.commit('clearAllConfirmOrdersForOthersResultsSeenByUser');
+
       } catch (error) {
         let errMessage;
         if (error.response) {
           // The request was made and server responded
-          errMessage = 'Ошибка получения информации о рабочих распоряжениях: ' + error.response.data ? error.response.data.message : '?';
+          errMessage = 'Ошибка получения информации о рабочих распоряжениях: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
         } else if (error.request) {
           // The request was made but no response was received
           errMessage = 'Ошибка получения информации о рабочих распоряжениях: сервер не отвечает';
         } else {
           // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях: ' + error.message || '?';
+          errMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях: ' + error.message || JSON.stringify(error);
         }
         context.commit('setLoadingWorkOrdersResult', { error: true, message: errMessage });
       }

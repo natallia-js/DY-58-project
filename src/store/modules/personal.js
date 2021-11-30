@@ -647,8 +647,19 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
-      } catch (err) {
-        context.state.errorLoadingCurrShift = err;
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка подгрузки персонала участка ДСП: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка подгрузки персонала участка ДСП: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ДСП: ' + error.message || JSON.stringify(error);
+        }
+        context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
     },
@@ -766,8 +777,19 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
-      } catch (err) {
-        context.state.errorLoadingCurrShift = err;
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка подгрузки персонала участка ДНЦ: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка подгрузки персонала участка ДНЦ: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ДНЦ: ' + error.message || JSON.stringify(error);
+        }
+        context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
     },
@@ -885,8 +907,19 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
-      } catch (err) {
-        context.state.errorLoadingCurrShift = err;
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка подгрузки персонала участка ЭЦД: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка подгрузки персонала участка ЭЦД: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ЭЦД: ' + error.message || JSON.stringify(error);
+        }
+        context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
     },

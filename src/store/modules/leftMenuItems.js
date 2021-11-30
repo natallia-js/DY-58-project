@@ -2,7 +2,7 @@ export const leftMenuItems = {
   getters: {
     getCommonLeftMenuItems(_state, getters) {
       return [
-        { label: 'Входящие за смену', info: getters.getNumberOfIncomingOrdersPerShift },
+        { label: 'Входящие за смену', info: getters.getNumberOfIncomingOrdersPerShift, error: getters.getErrorGettingIncomingOrdersPerShift },
         { label: 'Не подтверждено', itemClass: 'dy58-important-item', info: getters.getIncomingOrdersNumber },
         { label: 'Документы в работе', info: getters.getWorkingOrdersNumber },
         { label: 'Не доставлено экземпляров', itemClass: 'dy58-subitem dy58-important-item', info: getters.getNotDeliveredOrdersNumber },

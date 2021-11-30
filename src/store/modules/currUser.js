@@ -199,7 +199,7 @@ export const currUser = {
 
   mutations: {
     /**
-     *
+     * Сохраняет полномочия пользователя, в т.ч. в LocalStorage.
      */
     setUserCredential(state, credential) {
       if (credential) {
@@ -212,7 +212,7 @@ export const currUser = {
     },
 
     /**
-     *
+     * Сохраняет рабочий полигон пользователя, в т.ч. в LocalStorage.
      */
     setUserWorkPoligon(state, workPoligon) {
       if (workPoligon) {
@@ -225,7 +225,7 @@ export const currUser = {
     },
 
     /**
-     *
+     * Осуществляет вход в систему.
      */
     login(state, payload) {
       const {
@@ -303,7 +303,7 @@ export const currUser = {
     },
 
     /**
-     *
+     * Пытается авторизовать пользователя через LocalStorage браузера.
      */
     tryLoginViaLocalStorage(state) {
       if (state.isAuthenticated) {

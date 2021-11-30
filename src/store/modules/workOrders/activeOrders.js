@@ -3,12 +3,13 @@ import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
 
 
 /**
- * Данный модуль предназначен для работы с действующими распоряжениями.
+ * Данный модуль предназначен для работы с действующими рабочими распоряжениями.
  */
 export const activeOrders = {
   getters: {
     /**
-     *
+     * Возвращает true, если за распоряжением order в рамках его цепочки распоряжений следует
+     * распоряжение типа followerOrderType, в противном случае возвращает false.
      */
     isOrderFollowedByOrderOfGivenType(state) {
       return ({ followerOrderType, order }) => {
@@ -21,7 +22,8 @@ export const activeOrders = {
     },
 
     /**
-     *
+     * Возвращает true, если распоряжение order последнее в своей цепочке распоряжений,
+     * в противном случае возвращает false.
      */
     isOrderLastInChain(state) {
       return (order) => {
@@ -106,7 +108,7 @@ export const activeOrders = {
     },
 
     /**
-     *
+     * Возвращает действующее распоряжение заданного типа.
      */
     getActiveOrdersOfGivenType(_state, getters) {
       return (ordersType) => {
@@ -115,7 +117,7 @@ export const activeOrders = {
     },
 
     /**
-     *
+     * Возвращает действующее распоряжение заданного типа с заданным номером.
      */
     getActiveOrderByNumber(_state, getters) {
       return (orderType, orderNumber) => {
@@ -124,7 +126,9 @@ export const activeOrders = {
     },
 
     /**
-     *
+     * Возвращает действующие рабочие распоряжения - последние распоряжения (обязательно действующие!)
+     * в рамках цепочек рабочих распоряжений.
+     * Результат метода предназначен для отображения в компоненте TreeSelect.
      */
     getLastInChainActiveOrdersToDisplayInTreeSelect(_state, getters) {
       const orders = getters.getLastInChainActiveOrders;
