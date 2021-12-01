@@ -1,4 +1,5 @@
 import { store } from '../../store';
+import router from '../../router';
 
 export const MainMenuItemsKeys = Object.freeze({
   mainPage: 0,
@@ -16,10 +17,12 @@ export const mainMenuItems = {
   state: {
     mainMenuItems: [
       { key: MainMenuItemsKeys.mainPage, label: 'Главная страница', to: '/mainPage' },
-      { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: 'sectorStructure' },
+      { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: '/sectorStructure' },
       { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
       { key: MainMenuItemsKeys.currJournal, label: 'Журнал', to: '/currJournalPage' },
-      { key: MainMenuItemsKeys.createOrder, label: 'Создать', to: '/newOrderPage' },
+      { key: MainMenuItemsKeys.createOrder, label: 'Создать', command: () => {
+        router.push({ name: 'NewOrderPage', params: { orderType: null, prevOrderId: null } });
+      } },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
       // В поле 'command' определено действие по умолчанию на случай, когда пользователь не принимает

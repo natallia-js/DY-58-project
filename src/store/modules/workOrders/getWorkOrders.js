@@ -232,6 +232,7 @@ export const getWorkOrders = {
         .map((item, index) => {
           return {
             id: item._id,
+            createDateTime: item.createDateTime,
             sendOriginal: item.sendOriginal,
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,

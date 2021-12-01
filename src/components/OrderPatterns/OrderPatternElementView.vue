@@ -307,15 +307,19 @@
           handler: () => { pasteDRTrainTable(); menu.value.hide(); },
         }];
         if (drTableDataToDisplay.value.length) {
-          items.push({
-            label: DR_TABLE_MENU_ITEMS.CLEAR,
-            handler: (event) => { clearDRTrainTable(event); menu.value.hide(); },
-          });
+          items.push(
+            {
+              label: DR_TABLE_MENU_ITEMS.CLEAR,
+              handler: (event) => { clearDRTrainTable(event); menu.value.hide(); },
+            }
+          );
         }
-        items.push({
-          label: DR_TABLE_MENU_ITEMS.INSERT,
-          handler: () => { newDRTableRecord(); menu.value.hide(); },
-        });
+        items.push(
+          {
+            label: DR_TABLE_MENU_ITEMS.INSERT,
+            handler: () => { newDRTableRecord(); menu.value.hide(); },
+          }
+        );
         if (selectedDRTableRecord.value) {
           items.push(
             {

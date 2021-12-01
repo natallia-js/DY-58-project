@@ -5,7 +5,7 @@
       dlgTitle="Информация о входящем уведомлении"
       :order="chosenOrder"
       :orderNeedsToBeConfirmed="true"
-      :orderIsBeingConfirmed="chosenOrder && isOrderBeingConfirmed(chosenOrder.id)"
+      :orderIsBeingConfirmed="chosenOrder && isOrderBeingConfirmed(chosenOrder.id) ? true : false"
       @close="hideOrderInfo"
     >
     </ShowIncomingOrderDlg>

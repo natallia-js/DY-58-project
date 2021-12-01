@@ -213,15 +213,5 @@
         hideUserInfo,
       };
     },
-
-/*
-      createNewOrder() {
-        //if (isAuthenticated) {
-          //this.$router.push('/dashboard')
-        //} else {
-          this.$router.push('/newOrderPage');
-        //}
-      },
-    */
   };
 </script>

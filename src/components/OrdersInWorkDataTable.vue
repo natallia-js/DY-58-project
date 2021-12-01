@@ -148,6 +148,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { WorkMessStates } from '../constants/orders';
+  import { ORDER_PATTERN_TYPES } from '../constants/orderPatterns';
   import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
 
   export default {
@@ -167,6 +168,8 @@
         'getWorkingOrders',
         'getWorkingOrdersNumber',
         'isDSP',
+        'isDNC',
+        'isECD',
         'getWorkMessTblColumnsTitles',
         'getWorkMessReceiversTblColumnsTitles',
         'getWorkMessTblColumns',
@@ -176,6 +179,7 @@
         'getUserWorkPoligon',
         'isOrderBeingConfirmedForOthers',
         'isUserOnDuty',
+        'getLastInChainActiveOrders',
       ]),
 
       getWorkMessStates() {
@@ -204,24 +208,90 @@
             ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
             : `Удалить цепочку распоряжений (${ordersInChain.reduce((accumulator, currentValue, index) =>
               accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений?`;
-          items.push({
-            label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
-            handler: () => {
-              this.$confirm.require({
-                header: 'Подтвердите удаление',
-                message: confirmDlgMessage,
-                icon: 'pi pi-exclamation-circle',
-                defaultFocus: 'reject',
-                accept: () => {
-                  this.$store.dispatch('delConfirmedOrdersFromChain', this.selectedWorkOrdersTableRecord.orderChainId);
+          items.push(
+            {
+              label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
+              handler: () => {
+                this.$confirm.require({
+                  header: 'Подтвердите удаление',
+                  message: confirmDlgMessage,
+                  icon: 'pi pi-exclamation-circle',
+                  defaultFocus: 'reject',
+                  accept: () => {
+                    this.$store.dispatch('delConfirmedOrdersFromChain', this.selectedWorkOrdersTableRecord.orderChainId);
+                  },
+                });
+              },
+            }
+          );
+          // Дополнительное меню о создании на основании выбранного в таблице распоряжения другого
+          // распоряжения (следующего за ним в цепочке распоряжений) появляется лишь в том случае,
+          // если выбранное распоряжение является последним в своей цепочке и действующим
+          if (this.getLastInChainActiveOrders.find((order) => order._id === this.selectedWorkOrdersTableRecord.id)) {
+            // У ДНЦ и ДСП предыдущее распоряжение в цепочке может быть любого типа,
+            // равно как и следующее за ним распоряжение
+            if (this.isDNC) {
+              items.push(
+                {
+                  label: `Создать ${ORDER_PATTERN_TYPES.ORDER.toUpperCase()}`,
+                  handler: () => {
+                    this.$router.push({
+                      name: 'NewOrderPage',
+                      params: { orderType: ORDER_PATTERN_TYPES.ORDER, prevOrderId: this.selectedWorkOrdersTableRecord.id },
+                    });
+                  },
+                }
+              );
+            }
+            if (this.isDNC || this.isDSP) {
+              items.push(
+                {
+                  label: `Создать ${ORDER_PATTERN_TYPES.REQUEST.toUpperCase()}`,
+                  handler: () => {
+                    this.$router.push({
+                      name: 'NewOrderPage',
+                      params: { orderType: ORDER_PATTERN_TYPES.REQUEST, prevOrderId: this.selectedWorkOrdersTableRecord.id },
+                    });
+                  },
                 },
-              });
-            },
-          });
+                {
+                  label: `Создать ${ORDER_PATTERN_TYPES.NOTIFICATION.toUpperCase()}`,
+                  handler: () => {
+                    this.$router.push({
+                      name: 'NewOrderPage',
+                      params: { orderType: ORDER_PATTERN_TYPES.NOTIFICATION, prevOrderId: this.selectedWorkOrdersTableRecord.id },
+                    });
+                  },
+                }
+              );
+            }
+            // У ЭЦД предыдущее распоряжение в цепочке может быть любого типа, но следующее за ним -
+            // только уведомление / отмена запрещения. Приказ и запрещение могут лишь начинать цепочку.
+            if (this.isECD) {
+              items.push(
+                {
+                  label: `Создать ${ORDER_PATTERN_TYPES.ECD_NOTIFICATION.toUpperCase()}`,
+                  handler: () => {
+                    this.$router.push({
+                      name: 'NewOrderPage',
+                      params: { orderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION, prevOrderId: this.selectedWorkOrdersTableRecord.id },
+                    });
+                  },
+                }
+              );
+            }
+          }
         }
         return items;
       },
 
+      /**
+       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов.
+       * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
+       * котором работает пользователь.
+       * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
+       * за других.
+       */
       orderCanBeConfirmedFor() {
         return (order) => {
           return (order.senderWorkPoligon.type === this.getUserWorkPoligon.type) &&

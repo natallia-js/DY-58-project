@@ -2,10 +2,13 @@ import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
 
 
+/**
+ * Данный модуль предназначен для получения информации о входящих распоряжениях за смену.
+ */
 export const incomingOrdersPerShift = {
   getters: {
     /**
-     * Возвращает количество входящих распоряжений за смену либо null, если эта информацич неизвестна.
+     * Возвращает количество входящих распоряжений за смену либо null, если эта информация неизвестна.
      */
     getNumberOfIncomingOrdersPerShift(state) {
       if (!state.incomingOrdersPerShift) {
@@ -15,7 +18,8 @@ export const incomingOrdersPerShift = {
     },
 
     /**
-     *
+     * Возвращает сообщение об ошибке, возникшее при получении входящих распоряжений за смену.
+     * Если ошибки не было, то возвращает null.
      */
     getErrorGettingIncomingOrdersPerShift(state) {
       if (state.gettingIncomingOrdersPerShiftResult && state.gettingIncomingOrdersPerShiftResult.error) {
@@ -25,7 +29,8 @@ export const incomingOrdersPerShift = {
     },
 
     /**
-     *
+     * Возвращает true, если идет процесс получения входящих распоряжений за смену,
+     * false - если данный процесс не идет.
      */
     getGettingIncomingOrdersPerShiftStatus(state) {
       return state.gettingIncomingOrdersPerShift;
@@ -33,9 +38,6 @@ export const incomingOrdersPerShift = {
   },
 
   mutations: {
-    /**
-     *
-     */
     setIncomingOrdersPerShift(state, ordersIds) {
       state.incomingOrdersPerShift = ordersIds;
     },
@@ -64,8 +66,10 @@ export const incomingOrdersPerShift = {
       if (!context.getters.isUserOnDuty) {
         return;
       }
+
       context.commit('clearGettingIncomingOrdersPerShiftResult');
       context.commit('setGettingIncomingOrdersPerShiftStatus', true);
+
       try {
         const headers = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
