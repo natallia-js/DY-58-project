@@ -13,6 +13,7 @@
               <div class="p-col-2" style="height:100%;padding:0;">
                 <Badge v-if="item.error" severity="danger" value="!" v-tooltip="item.error"></Badge>
                 <Badge v-else-if="item.info" :value="item.info"></Badge>
+                <Badge v-else-if="item.dangerInfo" severity="danger" :value="item.dangerInfo"></Badge>
               </div>
             </div>
           </a>

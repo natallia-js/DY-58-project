@@ -1,23 +1,43 @@
 <template>
   <TabView v-if="isUserOnDuty" :activeIndex="activeIndex">
     <TabPanel v-if="isDNC" :header="getOrderTypes.ORDER">
-      <new-order :orderType="getOrderTypes.ORDER" :prevOrderId="this.$route.params.prevOrderId" />
+      <new-order
+        :orderType="getOrderTypes.ORDER"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
     </TabPanel>
     <TabPanel v-if="isECD" :header="getOrderTypes.ECD_ORDER">
-      <new-order :orderType="getOrderTypes.ECD_ORDER" :prevOrderId="this.$route.params.prevOrderId" />
+      <new-order
+        :orderType="getOrderTypes.ECD_ORDER"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
     </TabPanel>
     <TabPanel v-if="isECD" :header="getOrderTypes.ECD_PROHIBITION">
-      <new-order :orderType="getOrderTypes.ECD_PROHIBITION" :prevOrderId="this.$route.params.prevOrderId" />
+      <new-order
+        :orderType="getOrderTypes.ECD_PROHIBITION"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
     </TabPanel>
     <TabPanel v-if="isDNC || isDSP" :header="getOrderTypes.REQUEST">
-      <new-order :orderType="getOrderTypes.REQUEST" :prevOrderId="this.$route.params.prevOrderId" />
+      <new-order
+        :orderType="getOrderTypes.REQUEST"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
     </TabPanel>
     <TabPanel
       v-if="isDNC || isECD || isDSP"
       :header="isDNC || isDSP ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION"
     >
-      <new-order v-if="isDNC || isDSP" :orderType="getOrderTypes.NOTIFICATION" :prevOrderId="this.$route.params.prevOrderId" />
-      <new-order v-if="isECD" :orderType="getOrderTypes.ECD_NOTIFICATION" :prevOrderId="this.$route.params.prevOrderId" />
+      <new-order
+        v-if="isDNC || isDSP"
+        :orderType="getOrderTypes.NOTIFICATION"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
+      <new-order
+        v-if="isECD"
+        :orderType="getOrderTypes.ECD_NOTIFICATION"
+        :prevOrderId="this.$route.params.prevOrderId"
+      />
     </TabPanel>
   </TabView>
   <div v-else class="dy58-user-cannot-create-order-block">

@@ -3,7 +3,7 @@ import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions
 
 /**
  * Данный модуль предназначен для работы со связанным распоряжением по отношению к издаваемому
- * (распоряжением, предыдущим в цепочке распоряжений).
+ * (распоряжением, находящимся в той цепочке распоряжений, что и издаваемое).
  */
 export const useRelatedOrder = (state, store) => {
   const relatedOrderId = computed(() => {
@@ -15,7 +15,7 @@ export const useRelatedOrder = (state, store) => {
     if (!relatedOrderId.value) {
       return null;
     }
-    return store.getters.getLastInChainActiveOrders.find((order) => order._id === relatedOrderId.value);
+    return store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value);
   });
 
   const relatedOrderObjectStartDateTimeString = computed(() => {

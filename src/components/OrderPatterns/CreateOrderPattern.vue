@@ -10,7 +10,7 @@
         <div v-else class="p-col-12 dy58-warning">
           На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона распоряжения. Ожидаю ответ...
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="service" :class="{'p-error': v$.service.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Служба</span>
           </label>
@@ -27,12 +27,13 @@
             Пожалуйста, определите службу
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderType" :class="{'p-error': v$.orderType.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Тип распоряжения</span>
           </label>
           <Dropdown
             id="orderType"
+            placeholder="Выберите тип распоряжения"
             autofocus
             :options="orderPatternTypes"
             optionLabel="label"
@@ -47,7 +48,7 @@
             Пожалуйста, выберите тип распоряжения
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderCategory" :class="{'p-error': v$.orderCategory.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Категория распоряжения</span>
           </label>
@@ -64,7 +65,7 @@
             Пожалуйста, определите категорию распоряжения
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Наименование распоряжения</span>
           </label>
@@ -82,7 +83,18 @@
             Пожалуйста, введите наименование распоряжения
           </small>
         </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+          <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
+            <span class="p-text-bold">Особая категория поезда</span>
+          </label>
+          <MultiSelect
+            v-model="state.selectedSpecialTrainCategories"
+            :options="specialTrainCategories"
+            placeholder="Выберите признаки особой категории поезда"
+            style="width:100%"
+          />
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <div class="p-text-bold p-mb-2">Определите элементы шаблона</div>
           <edit-order-pattern-element
             :element="null"
@@ -127,7 +139,7 @@
   import EditOrderPatternElement from './EditOrderPatternElement';
   import EditOrderPattern from './EditOrderPattern';
   import OrderPatternPreview from './OrderPatternPreview';
-  import { ORDER_PATTERN_TYPES } from '../../constants/orderPatterns';
+  import { ORDER_PATTERN_TYPES, SPECIAL_TRAIN_CATEGORIES } from '../../constants/orderPatterns';
   import objectId from '../../additional/objectId.generator';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '../../hooks/showMessage.hook';
@@ -159,6 +171,7 @@
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
         // запроса о создании нового шаблона распоряжения
         orderPatternFieldsErrs: null,
+        selectedSpecialTrainCategories: null,
       });
 
       const rules = {
@@ -213,6 +226,9 @@
           type: state.orderType,
           category: state.orderCategory,
           title: state.orderTitle,
+          specialTrainCategories:
+            state.selectedSpecialTrainCategories && state.selectedSpecialTrainCategories.length ?
+            [...state.selectedSpecialTrainCategories.values()] : null,
           elements: state.orderPattern,
         });
       };
@@ -317,6 +333,7 @@
       return {
         state,
         orderPatternTypes: Object.values(ORDER_PATTERN_TYPES).map((name) => { return { label: name }; }),
+        specialTrainCategories: SPECIAL_TRAIN_CATEGORIES,
         orderCategories,
         v$,
         submitted,

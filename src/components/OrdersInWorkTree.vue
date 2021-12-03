@@ -25,17 +25,33 @@
           от {{ slotProps.node.time }}
         </span>
         <Button
+          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key)"
           icon="pi pi-ellipsis-h"
           class="p-button-info p-button-sm p-ml-2 p-mr-1 dy58-tree-order-action-button"
-          v-tooltip.right="'Подробнее'"
+          v-tooltip.bottom="'Подробнее'"
           @click="() => showOrderInfo(slotProps.node.key)"
         />
         <Button
-          v-if="isUserOnDuty && slotProps.node.topLevelNode"
+          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) && isUserOnDuty && slotProps.node.topLevelNode"
           icon="pi pi-times"
           class="p-button-secondary p-button-sm p-mr-1 dy58-tree-order-action-button"
-          v-tooltip.right="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
+          v-tooltip.bottom="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
           @click="() => deleteOrdersChain(slotProps.node.orderChainId)"
+        />
+        <TieredMenu
+          ref="createOrderMenu"
+          :model="createRelativeOrderContextMenuItems"
+          :popup="true"
+          id="overlay_tmenu"
+        />
+        <Button
+          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) && getActiveOrders.find((order) => order._id === chosenOrder.key)"
+          icon="pi pi-file"
+          class="p-button-success p-button-sm dy58-tree-order-action-button"
+          v-tooltip.bottom="'Создать'"
+          @click="toggleCreateOrderMenu"
+          aria-haspopup="true"
+          aria-controls="overlay_tmenu"
         />
       </template>
     </Tree>
@@ -68,7 +84,17 @@
         'isUserOnDuty',
         'getWorkingOrdersToDisplayAsTree',
         'getOrdersChainsBeingDeleted',
+        'getActiveOrders',
+        'getCreateRelativeOrderContextMenu',
+        'getDeleteOrdersChainAction',
       ]),
+
+      createRelativeOrderContextMenuItems() {
+        if (!this.chosenOrder) {
+          return null;
+        }
+        return this.getCreateRelativeOrderContextMenu(this.chosenOrder.key);
+      },
     },
 
     methods: {
@@ -89,27 +115,18 @@
       },
 
       deleteOrdersChain(chainId) {
-        const ordersInChain = this.$store.getters.getOrdersInChain(chainId);
-        const confirmDlgMessage = ordersInChain.length === 1
-          ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
-          : `Удалить цепочку распоряжений (${ordersInChain.reduce((accumulator, currentValue, index) =>
-            accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений?`;
-        this.$confirm.require({
-          header: 'Подтвердите удаление',
-          message: confirmDlgMessage,
-          icon: 'pi pi-exclamation-circle',
-          defaultFocus: 'reject',
-          accept: () => {
-            this.$store.dispatch('delConfirmedOrdersFromChain', chainId);
-          },
-        });
+        this.getDeleteOrdersChainAction(chainId, this.$confirm);
+      },
+
+      toggleCreateOrderMenu(event) {
+        this.$refs.createOrderMenu.toggle(event);
       },
     },
   }
 </script>
 
 
-<style scoped>
+<style lang="scss" scoped>
   .dy58-tree-order-action-button {
     width: 20px !important;
     height: 20px !important;

@@ -17,6 +17,9 @@
       {{ getSectorStationOrBlockTitleById({ placeType: place.place, id: place.value }) }}
     </p>
     <p><span class="p-text-bold">Время действия:</span> &#160; {{ orderTimeSpanString }}</p>
+    <p v-if="specialTrainCategories && specialTrainCategories.length">
+      <span class="p-text-bold">Особая категория поезда:</span> &#160; {{ specialTrainCategories.join(', ') }}
+    </p>
     <p><span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
@@ -100,6 +103,9 @@
       createdOnBehalfOf: {
         type: String,
         required: false,
+      },
+      specialTrainCategories: {
+        type: Array,
       },
     },
 

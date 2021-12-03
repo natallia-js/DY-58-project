@@ -6,6 +6,7 @@ import { incomingOrdersPerShift } from './incomingOrdersPerShift';
 import { incomingOrders } from './incomingOrders';
 import { activeOrders } from './activeOrders';
 import { delWorkOrdersChains } from './delWorkOrdersChains';
+import { contextMenus } from './contextMenus';
 
 
 export const workOrders = {
@@ -48,6 +49,7 @@ export const workOrders = {
     ...incomingOrdersPerShift.getters,
     ...delWorkOrdersChains.getters,
     ...confirmOrder.getters,
+    ...contextMenus.getters,
   },
 
   mutations: {

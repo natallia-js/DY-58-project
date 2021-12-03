@@ -136,19 +136,9 @@
       >
       </Column>
     </DataTable>
-    <ContextMenu ref="menu" :model="drTrainTableContextMenuItems">
-      <template #item="{item}">
-        <p class="p-m-2">
-          <a
-            href="#!"
-            class="dy58-context-menu-item"
-            @click="item.handler"
-          >
-            {{ item.label }}
-          </a>
-        </p>
-      </template>
-    </ContextMenu>
+
+    <ContextMenu ref="menu" :model="drTrainTableContextMenuItems" />
+
     <Dialog
       :header="addDRTableRecDlgTitle"
       v-model:visible="newDRRecordDialog"
@@ -304,35 +294,35 @@
       const drTrainTableContextMenuItems = computed(() => {
         const items = [{
           label: DR_TABLE_MENU_ITEMS.PASTE,
-          handler: () => { pasteDRTrainTable(); menu.value.hide(); },
+          command: () => { pasteDRTrainTable(); menu.value.hide(); },
         }];
         if (drTableDataToDisplay.value.length) {
           items.push(
             {
               label: DR_TABLE_MENU_ITEMS.CLEAR,
-              handler: (event) => { clearDRTrainTable(event); menu.value.hide(); },
+              command: (event) => { clearDRTrainTable(event); menu.value.hide(); },
             }
           );
         }
         items.push(
           {
             label: DR_TABLE_MENU_ITEMS.INSERT,
-            handler: () => { newDRTableRecord(); menu.value.hide(); },
+            command: () => { newDRTableRecord(); menu.value.hide(); },
           }
         );
         if (selectedDRTableRecord.value) {
           items.push(
             {
               label: DR_TABLE_MENU_ITEMS.INSERT_BEFORE,
-              handler: () => { newDRTableRecordBefore(); menu.value.hide(); },
+              command: () => { newDRTableRecordBefore(); menu.value.hide(); },
             },
             {
               label: DR_TABLE_MENU_ITEMS.INSERT_AFTER,
-              handler: () => { newDRTableRecordAfter(); menu.value.hide(); },
+              command: () => { newDRTableRecordAfter(); menu.value.hide(); },
             },
             {
               label: DR_TABLE_MENU_ITEMS.DELETE,
-              handler: () => { delDRTableRecord(); menu.value.hide(); },
+              command: () => { delDRTableRecord(); menu.value.hide(); },
             }
           );
         }

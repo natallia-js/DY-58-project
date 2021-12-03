@@ -27,7 +27,6 @@
           placeholder="Выберите структурные подразделения"
           display="chip"
           style="width:100%"
-          @selectall-change="() => {}"
         />
       </template>
 

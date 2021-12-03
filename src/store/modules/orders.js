@@ -50,7 +50,7 @@ export const orders = {
 
   actions: {
     /**
-     *
+     * Делает запрос на сервер с целью сохранения издаваемого распоряжения и передачи его причастным.
      */
     async dispatchOrder(context, params) {
       const {
@@ -64,10 +64,10 @@ export const orders = {
         dspToSend,
         ecdToSend,
         otherToSend,
-        //prevOrderId,
         orderChainId,
         createdOnBehalfOf,
         showOnGID,
+        specialTrainCategories,
       } = params;
 
       context.commit('clearDispatchOrderResult');
@@ -137,9 +137,9 @@ export const orders = {
               fio: context.getters.getUserFIO,
             },
             createdOnBehalfOf,
-            //prevOrderId,
             orderChainId,
             showOnGID,
+            specialTrainCategories,
           },
           { headers }
         );

@@ -88,6 +88,7 @@ function getWorkOrderObject(order) {
     } : null,
     sendOriginal: order.sendOriginal,
     orderChainId: order.orderChain.chainId,
+    specialTrainCategories: order.specialTrainCategories,
   };
 }
 
@@ -147,6 +148,23 @@ export const getWorkOrders = {
     },
 
     /**
+     * Возвращает количество рабочих распоряжений, имеющих указанные отметки об особой категории поезда.
+     */
+    getWorkingOrdersNumberReferringSpecialTrainCategories(_state, getters) {
+      return (specialTrainCategories) => {
+        if (!specialTrainCategories || !specialTrainCategories.length) {
+          return 0;
+        }
+        return getters.getRawWorkingOrders.filter((order) => {
+          if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
+            return false;
+          }
+          return specialTrainCategories.filter((el) => order.specialTrainCategories.includes(el)).length ? true : false;
+        }).length;
+      };
+    },
+
+    /**
      * Позволяет получить массив рабочих распоряжений, у элементов которого могут быть дочерние
      * элементы - распоряжения, изданные в рамках этой же цепочки распоряжений, но позднее.
      * Возвращаемый массив может использоваться для отображения рабочих распоряжений в виде
@@ -199,6 +217,7 @@ export const getWorkOrders = {
             otherToSend: order.otherToSend,
           }),
           orderChainId: order.orderChainId,
+          specialTrainCategories: order.specialTrainCategories,
           children: [],
         };
 
@@ -239,6 +258,7 @@ export const getWorkOrders = {
             time: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
             orderTitle: item.orderText.orderTitle,
+            orderPatternId: item.orderText.patternId,
             orderText: formOrderText({
               orderTextArray: item.orderText.orderText,
               dncToSend: item.dncToSend,

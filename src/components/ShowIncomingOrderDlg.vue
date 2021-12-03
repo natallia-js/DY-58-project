@@ -18,6 +18,9 @@
     <p><span class="p-text-bold">Номер:</span> &#160; {{ (order && order.orderNum) ? order.orderNum : '?' }}</p>
     <p><span class="p-text-bold">Время издания:</span> &#160; {{ (order && order.time) ? order.time : '?' }}</p>
     <p><span class="p-text-bold">Время действия:</span> &#160; {{ (order && order.timeSpan) ? order.timeSpan : '?' }}</p>
+    <p v-if="order && order.specialTrainCategories && order.specialTrainCategories.length">
+      <span class="p-text-bold">Особая категория поезда:</span> &#160; {{ order.specialTrainCategories.join(', ') }}
+    </p>
     <p><span class="p-text-bold">Наименование:</span> &#160; {{ (order && order.orderTitle) ? order.orderTitle : '?' }}</p>
     <p>
       <span class="p-text-bold">Текст:</span>

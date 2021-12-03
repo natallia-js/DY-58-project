@@ -13,19 +13,7 @@
               (arrIndex === 0 && patternElement.index === insertOrderElementPos)"
       />
 
-      <ContextMenu ref="menu" :model="orderPatternElementContextMenuItems">
-        <template #item="{item}">
-          <p class="p-m-2">
-            <a
-              href="#!"
-              class="dy58-context-menu-item"
-              @click="item.handler"
-            >
-              {{ item.label }}
-            </a>
-          </p>
-        </template>
-      </ContextMenu>
+      <ContextMenu ref="menu" :model="orderPatternElementContextMenuItems" />
 
       <div
         :class="{
@@ -108,7 +96,7 @@
             label: !this.orderPatternElementWithOpenContextMenu ||
                    this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId ?
                    'Редактировать' : 'Отменить редактирование',
-            handler: () => {
+            command: () => {
               if (this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId) {
                 this.editedPatternElementId = this.orderPatternElementWithOpenContextMenu._id;
               } else {
@@ -118,19 +106,19 @@
           },
           {
             label: 'Удалить',
-            handler: () => {
+            command: () => {
               this.$emit('deleteOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
             },
           },
           {
             label: 'Вставить элемент перед',
-            handler: () => {
+            command: () => {
               this.$emit('insertBeforeOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
             },
           },
           {
             label: 'Вставить элемент после',
-            handler: () => {
+            command: () => {
               this.$emit('insertAfterOrderPatternElement', this.orderPatternElementWithOpenContextMenu._id);
             },
           },

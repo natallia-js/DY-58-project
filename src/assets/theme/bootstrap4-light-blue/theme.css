@@ -3730,7 +3730,7 @@
   user-select: none;
 }
 .p-contextmenu .p-menuitem-link .p-menuitem-text {
-  color: #212529;
+  color: blue /*#212529*/;
 }
 .p-contextmenu .p-menuitem-link .p-menuitem-icon {
   color: #212529;
@@ -4455,7 +4455,7 @@
   user-select: none;
 }
 .p-tieredmenu .p-menuitem-link .p-menuitem-text {
-  color: #212529;
+  color: blue /*#212529*/;
 }
 .p-tieredmenu .p-menuitem-link .p-menuitem-icon {
   color: #212529;

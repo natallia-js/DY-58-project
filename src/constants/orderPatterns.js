@@ -56,3 +56,7 @@ export const DRTrainTableColumns = [
   { field: 'arrivalTime', header: 'Время прибытия', width: '25%' },
   { field: 'departureTime', header: 'Время отправления', width: '25%' },
 ];
+
+export const SPECIAL_TRAIN_CATEGORIES = [
+  'ДР', 'Н', 'ПВ', 'ПД', 'ПВПД', 'Т', 'Д', 'ТД', 'ВМ',
+];

@@ -39,7 +39,7 @@ export const activeOrders = {
      * - у которого есть дата подтверждения его получения,
      * - которое действует до отмены либо дата окончания его действия еще не наступила,
      * - которое не обязательно последнее в цепочке распоряжений, которой оно принадлежит (см.
-     *   комментарии ниже),
+     *   пункты ниже),
      * - если речь идет о заявке, то в рамках цепочки распоряжений только 1 заявка (последняя) считается
      *   действующей при условии, что далее по цепочке (не обязательно сразу) за нею не следует уведомление,
      * - если речь идет об уведомлении, то оно является действующим только при условии, что оно
@@ -78,6 +78,39 @@ export const activeOrders = {
           ((item.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) && getters.isOrderLastInChain(item))
         )
       );
+    },
+
+    /**
+     * Возвращает действующие рабочие распоряжения в рамках своих цепочек распоряжений.
+     * Результат метода предназначен для отображения в компоненте TreeSelect.
+     */
+     getActiveOrdersToDisplayInTreeSelect(_state, getters) {
+      const orders = getters.getActiveOrders;
+      const groupedOrders = [{
+        key: null,
+        label: '-',
+        data: null,
+      }];
+      orders.forEach((order) => {
+        const typeGroup = groupedOrders.find((group) => group.key === order.type);
+        const childItem = {
+          key: order._id,
+          label: `№ ${order.number} от ${getLocaleDateTimeString(order.createDateTime, false)} - ${order.orderText.orderTitle}`,
+          data: order,
+        };
+        if (!typeGroup) {
+          groupedOrders.push({
+            key: order.type,
+            label: order.type,
+            data: order.type,
+            selectable: false,
+            children: [childItem],
+          });
+        } else {
+          typeGroup.children.push(childItem);
+        }
+      });
+      return groupedOrders;
     },
 
     /**
@@ -123,40 +156,6 @@ export const activeOrders = {
       return (orderType, orderNumber) => {
         return getters.getActiveOrdersOfGivenType(orderType).find((item) => String(item.number) === String(orderNumber));
       };
-    },
-
-    /**
-     * Возвращает действующие рабочие распоряжения - последние распоряжения (обязательно действующие!)
-     * в рамках цепочек рабочих распоряжений.
-     * Результат метода предназначен для отображения в компоненте TreeSelect.
-     */
-    getLastInChainActiveOrdersToDisplayInTreeSelect(_state, getters) {
-      const orders = getters.getLastInChainActiveOrders;
-      const groupedOrders = [{
-        key: null,
-        label: '-',
-        data: null,
-      }];
-      orders.forEach((order) => {
-        const typeGroup = groupedOrders.find((group) => group.key === order.type);
-        const childItem = {
-          key: order._id,
-          label: `№ ${order.number} от ${getLocaleDateTimeString(order.createDateTime, false)} - ${order.orderText.orderTitle}`,
-          data: order,
-        };
-        if (!typeGroup) {
-          groupedOrders.push({
-            key: order.type,
-            label: order.type,
-            data: order.type,
-            selectable: false,
-            children: [childItem],
-          });
-        } else {
-          typeGroup.children.push(childItem);
-        }
-      });
-      return groupedOrders;
     },
   },
 };

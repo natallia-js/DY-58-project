@@ -1,5 +1,6 @@
 <template>
   <Toast />
+
   <PreviewNewOrderDlg
     :showDlg="state.showPreviewNewOrderDlg"
     :type="orderType"
@@ -13,6 +14,7 @@
     :ecdToSend="ecdSectorsToSendOrderNoDupl"
     :otherToSend="state.otherSectorsToSendOrder"
     :createdOnBehalfOf="state.createdOnBehalfOf"
+    :specialTrainCategories="state.specialTrainCategories"
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg">
   </PreviewNewOrderDlg>
@@ -80,14 +82,12 @@
             <span v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-text-bold">
               <span style="color:red">*</span> На приказ/запрещение
             </span>
-            <span v-else class="p-text-bold">
-              Предыдущее распоряжение в цепочке
-            </span>
+            <span v-else class="p-text-bold">На распоряжение</span>
           </label>
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
             v-model="v$.prevRelatedOrder.$model"
-            :options="getLastInChainActiveOrders"
+            :options="getActiveOrders"
             style="width:100%"
           />
           <div v-if="relatedOrderObject" class="p-mt-2">
@@ -192,6 +192,18 @@
           >
             Пожалуйста, корректно определите время действия распоряжения
           </small>
+        </div>
+
+        <!-- ОТМЕТКИ ОБ ОСОБОЙ КАТЕГОРИИ ПОЕЗДА -->
+
+        <div
+          v-if="state.specialTrainCategories && state.specialTrainCategories.length"
+          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
+        >
+          <label>
+            <span class="p-text-bold">Особая категория поезда</span>
+          </label>
+          {{ state.specialTrainCategories.join(', ') }}
         </div>
 
         <!-- НАИМЕНОВАНИЕ И ТЕКСТ РАСПОРЯЖЕНИЯ -->
@@ -310,7 +322,7 @@
   import OrderTimeSpanChooser from '../OrderTimeSpanChooser';
   import OrderText from '../OrderText';
   import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
-  import PreviewNewOrderDlg from '../PreviewNewOrderDlg.vue';
+  import PreviewNewOrderDlg from '../PreviewNewOrderDlg';
   import showMessage from '../../../hooks/showMessage.hook';
 
   export default {
@@ -371,6 +383,7 @@
         },
         defineOrderTimeSpan: defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
+        specialTrainCategories: null,
         orderText: {
           orderTextSource: null,
           patternId: null,
@@ -437,7 +450,7 @@
       const getOrderTypes = computed(() => ORDER_PATTERN_TYPES);
       const isDNC = computed(() => store.getters.isDNC);
       const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
-      const getLastInChainActiveOrders = computed(() => store.getters.getLastInChainActiveOrdersToDisplayInTreeSelect);
+      const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
 
       const getSectorStationOrBlockTitleById = computed(() => {
         if (relatedOrderObject.value && relatedOrderObject.value.place) {
@@ -494,6 +507,30 @@
       };
 
       /**
+       * При смене шаблона распоряжения извлекает отметки об особой категории поезда,
+       * закрепленные за данным шаблоном.
+       */
+      watch(() => state.orderText.patternId, (newVal) => {
+        if (!newVal) {
+          state.specialTrainCategories = null;
+        }
+        state.specialTrainCategories = store.getters.getOrderPatternSpecialTrainCategories(state.orderText.patternId)
+      });
+
+      /**
+       * Для выбранного шаблона распоряжения возвращает строку с особыми категориями поезда,
+       * которыми отмечен данный шаблон. Если за шаблоном не закреплены отметки об особых категориях
+       * поезда, то возвращается null.
+       */
+      const getOrderPatternSpecialTrainCategoriesString = computed(() => {
+        const specialTrainCategoriesArray = store.getters.getOrderPatternSpecialTrainCategories(state.orderText.patternId)
+        if (!specialTrainCategoriesArray || !specialTrainCategoriesArray.length) {
+          return null;
+        }
+        return specialTrainCategoriesArray.join(', ');
+      });
+
+      /**
        * Данный метод осуществляет проверку корректности указания значений полей создаваемого
        * распоряжения перед его изданием.
        */
@@ -547,7 +584,7 @@
         getOrderInputTypes: OrderInputTypes,
         handleSubmit,
         dispatchOrder: dispatchOrderObject.dispatchOrder,
-        getLastInChainActiveOrders,
+        getActiveOrders,
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
@@ -565,6 +602,7 @@
         dspSectorsToSendOrderNoDupl,
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
+        getOrderPatternSpecialTrainCategoriesString,
       };
     },
   };

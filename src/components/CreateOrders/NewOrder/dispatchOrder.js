@@ -83,6 +83,7 @@ export const useDispatchOrder = (inputVals) => {
       orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
       createdOnBehalfOf: state.createdOnBehalfOf,
       showOnGID: state.showOnGID.value,
+      specialTrainCategories: state.specialTrainCategories,
     });
   };
 

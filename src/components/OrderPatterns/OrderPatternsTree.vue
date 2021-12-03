@@ -107,6 +107,16 @@
             @input="handleEditOrderPatternTitle"
           />
         </div>
+        <div class="p-text-bold p-mb-2">Особая категория поезда</div>
+        <div class="p-mb-2">
+          <MultiSelect
+            v-model="editedPattern.specialTrainCategories"
+            :options="getSpecialTrainCategories"
+            placeholder="Выберите признаки особой категории поезда"
+            style="width:100%"
+            @change="handleEditOrderSpecialTrainCategories"
+          />
+        </div>
         <div class="p-mb-2">
           <edit-order-pattern
             :orderPattern="editedPattern.elements"
@@ -148,7 +158,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { OrderPatternsNodeType } from '../../constants/orderPatterns';
+  import { OrderPatternsNodeType, SPECIAL_TRAIN_CATEGORIES } from '../../constants/orderPatterns';
   import OrderPatternPreview from './OrderPatternPreview';
   import EditOrderPattern from './EditOrderPattern';
   import EditOrderPatternElement from './EditOrderPatternElement';
@@ -190,6 +200,10 @@
         'getModOrderPatternRecsBeingProcessed',
         'getCreateOrderPatternRecsBeingProcessed',
       ]),
+
+      getSpecialTrainCategories() {
+        return SPECIAL_TRAIN_CATEGORIES;
+      },
     },
 
     mounted() {
@@ -198,7 +212,9 @@
 
     watch: {
       getOrderPatternsToDisplayInTreeComponent(newVal) {
+        // Обновляем дерево шаблонов распоряжений
         this.allOrderPatterns = newVal;
+        // Еслив дереве есть выделенный узел, то сохраняем его выделение
         if (this.selectedOrderCategory) {
           const selectedNodeKey = this.getOrderPatternsTreeNodeKey([
             this.selectedOrderCategory.service,
@@ -249,6 +265,7 @@
           this.selectedPattern = {
             ...this.selectedPattern,
             label: newVal.orderPattern.title,
+            specialTrainCategories: newVal.orderPattern.specialTrainCategories,
             elements: newVal.orderPattern.elements,
           };
           this.editedPattern = null;
@@ -343,6 +360,7 @@
             label: node.label,
             elements: node.pattern,
             personalPattern: node.personalPattern,
+            specialTrainCategories: node.specialTrainCategories,
           };
           if (this.selectedOrderCategory) {
             this.changeSelectedOrderCategory(null);
@@ -434,6 +452,7 @@
         }
         this.editedPattern = {
           title: this.selectedPattern.label,
+          specialTrainCategories: this.selectedPattern.specialTrainCategories,
           elements: [...this.selectedPattern.elements],
         };
         if (this.patternEdited) {
@@ -453,6 +472,15 @@
           ...this.editedPattern,
           title: e.target.value,
         };
+        if (!this.patternEdited) {
+          this.patternEdited = true;
+        }
+      },
+
+      /**
+       *
+       */
+      handleEditOrderSpecialTrainCategories() {
         if (!this.patternEdited) {
           this.patternEdited = true;
         }
@@ -566,6 +594,7 @@
         this.$store.dispatch('modOrderPattern', {
           id: this.selectedPattern.key,
           title: this.editedPattern.title,
+          specialTrainCategories: this.editedPattern.specialTrainCategories,
           elements: this.editedPattern.elements,
         });
       },

@@ -60,6 +60,7 @@ export const incomingOrders = {
             place: item.senderWorkPoligon.title,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
+            specialTrainCategories: item.specialTrainCategories,
           };
         });
     },

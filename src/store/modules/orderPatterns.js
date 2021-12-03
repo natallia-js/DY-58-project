@@ -90,6 +90,7 @@ export const orderPatterns = {
           key: orderPattern._id,
           pattern: orderPattern.elements,
           type: OrderPatternsNodeType.ORDER_PATTERN,
+          specialTrainCategories: orderPattern.specialTrainCategories,
           personalPattern:
             orderPattern.personalPattern &&
             String(orderPattern.personalPattern) === String(getters.getUserId),
@@ -190,6 +191,19 @@ export const orderPatterns = {
 
     getCreateOrderPatternResult(state) {
       return state.createOrderPatternResult;
+    },
+
+    getOrderPatternSpecialTrainCategories(state) {
+      return (patternId) => {
+        if (!patternId) {
+          return null;
+        }
+        const pattern = state.patterns.find((item) => item._id === patternId);
+        if (!pattern) {
+          return null;
+        }
+        return pattern.specialTrainCategories;
+      };
     },
   },
 
@@ -437,7 +451,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async modOrderPattern(context, { id, title, elements }) {
+    async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
       context.commit('addModOrderPatternRecsBeingProcessed');
       context.commit('clearModOrderPatternResult');
       try {
@@ -445,7 +459,7 @@ export const orderPatterns = {
           'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
         };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderPattern,
-          { id, title, elements },
+          { id, title, specialTrainCategories, elements },
           { headers }
         );
         context.commit('setModOrderPatternResult', {
@@ -472,9 +486,12 @@ export const orderPatterns = {
     /**
      *
      */
-    async createOrderPattern(context, { service, type, category, title, elements }) {
+    async createOrderPattern(context, props) {
+      const { service, type, category, title, specialTrainCategories, elements } = props;
+
       context.commit('clearCreateOrderPatternResult');
       context.commit('addCreateOrderPatternRecsBeingProcessed');
+
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
         context.commit('setCreateOrderPatternResult', { error: true, message: 'Не определен рабочий полигон пользователя' });
@@ -490,6 +507,7 @@ export const orderPatterns = {
             type,
             category,
             title,
+            specialTrainCategories,
             elements,
             isPersonalPattern: true,
             workPoligonType: workPoligon.type,
@@ -499,6 +517,7 @@ export const orderPatterns = {
         );
         context.commit('setCreateOrderPatternResult', { error: false, message: response.data.message });
         context.commit('addNewOrderPattern', response.data.orderPattern);
+
       } catch ({ response }) {
         const defaultErrMessage = 'Произошла неизвестная ошибка при создании шаблона распоряжений';
         const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
