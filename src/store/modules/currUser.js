@@ -39,7 +39,7 @@ function checkUserAuthData(payload) {
   // и, если находим, извлекаем из него полномочия, которыми наделен пользователь в отношении данного приложения
   for (let cred of credentials) {
     if (cred.appAbbrev === APP_CODE_NAME) {
-      userAppCredentials = cred.creds;
+      userAppCredentials = cred.creds; // массив строк с условными названиями полномочий
       break;
     }
   }
@@ -55,8 +55,8 @@ function checkUserAuthData(payload) {
     throw new Error('Для данного пользователя определены неверные полномочия для работы с ДУ-58. Обратитесь к Администратору Системы');
   }
 
-  // Осталось проверить рабочие полигоны. Причем во взаимосвязи с полномочиями пользователя: конкретный тип полномочия
-  // подразумевает конкретный тип рабочего полигона.
+  // Осталось проверить рабочие полигоны. Причем во взаимосвязи с полномочиями пользователя:
+  // конкретный тип полномочия подразумевает конкретный тип рабочего полигона
   if (!workPoligons || !workPoligons.length) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
@@ -66,7 +66,25 @@ function checkUserAuthData(payload) {
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
     if (cred === APP_CREDENTIALS.DSP_FULL) {
-      obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
+      const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
+      if (!poligon) {
+        obj.poligons = [];
+      } else {
+        obj.poligons = [{
+          type: WORK_POLIGON_TYPES.STATION,
+          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && !wp.subPoligonId),
+        }];
+      }
+    } else if (cred === APP_CREDENTIALS.DSP_Operator) {
+      const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
+      if (!poligon) {
+        obj.poligons = [];
+      } else {
+        obj.poligons = [{
+          type: WORK_POLIGON_TYPES.STATION,
+          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId),
+        }];
+      }
     } else if (cred === APP_CREDENTIALS.DNC_FULL) {
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.DNC_SECTOR);
     } else if (cred === APP_CREDENTIALS.ECD_FULL) {
@@ -81,7 +99,7 @@ function checkUserAuthData(payload) {
   if (!workPoligonExists) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
-
+console.log('userCredsWithPoligons',userCredsWithPoligons)
   return userCredsWithPoligons;
 }
 
@@ -153,7 +171,7 @@ export const currUser = {
     getUserCredential(state) {
       return state.credential;
     },
-    getUserWorkPoligon(state) {
+    getUserWorkPoligon(state) {console.log('state.workPoligon',state.workPoligon)
       return state.workPoligon;
     },
     isUserAuthenticated(state) {
@@ -161,6 +179,9 @@ export const currUser = {
     },
     isDSP(state) {
       return state.credential === APP_CREDENTIALS.DSP_FULL;
+    },
+    isDSP_or_DSPoperator(state) {
+      return state.credential === APP_CREDENTIALS.DSP_FULL || state.credential === APP_CREDENTIALS.DSP_Operator;
     },
     isDNC(state) {
       return state.credential === APP_CREDENTIALS.DNC_FULL;
@@ -199,7 +220,7 @@ export const currUser = {
 
   mutations: {
     /**
-     * Сохраняет полномочия пользователя, в т.ч. в LocalStorage.
+     * Сохраняет полномочия пользователя (строка credential), в т.ч. в LocalStorage.
      */
     setUserCredential(state, credential) {
       if (credential) {
@@ -213,6 +234,7 @@ export const currUser = {
 
     /**
      * Сохраняет рабочий полигон пользователя, в т.ч. в LocalStorage.
+     * workPoligon - объект с полями type, code, subCode
      */
     setUserWorkPoligon(state, workPoligon) {
       if (workPoligon) {
@@ -244,14 +266,19 @@ export const currUser = {
       const userCredsWithPoligons = checkUserAuthData(payload);
 
       // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon, проверяем,
-      // если данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
+      // есть ли данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
       let trueLastCredential = false;
       let trueLastWorkPoligon = false;
       const credWithPoligons = !lastCredential ? null : userCredsWithPoligons.find((cred) => cred.cred === lastCredential);
       if (credWithPoligons) {
         trueLastCredential = true;
         const credPoligon = !lastWorkPoligon ? null : credWithPoligons.poligons.find((poligon) =>
-          (poligon.type === lastWorkPoligon.type) && poligon.workPoligons.includes(lastWorkPoligon.code));
+          (poligon.type === lastWorkPoligon.type) &&
+          poligon.workPoligons.find((wp) =>
+            wp.poligonId === lastWorkPoligon.code &&
+            ((!lastWorkPoligon.subCode && !wp.subPoligonId) || (wp.subPoligonId === lastWorkPoligon.subCode))
+          )
+        );
         if (credPoligon) {
           trueLastWorkPoligon = true;
         } else {
@@ -270,7 +297,8 @@ export const currUser = {
         (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
         {
           type: userCredsWithPoligons[0].poligons[0].type,
-          code: userCredsWithPoligons[0].poligons[0].workPoligons[0],
+          code: userCredsWithPoligons[0].poligons[0].workPoligons[0].poligonId,
+          subCode: userCredsWithPoligons[0].poligons[0].workPoligons[0].subPoligonId || null,
         };
 
       localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
@@ -384,6 +412,9 @@ export const currUser = {
       state.logoutFinished = true;
     },
 
+    /**
+     *
+     */
     cancelLogout(state) {
       state.startLogout = false;
       state.logoutStarted = false;
@@ -391,6 +422,9 @@ export const currUser = {
       state.logoutError = null;
     },
 
+    /**
+     *
+     */
     prepareForLogout(state, logoutWithDutyPass) {
       state.logoutWithDutyPass = logoutWithDutyPass;
       state.startLogout = true;

@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div v-if="getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
         <InlineMessage severity="error">{{ getDataError }}</InlineMessage>
       </div>
@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div v-if="!gettingData && !getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="!gettingData && !getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
       <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
         <p class="p-text-bold p-mb-3">Полномочие</p>
@@ -42,16 +42,18 @@
             <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
             <div
               v-for="workPoligon of typedPoligon.workPoligons"
-              :key="workPoligon"
+              :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
               class="p-field-radiobutton"
             >
               <RadioButton
-                :id="workPoligon"
+                :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
                 name="workPoligon"
-                :value="{ type: typedPoligon.type, code: workPoligon }"
+                :value="{ type: typedPoligon.type, ...workPoligon }"
                 v-model="selectedPoligon"
               />
-              <label :for="workPoligon" class="p-mr-3">{{ getWorkPoligonTitle(typedPoligon.type, workPoligon) }}</label>
+              <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
+                {{ getWorkPoligonTitle(typedPoligon.type, workPoligon.poligonId, workPoligon.subPoligonId) }}
+              </label>
             </div>
           </div>
         </div>
@@ -87,7 +89,7 @@
       selectedCredential: function (val) {
         if (val.poligons && val.poligons.length === 1 &&
             val.poligons[0].workPoligons && val.poligons[0].workPoligons.length === 1) {
-          this.selectedPoligon = { type: val.poligons[0].type, code: val.poligons[0].workPoligons[0] };
+          this.selectedPoligon = { type: val.poligons[0].type, ...val.poligons[0].workPoligons[0] };
         } else {
           this.selectedPoligon = null;
         }
@@ -105,6 +107,8 @@
 
     async created() {
       // если полномочие у пользователя одно, выделяем его
+      console.log('this.getUserCredential',this.getUserCredential)
+      console.log('this.getAllPossibleCredentialsWithPoligons',this.getAllPossibleCredentialsWithPoligons)
       if (this.getUserCredential) {
         this.selectedCredential = this.getAllPossibleCredentialsWithPoligons.find((cred) => cred.cred = this.getUserCredential);
       }
@@ -114,19 +118,23 @@
       // делаем запрос к бэкенду для получения наименований рабочих полигонов
       try {
         for (let cred of this.getAllPossibleCredentialsWithPoligons) {
+          if (!cred.poligons || !cred.poligons.length) {
+            continue;
+          }
           for (let typedPoligons of cred.poligons) {
             let data = [];
             switch (typedPoligons.type) {
               case WORK_POLIGON_TYPES.STATION:
-                data = await this.getStationsShortData(typedPoligons.workPoligons);
+                data = await this.getStationsWorkPlacesData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
                 break;
               case WORK_POLIGON_TYPES.DNC_SECTOR:
-                data = await this.getDNCSectorsShortData(typedPoligons.workPoligons);
+                data = await this.getDNCSectorsShortData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
                 break;
               case WORK_POLIGON_TYPES.ECD_SECTOR:
-                data = await this.getECDSectorsShortData(typedPoligons.workPoligons);
+                data = await this.getECDSectorsShortData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
                 break;
             }
+            console.log('data',data)
             data.forEach((poligon) => {
               this.workPoligonTitles.push({ type: typedPoligons.type, ...poligon });
             });
@@ -156,16 +164,20 @@
       goToMainPage() {
         if (this.selectedCredential && this.selectedPoligon) {
           this.setUserCredential(this.selectedCredential.cred);
-          this.setUserWorkPoligon(this.selectedPoligon);
+          this.setUserWorkPoligon({
+            type: this.selectedPoligon.type,
+            code: this.selectedPoligon.poligonId,
+            subCode: this.selectedPoligon.subPoligonId || null,
+          });
           this.$router.push({ name: 'MainPage' });
         }
       },
 
-      async getStationsShortData(stationIds) {
+      async getStationsWorkPlacesData(stationIds) {
         const headers = {
           'Authorization': `Bearer ${this.getUserToken}`,
         };
-        const response = await this.$http.post(AUTH_SERVER_ACTIONS_PATHS.getStationsShortData,
+        const response = await this.$http.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPlacesData,
           { stationIds },
           { headers }
         );
@@ -173,7 +185,12 @@
           response.data.map((sector) => {
             return {
               code: sector.St_ID,
-              title: `${sector.St_Title} (${sector.St_UNMC})`
+              title: `${sector.St_Title} (${sector.St_UNMC})`,
+              workPlaces: !sector.TStationWorkPlaces ? [] :
+                sector.TStationWorkPlaces.map((wp) => ({
+                  code: wp.SWP_ID,
+                  title: wp.SWP_Name,
+                })),
             };
           });
       },
@@ -190,7 +207,7 @@
           response.data.map((sector) => {
             return {
               code: sector.DNCS_ID,
-              title: sector.DNCS_Title
+              title: sector.DNCS_Title,
             };
           });
       },
@@ -207,15 +224,26 @@
           response.data.map((sector) => {
             return {
               code: sector.ECDS_ID,
-              title: sector.ECDS_Title
+              title: sector.ECDS_Title,
             };
           });
       },
 
-      getWorkPoligonTitle(workPoligonType, workPoligonCode) {
+      getWorkPoligonTitle(workPoligonType, workPoligonId, workSubPoligonId) {
         const workPoligonData = this.workPoligonTitles.find((poligon) =>
-          poligon.type === workPoligonType && poligon.code === workPoligonCode);
-        return workPoligonData ? workPoligonData.title : workPoligonCode;
+          poligon.type === workPoligonType && poligon.code === workPoligonId);
+        const workPoligonTitle = workPoligonData ? workPoligonData.title : workPoligonId;
+        if (!workSubPoligonId) {
+          return workPoligonTitle;
+        }
+        if (!workPoligonData || !workPoligonData.workPlaces || !workPoligonData.workPlaces.length) {
+          return `${workPoligonTitle}, ${workSubPoligonId}`;
+        }
+        const workSubPoligonData = workPoligonData.workPlaces.find((subPoligon) =>
+          subPoligon.code === workSubPoligonId);
+        return workSubPoligonData
+          ? `${workPoligonTitle}, ${workSubPoligonData.title}`
+          : `${workPoligonTitle}, ${workSubPoligonId}`;
       },
     },
   };

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
+import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
 
 
 /**
@@ -96,21 +97,19 @@ export const delWorkOrdersChains = {
       if (!context.getters.isUserOnDuty) {
         return;
       }
-
       context.commit('clearDeleteOrdersChainResult', chainId);
       context.commit('setOrdersChainBeingDeleted', chainId);
-
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
+            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
             chainId,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setDeleteOrdersChainResult', { chainId, error: false, message: response.data.message });
         context.commit('deleteConfirmedOrdersChain', chainId);

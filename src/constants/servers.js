@@ -21,6 +21,7 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   logoutWithDutyPass: `${AUTH_SERVER_ADDRESS}/api/auth/logoutWithDutyPass`,
 
   getStationsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/shortDefinitData`,
+  getStationsWorkPlacesData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/workPlacesData`,
   getDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortDefinitData`,
   getECDSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortDefinitData`,
 

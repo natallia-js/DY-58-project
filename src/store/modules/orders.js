@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { CurrShiftGetOrderStatus } from '../../constants/orders';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 export const orders = {
@@ -74,9 +75,6 @@ export const orders = {
       context.commit('addOrdersBeingDispatchedNumber');
 
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
           {
             type,
@@ -141,7 +139,7 @@ export const orders = {
             showOnGID,
             specialTrainCategories,
           },
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setDispatchOrderResult', { error: false, orderType: type, message: response.data.message });
         context.commit('addOrder', response.data.order);

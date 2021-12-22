@@ -87,5 +87,4 @@ app.component('Listbox', Listbox);
 app.component('MultiSelect', MultiSelect);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('TieredMenu', TieredMenu);
-
 app.mount('#app');

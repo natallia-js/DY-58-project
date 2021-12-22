@@ -2,6 +2,7 @@ import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
 import { ORDER_PLACE_VALUES } from '../../constants/orders';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 export const currWorkPoligonStructure = {
@@ -343,9 +344,7 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
+        const headers = getRequestAuthorizationHeader();
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitStationData,
           { stationId },
           { headers }
@@ -381,9 +380,7 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
+        const headers = getRequestAuthorizationHeader();
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitDNCSectorData,
           { sectorId },
           { headers }
@@ -414,9 +411,7 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
+        const headers = getRequestAuthorizationHeader();
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitECDSectorData,
           { sectorId },
           { headers }
@@ -442,7 +437,7 @@ export const currWorkPoligonStructure = {
 
     /**
      * В зависимости от полигона управления пользователя запускает операцию подгрузки
-     * с сервера информацию о данном полигоне управления.
+     * с сервера информации о данном полигоне управления.
      */
     async loadCurrWorkPoligonData(context) {
       // если ранее начатая загрузка данных не завершена, то повторно ничего не запускаем

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
+import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
 
 
 /**
@@ -62,17 +63,17 @@ export const reportOnOrdersDelivery = {
       context.commit('clearReportOnOrdersDeliveryResult');
 
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
+            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
             orderIds: newDeliveredOrderIds,
             deliverDateTime: new Date(),
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setReportOnOrdersDeliveryResult', { error: false, message: response.data.message });
 

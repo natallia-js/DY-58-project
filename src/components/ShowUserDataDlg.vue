@@ -22,7 +22,7 @@
     </p>
     <p><span class="p-text-bold">Время последнего приема дежурства:</span> &#160; {{ getUserLastTakeDutyTimeString }}</p>
     <p><span class="p-text-bold">Время последней сдачи дежурства:</span> &#160; {{ getUserLastPassDutyTimeString }}</p>
-    <p><span class="p-text-bold">Время входя в систему:</span> &#160; {{ getUserLoginDateTimeString }}</p>
+    <p><span class="p-text-bold">Время входа в систему:</span> &#160; {{ getUserLoginDateTimeString }}</p>
 
     <template #footer>
       <Button label="Закрыть" @click="closeDialog" />

@@ -1,6 +1,7 @@
 import { WorkMessStates, RECENTLY } from '../../../constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/dateTimeConvertions';
 import { formOrderText } from '../../../additional/formOrderText';
+import { upperCaseFirst } from '../../../additional/stringFunctions';
 
 
 /**
@@ -48,6 +49,7 @@ export const incomingOrders = {
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
+            extendedOrderTitle: `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
             orderTitle: item.orderText.orderTitle,
             shortOrderText: formOrderText({ orderTextArray: item.orderText.orderText }),
             orderText: formOrderText({

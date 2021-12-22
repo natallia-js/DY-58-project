@@ -3996,10 +3996,10 @@
 
 .p-menubar {
   padding: /*0.5rem 1rem;*/ 0;
-  background: black;
+  background: #303B44;
   color: #fff;
   border: 0 none;
-  border-radius: 4px;
+  /*border-radius: 4px;*/
 }
 .p-menubar .p-menuitem-link {
   padding: 0.75rem 1rem;
@@ -4022,7 +4022,7 @@
   background: #e9ecef;
 }
 .p-menubar .p-menuitem-link:not(.p-disabled):hover .p-menuitem-text {
-  color: #fff; /*#212529;*/
+  color: #212529;
 }
 .p-menubar .p-menuitem-link:not(.p-disabled):hover .p-menuitem-icon {
   color: #fff;/*#212529;*/
@@ -4092,7 +4092,7 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: none;
   width: 12.5rem;
-  z-index: 999999 !important;
+  /*z-index: 999999 !important;*/
 }
 .p-menubar .p-submenu-list .p-menu-separator {
   border-top: 1px solid #dee2e6;
@@ -4117,14 +4117,17 @@
   }
   .p-menubar .p-menubar-button {
     display: flex;
-    width: 2rem;
-    height: 2rem;
-    color: rgba(0, 0, 0, 0.5);
+    width: 3rem;
+    height: 3rem;
+    color: #fff;/*rgba(0, 0, 0, 0.5);*/
     border-radius: 50%;
     transition: box-shadow 0.15s;
   }
+  .p-menubar .p-menubar-button i {
+    font-size: 1.5rem;
+  }
   .p-menubar .p-menubar-button:hover {
-    color: rgba(0, 0, 0, 0.7);
+    color: #fff;/*rgba(0, 0, 0, 0.7);*/
     background: transparent;
   }
   .p-menubar .p-menubar-button:focus {
@@ -4136,7 +4139,7 @@
     position: absolute;
     display: none;
     padding: 0.5rem 0;
-    background: #ffffff;
+    background: /*#ffffff;*/black;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: none;
     width: 100%;
@@ -4154,20 +4157,20 @@
   }
   .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
     padding: 0.75rem 1rem;
-    color: #212529;
+    color: #fff;/*#212529;*/
     border-radius: 0;
     transition: box-shadow 0.15s;
     user-select: none;
   }
   .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-text {
-    color: #212529;
+    color: #fff;/*#212529;*/
   }
   .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-icon {
-    color: #212529;
+    color: #fff;/*#212529;*/
     margin-right: 0.5rem;
   }
   .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-submenu-icon {
-    color: #212529;
+    color: #fff;/*#212529;*/
   }
   .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link:not(.p-disabled):hover {
     background: #e9ecef;

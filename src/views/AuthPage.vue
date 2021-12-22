@@ -134,21 +134,30 @@
           if (response.data.stationWorkPoligons && response.data.stationWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.STATION,
-              workPoligons: response.data.stationWorkPoligons.map((poligon) => poligon['SWP_StID']),
+              workPoligons: response.data.stationWorkPoligons.map((poligon) => ({
+                poligonId: poligon['SWP_StID'],
+                subPoligonId: poligon['SWP_StWP_ID'],
+              })),
             });
           }
           if (response.data.dncSectorsWorkPoligons && response.data.dncSectorsWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.DNC_SECTOR,
-              workPoligons: response.data.dncSectorsWorkPoligons.map((poligon) => poligon['DNCSWP_DNCSID']),
+              workPoligons: response.data.dncSectorsWorkPoligons.map((poligon) => ({
+                poligonId: poligon['DNCSWP_DNCSID'],
+              })),
             });
           }
           if (response.data.ecdSectorsWorkPoligons && response.data.ecdSectorsWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.ECD_SECTOR,
-              workPoligons: response.data.ecdSectorsWorkPoligons.map((poligon) => poligon['ECDSWP_ECDSID']),
+              workPoligons: response.data.ecdSectorsWorkPoligons.map((poligon) => ({
+                poligonId: poligon['ECDSWP_ECDSID'],
+              })),
             });
           }
+          console.log('workPoligons', workPoligons);
+          console.log('response.data.credentials',response.data.credentials)
 
           this.login({
             userId: response.data.userId,
@@ -159,8 +168,8 @@
             credentials: response.data.credentials,
             workPoligons,
           });
-        }
-        catch (e) {
+
+        } catch (e) {
           thisComponent.$toast.add({
             severity: 'error',
             summary: 'Ошибка',

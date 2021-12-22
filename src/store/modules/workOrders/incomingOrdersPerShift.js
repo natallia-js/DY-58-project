@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
+import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
 
 
 /**
@@ -66,21 +67,18 @@ export const incomingOrdersPerShift = {
       if (!context.getters.isUserOnDuty) {
         return;
       }
-
       context.commit('clearGettingIncomingOrdersPerShiftResult');
       context.commit('setGettingIncomingOrdersPerShiftStatus', true);
-
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersCreatedFromGivenDate,
           {
             datetime: context.getters.getLastTakeDutyTime,
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setGettingIncomingOrdersPerShiftResult', { error: false, message: null });
         context.commit('setIncomingOrdersPerShift', response.data);

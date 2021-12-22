@@ -4,6 +4,8 @@ import { OrderPatternElementType } from '../../../constants/orderPatterns';
 import { ReceiversPosts, WorkMessStates, RECENTLY } from '../../../constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/dateTimeConvertions';
 import { formOrderText } from '../../../additional/formOrderText';
+import { upperCaseFirst } from '../../../additional/stringFunctions';
+import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
 
 
 function getWorkOrderObject(order) {
@@ -234,7 +236,7 @@ export const getWorkOrders = {
     /**
      * Возвращает список всех рабочих распоряжений, отсортированный по времени их создания,
      * со сформированным единым списком получателей распоряжения.
-     * Может использоваться для отображенич списка рабочих распоряжений в табличном виде.
+     * Может использоваться для отображения списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
       const now = new Date();
@@ -257,6 +259,7 @@ export const getWorkOrders = {
             seqNum: index + 1,
             time: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
+            extendedOrderTitle: `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
             orderTitle: item.orderText.orderTitle,
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({
@@ -498,21 +501,23 @@ export const getWorkOrders = {
   actions: {
     /**
      * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
+     * Если текущий полигон управления - рабочее место в рамках полигона, то запрашиваются все данные
+     * по всему полигону, к которому относится данное рабоче место.
      */
      async loadWorkOrders(context) {
       context.commit('clearLoadingWorkOrdersResult');
       context.commit('setLoadingWorkOrdersStatus', true);
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
+            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
             startDate: context.getters.getStartDateToGetData,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setLoadingWorkOrdersResult', { error: false, message: null });
         context.commit('setNewWorkOrdersArray', response.data);

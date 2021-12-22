@@ -13,6 +13,17 @@
       <div v-else class="p-mb-2">
         Не определены
       </div>
+      <p class="p-mb-2">
+        <span class="p-text-bold">Рабочие места:</span>
+      </p>
+      <div v-if="stationObj.TStationWorkPlaces && stationObj.TStationWorkPlaces.length" class="p-mb-4">
+        <p v-for="workPlace of stationObj.TStationWorkPlaces" :key="workPlace.SWP_ID" class="p-ml-4">
+          {{ workPlace.SWP_Name }}
+        </p>
+      </div>
+      <div v-else class="p-mb-4">
+        Не определены
+      </div>
       <Fieldset legend="перегоны" :toggleable="true">
         <div v-if="stationObj.TBlocks && stationObj.TBlocks.length">
           <Fieldset

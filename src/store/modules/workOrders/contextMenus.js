@@ -9,8 +9,11 @@ import { store } from '../../../store';
  */
 export const contextMenus = {
   getters: {
+    /**
+     *
+     */
     getDeleteOrdersChainAction(_state, getters) {
-      return (chainId, confirmInstance) => {console.log(chainId, confirmInstance)
+      return (chainId, confirmInstance) => {
         const ordersInChain = getters.getOrdersInChain(chainId);
         const confirmDlgMessage = ordersInChain.length === 1
           ? 'Удалить распоряжение из таблицы рабочих распоряжений?'

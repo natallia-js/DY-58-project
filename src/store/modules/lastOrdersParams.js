@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 /**
@@ -92,7 +93,8 @@ export const lastOrdersParams = {
 
   actions: {
     /**
-     * Подгружает информацию о параметрах последних изданных распоряжений
+     * Подгружает информацию о параметрах последних изданных распоряжений в рамках глобального
+     * полигона управления.
      */
     async loadLastOrdersParams(context) {
       const currPoligonData = context.getters.getUserWorkPoligonData;
@@ -102,9 +104,6 @@ export const lastOrdersParams = {
       context.state.errorLoadingParams = null;
       context.state.loadingParams = true;
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         // Извлекаем информацию о последних номерах изданных распоряжений разных типов
         // на текущем полигоне управления
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
@@ -112,7 +111,9 @@ export const lastOrdersParams = {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setLastOrdersParams', response.data);
       } catch (err) {

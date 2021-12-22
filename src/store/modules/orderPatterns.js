@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import { OrderPatternsNodeType } from '../../constants/orderPatterns';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 export const orderPatterns = {
@@ -366,16 +367,15 @@ export const orderPatterns = {
         return;
       }
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getOrderPatterns,
           {
             workPoligonType: workPoligon.type,
             workPoligonId: workPoligon.code,
             getChildPatterns: true,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
         context.commit('setNewOrderPatternsArray', response.data);
@@ -394,12 +394,9 @@ export const orderPatterns = {
       context.commit('addModifyOrderCategoryTitleRecsBeingProcessed');
       context.commit('clearModifyOrderCategoryTitleResult');
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
           { service, orderType, title, newTitle },
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setModifyOrderCategoryTitleResult', {
           error: false,
@@ -431,12 +428,9 @@ export const orderPatterns = {
       context.commit('addDelOrderPatternRecsBeingProcessed');
       context.commit('clearDelOrderPatternResult');
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.delOrderPattern,
           { id: orderPatternId },
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setDelOrderPatternResult', { error: false, message: response.data.message });
         context.commit('delOrderPattern', orderPatternId);
@@ -455,12 +449,9 @@ export const orderPatterns = {
       context.commit('addModOrderPatternRecsBeingProcessed');
       context.commit('clearModOrderPatternResult');
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderPattern,
           { id, title, specialTrainCategories, elements },
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setModOrderPatternResult', {
           error: false,
@@ -498,9 +489,6 @@ export const orderPatterns = {
         return;
       }
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
           {
             service,
@@ -513,7 +501,7 @@ export const orderPatterns = {
             workPoligonType: workPoligon.type,
             workPoligonId: workPoligon.code,
           },
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setCreateOrderPatternResult', { error: false, message: response.data.message });
         context.commit('addNewOrderPattern', response.data.orderPattern);

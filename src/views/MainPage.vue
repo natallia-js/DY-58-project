@@ -1,54 +1,14 @@
 <template>
   <Toast />
 
-  <ShowUserDataDlg :showDlg="state.showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
-
   <ConfirmDialog style="max-width:700px"></ConfirmDialog>
 
   <div class="p-grid" style="margin:0">
     <div class="p-col-3 dy58-left-menu-panel">
-      <div class="dy58-date-user-block p-p-3 p-d-flex p-jc-center p-ai-center p-flex-wrap">
-        <p class="dy58-text-big p-m-2 p-text-center p-text-bold" style="width:100%">
-          {{ getCurrDateTimeString }}
-        </p>
-        <Button
-          :label="getUserPostFIO"
-          icon="pi pi-user"
-          @click="showUserInfo"
-          v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
-          style="width:100%;"
-          class="dy58-curr-user-button"
-        />
-      </div>
+      <Button v-if="isDSP" label="Warning" class="p-button-raised p-button-warning p-mb-2" style="width:100%" />
       <side-menu />
     </div>
     <div class="p-col-9" style="flex:1">
-      <!--
-      <div class="p-mt-3">
-        <Button
-          type="button"
-          label="Создать"
-          class="p-mr-2"
-          v-tooltip.bottom="'Создать новое распоряжение'"
-          @click="createNewOrder"
-        />
-        <Button
-          type="button"
-          label="Открыть / закрыть перегон"
-          class="p-mr-2"
-          v-if="userIs_DNC()"
-          v-tooltip.bottom="'Создать распоряжение на открытие / закрытие перегона'"
-        />
-        <Button
-          type="button"
-          label="Циркулярное распоряжение"
-          class="p-mr-2"
-          v-if="userIs_DNC_or_ECD()"
-          v-tooltip.bottom="'Создать циркулярное распоряжение'"
-        />
-      </div>
-      <br>
-      -->
       <div class="p-d-flex p-flex-column">
         <div>
           <!-- Таблица входящих уведомлений -->
@@ -60,7 +20,7 @@
           <div class="dy58-table-title p-pb-2">
             <div class="p-mb-2">
               <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
-              {{ isDSP ? 'Документы' : 'Распоряжения' }} в работе
+              {{ isDSP_or_DSPoperator ? 'Документы' : 'Распоряжения' }} в работе
               <Badge :value="getWorkingOrdersNumber"></Badge>
             </div>
             <div class="dy58-table-comment">
@@ -102,7 +62,6 @@
   import { computed, onMounted, reactive, watch } from 'vue';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
   import IncomingNotificationsDataTable from '../components/IncomingNotificationsDataTable';
-  import ShowUserDataDlg from '../components/ShowUserDataDlg';
   import OrdersInWorkDataTable from '../components/OrdersInWorkDataTable';
   import OrdersInWorkTree from '@/components/OrdersInWorkTree.vue';
   import showMessage from '../hooks/showMessage.hook';
@@ -115,7 +74,6 @@
       SideMenu,
       IncomingNotificationsDataTable,
       OrdersInWorkDataTable,
-      ShowUserDataDlg,
       OrdersInWorkTree,
     },
 
@@ -124,19 +82,16 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
-        showUserDataDlg: false,
         startDateToGetData: new Date(),
       });
 
       const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
-      const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
-      const getUserCredential = computed(() => store.getters.getUserCredential);
 
       const getLoadingWorkOrdersStatus = computed(() => store.getters.getLoadingWorkOrdersStatus);
       const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
       const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
 
-      const isDSP = computed(() => store.getters.isDSP);
+      const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
       const getMainMenuItemsKeys = computed(() => MainMenuItemsKeys);
 
       const changedStartDateToGetData = computed(() => state.startDateToGetData);
@@ -190,27 +145,15 @@
         state.startDateToGetData = getStartDateToGetData.value;
       });
 
-      const showUserInfo = () => {
-        state.showUserDataDlg = true;
-      };
-
-      const hideUserInfo = () => {
-        state.showUserDataDlg = false;
-      };
-
       return {
         state,
         getCurrDateTimeString,
-        getUserPostFIO,
-        getUserCredential,
         getStartDateToGetData,
         getLoadingWorkOrdersStatus,
         getWorkingOrdersNumber,
         getErrorLoadingWorkOrders,
-        isDSP,
+        isDSP_or_DSPoperator,
         getMainMenuItemsKeys,
-        showUserInfo,
-        hideUserInfo,
       };
     },
   };

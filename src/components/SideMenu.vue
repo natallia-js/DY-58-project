@@ -1,11 +1,9 @@
 <template>
   <PanelMenu :model="getLeftMenuItems">
     <template #item="{item}">
-      <div class="p-panelmenu-panel" style="marginBottom:0.5rem">
+      <div class="p-panelmenu-panel p-mb-2">
         <div class="p-component p-panelmenu-header">
-          <a
-            class="p-panelmenu-header-link dy58-item-link"
-          >
+          <a class="p-panelmenu-header-link dy58-item-link">
             <div :class="['p-grid',item.itemClass]" style="width:100%;margin:0;">
               <div class="p-col-10" style="height:100%;padding:0;">
                 {{ item.label }}
@@ -37,7 +35,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-</style>

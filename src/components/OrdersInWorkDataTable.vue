@@ -150,13 +150,7 @@
 
     computed: {
       ...mapGetters([
-        'getLoadingWorkOrdersStatus',
-        'getErrorLoadingWorkOrders',
         'getWorkingOrders',
-        'getWorkingOrdersNumber',
-        'isDSP',
-        'isDNC',
-        'isECD',
         'getWorkMessTblColumnsTitles',
         'getWorkMessReceiversTblColumnsTitles',
         'getWorkMessTblColumns',
@@ -166,7 +160,6 @@
         'getUserWorkPoligon',
         'isOrderBeingConfirmedForOthers',
         'isUserOnDuty',
-        'getActiveOrders',
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
       ]),

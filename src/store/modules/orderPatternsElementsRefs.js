@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
+import { getRequestAuthorizationHeader } from '../../serverRequests/common';
 
 
 /**
@@ -77,11 +78,8 @@ export const orderPatternsElementsRefs = {
       context.commit('setLoadingOrderPatternsElementsRefsStatus', true);
       context.commit('clearLoadingRefsResult');
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.getOrderPatternsElementsRefs,
-          { headers }
+          { headers: getRequestAuthorizationHeader() }
         );
         context.commit('setLoadingRefsResult', { error: false, message: null });
         context.commit('setOrderPatternsElementsRefs', response.data);

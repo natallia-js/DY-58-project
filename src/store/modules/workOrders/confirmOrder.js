@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
 import { WORK_POLIGON_TYPES } from '../../../constants/appCredentials';
+import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
 
 
 /**
@@ -259,18 +260,18 @@ export const confirmOrder = {
       context.commit('setOrderBeingConfirmed', orderId);
 
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const confirmDateTime = new Date();
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
           {
             workPoligonType: context.getters.getUserWorkPoligon.type,
             workPoligonId: context.getters.getUserWorkPoligon.code,
+            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
             id: orderId,
             confirmDateTime,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setConfirmOrderResult', { orderId, error: false, message: response.data.message });
         context.commit('setOrderConfirmed', { orderId: response.data.id, confirmDateTime });
@@ -295,18 +296,18 @@ export const confirmOrder = {
     /**
      * Позволяет для данного рабочего распоряжения выставить статус "подтверждено" на сервере
      * за ряд рабочих полигонов.
+     * Данная функция не используется в рамках конкретного рабочего места полигона, только глобально
+     * для всего полигона.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
-      if (!context.getters.isUserOnDuty || !confirmWorkPoligons || !confirmWorkPoligons.length) {
+      if (!context.getters.isUserOnDuty || !confirmWorkPoligons || !confirmWorkPoligons.length ||
+        context.getters.getUserWorkPoligon.subCode) {
         return;
       }
       context.commit('clearConfirmOrderForOthersResult', orderId);
       context.commit('setOrderBeingConfirmedForOthers', orderId);
 
       try {
-        const headers = {
-          'Authorization': `Bearer ${context.getters.getCurrentUserToken}`,
-        };
         const confirmDateTime = new Date();
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
           {
@@ -316,7 +317,9 @@ export const confirmOrder = {
             orderId,
             confirmDateTime,
           },
-          { headers }
+          {
+            headers: getRequestAuthorizationHeader(),
+          }
         );
         context.commit('setConfirmOrderForOthersResult', { orderId, error: false, message: response.data.message });
         context.commit('setOrderConfirmedForOthers', { orderId: response.data.orderId, workPoligons: response.data.confirmWorkPoligons, confirmDateTime });
