@@ -28,8 +28,17 @@
       <span v-if="order" v-html="order.orderText"></span>
     </p>
     <template #footer>
-      <Button v-if="isUserOnDuty && orderNeedsToBeConfirmed && !orderIsBeingConfirmed" label="Подтвердить" @click="confirmOrder" />
-      <span v-if="orderNeedsToBeConfirmed && orderIsBeingConfirmed" class="p-mr-2">Распоряжение подтверждается...</span>
+      <Button
+        v-if="canUserConfirmOrder && orderNeedsToBeConfirmed && !orderIsBeingConfirmed"
+        label="Подтвердить"
+        @click="confirmOrder"
+      />
+      <span
+        v-if="orderNeedsToBeConfirmed && orderIsBeingConfirmed"
+        class="p-mr-2"
+      >
+        Распоряжение подтверждается...
+      </span>
       <Button label="Закрыть" @click="closeDialog" />
     </template>
   </Dialog>
@@ -74,7 +83,7 @@
 
     computed: {
       ...mapGetters([
-        'isUserOnDuty',
+        'canUserConfirmOrder',
       ]),
     },
 

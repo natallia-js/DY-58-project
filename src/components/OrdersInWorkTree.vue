@@ -32,7 +32,8 @@
           @click="() => showOrderInfo(slotProps.node.key)"
         />
         <Button
-          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) && isUserOnDuty && slotProps.node.topLevelNode"
+          v-if="canUserDelConfirmedOrdersChains && chosenOrder && (chosenOrder.key === slotProps.node.key) &&
+            slotProps.node.topLevelNode"
           icon="pi pi-times"
           class="p-button-secondary p-button-sm p-mr-1 dy58-tree-order-action-button"
           v-tooltip.bottom="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
@@ -45,7 +46,8 @@
           id="overlay_tmenu"
         />
         <Button
-          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) && getActiveOrders.find((order) => order._id === chosenOrder.key)"
+          v-if="canUserDispatchOrders && chosenOrder && (chosenOrder.key === slotProps.node.key) &&
+            getActiveOrders.find((order) => order._id === chosenOrder.key)"
           icon="pi pi-file"
           class="p-button-success p-button-sm dy58-tree-order-action-button"
           v-tooltip.bottom="'Создать'"
@@ -81,7 +83,8 @@
 
     computed: {
       ...mapGetters([
-        'isUserOnDuty',
+        'canUserDelConfirmedOrdersChains',
+        'canUserDispatchOrders',
         'getWorkingOrdersToDisplayAsTree',
         'getOrdersChainsBeingDeleted',
         'getActiveOrders',

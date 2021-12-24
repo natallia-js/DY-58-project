@@ -84,7 +84,7 @@ export const activeOrders = {
      * Возвращает действующие рабочие распоряжения в рамках своих цепочек распоряжений.
      * Результат метода предназначен для отображения в компоненте TreeSelect.
      */
-     getActiveOrdersToDisplayInTreeSelect(_state, getters) {
+    getActiveOrdersToDisplayInTreeSelect(_state, getters) {
       const orders = getters.getActiveOrders;
       const groupedOrders = [{
         key: null,

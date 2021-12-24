@@ -62,6 +62,8 @@ export const incomingOrdersPerShift = {
   actions: {
     /**
      * Позволяет получить список id входящих распоряжений за смену.
+     * Для оператора при ДСП извлекаются данные за заданный промежуток времени, которые приходили
+     * соответствующему ДСП.
      */
     async loadIncomingOrdersPerShift(context) {
       if (!context.getters.isUserOnDuty) {

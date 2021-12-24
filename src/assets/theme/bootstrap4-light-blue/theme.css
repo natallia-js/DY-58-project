@@ -4139,7 +4139,7 @@
     position: absolute;
     display: none;
     padding: 0.5rem 0;
-    background: /*#ffffff;*/black;
+    background: /*#ffffff;*/#303B44;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: none;
     width: 100%;

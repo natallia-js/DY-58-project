@@ -130,7 +130,7 @@
             takeDuty: thisComponent.takeDuty,
           });
 
-          const workPoligons = [];
+          const workPoligons = [];console.log('response.data.stationWorkPoligons',response.data.stationWorkPoligons)
           if (response.data.stationWorkPoligons && response.data.stationWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.STATION,
@@ -156,8 +156,6 @@
               })),
             });
           }
-          console.log('workPoligons', workPoligons);
-          console.log('response.data.credentials',response.data.credentials)
 
           this.login({
             userId: response.data.userId,

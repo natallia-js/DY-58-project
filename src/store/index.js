@@ -11,6 +11,7 @@ import { lastOrdersParams } from './modules/lastOrdersParams';
 import { orders } from './modules/orders';
 import { workOrders } from './modules/workOrders/index';
 import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
+import { checkUserAuthority } from './modules/checkUserAuthority';
 
 export const store = createStore({
   modules: {
@@ -26,5 +27,6 @@ export const store = createStore({
     orders,
     workOrders,
     orderPatternsElementsRefs,
+    checkUserAuthority,
   },
 });

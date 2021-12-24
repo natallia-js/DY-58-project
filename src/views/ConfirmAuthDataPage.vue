@@ -107,8 +107,6 @@
 
     async created() {
       // если полномочие у пользователя одно, выделяем его
-      console.log('this.getUserCredential',this.getUserCredential)
-      console.log('this.getAllPossibleCredentialsWithPoligons',this.getAllPossibleCredentialsWithPoligons)
       if (this.getUserCredential) {
         this.selectedCredential = this.getAllPossibleCredentialsWithPoligons.find((cred) => cred.cred = this.getUserCredential);
       }
@@ -134,7 +132,6 @@
                 data = await this.getECDSectorsShortData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
                 break;
             }
-            console.log('data',data)
             data.forEach((poligon) => {
               this.workPoligonTitles.push({ type: typedPoligons.type, ...poligon });
             });

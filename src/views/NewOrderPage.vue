@@ -1,5 +1,5 @@
 <template>
-  <TabView v-if="isUserOnDuty" :activeIndex="activeIndex">
+  <TabView v-if="canUserDispatchOrders" :activeIndex="activeIndex">
     <TabPanel v-if="isDNC" :header="getOrderTypes.ORDER">
       <new-order
         :orderType="getOrderTypes.ORDER"
@@ -41,7 +41,7 @@
     </TabPanel>
   </TabView>
   <div v-else class="dy58-user-cannot-create-order-block">
-    Создавать распоряжения можно лишь находясь на дежурстве
+    Вы не на дежурстве либо у вас нет прав на издание распоряжений
   </div>
 </template>
 
@@ -67,7 +67,7 @@
 
     computed: {
       ...mapGetters([
-        'isUserOnDuty',
+        'canUserDispatchOrders',
         'isDSP',
         'isDNC',
         'isECD',

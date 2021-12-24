@@ -71,6 +71,11 @@ export const orders = {
         specialTrainCategories,
       } = params;
 
+      if (!context.getters.canUserDispatchOrders) {
+        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: 'У вас нет права на издание распоряжений' });
+        return;
+      }
+
       context.commit('clearDispatchOrderResult');
       context.commit('addOrdersBeingDispatchedNumber');
 

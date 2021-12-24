@@ -17,7 +17,7 @@
     <p><span class="p-text-bold">Полномочие:</span> &#160; {{ getUserCredential || '?' }}</p>
     <p>
       <span class="p-text-bold">Рабочий полигон:</span> &#160;
-      {{ getUserWorkPoligon ? getUserWorkPoligon.type : '?' }} &#160;
+      {{ getUserWorkPoligon ? getUserWorkPoligon.type : '?' }}
       {{ getUserWorkPoligonName }}
     </p>
     <p><span class="p-text-bold">Время последнего приема дежурства:</span> &#160; {{ getUserLastTakeDutyTimeString }}</p>

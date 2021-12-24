@@ -160,6 +160,7 @@
         'getUserWorkPoligon',
         'isOrderBeingConfirmedForOthers',
         'isUserOnDuty',
+        'canUserDelConfirmedOrdersChains',
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
       ]),
@@ -178,24 +179,32 @@
 
       workOrdersTableContextMenuItems() {
         const items = [];
-        if (!this.isUserOnDuty) {
-          items.push({
-            label: 'Вы не на дежурстве',
-          });
 
-        } else if (this.selectedWorkOrdersTableRecord) {
-          const ordersInChain = this.$store.getters.getOrdersInChain(this.selectedWorkOrdersTableRecord.orderChainId);
-          items.push(
-            {
+        if (this.selectedWorkOrdersTableRecord) {
+          if (this.canUserDelConfirmedOrdersChains) {
+            const ordersInChain = this.$store.getters.getOrdersInChain(this.selectedWorkOrdersTableRecord.orderChainId);
+            items.push({
               label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
               icon: 'pi pi-times',
               command: () => {
                 this.getDeleteOrdersChainAction(this.selectedWorkOrdersTableRecord.orderChainId, this.$confirm);
               },
-            },
-            ...this.getCreateRelativeOrderContextMenu(this.selectedWorkOrdersTableRecord.id)
-          );
+            });
+          }
+
+          const createRelativeOrderContextMenuItems =
+            this.getCreateRelativeOrderContextMenu(this.selectedWorkOrdersTableRecord.id);
+          if (createRelativeOrderContextMenuItems.length) {
+            items.push(...createRelativeOrderContextMenuItems);
+          }
         }
+
+        if (!items.length) {
+          items.push({
+            label: 'У вас нет прав на выполнение действий над распоряжениями',
+          });
+        }
+
         return items;
       },
 

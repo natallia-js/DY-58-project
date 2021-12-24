@@ -9,7 +9,7 @@
         @click="showUserInfo"
         v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
         style="width:100%;height:100%"
-        class="p-button-raised p-button-secondary"
+        :class="{'p-button-raised': true, 'p-button-secondary': isUserOnDuty, 'p-button-warning': !isUserOnDuty}"
       />
     </template>
   </Menubar>
@@ -38,6 +38,7 @@
       'getUserWorkPoligonName',
       'getUserPost',
       'getUserFIO',
+      'isUserOnDuty',
     ]),
 
     methods: {
@@ -56,8 +57,4 @@
   .p-menubar :deep(.p-submenu-list) {
     z-index: 999999;
   }
-
- /* .p-menubar :deep(.p-menubar-end) {
-    align-self: stretch;
-  }*/
 </style>

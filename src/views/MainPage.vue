@@ -91,7 +91,6 @@
       const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
       const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
 
-      const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
       const getMainMenuItemsKeys = computed(() => MainMenuItemsKeys);
 
       const changedStartDateToGetData = computed(() => state.startDateToGetData);
@@ -152,7 +151,8 @@
         getLoadingWorkOrdersStatus,
         getWorkingOrdersNumber,
         getErrorLoadingWorkOrders,
-        isDSP_or_DSPoperator,
+        isDSP: store.getters.isDSP,
+        isDSP_or_DSPoperator: store.getters.isDSP_or_DSPoperator,
         getMainMenuItemsKeys,
       };
     },

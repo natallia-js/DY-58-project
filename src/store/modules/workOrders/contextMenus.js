@@ -39,6 +39,11 @@ export const contextMenus = {
       return (orderId) => {
         const items = [];
 
+        // Проверяем, имеет ли право текущий пользователь издавать распоряжения
+        if (!getters.canUserDispatchOrders) {
+          return items;
+        }
+
         // Пукты меню о создании на основании выбранного распоряжения другого распоряжения
         // создаются лишь в том случае, если выбранное распоряжение является в своей цепочке действующим
         if (!getters.getActiveOrders.find((order) => order._id === orderId)) {

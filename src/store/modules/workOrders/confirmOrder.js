@@ -252,13 +252,11 @@ export const confirmOrder = {
      * Позволяет для данного входящего уведомления выставить статус "подтверждено" на сервере.
      */
      async confirmOrder(context, { orderId }) {
-      if (!context.getters.isUserOnDuty) {
+      if (!context.getters.canUserConfirmOrder) {
         return;
       }
-
       context.commit('clearConfirmOrderResult', orderId);
       context.commit('setOrderBeingConfirmed', orderId);
-
       try {
         const confirmDateTime = new Date();
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
@@ -300,13 +298,11 @@ export const confirmOrder = {
      * для всего полигона.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
-      if (!context.getters.isUserOnDuty || !confirmWorkPoligons || !confirmWorkPoligons.length ||
-        context.getters.getUserWorkPoligon.subCode) {
+      if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
         return;
       }
       context.commit('clearConfirmOrderForOthersResult', orderId);
       context.commit('setOrderBeingConfirmedForOthers', orderId);
-
       try {
         const confirmDateTime = new Date();
         const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,

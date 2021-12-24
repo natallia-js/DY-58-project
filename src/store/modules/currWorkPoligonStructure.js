@@ -32,22 +32,35 @@ export const currWorkPoligonStructure = {
       if (!workPoligon) {
         return;
       }
+      let poligonName;
+      let workPlaceName;
       switch (workPoligon.type) {
         case WORK_POLIGON_TYPES.STATION:
-          return state.station ? `${state.station.St_Title} (${state.station.St_UNMC})` : null;
+          if (state.station) {
+            poligonName = `${state.station.St_Title} (${state.station.St_UNMC})`;
+            if (!workPoligon.subCode) {
+              return poligonName;
+            }
+            if (state.station.TStationWorkPlaces) {
+              const stationWorkPlace = state.station.TStationWorkPlaces.find((wp) => wp.SWP_ID === workPoligon.subCode);
+              workPlaceName = stationWorkPlace ? stationWorkPlace.SWP_Name : null;
+            }
+            return workPlaceName ? `${poligonName} ${workPlaceName}` : poligonName;
+          }
+          return null;
         case WORK_POLIGON_TYPES.DNC_SECTOR:
           return state.sector ? state.sector.DNCS_Title : null;
         case WORK_POLIGON_TYPES.ECD_SECTOR:
           return state.sector ? state.sector.ECDS_Title : null;
         default:
-          return 'Наименование рабочего полигона не указано';
+          return 'Наименование рабочего полигона неизвестно';
       }
     },
 
     getUserWorkPoligonData(state, getters) {
       const workPoligon = getters.getUserWorkPoligon;
       if (!workPoligon) {
-        return;
+        return null;
       }
       switch (workPoligon.type) {
         case WORK_POLIGON_TYPES.STATION:

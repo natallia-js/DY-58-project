@@ -6,6 +6,7 @@ import {
   getECDSectorsWorkPoligonsUsers,
 } from '../../serverRequests/users.requests';
 import objectId from '../../additional/objectId.generator';
+import { store } from '../../store';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -96,6 +97,7 @@ export const personal = {
 
     /**
      * Возвращает информацию о всех ДНЦ участков ДНЦ, связанных с текущим полигоном управления.
+     * Данным ДНЦ и может адресоваться информация, отправляемая текущим пользователем.
      */
     getDNCShiftForSendingData: (state) => {
       if (!state.sectorPersonal || !state.sectorPersonal.DNCSectorsShift) {
@@ -125,12 +127,20 @@ export const personal = {
 
     /**
      * Возвращает информацию о всех ДСП станций, связанных с текущим полигом управления.
+     * Данным ДСП и может адресоваться информация, отправляемая текущим пользователем.
+     * Если полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
      */
-    getDSPShiftForSendingData: (state) => {
-      if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
+    getDSPShiftForSendingData: (state, getters) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
+        !getters.getUserWorkPoligon || !getters.getUserWorkPoligonData) {
         return [];
       }
-      const arr = state.sectorPersonal.sectorStationsShift.map((item) => {
+      let arr = state.sectorPersonal.sectorStationsShift;
+
+      if (getters.userWorkPoligonIsStation) {
+        arr = arr.filter((item) => String(item.stationId) !== String(getters.getUserWorkPoligonData.St_ID));
+      }
+      arr = arr.map((item) => {
         return {
           id: item.stationId,
           type: WORK_POLIGON_TYPES.STATION,
@@ -156,6 +166,7 @@ export const personal = {
 
     /**
      * Возвращает информацию о всех ЭЦД участков ЭЦД, связанных с текущим полигоном управления.
+     * Данным ЭЦД и может адресоваться информация, отправляемая текущим пользователем.
      */
      getECDShiftForSendingData: (state) => {
       if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
@@ -211,7 +222,7 @@ export const personal = {
 
   mutations: {
     /**
-     * Оригинал/Копия/Ничего всем ДНЦ всех участков ДНЦ
+     * Оригинал/Копия/Ничего всем участкам ДНЦ
      */
     setGetOrderStatusToAllDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -224,7 +235,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДНЦ конкретного участка ДНЦ
+     * Оригинал/Копия/Ничего конкретному участку ДНЦ
      */
     setGetOrderStatusToDefinitDNCSector(state, { dncSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -236,7 +247,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ДНЦ оставшихся участков ДНЦ
+     * Оригинал/Копия/Ничего всем оставшимся участкам ДНЦ
      */
     setGetOrderStatusToAllLeftDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -250,11 +261,16 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ДСП всех станций
+     * Оригинал/Копия/Ничего всем станциям. Если текущий полигон управления - станция,
+     * то она не участвует в переборе.
      */
     setGetOrderStatusToAllDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
-        state.sectorPersonal.sectorStationsShift.forEach((el) => {
+        let arr = state.sectorPersonal.sectorStationsShift;
+        if (store.getters.userWorkPoligonIsStation) {
+          arr = arr.filter((item) => String(item.stationId) !== String(store.getters.getUserWorkPoligonData.St_ID));
+        }
+        arr.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
@@ -263,7 +279,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДСП конкретной станции
+     * Оригинал/Копия/Ничего конкретной станции.
      */
     setGetOrderStatusToDefinitDSP(state, { stationId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
@@ -276,11 +292,16 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ДСП всех оставшихся станций
+     * Оригинал/Копия/Ничего всем оставшимся станциям. Если текущий полигон управления - станция,
+     * то она не участвует в переборе.
      */
     setGetOrderStatusToAllLeftDSP(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
-        state.sectorPersonal.sectorStationsShift.forEach(el => {
+        let arr = state.sectorPersonal.sectorStationsShift;
+        if (store.getters.userWorkPoligonIsStation) {
+          arr = arr.filter((item) => String(item.stationId) !== String(store.getters.getUserWorkPoligonData.St_ID));
+        }
+        arr.forEach(el => {
           if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
               el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
@@ -290,7 +311,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ЭЦД всех участков ЭЦД
+     * Оригинал/Копия/Ничего всем участкам ЭЦД
      */
      setGetOrderStatusToAllECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -303,7 +324,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего ЭЦД конкретного участка ЭЦД
+     * Оригинал/Копия/Ничего конкретному участку ЭЦД
      */
      setGetOrderStatusToDefinitECDSector(state, { ecdSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -315,7 +336,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем ЭЦД оставшихся участков ЭЦД
+     * Оригинал/Копия/Ничего всем оставшимся участкам ЭЦД
      */
      setGetOrderStatusToAllLeftECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -413,15 +434,17 @@ export const personal = {
     /**
      * Данный метод создан специально для окна создания нового распоряжения.
      * Он вызывается при открытии данного окна и позволяет заполнить таблицы в секции "Кому".
-     * Заполнение происходит путем определения для каждого участка / станции первого из
+     * Заполнение происходит путем определения для каждого участка / станции первого ПОДХОДЯЩЕГО из
      * online-пользователей данного участка / станции.
+     * Полагается, что пользователи участков ДНЦ и ЭЦД - ДНЦ и ЭЦД соответственно (другие должности не
+     * рассматриваются), пользователя участков ДСП - только ДСП данных станций.
      */
     chooseOnlyOnlinePersonal(state) {
-      function setOnlineSectorsShift(sectorsArray) {
+      function setOnlineSectorsShift(sectorsArray, userPost) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
             if (sector.people) {
-              const onlineUser = sector.people.find((user) => user.online);
+              const onlineUser = sector.people.find((user) => user.post === userPost && user.online);
               if (onlineUser) {
                 sector.lastUserChoiceId = onlineUser._id;
                 sector.lastUserChoice = getUserFIOString({
@@ -439,9 +462,9 @@ export const personal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift);
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift);
-      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, ReceiversPosts.DNC);
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, ReceiversPosts.DSP);
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, ReceiversPosts.ECD);
     },
 
     /**
@@ -532,7 +555,7 @@ export const personal = {
     /**
      *
      */
-     delOtherGetOrderRecordByAdditionalId(state, additionalId) {
+    delOtherGetOrderRecordByAdditionalId(state, additionalId) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
@@ -553,11 +576,12 @@ export const personal = {
       const dncSectorsIds = context.getters.getStationDNCSectors.map((sector) => sector.DNCS_ID);
       // id участков ЭЦД
       const ecdSectorsIds = context.getters.getStationECDSectors.map((sector) => sector.ECDS_ID);
-      // id всех смежных станций
-      const currStationWorkPoligon = context.getters.getUserWorkPoligonData;
+      // id всех станций: как текущего полигона управления, так и смежных к нему станций
+      //const currStationWorkPoligon = context.getters.getUserWorkPoligonData;
       const stationsIds = context.getters.getSectorStations
-        .filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
+        //.filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
         .map((station) => station.St_ID);
+
       // Сюда поместим информацию о персонале, необходимую ДСП. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {
@@ -581,10 +605,10 @@ export const personal = {
             sendOriginal: CurrShiftGetOrderStatus.doNotSend,
           };
         }),
-        // Здесь будет информация о тех пользователях, которые работают на станциях, смежных с
-        // текущей (т.е. текущим полигоном управления)
+        // Здесь будет информация о тех пользователях, которые работают как на текущей станции (полигоне
+        // управления), так и на станциях, смежных с текущей
         sectorStationsShift: context.getters.getSectorStations
-          .filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
+          //.filter((station) => station.St_ID !== currStationWorkPoligon.St_ID)
           .map((station) => {
             return {
               stationId: station.St_ID,
@@ -609,10 +633,6 @@ export const personal = {
                   item.people.push({ ...user });
                 }
               });
-              /*const element = shiftPersonal.DNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
             });
           }
         }
@@ -626,10 +646,6 @@ export const personal = {
                   item.people.push({ ...user });
                 }
               });
-              /*const element = shiftPersonal.ECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
             });
           }
         }
@@ -725,10 +741,6 @@ export const personal = {
           const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              /*const element = shiftPersonal.DNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
               shiftPersonal.DNCSectorsShift.forEach((item) => {
                 if (item.sectorId === user.dncSectorId) {
                   item.people.push({ ...user });
@@ -740,14 +752,6 @@ export const personal = {
         // Извлекаем информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
         if (stationsIds.length) {
           const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
-          /*if (responseData && responseData.length) {
-            responseData.forEach((user) => {
-              const element = shiftPersonal.sectorStationsShift.find((item) => item.stationId === user.stationId);
-              if (element) {
-                element.people.push(user);
-              }
-            });
-          }*/
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
               shiftPersonal.sectorStationsShift.forEach((item) => {
@@ -764,10 +768,6 @@ export const personal = {
           const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              /*const element = shiftPersonal.ECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
               shiftPersonal.ECDSectorsShift.forEach((item) => {
                 if (item.sectorId === user.ecdSectorId) {
                   item.people.push({ ...user });
@@ -855,10 +855,6 @@ export const personal = {
           const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              /*const element = shiftPersonal.ECDSectorsShift.find((item) => item.sectorId === user.ecdSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
               shiftPersonal.ECDSectorsShift.forEach((item) => {
                 if (item.sectorId === user.ecdSectorId) {
                   item.people.push({ ...user });
@@ -870,14 +866,6 @@ export const personal = {
         // Извлекаем информацию о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
         if (stationsIds.length) {
           const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
-          /*if (responseData && responseData.length) {
-            responseData.forEach((user) => {
-              const element = shiftPersonal.sectorStationsShift.find((item) => item.stationId === user.stationId);
-              if (element) {
-                element.people.push(user);
-              }
-            });
-          }*/
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
               shiftPersonal.sectorStationsShift.forEach((item) => {
@@ -894,10 +882,6 @@ export const personal = {
           const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
           if (responseData && responseData.length) {
             responseData.forEach((user) => {
-              /*const element = shiftPersonal.DNCSectorsShift.find((item) => item.sectorId === user.dncSectorId);
-              if (element) {
-                element.people.push(user);
-              }*/
               shiftPersonal.DNCSectorsShift.forEach((item) => {
                 if (item.sectorId === user.dncSectorId) {
                   item.people.push({ ...user });
@@ -927,11 +911,7 @@ export const personal = {
 
     /**
      * Позволяет извлечь из БД информацию о всем персонале рабочего полигона.
-     * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя:
-     * 1) если рабочий полигон - участок ДНЦ, то извлекается информация о:
-     *   - пользователях смежных участков ДНЦ
-     *   - пользователях станций рабочего полигона
-     *   - пользователях ближайших участков ЭЦД
+     * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя.
      */
     async loadCurrSectorsShift(context) {
       // если ранее начатая загрузка данных не завершена, то повторно ничего не запускаем

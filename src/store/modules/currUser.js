@@ -18,6 +18,7 @@ import { getRequestAuthorizationHeader } from '../../serverRequests/common';
  */
 function checkUserAuthData(payload) {
   const { userId, jtwToken, userInfo, credentials, workPoligons } = payload;
+  console.log('workPoligons',workPoligons)
 
   if (!userId) {
     throw new Error('Не указан id пользователя для входа в Систему. Обратитесь к Администратору Системы');
@@ -99,7 +100,6 @@ function checkUserAuthData(payload) {
   if (!workPoligonExists) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
-console.log('userCredsWithPoligons',userCredsWithPoligons)
   return userCredsWithPoligons;
 }
 
@@ -171,8 +171,11 @@ export const currUser = {
     getUserCredential(state) {
       return state.credential;
     },
-    getUserWorkPoligon(state) {console.log('state.workPoligon',state.workPoligon)
+    getUserWorkPoligon(state) {
       return state.workPoligon;
+    },
+    userWorkPoligonIsStation(state) {
+      return state.workPoligon && state.workPoligon.type === WORK_POLIGON_TYPES.STATION;
     },
     isUserAuthenticated(state) {
       return state.isAuthenticated;
@@ -182,6 +185,9 @@ export const currUser = {
     },
     isDSP_or_DSPoperator(state) {
       return state.credential === APP_CREDENTIALS.DSP_FULL || state.credential === APP_CREDENTIALS.DSP_Operator;
+    },
+    isDSPoperator(state) {
+      return state.credential === APP_CREDENTIALS.DSP_Operator;
     },
     isDNC(state) {
       return state.credential === APP_CREDENTIALS.DNC_FULL;
