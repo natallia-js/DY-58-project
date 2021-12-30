@@ -11,7 +11,6 @@
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
     v-model="state.elementModelValue"
-    @input="handleChangeInputText"
     v-tooltip="element.ref"
     :placeholder="element.ref"
   />
@@ -25,7 +24,6 @@
       optionLabel="label"
       optionValue="value"
       v-model="state.elementModelValue"
-      @change="handleChangeDropdown"
       v-tooltip="element.ref"
       :placeholder="element.ref"
     />
@@ -38,9 +36,8 @@
     :showIcon="true"
     :placeholder="element.ref || 'дата'"
     :hideOnDateTimeSelect="true"
-    :manualInput="false"
+    :manualInput="true"
     v-model="state.elementModelValue"
-    @dateSelect="handleChangeDateTime"
     v-tooltip="element.ref"
   />
 
@@ -52,10 +49,9 @@
     :timeOnly="true"
     :showIcon="true"
     :hideOnDateTimeSelect="true"
-    :manualInput="false"
+    :manualInput="true"
     :placeholder="element.ref || 'время'"
     v-model="state.elementModelValue"
-    @dateSelect="handleChangeDateTime"
     v-tooltip="element.ref"
   />
 
@@ -67,9 +63,8 @@
     :showIcon="true"
     :placeholder="element.ref || 'дата-время'"
     :hideOnDateTimeSelect="true"
-    :manualInput="false"
+    :manualInput="true"
     v-model="state.elementModelValue"
-    @dateSelect="handleChangeDateTime"
     v-tooltip="element.ref"
   />
 
@@ -515,32 +510,16 @@
         }
       });
 
-      const handleChangeInputText = (event) => {
-        emit('input', {
-          elementId: props.element._id,
-          value: event.target.value,
-          elementType: props.element.type,
-          elementRef: props.element.ref,
-        });
-      };
-
-      const handleChangeDropdown = (event) => {
-        emit('input', {
-          elementId: props.element._id,
-          value: event.value,
-          elementType: props.element.type,
-          elementRef: props.element.ref,
-        });
-      };
-
-      const handleChangeDateTime = (value) => {
-        emit('input', {
-          elementId: props.element._id,
-          value,
-          elementType: props.element.type,
-          elementRef: props.element.ref,
-        });
-      };
+      watch(() => state.elementModelValue, (value) => {
+        if (props.element && props.element.type !== getOrderPatternElementTypes.value.DR_TRAIN_TABLE) {
+          emit('input', {
+            elementId: props.element._id,
+            value,
+            elementType: props.element.type,
+            elementRef: props.element.ref,
+          });
+        }
+      });
 
       const handleTrainTableRightClick = (event) => {
         menu.value.show(event);
@@ -562,9 +541,6 @@
         getDRTrainTableColumns,
         elementValue,
         drTrainTableContextMenuItems,
-        handleChangeInputText,
-        handleChangeDropdown,
-        handleChangeDateTime,
         handleTrainTableRightClick,
         pasteDRTrainTable,
         clearDRTrainTable,

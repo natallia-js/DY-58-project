@@ -13,10 +13,11 @@
 <script>
   import { onMounted, onUnmounted, watch, computed, reactive } from 'vue';
   import { useStore } from 'vuex';
-  import NavBar from './components/NavBar';
-  import FooterBar from './components/FooterBar';
-  import useWebSocket from './hooks/useWebSocket.hook';
-  import ShowBeforeLogoutDlg from './components/ShowBeforeLogoutDlg';
+  import NavBar from '@/components/NavBar';
+  import FooterBar from '@/components/FooterBar';
+  import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
+  import useWebSocket from '@/hooks/useWebSocket.hook';
+  import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
 
   const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
@@ -31,6 +32,12 @@
 
     setup() {
       const store = useStore();
+
+      const newIncomingOrdersSound = new Audio(incomingOrderSound);
+      if (newIncomingOrdersSound) {
+        newIncomingOrdersSound.crossOrigin = 'anonymous';
+        newIncomingOrdersSound.autoplay = true;
+      }
 
       let timerId;
       let updateDataTimerId;
@@ -70,6 +77,16 @@
           store.dispatch('loadWorkOrders');
         }
       };
+
+      watch(() => store.getters.thereAreNewIncomingOrders, (val) => {
+        if (val) {
+          if (newIncomingOrdersSound) {
+            newIncomingOrdersSound.volume = store.getters.getSoundsVolume;
+            newIncomingOrdersSound.play();
+          }
+          store.commit('notifiedAboutNewIncomingOrders');
+        }
+      });
 
       /**
        *

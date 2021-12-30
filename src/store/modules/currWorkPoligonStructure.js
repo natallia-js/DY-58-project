@@ -132,7 +132,7 @@ export const currWorkPoligonStructure = {
     /**
      * Возвращает объект перегона участка управления по его id.
      */
-     getSectorBlockById: (_state, getters) => (blockId) => {
+    getSectorBlockById: (_state, getters) => (blockId) => {
       return getters.getSectorBlocks.find((block) => block.Bl_ID === blockId);
     },
 

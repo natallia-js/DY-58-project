@@ -129,6 +129,8 @@ export const personal = {
      * Возвращает информацию о всех ДСП станций, связанных с текущим полигом управления.
      * Данным ДСП и может адресоваться информация, отправляемая текущим пользователем.
      * Если полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
+     * Еще один нюанс: в выборку не включаем операторов при ДСП (это те лица, у которых полигон
+     * управления - не сама станция, а рабочее место на станции).
      */
     getDSPShiftForSendingData: (state, getters) => {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
@@ -137,30 +139,37 @@ export const personal = {
       }
       let arr = state.sectorPersonal.sectorStationsShift;
 
+      // Если текущий полигон - станция, то не включаем ее в выборку
       if (getters.userWorkPoligonIsStation) {
         arr = arr.filter((item) => String(item.stationId) !== String(getters.getUserWorkPoligonData.St_ID));
       }
-      arr = arr.map((item) => {
-        return {
-          id: item.stationId,
-          type: WORK_POLIGON_TYPES.STATION,
-          station: item.stationTitle,
-          sector: item.trainSectorTitle || '',
-          fio: item.lastUserChoice || '',
-          fioId: item.lastUserChoiceId,
-          fioOnline: item.lastUserChoiceOnline,
-          people: item.people
-            .filter((el) => el.post === ReceiversPosts.DSP)
-            .map((el) => {
-              return {
-                id: el._id,
-                fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
-                online: el.online,
-              };
-            }),
-          sendOriginal: item.sendOriginal,
-        };
-      });
+      // Извлекаем необходимые данные, сортируя их по поездным участкам и порядку станций на данных участках
+      arr = arr.sort((a, b) => { return a.trainSectorId - b.trainSectorId; })
+        .sort((a, b) => {
+          if (a.trainSectorId !== b.trainSectorId) return 0;
+          return a.stationPosInTrainSector - b.stationPosInTrainSector;
+        })
+        .map((item) => {
+          return {
+            id: item.stationId,
+            type: WORK_POLIGON_TYPES.STATION,
+            station: item.stationTitle,
+            sector: item.trainSectorTitle || '',
+            fio: item.lastUserChoice || '',
+            fioId: item.lastUserChoiceId,
+            fioOnline: item.lastUserChoiceOnline,
+            people: item.people
+              .filter((el) => el.post === ReceiversPosts.DSP && !el.stationWorkPlaceId)
+              .map((el) => {
+                return {
+                  id: el._id,
+                  fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
+                  online: el.online,
+                };
+              }),
+            sendOriginal: item.sendOriginal,
+          };
+        });
       return arr;
     },
 
@@ -222,7 +231,33 @@ export const personal = {
 
   mutations: {
     /**
-     * Оригинал/Копия/Ничего всем участкам ДНЦ
+     * Чистит информацию о тех, кому необходимо адресовать распоряжение.
+     */
+    clearShiftForSendingData(state) {
+      if (!state.sectorPersonal) {
+        return;
+      }
+      const clearSendItem = (item) => {
+        if (item.lastUserChoice || item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend) {
+          item.lastUserChoice = null;
+          item.lastUserChoiceId = null;
+          item.lastUserChoiceOnline = false;
+          item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
+        }
+      }
+      if (state.sectorPersonal.DNCSectorsShift) {
+        state.sectorPersonal.DNCSectorsShift.forEach((el) => clearSendItem(el));
+      }
+      if (state.sectorPersonal.ECDSectorsShift) {
+        state.sectorPersonal.ECDSectorsShift.forEach((el) => clearSendItem(el));
+      }
+      if (state.sectorPersonal.sectorStationsShift) {
+        state.sectorPersonal.sectorStationsShift.forEach((el) => clearSendItem(el));
+      }
+    },
+
+    /**
+     * Оригинал/Копия/Ничего всем участкам ДНЦ.
      */
     setGetOrderStatusToAllDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -235,7 +270,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего конкретному участку ДНЦ
+     * Оригинал/Копия/Ничего конкретному участку ДНЦ.
      */
     setGetOrderStatusToDefinitDNCSector(state, { dncSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -247,7 +282,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем оставшимся участкам ДНЦ
+     * Оригинал/Копия/Ничего всем оставшимся участкам ДНЦ.
      */
     setGetOrderStatusToAllLeftDNCSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
@@ -311,7 +346,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем участкам ЭЦД
+     * Оригинал/Копия/Ничего всем участкам ЭЦД.
      */
      setGetOrderStatusToAllECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -324,7 +359,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего конкретному участку ЭЦД
+     * Оригинал/Копия/Ничего конкретному участку ЭЦД.
      */
      setGetOrderStatusToDefinitECDSector(state, { ecdSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -336,7 +371,7 @@ export const personal = {
     },
 
     /**
-     * Оригинал/Копия/Ничего всем оставшимся участкам ЭЦД
+     * Оригинал/Копия/Ничего всем оставшимся участкам ЭЦД.
      */
      setGetOrderStatusToAllLeftECDSectors(state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
@@ -438,13 +473,14 @@ export const personal = {
      * online-пользователей данного участка / станции.
      * Полагается, что пользователи участков ДНЦ и ЭЦД - ДНЦ и ЭЦД соответственно (другие должности не
      * рассматриваются), пользователя участков ДСП - только ДСП данных станций.
+     * Пользователи рабочих мест на станциях не рассматриваются.
      */
     chooseOnlyOnlinePersonal(state) {
       function setOnlineSectorsShift(sectorsArray, userPost) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
             if (sector.people) {
-              const onlineUser = sector.people.find((user) => user.post === userPost && user.online);
+              const onlineUser = sector.people.find((user) => user.post === userPost && user.online && !user.stationWorkPlaceId);
               if (onlineUser) {
                 sector.lastUserChoiceId = onlineUser._id;
                 sector.lastUserChoice = getUserFIOString({
@@ -471,34 +507,47 @@ export const personal = {
      * Данный метод создан специально для диалога выбора получателя распоряжения,
      * открываемого из таблиц секции "Кому" окна создания распоряжения.
      * Метод позволяет зафиксировать выбор пользователя в диалоговом окне:
-     * сохраняется информация о ФИО выбранного пользователя (либо пользователя, для
-     * которого выбор отменен) и его online-статуса для соответствующего участка / станции.
+     * сохраняется информация о ФИО выбранного пользователя (либо удаляет пользователя, для
+     * которого выбор отменен) и его online-статусе для соответствующего участка / станции.
+     * Если участок / станция в рамках структуры полигона управления встречается более одного
+     * раза, то действия в отношении пользователя производятся для каждой такой встречи.
      */
-    setUserChosenStatus(state, { userId, chooseUser }) {
+    setUserChosenStatus(state, { userId, chooseUser, workPoligonType, workPoligonId }) {
       function findUserAndSetChosenStatus(sectorsArray) {
-        let found = false;
-        if (sectorsArray && sectorsArray.length) {
-          for (let sector of sectorsArray) {
-            if (sector.people) {
-              const neededUser = sector.people.find((user) => user._id === userId);
-              if (neededUser) {
-                sector.lastUserChoiceId = chooseUser ? neededUser._id : null;
-                sector.lastUserChoice = chooseUser ? getUserFIOString({
-                  name: neededUser.name,
-                  fatherName: neededUser.fatherName,
-                  surname: neededUser.surname,
-                }) : null;
-                sector.lastUserChoiceOnline = chooseUser ? neededUser.online : false;
-                found = true;
-              }
-            }
-          }
+        if (!sectorsArray || !sectorsArray.length) {
+          return;
         }
-        return found;
+        const neededSectors = sectorsArray.filter((item) => item.stationId === workPoligonId || item.sectorId === workPoligonId);
+        if (!neededSectors.length) {
+          return;
+        }
+        neededSectors.forEach((sector) => {
+          if (sector.people && sector.people.length) {
+            const neededUser = sector.people.find((user) => user._id === userId);
+            if (!neededUser) {
+              return;
+            }
+            sector.lastUserChoiceId = chooseUser ? userId : null;
+            sector.lastUserChoice = chooseUser ? getUserFIOString({
+              name: neededUser.name,
+              fatherName: neededUser.fatherName,
+              surname: neededUser.surname,
+            }) : null;
+            sector.lastUserChoiceOnline = chooseUser ? neededUser.online : false;
+          }
+        });
       }
-      if (findUserAndSetChosenStatus(state.sectorPersonal.DNCSectorsShift)) return;
-      if (findUserAndSetChosenStatus(state.sectorPersonal.sectorStationsShift)) return;
-      if (findUserAndSetChosenStatus(state.sectorPersonal.ECDSectorsShift)) return;
+      switch (workPoligonType) {
+        case WORK_POLIGON_TYPES.STATION:
+          findUserAndSetChosenStatus(state.sectorPersonal.sectorStationsShift);
+          break;
+        case WORK_POLIGON_TYPES.DNC_SECTOR:
+          findUserAndSetChosenStatus(state.sectorPersonal.DNCSectorsShift);
+          break;
+        case WORK_POLIGON_TYPES.ECD_SECTOR:
+          findUserAndSetChosenStatus(state.sectorPersonal.ECDSectorsShift);
+          break;
+      }
     },
 
     /**

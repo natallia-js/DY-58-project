@@ -130,7 +130,7 @@
             takeDuty: thisComponent.takeDuty,
           });
 
-          const workPoligons = [];console.log('response.data.stationWorkPoligons',response.data.stationWorkPoligons)
+          const workPoligons = [];
           if (response.data.stationWorkPoligons && response.data.stationWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.STATION,

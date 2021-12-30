@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :header="`Выбор получателя среди ${personalPost} ${sector}`"
+    :header="`Выбор получателя среди ${personalPost} ${sectorName || ''}`"
     v-model:visible="dlgVisible"
     style="width:auto; maxWidth:50%"
     :modal="true"
@@ -56,7 +56,14 @@
         type: Object,
         required: false,
       },
-      sector: {
+      sectorId: {
+        type: Number,
+        required: true,
+      },
+      sectorName: {
+        type: String,
+      },
+      workPoligonType: {
         type: String,
         required: true,
       },
@@ -73,12 +80,22 @@
 
     methods: {
       chooseUser() {
-        this.$store.commit('setUserChosenStatus', { userId: this.selectedUser.id, chooseUser: true });
+        this.$store.commit('setUserChosenStatus', {
+          userId: this.selectedUser.id,
+          chooseUser: true,
+          workPoligonType: this.workPoligonType,
+          workPoligonId: this.sectorId,
+        });
         this.closeDialog();
       },
 
       unChooseUser() {
-        this.$store.commit('setUserChosenStatus', { userId: this.selectedUser.id, chooseUser: false });
+        this.$store.commit('setUserChosenStatus', {
+          userId: this.selectedUser.id,
+          chooseUser: false,
+          workPoligonType: this.workPoligonType,
+          workPoligonId: this.sectorId,
+        });
         this.selectedUser = null;
         this.closeDialog();
       },

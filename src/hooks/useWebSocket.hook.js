@@ -41,6 +41,10 @@ export default function useWebSocket({ socketUrl }) {
     }
   }
 
+  function isConnectionOpen() {
+    return state.ws.readyState === 1;
+  }
+
   // retryNum dependency here triggers the connection attempt
   watch(retryNum, (newRetryNum) => {
     if (newRetryNum === 0 || !retryOnCloseWSConnection.value) {
@@ -51,6 +55,9 @@ export default function useWebSocket({ socketUrl }) {
 
     const sendMessageToServer = (message) => {
       try {
+        if (!isConnectionOpen()) {
+          return false;
+        }
         state.ws.send(JSON.stringify(message));
         return true;
       } catch (err) {

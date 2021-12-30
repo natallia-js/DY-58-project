@@ -1,15 +1,17 @@
 import { reactive, watch } from 'vue';
 import { minLength, required  } from '@vuelidate/validators';
-import { ORDER_ELEMENTS_CAN_BE_EMPTY } from '../../../constants/orders';
-import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '../../../constants/orderPatterns';
+import { ORDER_ELEMENTS_CAN_BE_EMPTY } from '@/constants/orders';
+import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '@/constants/orderPatterns';
+import isValidDateTime from '@/additional/isValidDateTime';
 
 /**
  * Данный модуль предназначен для проверки параметров издаваемого распоряжения.
  */
 export const useNewOrderValidationRules = (state, props, relatedOrderObject) => {
+
   const endDateNoLessStartDate = (value) => {
     return !value ? true :
-      !state.timeSpan.start ? true : value >= state.timeSpan.start;}
+      !state.timeSpan.start ? true : (isValidDateTime(value) && value >= state.timeSpan.start);}
 
   const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
@@ -28,6 +30,16 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     return true;
   };
 
+  const checkOrderTextDateTimeParams = (orderText) => {
+    for (let orderTextElement of orderText) {
+      if ([OrderPatternElementType.DATE, OrderPatternElementType.TIME, OrderPatternElementType.DATETIME]
+        .includes(orderTextElement.type) && !isValidDateTime(orderTextElement.value)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const cancelOrderDateTimeNoLessOrderStartDate = (value) => {
     if (!relatedOrderObject.value) {
       return true;
@@ -39,7 +51,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     orderTextSource: { required },
     patternId: {},
     orderTitle: { required },
-    orderText: { required, orderTextFieldsNotEmpty },
+    orderText: { required, orderTextFieldsNotEmpty, checkOrderTextDateTimeParams },
   };
 
   const placeRules = {
@@ -48,7 +60,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   };
 
   const timeSpanRules = {
-    start: { required },
+    start: { required, isValidDateTime },
     end: { endDateNoLessStartDate },
     tillCancellation: { cancelOrEndDate },
   };
@@ -79,7 +91,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       break;
     case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
       rules.prevRelatedOrder = { required };
-      rules.cancelOrderDateTime = { required, cancelOrderDateTimeNoLessOrderStartDate };
+      rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
     case ORDER_PATTERN_TYPES.NOTIFICATION:

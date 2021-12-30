@@ -13,6 +13,8 @@ export const workOrders = {
   state: {
     data: [],
 
+    newIncomingOrders: false,
+
     startDateToGetData: new Date(),
     loadingWorkOrders: false,
     loadingWorkOrdersResult: null,
@@ -56,6 +58,7 @@ export const workOrders = {
     ...reportOnOrdersDelivery.mutations,
     ...getWorkOrders.mutations,
     ...confirmOrder.mutations,
+    ...incomingOrders.mutations,
     ...incomingOrdersPerShift.mutations,
     ...delWorkOrdersChains.mutations,
   },

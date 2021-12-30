@@ -70,7 +70,7 @@ export const contextMenus = {
             }
           );
         }
-        if (getters.isDNC || getters.isDSP) {
+        if (getters.isDNC || getters.isDSP_or_DSPoperator) {
           items.push(
             {
               label: `Создать ${ORDER_PATTERN_TYPES.REQUEST.toUpperCase()}`,

@@ -5,7 +5,9 @@
       :personal="sectorPersonal"
       :selectedPerson="selectedPerson"
       :personalPost="getDSPPost"
-      :sector="station"
+      :sectorId="sectorId"
+      :sectorName="sectorName"
+      :workPoligonType="workPoligonTypes.STATION"
       @close="hideChoosePersonDlg"
     ></ShowChoosePersonDlg>
     <DataTable
@@ -51,6 +53,7 @@
                   slotProps.data.fioId
                     ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline }
                     : null,
+                  slotProps.data.id,
                   slotProps.data.station
                 )"
               >
@@ -122,6 +125,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
+  import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
   import {
     CurrStationsShiftTblColumnNames,
     CurrStationsShiftTblColumns,
@@ -138,7 +142,8 @@
         showChoosePersonDlg: false,
         sectorPersonal: [],
         selectedPerson: null,
-        station: '',
+        sectorId: -1,
+        sectorName: null,
       };
     },
 
@@ -165,6 +170,10 @@
 
       getDSPPost() {
         return ReceiversPosts.DSP;
+      },
+
+      workPoligonTypes() {
+        return WORK_POLIGON_TYPES;
       },
     },
 
@@ -227,10 +236,11 @@
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
-      openChoosePersonDlg(people, selectedPerson, station) {
+      openChoosePersonDlg(people, selectedPerson, sectorId, sectorName) {
         this.sectorPersonal = people || [];
         this.selectedPerson = selectedPerson;
-        this.station = station;
+        this.sectorId = sectorId;
+        this.sectorName = sectorName;
         this.showChoosePersonDlg = true;
       },
 

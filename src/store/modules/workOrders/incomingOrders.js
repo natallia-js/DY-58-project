@@ -9,6 +9,10 @@ import { upperCaseFirst } from '../../../additional/stringFunctions';
  */
 export const incomingOrders = {
   getters: {
+    thereAreNewIncomingOrders(state) {
+      return state.newIncomingOrders;
+    },
+
     /**
      * Возвращает массив входящих распоряжений (в том порядке, в котором они были получены с сервера).
      */
@@ -74,6 +78,12 @@ export const incomingOrders = {
       return (id) => {
         return state.data.find((item) => item._id === id);
       };
+    },
+  },
+
+  mutations: {
+    notifiedAboutNewIncomingOrders(state) {
+      state.newIncomingOrders = false;
     },
   },
 };

@@ -16,18 +16,17 @@ export const checkUserAuthority = {
     },
 
     /**
-     * Подтвердить распоряжение за других может лишь находящийся на дежурстве пользователь, который
-     * не является работником вложенного рабочего полигона (например, не является оператором при ДСП).
+     * Подтвердить распоряжение за других может лишь находящийся на дежурстве пользователь.
      */
     canUserConfirmOrderForOthers(_state, getters) {
-      return getters.isUserOnDuty && getters.getUserWorkPoligon && !getters.getUserWorkPoligon.subCode;
+      return getters.isUserOnDuty;
     },
 
     /**
-     * Издавать распоряжения может лишь пользователь, принявший дежурство, но не оператор при ДСП.
+     * Издавать распоряжения может лишь пользователь, принявший дежурство.
      */
      canUserDispatchOrders(_state, getters) {
-      return getters.isUserOnDuty && !getters.isDSPoperator;
+      return getters.isUserOnDuty;
     },
   },
 };

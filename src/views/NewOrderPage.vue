@@ -18,18 +18,18 @@
         :prevOrderId="this.$route.params.prevOrderId"
       />
     </TabPanel>
-    <TabPanel v-if="isDNC || isDSP" :header="getOrderTypes.REQUEST">
+    <TabPanel v-if="isDNC || isDSP_or_DSPoperator" :header="getOrderTypes.REQUEST">
       <new-order
         :orderType="getOrderTypes.REQUEST"
         :prevOrderId="this.$route.params.prevOrderId"
       />
     </TabPanel>
     <TabPanel
-      v-if="isDNC || isECD || isDSP"
-      :header="isDNC || isDSP ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION"
+      v-if="isDNC || isECD || isDSP_or_DSPoperator"
+      :header="isDNC || isDSP_or_DSPoperator ? getOrderTypes.NOTIFICATION : getOrderTypes.ECD_NOTIFICATION"
     >
       <new-order
-        v-if="isDNC || isDSP"
+        v-if="isDNC || isDSP_or_DSPoperator"
         :orderType="getOrderTypes.NOTIFICATION"
         :prevOrderId="this.$route.params.prevOrderId"
       />
@@ -68,7 +68,7 @@
     computed: {
       ...mapGetters([
         'canUserDispatchOrders',
-        'isDSP',
+        'isDSP_or_DSPoperator',
         'isDNC',
         'isECD',
       ]),
@@ -96,7 +96,7 @@
           }
           break;
         case ORDER_PATTERN_TYPES.NOTIFICATION:
-          if (this.isDSP) {
+          if (this.isDSP_or_DSPoperator) {
             this.activeIndex = 1;
           }
           else if (this.isDNC) {

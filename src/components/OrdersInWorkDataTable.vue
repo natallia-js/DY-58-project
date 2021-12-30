@@ -1,5 +1,14 @@
 <template>
   <div>
+    <ShowIncomingOrderDlg
+      :showDlg="showIncomingOrderDlg"
+      dlgTitle="Информация о рабочем распоряжении"
+      :order="chosenOrder"
+      :orderNeedsToBeConfirmed="false"
+      @close="hideOrderInfo"
+    >
+    </ShowIncomingOrderDlg>
+
     <ContextMenu ref="menu" :model="workOrdersTableContextMenuItems" />
 
     <DataTable
@@ -42,8 +51,7 @@
             >
               {{ slotProps.data[col.field] }}
             </span>
-            <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus"
-            >
+            <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
               <p v-if="slotProps.data[col.field].notDelivered > 0">
                 <span class="p-mr-2">Не доставлено:</span>
                 <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDelivered"></Badge>
@@ -55,12 +63,42 @@
             </div>
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.state">
               <i v-if="isOrderBeingConfirmedForOthers(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
-              <img
-                :src="slotProps.data[col.field] === getWorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
-                      (slotProps.data[col.field] === getWorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
-                :alt="slotProps.data[col.field]"
-                class="dy58-order-state-img-style"
-              />
+              <div v-else>
+                <div class="p-mb-1">
+                  <Button
+                    icon="pi pi-ellipsis-h"
+                    class="p-button-info p-button-sm dy58-order-action-button"
+                    v-tooltip.bottom="'Подробнее'"
+                    @click="() => showOrderInfo(slotProps.data)"
+                  />
+                </div>
+                <div class="p-mb-1">
+                  <Button
+                    v-if="canUserDelConfirmedOrdersChains"
+                    icon="pi pi-times"
+                    class="p-button-secondary p-button-sm dy58-order-action-button"
+                    v-tooltip.bottom="slotProps.data.chainMembersNumber > 1 ? 'Не показывать цепочку' : 'Не показывать'"
+                    @click="() => deleteOrdersChain(slotProps.data.orderChainId)"
+                  />
+                </div>
+                <div>
+                  <TieredMenu
+                    :ref="`createOrderMenu${slotProps.data.id}`"
+                    :model="createRelativeOrderContextMenuItems(slotProps.data.id)"
+                    :popup="true"
+                    :id="`overlay_tmenu${slotProps.data.id}`"
+                  />
+                  <Button
+                    v-if="canUserDispatchOrders && getActiveOrders.find((order) => order._id === slotProps.data.id)"
+                    icon="pi pi-file"
+                    class="p-button-success p-button-sm dy58-order-action-button"
+                    v-tooltip.bottom="'Создать'"
+                    @click="(event) => $refs[`createOrderMenu${slotProps.data.id}`].toggle(event)"
+                    aria-haspopup="true"
+                    :aria-controls="`overlay_tmenu${slotProps.data.id}`"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </template>
@@ -99,7 +137,7 @@
                       {{ getDateTimeString(slotProps2.data[col2.field]) }}
                     </span>
                     <Button
-                      v-else-if="isUserOnDuty &&
+                      v-else-if="canUserConfirmOrderForOthers &&
                         !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
                         !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
                         orderCanBeConfirmedFor(slotProps.data)"
@@ -112,7 +150,7 @@
               </Column>
             </DataTable>
             <div style="text-align:right"
-              v-if="isUserOnDuty &&
+              v-if="canUserConfirmOrderForOthers &&
                 !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
                 !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
                 orderCanBeConfirmedFor(slotProps.data) &&
@@ -137,14 +175,21 @@
   import { mapGetters } from 'vuex';
   import { WorkMessStates } from '../constants/orders';
   import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
+  import ShowIncomingOrderDlg from '../components/ShowIncomingOrderDlg';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
+
+    components: {
+      ShowIncomingOrderDlg,
+    },
 
     data() {
       return {
         expandedRows: [],
         selectedWorkOrdersTableRecord: null,
+        showIncomingOrderDlg: false,
+        chosenOrder: null,
       };
     },
 
@@ -159,10 +204,12 @@
         'getOrderUnconfirmedWorkPoligons',
         'getUserWorkPoligon',
         'isOrderBeingConfirmedForOthers',
-        'isUserOnDuty',
+        'canUserConfirmOrderForOthers',
+        'canUserDispatchOrders',
         'canUserDelConfirmedOrdersChains',
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
+        'getActiveOrders',
       ]),
 
       getWorkMessStates() {
@@ -224,6 +271,24 @@
     },
 
     methods: {
+      createRelativeOrderContextMenuItems(orderId) {
+        return this.getCreateRelativeOrderContextMenu(orderId);
+      },
+
+      showOrderInfo(order) {
+        this.chosenOrder = order;
+        this.showIncomingOrderDlg = true;
+      },
+
+      hideOrderInfo() {
+        this.chosenOrder = null;
+        this.showIncomingOrderDlg = false;
+      },
+
+      deleteOrdersChain(chainId) {
+        this.getDeleteOrdersChainAction(chainId, this.$confirm);
+      },
+
       handleWorkOrdersTableRightClick(event) {
         this.$refs.menu.show(event.originalEvent);
       },

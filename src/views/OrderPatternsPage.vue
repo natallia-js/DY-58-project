@@ -3,7 +3,7 @@
     <TabPanel header="Шаблоны по категориям">
       <order-patterns-tree />
     </TabPanel>
-    <TabPanel header="Создать шаблон">
+    <TabPanel v-if="!isDNC && !isECD" header="Создать шаблон">
       <create-order-pattern />
     </TabPanel>
   </TabView>
@@ -11,6 +11,7 @@
 
 
 <script>
+  import { mapGetters } from 'vuex';
   import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
   import OrderPatternsTree from '../components/OrderPatterns/OrderPatternsTree';
   import CreateOrderPattern from '../components/OrderPatterns/CreateOrderPattern';
@@ -24,6 +25,11 @@
     },
 
     computed: {
+      ...mapGetters([
+        'isDNC',
+        'isECD',
+      ]),
+
       getMainMenuItemsKeys() {
         return MainMenuItemsKeys;
       },

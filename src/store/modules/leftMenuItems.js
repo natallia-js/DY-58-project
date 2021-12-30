@@ -54,11 +54,6 @@ export const leftMenuItems = {
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ПВ', 'ПД', 'ПВПД']),
         },
         {
-          label: 'Поезда Т, Д, ТД',
-          itemClass: 'dy58-subitem',
-          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['Т', 'Д', 'ТД']),
-        },
-        {
           label: 'Поезда ВМ',
           itemClass: 'dy58-subitem',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ВМ']),

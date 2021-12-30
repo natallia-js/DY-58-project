@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
 import { OrderPatternElementType } from '../../../constants/orderPatterns';
-import { ReceiversPosts, WorkMessStates, RECENTLY } from '../../../constants/orders';
+import { ReceiversPosts } from '../../../constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/dateTimeConvertions';
 import { formOrderText } from '../../../additional/formOrderText';
 import { upperCaseFirst } from '../../../additional/stringFunctions';
@@ -239,7 +239,6 @@ export const getWorkOrders = {
      * Может использоваться для отображения списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
-      const now = new Date();
       return getters.getRawWorkingOrders
         .sort((a, b) => {
           if (a.createDateTime < b.createDateTime) {
@@ -253,11 +252,13 @@ export const getWorkOrders = {
         .map((item, index) => {
           return {
             id: item._id,
-            createDateTime: item.createDateTime,
+            type: item.type,
+            //createDateTime: item.createDateTime,
             sendOriginal: item.sendOriginal,
-            state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
+            state: '',
             seqNum: index + 1,
-            time: getTimeSpanString(item.timeSpan, getters.isECD),
+            time: getLocaleDateTimeString(item.createDateTime, false),
+            timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
             extendedOrderTitle: `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
             orderTitle: item.orderText.orderTitle,
@@ -287,6 +288,7 @@ export const getWorkOrders = {
                 (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
             },
             orderChainId: item.orderChainId,
+            chainMembersNumber: getters.getRawWorkingOrders.filter((el) => el.orderChainId === item.orderChainId).length,
             receivers: function() {
               const receiversArray = [];
               if (item.dspToSend) {
@@ -449,6 +451,9 @@ export const getWorkOrders = {
       }
       if (!state.data || !state.data.length) {
         state.data = newData.map((order) => getWorkOrderObject(order));
+        if (state.data.find((order) => !order.confirmDateTime)) {
+          state.newIncomingOrders = true;
+        }
         return;
       }
       // Вначале удалим те элементы существующего массива, которых нет в новом массиве
@@ -466,6 +471,9 @@ export const getWorkOrders = {
       newData.forEach((order) => {
         const existingOrderIndex = state.data.findIndex((item) => item._id === order._id);
         if (existingOrderIndex < 0) {
+          if (!order.deliverDateTime) {
+            state.newIncomingOrders = true;
+          }
           state.data.push(getWorkOrderObject(order));
         } else {
           const modifiedObject = getWorkOrderObject(order);

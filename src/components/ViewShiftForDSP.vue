@@ -7,7 +7,8 @@
       </div>
       <div v-else>
         <p v-for="user of currentStationShift" :key="user._id" :class="['p-ml-4', { 'dy58-info': user.online }]">
-          {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
+          {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
+          ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
         </p>
       </div>
     </Fieldset>
@@ -23,7 +24,8 @@
           </div>
           <div v-else>
             <p v-for="user of station.people" :key="user._id" :class="['p-ml-4', { 'dy58-info': user.online }]">
-              {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
+              {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
+              ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
             </p>
           </div>
         </div>

@@ -4088,7 +4088,7 @@
 }
 .p-menubar .p-submenu-list {
   padding: 0.5rem 0;
-  background: black;/*#ffffff;*/
+  background: #303B44;/*#ffffff;*/
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: none;
   width: 12.5rem;

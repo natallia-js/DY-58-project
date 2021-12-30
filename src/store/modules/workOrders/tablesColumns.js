@@ -20,7 +20,7 @@ const WorkMessTblColumnsTitles = Object.freeze({
   expander: 'expander',
   state: 'state',
   seqNum: 'seqNum',
-  time: 'time',
+  timeSpan: 'timeSpan', // время действия распоряжения
   orderNum: 'orderNum',
   extendedOrderTitle: 'extendedOrderTitle',
   orderReceiveStatus: 'orderReceiveStatus',
@@ -97,10 +97,10 @@ export const tablesColumns = {
     getWorkMessTblColumns() {
       return [
         { field: WorkMessTblColumnsTitles.expander, title: '', width: '5%', align: 'center' },
-        { field: WorkMessTblColumnsTitles.state, title: '', width: '4%', align: 'center' },
         { field: WorkMessTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left' },
-        { field: WorkMessTblColumnsTitles.time, title: 'Время действия', width: '10%', align: 'left' },
-        { field: WorkMessTblColumnsTitles.orderNum, title: 'Номер', width: '10%', 'align': 'left' },
+        { field: WorkMessTblColumnsTitles.state, title: 'Действия', width: '4%', align: 'center' },
+        { field: WorkMessTblColumnsTitles.orderNum, title: 'Номер', width: '5%', 'align': 'left' },
+        { field: WorkMessTblColumnsTitles.timeSpan, title: 'Время действия', width: '15%', align: 'left' },
         { field: WorkMessTblColumnsTitles.extendedOrderTitle, title: 'Наименование', width: '44%', align: 'left' },
         { field: WorkMessTblColumnsTitles.orderReceiveStatus, title: 'Статус', width: '23%', align: 'left' },
       ];

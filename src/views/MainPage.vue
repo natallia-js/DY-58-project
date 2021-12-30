@@ -7,6 +7,7 @@
     <div class="p-col-3 dy58-left-menu-panel">
       <Button v-if="isDSP" label="Warning" class="p-button-raised p-button-warning p-mb-2" style="width:100%" />
       <side-menu />
+      <AppSettings />
     </div>
     <div class="p-col-9" style="flex:1">
       <div class="p-d-flex p-flex-column">
@@ -66,6 +67,7 @@
   import OrdersInWorkTree from '@/components/OrdersInWorkTree.vue';
   import showMessage from '../hooks/showMessage.hook';
   import { useStore } from 'vuex';
+  import AppSettings from '@/components/AppSettings';
 
   export default {
     name: 'dy58-main-page',
@@ -75,6 +77,7 @@
       IncomingNotificationsDataTable,
       OrdersInWorkDataTable,
       OrdersInWorkTree,
+      AppSettings,
     },
 
     setup() {
@@ -85,16 +88,11 @@
         startDateToGetData: new Date(),
       });
 
-      const getCurrDateTimeString = computed(() => store.getters.getCurrDateTimeString);
-
       const getLoadingWorkOrdersStatus = computed(() => store.getters.getLoadingWorkOrdersStatus);
       const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
       const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
 
-      const getMainMenuItemsKeys = computed(() => MainMenuItemsKeys);
-
-      const changedStartDateToGetData = computed(() => state.startDateToGetData);
-      watch(changedStartDateToGetData, (newVal) => {
+      watch(() => state.startDateToGetData, (newVal) => {
         store.commit('setStartDateToGetDataNoCheck', newVal);
       });
 
@@ -103,8 +101,7 @@
         state.startDateToGetData = newVal;
       });
 
-      const deleteOrdersChainsResults = computed(() => store.getters.getDeleteOrdersChainsResultsUnseenByUser);
-      watch(deleteOrdersChainsResults, (newVal) => {
+      watch(() => store.getters.getDeleteOrdersChainsResultsUnseenByUser, (newVal) => {
         newVal.forEach((result) => {
           if (result.error) {
             showErrMessage(result.message);
@@ -115,8 +112,7 @@
         });
       });
 
-      const confirmIncomingOrdersResults = computed(() => store.getters.getConfirmOrdersResultsUnseenByUser);
-      watch(confirmIncomingOrdersResults, (newVal) => {
+      watch(() => store.getters.getConfirmOrdersResultsUnseenByUser, (newVal) => {
         newVal.forEach((result) => {
           if (result.error) {
             showErrMessage(result.message);
@@ -127,8 +123,7 @@
         });
       });
 
-      const confirmIncomingOrdersForOthersResults = computed(() => store.getters.getConfirmOrdersForOthersResultsUnseenByUser);
-      watch(confirmIncomingOrdersForOthersResults, (newVal) => {
+      watch(() => store.getters.getConfirmOrdersForOthersResultsUnseenByUser, (newVal) => {
         newVal.forEach((result) => {
           if (result.error) {
             showErrMessage(result.message);
@@ -140,20 +135,18 @@
       });
 
       onMounted(() => {
-        store.commit('setActiveMainMenuItem', getMainMenuItemsKeys.value.mainPage);
+        store.commit('setActiveMainMenuItem', MainMenuItemsKeys.mainPage);
         state.startDateToGetData = getStartDateToGetData.value;
       });
 
       return {
         state,
-        getCurrDateTimeString,
         getStartDateToGetData,
         getLoadingWorkOrdersStatus,
         getWorkingOrdersNumber,
         getErrorLoadingWorkOrders,
         isDSP: store.getters.isDSP,
         isDSP_or_DSPoperator: store.getters.isDSP_or_DSPoperator,
-        getMainMenuItemsKeys,
       };
     },
   };

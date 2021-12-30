@@ -45,6 +45,8 @@ import MultiSelect from 'primevue/multiselect';
 import Menubar from 'primevue/menubar';
 import ConfirmDialog from 'primevue/confirmdialog';
 import TieredMenu from 'primevue/tieredmenu';
+import Slider from 'primevue/slider';
+import Panel from 'primevue/panel';
 
 const app = createApp(App);
 
@@ -87,4 +89,7 @@ app.component('Listbox', Listbox);
 app.component('MultiSelect', MultiSelect);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('TieredMenu', TieredMenu);
+app.component('Slider', Slider);
+app.component('Panel', Panel);
+
 app.mount('#app');

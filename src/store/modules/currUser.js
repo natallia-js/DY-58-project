@@ -18,7 +18,6 @@ import { getRequestAuthorizationHeader } from '../../serverRequests/common';
  */
 function checkUserAuthData(payload) {
   const { userId, jtwToken, userInfo, credentials, workPoligons } = payload;
-  console.log('workPoligons',workPoligons)
 
   if (!userId) {
     throw new Error('Не указан id пользователя для входа в Систему. Обратитесь к Администратору Системы');
@@ -66,7 +65,7 @@ function checkUserAuthData(payload) {
   let workPoligonExists = false; // будет true, если хотя бы для одного из типов полномочий существует хотя бы один рабочий полигон
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
-    if (cred === APP_CREDENTIALS.DSP_FULL) {
+    if (cred === APP_CREDENTIALS.DSP_FULL || cred === APP_CREDENTIALS.DSP_Operator) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
         obj.poligons = [];
@@ -74,16 +73,6 @@ function checkUserAuthData(payload) {
         obj.poligons = [{
           type: WORK_POLIGON_TYPES.STATION,
           workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && !wp.subPoligonId),
-        }];
-      }
-    } else if (cred === APP_CREDENTIALS.DSP_Operator) {
-      const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
-      if (!poligon) {
-        obj.poligons = [];
-      } else {
-        obj.poligons = [{
-          type: WORK_POLIGON_TYPES.STATION,
-          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId),
         }];
       }
     } else if (cred === APP_CREDENTIALS.DNC_FULL) {

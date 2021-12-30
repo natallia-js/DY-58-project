@@ -106,9 +106,8 @@
                 hourFormat="24"
                 :hideOnDateTimeSelect="true"
                 :showIcon="true"
-                :manualInput="false"
+                :manualInput="true"
                 v-model="v$.cancelOrderDateTime.$model"
-                @dateSelect="handleChangeCancelOrderDateTime"
               />
               <br/>
               <small
@@ -317,13 +316,14 @@
   import DNCToSendOrderDataTable from '../DNCToSendOrderDataTable';
   import ECDToSendOrderDataTable from '../ECDToSendOrderDataTable';
   import OtherToSendOrderDataTable from '../OtherToSendOrderDataTable';
-  import { OrderInputTypes } from '../../../constants/orderInputTypes';
+  import { OrderInputTypes } from '@/constants/orderInputTypes';
   import OrderPlaceChooser from '../OrderPlaceChooser';
   import OrderTimeSpanChooser from '../OrderTimeSpanChooser';
   import OrderText from '../OrderText';
-  import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
+  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import PreviewNewOrderDlg from '../PreviewNewOrderDlg';
-  import showMessage from '../../../hooks/showMessage.hook';
+  import showMessage from '@/hooks/showMessage.hook';
+  import isValidDateTime from '@/additional/isValidDateTime';
 
   export default {
     name: 'dy58-new-order-block',
@@ -484,6 +484,7 @@
        * После загрузки компонента отображаем online-пользователей станций и участков в секции "Кому"
        */
       onMounted(() => {
+        store.commit('clearShiftForSendingData');
         store.commit('chooseOnlyOnlinePersonal');
       });
 
@@ -493,11 +494,11 @@
        * например, когда необходимо отменить в то же время, когда оно начало действовать, если издано
        * было случайно).
        */
-      const handleChangeCancelOrderDateTime = (value) => {
-        if (value) {
+      watch(() => state.cancelOrderDateTime, (value) => {
+        if (value && isValidDateTime(value)) {
           state.cancelOrderDateTime.setSeconds(0, 0);
         }
-      };
+      });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
@@ -595,7 +596,6 @@
         selectedECDString,
         selectedOtherAddresseesString,
         getDispatchOrdersBeingProcessed: dispatchOrderObject.getDispatchOrdersBeingProcessed,
-        handleChangeCancelOrderDateTime,
         hidePreviewNewOrderDlg,
         getIssuedOrderPlaceObject: dispatchOrderObject.getIssuedOrderPlaceObject,
         getPreviewOrderTimeSpanObject: dispatchOrderObject.getPreviewOrderTimeSpanObject,

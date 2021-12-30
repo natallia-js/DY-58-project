@@ -8,9 +8,8 @@
           hourFormat="24"
           :hideOnDateTimeSelect="true"
           :showIcon="true"
-          :manualInput="false"
+          :manualInput="true"
           v-model="state.startDateTime"
-          @dateSelect="handleChangeStartDateTime"
         />
       </div>
     </div>
@@ -22,9 +21,8 @@
           hourFormat="24"
           :showIcon="true"
           :hideOnDateTimeSelect="true"
-          :manualInput="false"
+          :manualInput="true"
           v-model="state.endDateTime"
-          @dateSelect="handleChangeEndDateTime"
         />
       </div>
     </div>
@@ -41,8 +39,9 @@
 
 
 <script>
-  import { computed, reactive, watch } from 'vue';
+  import { reactive, watch } from 'vue';
   import { useStore } from 'vuex';
+  import isValidDateTime from '@/additional/isValidDateTime';
 
   export default {
     name: 'dy58-order-timespan-chooser',
@@ -58,14 +57,8 @@
         tillCancellation: false,
       });
 
-      const isDNC = computed(() => store.getters.isDNC);
-
-      const getTillCancellation = computed(() => {
-        return state.tillCancellation;
-      });
-
-      const handleChangeStartDateTime = (value) => {
-        if (value) {
+      watch(() => state.startDateTime, (value) => {
+        if (value && isValidDateTime(value)) {
           state.startDateTime.setSeconds(0, 0);
         }
         emit('input', {
@@ -73,10 +66,10 @@
           end: state.tillCancellation ? null : state.endDateTime,
           tillCancellation: state.tillCancellation,
         });
-      };
+      });
 
-      const handleChangeEndDateTime = (value) => {
-        if (value) {
+      watch(() => state.endDateTime, (value) => {
+        if (value && isValidDateTime(value)) {
           state.endDateTime.setSeconds(0, 0);
         }
         emit('input', {
@@ -84,9 +77,9 @@
           end: state.tillCancellation ? null : state.endDateTime,
           tillCancellation: state.tillCancellation,
         });
-      };
+      });
 
-      watch(getTillCancellation, (newVal) => {
+      watch(() => state.tillCancellation, (newVal) => {
         emit('input', {
           start: state.startDateTime,
           end: newVal ? null : state.endDateTime,
@@ -96,9 +89,7 @@
 
       return {
         state,
-        isDNC,
-        handleChangeStartDateTime,
-        handleChangeEndDateTime,
+        isDNC: store.getters.isDNC,
       };
     },
   };
