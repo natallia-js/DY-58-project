@@ -4,7 +4,7 @@
   <PreviewNewOrderDlg
     :showDlg="state.showPreviewNewOrderDlg"
     :type="orderType"
-    :number="state.number"
+    :number="+state.number"
     :prevRelatedOrder="relatedOrderObject"
     :place="getIssuedOrderPlaceObject"
     :timeSpan="getPreviewOrderTimeSpanObject"
@@ -36,19 +36,49 @@
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
 
         <div class="p-field p-col-4 p-d-flex p-flex-column p-m-0">
+          <OverlayPanel
+            ref="newNumberOverlayPanel"
+            appendTo="body"
+            :showCloseIcon="true"
+            id="new-number-overlay_panel"
+            style="width:200px"
+            :breakpoints="{'960px':'75vw'}"
+          >
+            <div class="p-d-flex p-flex-column">
+              <label for="newNumber" :class="{'p-error':v$.number.$invalid && submitted,'p-mb-2':true}">
+                <span class="p-text-bold"><span style="color:red">*</span> Новый номер</span>
+              </label>
+              <InputText
+                id="newNumber"
+                v-model="v$.number.$model"
+                :class="{'p-invalid':v$.number.$invalid && submitted}"
+              />
+            </div>
+          </OverlayPanel>
           <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
           </label>
-          <InputText
-            id="number"
-            v-model="v$.number.$model"
-            :class="{'p-invalid':v$.number.$invalid && submitted}"
-          />
+          <div class="p-inputgroup">
+            <InputText
+              id="number"
+              disabled
+              v-model="v$.number.$model"
+              :class="{'p-invalid':v$.number.$invalid && submitted}"
+            />
+            <Button
+              icon="pi pi-times-circle"
+              class="p-button-outlined dy58-addon-button"
+              v-tooltip.bottom="'Нарушить текущую нумерацию'"
+              @click="changeOrderNumber"
+              aria:haspopup="true"
+              aria-controls="new-number-overlay_panel"
+            />
+          </div>
           <small
             v-if="(v$.number.$invalid && submitted) || v$.number.$pending.$response"
             class="p-error"
           >
-            Не указан номер распоряжения
+            Не указан/неверно указан номер распоряжения
           </small>
         </div>
 
@@ -68,7 +98,7 @@
             v-if="(v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response"
             class="p-error"
           >
-            Не определены дата и время создания распоряжения
+            Не определены/неверно определены дата и время создания распоряжения
           </small>
         </div>
 
@@ -444,8 +474,7 @@
       const v$ = useVuelidate(rules, state);
 
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
-      const nextOrderNumber = computed(() => store.getters.getNextOrdersNumber(props.orderType));
-      watch(nextOrderNumber, (newVal) => state.number = newVal);
+      watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
       const getOrderTypes = computed(() => ORDER_PATTERN_TYPES);
       const isDNC = computed(() => store.getters.isDNC);
@@ -573,6 +602,11 @@
         state.showPreviewNewOrderDlg = true;
       };
 
+      const newNumberOverlayPanel = ref();
+      const changeOrderNumber = (event) => {
+        newNumberOverlayPanel.value.toggle(event);
+      };
+
       return {
         state,
         showOnGIDOptions,
@@ -603,6 +637,8 @@
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
         getOrderPatternSpecialTrainCategoriesString,
+        newNumberOverlayPanel,
+        changeOrderNumber,
       };
     },
   };

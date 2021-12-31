@@ -47,6 +47,7 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import TieredMenu from 'primevue/tieredmenu';
 import Slider from 'primevue/slider';
 import Panel from 'primevue/panel';
+import OverlayPanel from 'primevue/overlaypanel';
 
 const app = createApp(App);
 
@@ -91,5 +92,6 @@ app.component('ConfirmDialog', ConfirmDialog);
 app.component('TieredMenu', TieredMenu);
 app.component('Slider', Slider);
 app.component('Panel', Panel);
+app.component('OverlayPanel', OverlayPanel);
 
 app.mount('#app');

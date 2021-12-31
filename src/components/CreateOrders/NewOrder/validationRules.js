@@ -3,6 +3,7 @@ import { minLength, required  } from '@vuelidate/validators';
 import { ORDER_ELEMENTS_CAN_BE_EMPTY } from '@/constants/orders';
 import { ORDER_PATTERN_TYPES, OrderPatternElementType } from '@/constants/orderPatterns';
 import isValidDateTime from '@/additional/isValidDateTime';
+import isNumber from '@/additional/isNumber';
 
 /**
  * Данный модуль предназначен для проверки параметров издаваемого распоряжения.
@@ -66,8 +67,8 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   };
 
   const rules = reactive({
-    number: { required },
-    createDateTime: { required },
+    number: { required, isNumber },
+    createDateTime: { required, isValidDateTime },
     createDateTimeString: { required },
     orderText: orderTextRules,
     // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю

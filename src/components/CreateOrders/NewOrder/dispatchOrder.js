@@ -71,7 +71,7 @@ export const useDispatchOrder = (inputVals) => {
 
     store.dispatch('dispatchOrder', {
       type: props.orderType,
-      number: state.number,
+      number: +state.number,
       createDateTime: state.createDateTime,
       place: getIssuedOrderPlaceObject.value,
       timeSpan: getIssuedOrderTimeSpanObject.value,
