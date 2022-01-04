@@ -5,7 +5,7 @@
         <div class="p-component p-panelmenu-header">
           <a class="p-panelmenu-header-link dy58-item-link">
             <div :class="['p-grid',item.itemClass]" style="width:100%;margin:0;">
-              <div class="p-col-10" style="height:100%;padding:0;">
+              <div class="p-col-10 p-pt-0 p-pb-0 p-pl-0 p-pr-1" style="height:100%">
                 {{ item.label }}
               </div>
               <div class="p-col-2" style="height:100%;padding:0;">

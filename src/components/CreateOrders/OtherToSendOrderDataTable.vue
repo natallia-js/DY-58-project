@@ -109,9 +109,18 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus } from '../../constants/orders';
-  import { OtherShiftTblColumnNames, OtherShiftTblColumns } from '../../store/modules/personal';
-  import ShowOtherReceiverDlg from './ShowOtherReceiverDlg';
+  import { CurrShiftGetOrderStatus } from '@/constants/orders';
+  import { OtherShiftTblColumnNames, OtherShiftTblColumns } from '@/store/modules/personal';
+  import {
+    SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
+    SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+    SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT,
+    ADD_OTHER_GET_ORDER_RECORD,
+    EDIT_OTHER_GET_ORDER_RECORD,
+    DEL_OTHER_GET_ORDER_RECORD,
+    DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
+  } from '@/store/mutation-types';
+  import ShowOtherReceiverDlg from '@/components/CreateOrders/ShowOtherReceiverDlg';
 
   export default {
     name: 'dy58-ecd-to-send-order-data-table',
@@ -177,7 +186,7 @@
         if (!prevVal || prevVal.length < newVal.length) {
           for (let item of newVal) {
             if (!prevVal || !prevVal.find((el) => el.additionalId === item.additionalId)) {
-              this.$store.commit('addOtherGetOrderRecord', { ...item });
+              this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...item });
             }
           }
         }
@@ -185,7 +194,7 @@
           // Проверяем, были ли удалены записи
           for (let item of prevVal) {
             if (!newVal || !newVal.find((el) => el.additionalId === item.additionalId)) {
-              this.$store.commit('delOtherGetOrderRecordByAdditionalId', item.additionalId);
+              this.$store.commit(DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID, item.additionalId);
             }
           }
         }
@@ -194,51 +203,51 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToDefinitSector(otherId) {
-        this.$store.commit('setGetOrderStatusToDefinitOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
           { otherId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToDefinitSector(otherId) {
-        this.$store.commit('setGetOrderStatusToDefinitOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
           { otherId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       doNotSendToDefinitSector(otherId) {
-        this.$store.commit('setGetOrderStatusToDefinitOtherShift',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
           { otherId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       handleInputFromOtherReceiverDlg(userData) {
         if (this.addNewRec) {
-          this.$store.commit('addOtherGetOrderRecord', { ...userData });
+          this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...userData });
         } else {
           this.selectedUser = { ...userData };
-          this.$store.commit('editOtherGetOrderRecord', { ...userData });
+          this.$store.commit(EDIT_OTHER_GET_ORDER_RECORD, { ...userData });
         }
       },
 
@@ -266,7 +275,7 @@
         if (this.selectedUser.additionalId > 0) {
           this.selectedDivisions = this.selectedDivisions.filter((el) => el.additionalId !== this.selectedUser.additionalId);
         }
-        this.$store.commit('delOtherGetOrderRecord', this.selectedUser._id);
+        this.$store.commit(DEL_OTHER_GET_ORDER_RECORD, this.selectedUser._id);
         this.selectedUser = null;
       },
 
@@ -276,7 +285,3 @@
     }
   }
 </script>
-
-
-<style scoped>
-</style>

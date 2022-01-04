@@ -1,7 +1,8 @@
-import { WorkMessStates, RECENTLY } from '../../../constants/orders';
-import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/dateTimeConvertions';
-import { formOrderText } from '../../../additional/formOrderText';
-import { upperCaseFirst } from '../../../additional/stringFunctions';
+import { WorkMessStates, RECENTLY } from '@/constants/orders';
+import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
+import { formOrderText } from '@/additional/formOrderText';
+import { upperCaseFirst } from '@/additional/stringFunctions';
+import { NOTIFIED_ABOUT_NEW_INCOMING_ORDERS } from '@/store/mutation-types';
 
 
 /**
@@ -82,8 +83,10 @@ export const incomingOrders = {
   },
 
   mutations: {
-    notifiedAboutNewIncomingOrders(state) {
-      state.newIncomingOrders = false;
+    [NOTIFIED_ABOUT_NEW_INCOMING_ORDERS] (state) {
+      if (state.newIncomingOrders) {
+        state.newIncomingOrders = false;
+      }
     },
   },
 };

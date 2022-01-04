@@ -25,7 +25,7 @@
 
 <script>
   import OrderPatternElementView from './OrderPatternElementView';
-  import { OrderPatternElementType, ElementSizesCorrespondence } from '../../constants/orderPatterns';
+  import { OrderPatternElementType, ElementSizesCorrespondence } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy58-order-pattern-preview',

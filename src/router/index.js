@@ -1,14 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AuthPage from '../views/AuthPage.vue';
-import SectorStructurePage from '../views/SectorStructurePage.vue';
-import ConfirmAuthDataPage from '../views/ConfirmAuthDataPage.vue';
-import MainPage from '../views/MainPage.vue';
-import NewOrderPage from '../views/NewOrderPage.vue';
-import OrderPatternsPage from '../views/OrderPatternsPage.vue';
-import CurrJournalPage from '../views/CurrJournalPage.vue';
-import ShiftPage from '../views/ShiftPage.vue';
-import HelpPage from '../views/HelpPage.vue';
-import { store } from '../store';
+import AuthPage from '@/views/AuthPage';
+import SectorStructurePage from '@/views/SectorStructurePage';
+import ConfirmAuthDataPage from '@/views/ConfirmAuthDataPage';
+import MainPage from '@/views/MainPage';
+import NewOrderPage from '@/views/NewOrderPage';
+import OrderPatternsPage from '@/views/OrderPatternsPage';
+import CurrJournalPage from '@/views/CurrJournalPage';
+import ShiftPage from '@/views/ShiftPage';
+import HelpPage from '@/views/HelpPage';
+import { store } from '@/store';
+import { TRY_LOGIN_VIA_LOCAL_STORAGE } from '@/store/mutation-types';
 
 const routes = [
   {
@@ -101,7 +102,7 @@ router.beforeEach((to, from, next) => {
     if (!store.getters.isUserAuthenticated) {
       // Нет -> пытаемся аутентифицировать пользователя через localstorage
       // (такое, в частности, возможно при перезагрузке страницы)
-      store.commit('tryLoginViaLocalStorage');
+      store.commit(TRY_LOGIN_VIA_LOCAL_STORAGE);
     }
 
     // Пользователь аутентифицирован?
@@ -140,7 +141,7 @@ router.beforeEach((to, from, next) => {
     // Пользователь не аутентифицирован?
     if (!store.getters.isUserAuthenticated) {
       // Не аутентифицирован -> пытаемся аутентифицировать пользователя через localstorage
-      store.commit('tryLoginViaLocalStorage');
+      store.commit(TRY_LOGIN_VIA_LOCAL_STORAGE);
     }
 
     // Пользователь аутентифицирован?

@@ -6,7 +6,8 @@
 
 
 <script>
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-curr-journal-page',
@@ -18,7 +19,7 @@
     },
 
     mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.currJournal);
+      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.currJournal);
     },
   }
 </script>

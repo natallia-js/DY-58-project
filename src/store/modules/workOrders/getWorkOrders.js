@@ -1,11 +1,21 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
-import { OrderPatternElementType } from '../../../constants/orderPatterns';
-import { ReceiversPosts } from '../../../constants/orders';
-import { getLocaleDateTimeString, getTimeSpanString } from '../../../additional/dateTimeConvertions';
-import { formOrderText } from '../../../additional/formOrderText';
-import { upperCaseFirst } from '../../../additional/stringFunctions';
-import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
+import { OrderPatternElementType } from '@/constants/orderPatterns';
+import { ReceiversPosts } from '@/constants/orders';
+import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
+import { formOrderText } from '@/additional/formOrderText';
+import { upperCaseFirst } from '@/additional/stringFunctions';
+import {
+  CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER,
+  CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
+  CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
+  SET_START_DATE_TO_GET_DATA,
+  SET_START_DATE_TO_GET_DATA_NO_CHECK,
+  CLEAR_LOADING_WORK_ORDERS_RESULT,
+  SET_LOADING_WORK_ORDERS_RESULT,
+  SET_LOADING_WORK_ORDERS_STATUS,
+  SET_NEW_WORK_ORDERS_ARRAY,
+  UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT,
+} from '@/store/mutation-types';
+import { getWorkOrdersFromServer } from '@/serverRequests/orders.requests';
 
 
 function getWorkOrderObject(order) {
@@ -75,6 +85,7 @@ function getWorkOrderObject(order) {
     place: order.place ? { place: order.place.place, value: +order.place.value } : null,
     senderWorkPoligon: order.senderWorkPoligon ? {
       id: order.senderWorkPoligon.id,
+      workPlaceId: order.senderWorkPoligon.workPlaceId,
       type: order.senderWorkPoligon.type,
       title: order.senderWorkPoligon.title,
     } : null,
@@ -86,6 +97,7 @@ function getWorkOrderObject(order) {
     type: order.type,
     workPoligon: order.workPoligon ? {
       id: order.workPoligon.id,
+      workPlaceId: order.workPoligon.workPlaceId,
       type: order.workPoligon.type,
     } : null,
     sendOriginal: order.sendOriginal,
@@ -234,17 +246,36 @@ export const getWorkOrders = {
     },
 
     /**
-     * Возвращает список всех рабочих распоряжений, отсортированный по времени их создания,
-     * со сформированным единым списком получателей распоряжения.
-     * Может использоваться для отображения списка рабочих распоряжений в табличном виде.
+     * Возвращает список всех рабочих распоряжений со сформированным единым списком получателей распоряжения.
+     * Распоряжения сортируются следующим образом.
+     * Вначале идут распоряжения, у которых присутствует статус "не доставлено" и/или "не подтверждено",
+     * отсортированные по времени их создания, за ними следуют все остальные распоряжения, также
+     * отсортированные по времени их создания.
+     * Данная функция может использоваться для отображения списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
+      const isOrderNotDeliveredOrNotConfirmed = (order) => {
+        return getters.getOrderNotDeliveredInstancesNumber(order) > 0 ||
+               getters.getOrderNotConfirmedInstancesNumber(order) > 0;
+      };
+
       return getters.getRawWorkingOrders
         .sort((a, b) => {
           if (a.createDateTime < b.createDateTime) {
             return -1;
           }
           if (a.createDateTime > b.createDateTime) {
+            return 1;
+          }
+          return 0;
+        })
+        .sort((a, b) => {
+          const status_a = isOrderNotDeliveredOrNotConfirmed(a);
+          const status_b = isOrderNotDeliveredOrNotConfirmed(b);
+          if (status_a && !status_b) {
+            return -1;
+          }
+          if (!status_a && status_b) {
             return 1;
           }
           return 0;
@@ -337,12 +368,15 @@ export const getWorkOrders = {
     },
 
     /**
-     * Позволяет получить количество экземпляров не доставленных и находящихся в работе распоряжений.
+     * Для данного распоряжения позволяет получить количество не доставленных до
+     * получателей его экземпляров.
      */
-    getNotDeliveredOrdersNumber(state) {
-      const workingOrders = state.data.filter((item) => item.confirmDateTime);
-      let notDeliveredInstances = 0;
-      workingOrders.forEach((order) => {
+    getOrderNotDeliveredInstancesNumber() {
+      return (order) => {
+        if (!order) {
+          return 0;
+        }
+        let notDeliveredInstances = 0;
         if (order.dspToSend) {
           notDeliveredInstances += order.dspToSend.filter((item) => !item.deliverDateTime).length;
         }
@@ -352,17 +386,20 @@ export const getWorkOrders = {
         if (order.ecdToSend) {
           notDeliveredInstances += order.ecdToSend.filter((item) => !item.deliverDateTime).length;
         }
-      })
-      return notDeliveredInstances;
+        return notDeliveredInstances;
+      };
     },
 
     /**
-     * Позволяет получить количество экземпляров не подтвержденных и находящихся в работе распоряжений.
+     * Для данного распоряжения позволяет получить количество не подтвержденных
+     * получателями его экземпляров.
      */
-    getNotConfirmedOrdersNumber(state) {
-      const workingOrders = state.data.filter((item) => item.confirmDateTime);
-      let notConfirmedInstances = 0;
-      workingOrders.forEach((order) => {
+    getOrderNotConfirmedInstancesNumber() {
+      return (order) => {
+        if (!order) {
+          return 0;
+        }
+        let notConfirmedInstances = 0;
         if (order.dspToSend) {
           notConfirmedInstances += order.dspToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
         }
@@ -372,7 +409,31 @@ export const getWorkOrders = {
         if (order.ecdToSend) {
           notConfirmedInstances += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
         }
-      })
+        return notConfirmedInstances;
+      };
+    },
+
+    /**
+     * Позволяет получить количество экземпляров не доставленных и находящихся в работе распоряжений.
+     */
+    getNotDeliveredOrdersNumber(state, getters) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      let notDeliveredInstances = 0;
+      workingOrders.forEach((order) => {
+        notDeliveredInstances += getters.getOrderNotDeliveredInstancesNumber(order);
+      });
+      return notDeliveredInstances;
+    },
+
+    /**
+     * Позволяет получить количество экземпляров не подтвержденных и находящихся в работе распоряжений.
+     */
+    getNotConfirmedOrdersNumber(state, getters) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      let notConfirmedInstances = 0;
+      workingOrders.forEach((order) => {
+        notConfirmedInstances += getters.getOrderNotConfirmedInstancesNumber(order);
+      });
       return notConfirmedInstances;
     },
 
@@ -396,7 +457,7 @@ export const getWorkOrders = {
      * Позволяет определить дату-время начала временного интервала запроса информации о рабочих
      * распоряжениях у сервера.
      */
-     setStartDateToGetData(state, userLoginDateTime) {
+    [SET_START_DATE_TO_GET_DATA] (state, userLoginDateTime) {
       if (!userLoginDateTime) {
         state.startDateToGetData = new Date();
         return;
@@ -417,32 +478,32 @@ export const getWorkOrders = {
      * Позволяет изменить дату-время начала временного интервала запроса информации о рабочих
      * распоряжениях у сервера.
      */
-    setStartDateToGetDataNoCheck(state, date) {
+    [SET_START_DATE_TO_GET_DATA_NO_CHECK] (state, date) {
       if (!(date instanceof Date)) {
         return;
       }
       state.startDateToGetData = date;
     },
 
-    clearLoadingWorkOrdersResult(state) {
+    [CLEAR_LOADING_WORK_ORDERS_RESULT] (state) {
       state.loadingWorkOrdersResult = null;
     },
 
-    setLoadingWorkOrdersResult(state, { error, message }) {
+    [SET_LOADING_WORK_ORDERS_RESULT] (state, { error, message }) {
       state.loadingWorkOrdersResult = {
         error,
         message,
       };
     },
 
-    setLoadingWorkOrdersStatus(state, status) {
+    [SET_LOADING_WORK_ORDERS_STATUS] (state, status) {
       state.loadingWorkOrders = status;
     },
 
     /**
      * Позволяет запомнить массив "рабочих" распоряжений, полученный от сервера.
      */
-     setNewWorkOrdersArray(state, newData) {
+    [SET_NEW_WORK_ORDERS_ARRAY] (state, newData) {
       if (!newData || !newData.length) {
         if (state.data.length) {
           state.data = [];
@@ -487,7 +548,7 @@ export const getWorkOrders = {
     /**
      * Обновляет, при необходимости, счетчик входящих распоряжений (за смену).
      */
-    updateNumberOfIncomingOrdersPerShift(state, { isUserOnDuty, lastTakeDutyTime, userId }) {
+    [UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT] (state, { isUserOnDuty, lastTakeDutyTime, userId }) {
       if (!isUserOnDuty) {
         return;
       }
@@ -511,31 +572,26 @@ export const getWorkOrders = {
      * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
      */
      async loadWorkOrders(context) {
-      context.commit('clearLoadingWorkOrdersResult');
-      context.commit('setLoadingWorkOrdersStatus', true);
+      context.commit(CLEAR_LOADING_WORK_ORDERS_RESULT);
+      context.commit(SET_LOADING_WORK_ORDERS_STATUS, true);
       try {
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
-            startDate: context.getters.getStartDateToGetData,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setLoadingWorkOrdersResult', { error: false, message: null });
-        context.commit('setNewWorkOrdersArray', response.data);
-        context.commit('updateNumberOfIncomingOrdersPerShift', {
+        const responseData = await getWorkOrdersFromServer({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
+          startDate: context.getters.getStartDateToGetData,
+        });
+        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: false, message: null });
+        context.commit(SET_NEW_WORK_ORDERS_ARRAY, responseData);
+        context.commit(UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT, {
           isUserOnDuty: context.getters.isUserOnDuty,
           lastTakeDutyTime: context.getters.getLastTakeDutyTime,
           userId: context.getters.getUserId,
         });
-        context.dispatch('reportOnOrdersDelivery', response.data);
-        context.commit('clearAllDeleteOrdersChainResultsSeenByUser');
-        context.commit('clearAllConfirmOrdersResultsSeenByUser');
-        context.commit('clearAllConfirmOrdersForOthersResultsSeenByUser');
+        context.dispatch('reportOnOrdersDelivery', responseData);
+        context.commit(CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
+        context.commit(CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER);
+        context.commit(CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER);
 
       } catch (error) {
         let errMessage;
@@ -549,9 +605,9 @@ export const getWorkOrders = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setLoadingWorkOrdersResult', { error: true, message: errMessage });
+        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
       }
-      context.commit('setLoadingWorkOrdersStatus', false);
+      context.commit(SET_LOADING_WORK_ORDERS_STATUS, false);
     },
   },
 }

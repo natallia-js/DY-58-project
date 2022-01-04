@@ -1,12 +1,34 @@
-import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
-import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
 import {
   getDNCSectorsWorkPoligonsUsers,
   getStationsWorkPoligonsUsers,
   getECDSectorsWorkPoligonsUsers,
-} from '../../serverRequests/users.requests';
-import objectId from '../../additional/objectId.generator';
-import { store } from '../../store';
+} from '@/serverRequests/users.requests';
+import objectId from '@/additional/objectId.generator';
+import { store } from '@/store';
+import {
+  CLEAR_SHIFT_FOR_SENDING_DATA,
+  SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS,
+  SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR,
+  SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS,
+  SET_GET_ORDER_STATUS_TO_ALL_DSP,
+  SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+  SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+  SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
+  SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
+  SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS,
+  SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
+  SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+  SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT,
+  SET_ONLINE_SHIFT_PERSONAL,
+  CHOOSE_ONLY_ONLINE_PERSONAL,
+  SET_USER_CHOSEN_STATUS,
+  ADD_OTHER_GET_ORDER_RECORD,
+  EDIT_OTHER_GET_ORDER_RECORD,
+  DEL_OTHER_GET_ORDER_RECORD,
+  DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
+} from '@/store/mutation-types';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -233,7 +255,7 @@ export const personal = {
     /**
      * Чистит информацию о тех, кому необходимо адресовать распоряжение.
      */
-    clearShiftForSendingData(state) {
+    [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {
       if (!state.sectorPersonal) {
         return;
       }
@@ -259,7 +281,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем участкам ДНЦ.
      */
-    setGetOrderStatusToAllDNCSectors(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         state.sectorPersonal.DNCSectorsShift.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
@@ -272,7 +294,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего конкретному участку ДНЦ.
      */
-    setGetOrderStatusToDefinitDNCSector(state, { dncSectorId, getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR] (state, { dncSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         const sector = state.sectorPersonal.DNCSectorsShift.find(el => el.sectorId === dncSectorId);
         if (sector && sector.sendOriginal !== getOrderStatus) {
@@ -284,7 +306,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем оставшимся участкам ДНЦ.
      */
-    setGetOrderStatusToAllLeftDNCSectors(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
         state.sectorPersonal.DNCSectorsShift.forEach(el => {
           if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
@@ -299,7 +321,7 @@ export const personal = {
      * Оригинал/Копия/Ничего всем станциям. Если текущий полигон управления - станция,
      * то она не участвует в переборе.
      */
-    setGetOrderStatusToAllDSP(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_DSP] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         let arr = state.sectorPersonal.sectorStationsShift;
         if (store.getters.userWorkPoligonIsStation) {
@@ -316,7 +338,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего конкретной станции.
      */
-    setGetOrderStatusToDefinitDSP(state, { stationId, getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_DEFINIT_DSP] (state, { stationId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => {
           if (el.stationId === stationId && el.sendOriginal !== getOrderStatus) {
@@ -330,7 +352,7 @@ export const personal = {
      * Оригинал/Копия/Ничего всем оставшимся станциям. Если текущий полигон управления - станция,
      * то она не участвует в переборе.
      */
-    setGetOrderStatusToAllLeftDSP(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         let arr = state.sectorPersonal.sectorStationsShift;
         if (store.getters.userWorkPoligonIsStation) {
@@ -348,7 +370,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем участкам ЭЦД.
      */
-     setGetOrderStatusToAllECDSectors(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         state.sectorPersonal.ECDSectorsShift.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
@@ -361,7 +383,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего конкретному участку ЭЦД.
      */
-     setGetOrderStatusToDefinitECDSector(state, { ecdSectorId, getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR] (state, { ecdSectorId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         const sector = state.sectorPersonal.ECDSectorsShift.find(el => el.sectorId === ecdSectorId);
         if (sector && sector.sendOriginal !== getOrderStatus) {
@@ -373,7 +395,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем оставшимся участкам ЭЦД.
      */
-     setGetOrderStatusToAllLeftECDSectors(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
         state.sectorPersonal.ECDSectorsShift.forEach(el => {
           if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
@@ -387,7 +409,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем виртуальным получателям распоряжения.
      */
-     setGetOrderStatusToAllOtherShift(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
@@ -400,7 +422,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего конкретному виртуальному получателю распоряжения.
      */
-     setGetOrderStatusToDefinitOtherShift(state, { otherId, getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT] (state, { otherId, getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.otherShift) {
         const sector = state.sectorPersonal.otherShift.find(el => el._id === otherId);
         if (sector && sector.sendOriginal !== getOrderStatus) {
@@ -412,7 +434,7 @@ export const personal = {
     /**
      * Оригинал/Копия/Ничего всем оставшимся виртуальным получателям распоряжения.
      */
-     setGetOrderStatusToAllLeftOtherShift(state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift.forEach(el => {
           if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
@@ -428,7 +450,7 @@ export const personal = {
      * нахождения online: для лиц, id которых находятся в массиве onlineUsersIds,
      * online = true, для остальных online = false.
      */
-    setOnlineShiftPersonal: (state, onlineUsersIds) => {
+    [SET_ONLINE_SHIFT_PERSONAL] (state, onlineUsersIds) {
       function setOnlineSectorsShift(sectorsArray) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
@@ -475,7 +497,7 @@ export const personal = {
      * рассматриваются), пользователя участков ДСП - только ДСП данных станций.
      * Пользователи рабочих мест на станциях не рассматриваются.
      */
-    chooseOnlyOnlinePersonal(state) {
+    [CHOOSE_ONLY_ONLINE_PERSONAL] (state) {
       function setOnlineSectorsShift(sectorsArray, userPost) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
@@ -512,7 +534,7 @@ export const personal = {
      * Если участок / станция в рамках структуры полигона управления встречается более одного
      * раза, то действия в отношении пользователя производятся для каждой такой встречи.
      */
-    setUserChosenStatus(state, { userId, chooseUser, workPoligonType, workPoligonId }) {
+    [SET_USER_CHOSEN_STATUS] (state, { userId, chooseUser, workPoligonType, workPoligonId }) {
       function findUserAndSetChosenStatus(sectorsArray) {
         if (!sectorsArray || !sectorsArray.length) {
           return;
@@ -553,7 +575,7 @@ export const personal = {
     /**
      *
      */
-    addOtherGetOrderRecord(state, props) {
+    [ADD_OTHER_GET_ORDER_RECORD] (state, props) {
       const { additionalId, placeTitle, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend } = props;
 
       if (!state.sectorPersonal) {
@@ -575,7 +597,7 @@ export const personal = {
     /**
      *
      */
-    editOtherGetOrderRecord(state, { _id, placeTitle, post, fio } ) {
+    [EDIT_OTHER_GET_ORDER_RECORD] (state, { _id, placeTitle, post, fio } ) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
@@ -594,7 +616,7 @@ export const personal = {
     /**
      *
      */
-    delOtherGetOrderRecord(state, id) {
+    [DEL_OTHER_GET_ORDER_RECORD] (state, id) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
@@ -604,7 +626,7 @@ export const personal = {
     /**
      *
      */
-    delOtherGetOrderRecordByAdditionalId(state, additionalId) {
+    [DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID] (state, additionalId) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return;
       }
@@ -712,6 +734,7 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
+
       } catch (error) {
         let errMessage;
         if (error.response) {
@@ -826,6 +849,7 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
+
       } catch (error) {
         let errMessage;
         if (error.response) {
@@ -940,6 +964,7 @@ export const personal = {
           }
         }
         context.state.sectorPersonal = shiftPersonal || {};
+
       } catch (error) {
         let errMessage;
         if (error.response) {

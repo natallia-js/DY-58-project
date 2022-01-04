@@ -1,7 +1,14 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { CurrShiftGetOrderStatus } from '../../constants/orders';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+import { CurrShiftGetOrderStatus } from '@/constants/orders';
+import { getRequestAuthorizationHeader } from '@/serverRequests/common';
+import {
+  CLEAR_DISPATCH_ORDER_RESULT,
+  ADD_ORDERS_BEING_DISPATCHED_NUMBER,
+  SUB_ORDERS_BEING_DISPATCHED_NUMBER,
+  SET_DISPATCH_ORDER_RESULT,
+  ADD_ORDER,
+  SET_LAST_ORDERS_NUMBER,
+} from '@/store/mutation-types';
+import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 
 
 export const orders = {
@@ -21,19 +28,21 @@ export const orders = {
   },
 
   mutations: {
-    clearDispatchOrderResult(state) {
-      state.dispatchOrderResult = null;
+    [CLEAR_DISPATCH_ORDER_RESULT] (state) {
+      if (state.dispatchOrderResult) {
+        state.dispatchOrderResult = null;
+      }
     },
 
-    addOrdersBeingDispatchedNumber(state) {
+    [ADD_ORDERS_BEING_DISPATCHED_NUMBER] (state) {
       state.dispatchOrdersBeingProcessed += 1;
     },
 
-    subOrdersBeingDispatchedNumber(state) {
+    [SUB_ORDERS_BEING_DISPATCHED_NUMBER] (state) {
       state.dispatchOrdersBeingProcessed -= 1;
     },
 
-    setDispatchOrderResult(state, { error, orderType, message }) {
+    [SET_DISPATCH_ORDER_RESULT] (state, { error, orderType, message }) {
       state.dispatchOrderResult = {
         error,
         orderType,
@@ -41,11 +50,8 @@ export const orders = {
       };
     },
 
-    addOrder(state, newOrder) {
-      state.data = [
-        ...state.data,
-        newOrder,
-      ];
+    [ADD_ORDER] (state, newOrder) {
+      state.data.push(newOrder);
     },
   },
 
@@ -72,15 +78,19 @@ export const orders = {
       } = params;
 
       if (!context.getters.canUserDispatchOrders) {
-        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: 'У вас нет права на издание распоряжений' });
+        context.commit(SET_DISPATCH_ORDER_RESULT, {
+          error: true,
+          orderType: type,
+          message: 'У вас нет права на издание распоряжений',
+        });
         return;
       }
 
-      context.commit('clearDispatchOrderResult');
-      context.commit('addOrdersBeingDispatchedNumber');
+      context.commit(CLEAR_DISPATCH_ORDER_RESULT);
+      context.commit(ADD_ORDERS_BEING_DISPATCHED_NUMBER);
 
       try {
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
+        const responseData = await dispatchOrderToServer(
           {
             type,
             number,
@@ -132,6 +142,7 @@ export const orders = {
             workPoligon: {
               id: context.getters.getUserWorkPoligon.code,
               type: context.getters.getUserWorkPoligon.type,
+              workPlaceId: context.getters.getUserWorkPoligon.subCode,
               title: context.getters.getUserWorkPoligonName,
             },
             creator: {
@@ -146,17 +157,26 @@ export const orders = {
           },
           { headers: getRequestAuthorizationHeader() }
         );
-        context.commit('setDispatchOrderResult', { error: false, orderType: type, message: response.data.message });
-        context.commit('addOrder', response.data.order);
-        context.commit('setLastOrdersNumber', { ordersType: type, number, createDateTime });
+        context.commit(SET_DISPATCH_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(ADD_ORDER, responseData.order);
+        context.commit(SET_LAST_ORDERS_NUMBER, { ordersType: type, number, createDateTime });
 
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при отправке распоряжения';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setDispatchOrderResult', { error: true, orderType: type, message: errMessage });
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка отправки распоряжения на сервер: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка отправки распоряжения на сервер: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при отправке распоряжения на сервер: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
       }
 
-      context.commit('subOrdersBeingDispatchedNumber');
+      context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER);
     },
   },
 };

@@ -1,7 +1,21 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
-import { WORK_POLIGON_TYPES } from '../../../constants/appCredentials';
-import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import {
+  SET_CONFIRM_ORDER_RESULT,
+  SET_CONFIRM_ORDER_FOR_OTHERS_RESULT,
+  CLEAR_CONFIRM_ORDER_RESULT,
+  CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT,
+  SET_ORDER_BEING_CONFIRMED,
+  SET_ORDER_BEING_CONFIRMED_FOR_OTHERS,
+  SET_ORDER_FINISHED_BEING_CONFIRMED,
+  SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS,
+  SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER,
+  SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER,
+  CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER,
+  CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
+  SET_ORDER_CONFIRMED,
+  SET_ORDER_CONFIRMED_FOR_OTHERS,
+} from '@/store/mutation-types';
+import { confirmOrderForMyself, confirmOrdersForOthers } from '@/serverRequests/orders.requests';
 
 
 /**
@@ -40,14 +54,15 @@ export const confirmOrder = {
     },
 
     /**
-     * Возвращает id подтверждаемых распоряжений (входящих уведомлений).
+     * Возвращает массив id подтверждаемых распоряжений (входящих уведомлений) либо пустой массив, если
+     * в настоящий момент нет подтверждаемых распоряжений.
      */
     getOrdersBeingConfirmed(state) {
       return state.ordersBeingConfirmed;
     },
 
     /**
-     * Возвращает id подтверждаемых распоряжений (за полигоны-приемники которого проводится подтверждение).
+     * Возвращает массив id распоряжений, за адресатов которых в настоящий момент проводится подтверждение.
      */
     getOrdersBeingConfirmedForOthers(state) {
       return state.ordersBeingConfirmedForOthers;
@@ -91,7 +106,7 @@ export const confirmOrder = {
     /**
      * Позволяет сохранить результат подтверждения распоряжения (входящего уведомления).
      */
-    setConfirmOrderResult(state, { orderId, error, message }) {
+    [SET_CONFIRM_ORDER_RESULT] (state, { orderId, error, message }) {
       const orderInfo = state.confirmOrdersResults.find((item) => item.orderId === orderId);
       if (!orderInfo) {
         state.confirmOrdersResults.push({ orderId, error, message, wasShownToUser: false });
@@ -105,7 +120,7 @@ export const confirmOrder = {
     /**
      * Позволяет сохранить результат подтверждения распоряжения за другие полигоны.
      */
-    setConfirmOrderForOthersResult(state, { orderId, error, message }) {
+    [SET_CONFIRM_ORDER_FOR_OTHERS_RESULT] (state, { orderId, error, message }) {
       const orderInfo = state.confirmOrdersForOthersResults.find((item) => item.orderId === orderId);
       if (!orderInfo) {
         state.confirmOrdersForOthersResults.push({ orderId, error, message, wasShownToUser: false });
@@ -119,14 +134,14 @@ export const confirmOrder = {
     /**
      * Удаляет результат подтверждения распоряжения (входящего уведомления) с заданным id.
      */
-    clearConfirmOrderResult(state, orderId) {
+    [CLEAR_CONFIRM_ORDER_RESULT] (state, orderId) {
       state.confirmOrdersResults = state.confirmOrdersResults.filter((item) => item.orderId !== orderId);
     },
 
     /**
      * Удаляет результат подтверждения распоряжения с заданным id за другие полигоны.
      */
-    clearConfirmOrderForOthersResult(state, orderId) {
+    [CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT] (state, orderId) {
       state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.filter((item) =>
         item.orderId !== orderId);
     },
@@ -134,7 +149,7 @@ export const confirmOrder = {
     /**
      * Сохраняет id распоряжения (входящего уведомления), за которое идет подтверждение.
      */
-    setOrderBeingConfirmed(state, orderId) {
+    [SET_ORDER_BEING_CONFIRMED] (state, orderId) {
       if (!state.ordersBeingConfirmed.includes(orderId)) {
         state.ordersBeingConfirmed.push(orderId);
       }
@@ -143,7 +158,7 @@ export const confirmOrder = {
     /**
      * Сохраняет id распоряжения, за полигон(ы)-приемник(и) которого идет подтверждение.
      */
-    setOrderBeingConfirmedForOthers(state, orderId) {
+    [SET_ORDER_BEING_CONFIRMED_FOR_OTHERS] (state, orderId) {
       if (!state.ordersBeingConfirmedForOthers.includes(orderId)) {
         state.ordersBeingConfirmedForOthers.push(orderId);
       }
@@ -152,7 +167,7 @@ export const confirmOrder = {
     /**
      * Удаляет сохраненный id распоряжения, операция подтверждения которого была завершена.
      */
-    setOrderFinishedBeingConfirmed(state, orderId) {
+    [SET_ORDER_FINISHED_BEING_CONFIRMED] (state, orderId) {
       state.ordersBeingConfirmed = state.ordersBeingConfirmed.filter((item) => item !== orderId);
     },
 
@@ -160,7 +175,7 @@ export const confirmOrder = {
      * Удаляет сохраненный id распоряжения, операция подтверждения за полигоны-получатели
      * которого была завершена.
      */
-    setOrderFinishedBeingConfirmedForOthers(state, orderId) {
+    [SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS] (state, orderId) {
       state.ordersBeingConfirmedForOthers = state.ordersBeingConfirmedForOthers.filter((item) => item !== orderId);
     },
 
@@ -168,7 +183,7 @@ export const confirmOrder = {
      * Для данного id распоряжения (входящего уведомления) устанавливает флаг просмотра
      * пользователем информации о его подтверждении.
      */
-    setConfirmOrderResultSeenByUser(state, orderId) {
+    [SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER] (state, orderId) {
       const orderInfo = state.confirmOrdersResults.find((item) => item.orderId === orderId);
       if (orderInfo) {
         orderInfo.wasShownToUser = true;
@@ -179,7 +194,7 @@ export const confirmOrder = {
      * Для данного id распоряжения устанавливает флаг просмотра пользователем информации о его
      * подтверждении за другие полигоны управления.
      */
-    setConfirmOrderForOthersResultSeenByUser(state, orderId) {
+    [SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER] (state, orderId) {
       const orderInfo = state.confirmOrdersForOthersResults.find((item) => item.orderId === orderId);
       if (orderInfo) {
         orderInfo.wasShownToUser = true;
@@ -189,14 +204,14 @@ export const confirmOrder = {
     /**
      * Удаляет все результаты подтверждения распоряжений (входящих уведомлений), просмотренные пользователем.
      */
-    clearAllConfirmOrdersResultsSeenByUser(state) {
+    [CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER] (state) {
       state.confirmOrdersResults = state.confirmOrdersResults.filter((item) => !item.wasShownToUser);
     },
 
     /**
      * Удаляет все результаты подтверждения распоряжений (за другие полигоны управления), просмотренные пользователем.
      */
-    clearAllConfirmOrdersForOthersResultsSeenByUser(state) {
+    [CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER] (state) {
       state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.filter((item) => !item.wasShownToUser);
     },
 
@@ -204,7 +219,7 @@ export const confirmOrder = {
      * Для заданного распоряжения позволяет установить дату его подтверждения (когда данное распоряжение
      * находится в списке входящих уведомлений).
      */
-    setOrderConfirmed(state, { orderId, confirmDateTime }) {
+    [SET_ORDER_CONFIRMED] (state, { orderId, confirmDateTime }) {
       state.data = state.data.map((el) => {
         if (el._id === orderId) {
           return {
@@ -219,7 +234,7 @@ export const confirmOrder = {
     /**
      * Для заданного распоряжения позволяет установить дату его подтверждения за другие полигоны управления.
      */
-    setOrderConfirmedForOthers(state, { orderId, workPoligons, confirmDateTime }) {
+    [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, { orderId, workPoligons, confirmDateTime }) {
       if (!workPoligons || !workPoligons.length) {
         return;
       }
@@ -255,24 +270,19 @@ export const confirmOrder = {
       if (!context.getters.canUserConfirmOrder) {
         return;
       }
-      context.commit('clearConfirmOrderResult', orderId);
-      context.commit('setOrderBeingConfirmed', orderId);
+      context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
+      context.commit(SET_ORDER_BEING_CONFIRMED, orderId);
       try {
         const confirmDateTime = new Date();
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
-            id: orderId,
-            confirmDateTime,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setConfirmOrderResult', { orderId, error: false, message: response.data.message });
-        context.commit('setOrderConfirmed', { orderId: response.data.id, confirmDateTime });
+        const responseData = await confirmOrderForMyself({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
+          id: orderId,
+          confirmDateTime,
+        });
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_ORDER_CONFIRMED, { orderId: responseData.id, confirmDateTime });
 
       } catch (error) {
         let errMessage;
@@ -286,9 +296,9 @@ export const confirmOrder = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при подтверждении распоряжения: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setConfirmOrderResult', { orderId, error: true, message: errMessage });
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
       }
-      context.commit('setOrderFinishedBeingConfirmed', orderId);
+      context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
     },
 
     /**
@@ -301,24 +311,20 @@ export const confirmOrder = {
       if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
         return;
       }
-      context.commit('clearConfirmOrderForOthersResult', orderId);
-      context.commit('setOrderBeingConfirmedForOthers', orderId);
+      context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
+      context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
       try {
         const confirmDateTime = new Date();
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-            confirmWorkPoligons,
-            orderId,
-            confirmDateTime,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setConfirmOrderForOthersResult', { orderId, error: false, message: response.data.message });
-        context.commit('setOrderConfirmedForOthers', { orderId: response.data.orderId, workPoligons: response.data.confirmWorkPoligons, confirmDateTime });
+        const responseData = await confirmOrdersForOthers({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
+          confirmWorkPoligons,
+          orderId,
+          confirmDateTime,
+        });
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons, confirmDateTime });
 
       } catch (error) {
         let errMessage;
@@ -332,9 +338,9 @@ export const confirmOrder = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при подтверждении распоряжения: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setConfirmOrderForOthersResult', { orderId, error: true, message: errMessage });
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
       }
-      context.commit('setOrderFinishedBeingConfirmedForOthers', orderId);
+      context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
     },
   },
 };

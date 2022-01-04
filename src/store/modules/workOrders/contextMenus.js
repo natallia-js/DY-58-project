@@ -1,6 +1,6 @@
-import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
-import router from '../../../router';
-import { store } from '../../../store';
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import router from '@/router';
+import { store } from '@/store';
 
 
 /**
@@ -16,9 +16,9 @@ export const contextMenus = {
       return (chainId, confirmInstance) => {
         const ordersInChain = getters.getOrdersInChain(chainId);
         const confirmDlgMessage = ordersInChain.length === 1
-          ? 'Удалить распоряжение из таблицы рабочих распоряжений?'
+          ? 'Удалить распоряжение из таблицы рабочих распоряжений без возможности восстановления?'
           : `Удалить цепочку распоряжений (${ordersInChain.reduce((accumulator, currentValue, index) =>
-            accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений?`;
+            accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) из таблицы рабочих распоряжений без возможности восстановления?`;
         confirmInstance.require({
           header: 'Подтвердите удаление',
           message: confirmDlgMessage,

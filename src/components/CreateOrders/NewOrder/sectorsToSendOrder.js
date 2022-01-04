@@ -1,5 +1,9 @@
 import { computed, watch } from 'vue';
-import { CurrShiftGetOrderStatus, ORDER_PLACE_VALUES } from '../../../constants/orders';
+import { CurrShiftGetOrderStatus, ORDER_PLACE_VALUES } from '@/constants/orders';
+import {
+  SET_GET_ORDER_STATUS_TO_ALL_DSP,
+  SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+} from '@/store/mutation-types';
 
 /**
  * Данный модуль предназначен для работы с участками, на которые необходимо передать
@@ -80,21 +84,21 @@ export const useSectorsToSendOrder = (state, store) => {
   // При изменении значения параметра места действия распоряжения меняем список "Кому" по станциям
   watch(() => state.orderPlace, (newVal) => {
     // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
-    store.commit('setGetOrderStatusToAllDSP', { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+    store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
     let blockObject;
     switch (newVal.place) {
       case ORDER_PLACE_VALUES.station:
         // Затем назначаем получение оригинала распоряжения выбранной станции
-        store.commit('setGetOrderStatusToDefinitDSP',
+        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId: newVal.value, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
         break;
       case ORDER_PLACE_VALUES.span:
         // Затем назначаем получение оригинала распоряжения станциям выбранного перегона
         blockObject = store.getters.getSectorBlockById(newVal.value);
         if (blockObject) {
-          store.commit('setGetOrderStatusToDefinitDSP',
+          store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
             { stationId: blockObject.Bl_StationID1, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
-          store.commit('setGetOrderStatusToDefinitDSP',
+          store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
             { stationId: blockObject.Bl_StationID2, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
         }
         break;

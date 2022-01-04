@@ -173,9 +173,9 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { WorkMessStates } from '../constants/orders';
-  import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
-  import ShowIncomingOrderDlg from '../components/ShowIncomingOrderDlg';
+  import { WorkMessStates } from '@/constants/orders';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
 
   export default {
     name: 'dy58-orders-in-work-data-table',

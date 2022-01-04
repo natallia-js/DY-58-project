@@ -7,7 +7,7 @@
 
 
 <script>
-  import ServerConnStatus from '../components/ServerConnStatus.vue';
+  import ServerConnStatus from '@/components/ServerConnStatus.vue';
 
   export default {
     name: 'dy58-footer-bar',
@@ -17,7 +17,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-</style>

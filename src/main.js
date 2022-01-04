@@ -1,16 +1,16 @@
 import { createApp } from 'vue';
-import { store } from './store';
-import App from './App.vue';
-import router from './router';
+import { store } from '@/store';
+import App from '@/App';
+import router from '@/router';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 
-import locale from './constants/locale';
+import locale from '@/constants/locale';
 
 import 'primeflex/primeflex.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
-import './assets/theme/bootstrap4-light-blue/theme.css';
+import '@/assets/theme/bootstrap4-light-blue/theme.css';
 import PrimeVue from 'primevue/config';
 import DataTable from 'primevue/datatable';
 import PanelMenu from 'primevue/panelmenu';

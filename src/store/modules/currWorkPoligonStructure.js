@@ -1,8 +1,22 @@
-import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
-import { ORDER_PLACE_VALUES } from '../../constants/orders';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { ORDER_PLACE_VALUES } from '@/constants/orders';
+import { DEL_CURR_WORK_POLIGON_DATA } from '@/store/mutation-types';
+import {
+  getDefinitStationData,
+  getStationBlocksData,
+  getStationDNCSectorsData,
+  getStationECDSectorsData,
+} from '@/serverRequests/stations.requests';
+import {
+  getDefinitDNCSectorData,
+  getAdjacentDNCSectorsShortDefinitData,
+  getNearestECDSectorsShortDefinitData,
+} from '@/serverRequests/dncSectors.requests';
+import {
+  getDefinitECDSectorData,
+  getAdjacentECDSectorsShortDefinitData,
+  getNearestDNCSectorsShortDefinitData,
+} from '@/serverRequests/ecdSectors.requests';
 
 
 export const currWorkPoligonStructure = {
@@ -339,7 +353,7 @@ export const currWorkPoligonStructure = {
   },
 
   mutations: {
-    delCurrWorkPoligonData(state) {
+    [DEL_CURR_WORK_POLIGON_DATA] (state) {
       if (state.sector) {
         state.sector = null;
       }
@@ -357,31 +371,18 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = getRequestAuthorizationHeader();
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitStationData,
-          { stationId },
-          { headers }
-        );
-        const blocksResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationBlocksData,
-          { stationId },
-          { headers }
-        );
-        const dncSectorsResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationDNCSectorsData,
-          { stationId },
-          { headers }
-        );
-        const ecdSectorsResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationECDSectorsData,
-          { stationId },
-          { headers }
-        );
+        const responseData = await getDefinitStationData(stationId);
+        const blocksResponseData = await getStationBlocksData(stationId);
+        const dncSectorsResponseData = await getStationDNCSectorsData(stationId);
+        const ecdSectorsResponseData = await getStationECDSectorsData(stationId);
         context.state.station = {
-          ...response.data,
-          TBlocks: blocksResponse.data,
-          TDNCSectors: dncSectorsResponse.data,
-          TECDSectors: ecdSectorsResponse.data,
+          ...responseData,
+          TBlocks: blocksResponseData,
+          TDNCSectors: dncSectorsResponseData,
+          TECDSectors: ecdSectorsResponseData,
         };
-      } catch (err) {
-        context.state.errorLoadingCurrWorkPoligonStructure = err;
+      } catch (error) {
+        context.state.errorLoadingCurrWorkPoligonStructure = error;
       }
       context.state.loadingCurrWorkPoligonStructure = false;
     },
@@ -393,26 +394,16 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = getRequestAuthorizationHeader();
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitDNCSectorData,
-          { sectorId },
-          { headers }
-        );
-        const adjDNCSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentDNCSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
-        const nearECDSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestECDSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
+        const responseData = await getDefinitDNCSectorData(sectorId);
+        const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData(sectorId);
+        const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData(sectorId);
         context.state.sector = {
-          ...response.data,
-          TAdjacentDNCSectors: adjDNCSectResponse.data,
-          TNearestECDSectors: nearECDSectResponse.data,
+          ...responseData,
+          TAdjacentDNCSectors: adjDNCSectResponseData,
+          TNearestECDSectors: nearECDSectResponseData,
         };
-      } catch (err) {
-        context.state.errorLoadingCurrWorkPoligonStructure = err;
+      } catch (error) {
+        context.state.errorLoadingCurrWorkPoligonStructure = error;
       }
       context.state.loadingCurrWorkPoligonStructure = false;
     },
@@ -424,26 +415,16 @@ export const currWorkPoligonStructure = {
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
-        const headers = getRequestAuthorizationHeader();
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitECDSectorData,
-          { sectorId },
-          { headers }
-        );
-        const adjECDSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentECDSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
-        const nearDNCSectResponse = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestDNCSectorsShortDefinitData,
-          { sectorId },
-          { headers }
-        );
+        const responseData = await getDefinitECDSectorData(sectorId);
+        const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData(sectorId);
+        const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData(sectorId);
         context.state.sector = {
-          ...response.data,
-          TAdjacentECDSectors: adjECDSectResponse.data,
-          TNearestDNCSectors: nearDNCSectResponse.data,
+          ...responseData,
+          TAdjacentECDSectors: adjECDSectResponseData,
+          TNearestDNCSectors: nearDNCSectResponseData,
         };
-      } catch (err) {
-        context.state.errorLoadingCurrWorkPoligonStructure = err;
+      } catch (error) {
+        context.state.errorLoadingCurrWorkPoligonStructure = error;
       }
       context.state.loadingCurrWorkPoligonStructure = false;
     },

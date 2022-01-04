@@ -252,7 +252,7 @@
             v-if="(v$.orderText.$invalid && submitted) || v$.orderText.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, определите все параметры текста распоряжения
+            Пожалуйста, корректно определите все параметры текста распоряжения
           </small>
         </div>
 
@@ -337,23 +337,24 @@
   import { reactive, ref, computed, onMounted, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
+  import DSPToSendOrderDataTable from '@/components/CreateOrders/DSPToSendOrderDataTable';
+  import DNCToSendOrderDataTable from '@/components/CreateOrders/DNCToSendOrderDataTable';
+  import ECDToSendOrderDataTable from '@/components/CreateOrders/ECDToSendOrderDataTable';
+  import OtherToSendOrderDataTable from '@/components/CreateOrders/OtherToSendOrderDataTable';
+  import PreviewNewOrderDlg from '@/components/CreateOrders/PreviewNewOrderDlg';
+  import OrderPlaceChooser from '@/components/CreateOrders/OrderPlaceChooser';
+  import OrderTimeSpanChooser from '@/components/CreateOrders/OrderTimeSpanChooser';
+  import OrderText from '@/components/CreateOrders/OrderText';
+  import { OrderInputTypes } from '@/constants/orderInputTypes';
+  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+  import showMessage from '@/hooks/showMessage.hook';
+  import isValidDateTime from '@/additional/isValidDateTime';
+  import { CLEAR_SHIFT_FOR_SENDING_DATA, CHOOSE_ONLY_ONLINE_PERSONAL } from '@/store/mutation-types';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useDispatchOrder } from './dispatchOrder';
   import { useSectorsToSendOrder } from './sectorsToSendOrder';
   import { useRelatedOrder } from './relatedOrder';
   import { useNewOrderValidationRules } from './validationRules';
-  import DSPToSendOrderDataTable from '../DSPToSendOrderDataTable';
-  import DNCToSendOrderDataTable from '../DNCToSendOrderDataTable';
-  import ECDToSendOrderDataTable from '../ECDToSendOrderDataTable';
-  import OtherToSendOrderDataTable from '../OtherToSendOrderDataTable';
-  import { OrderInputTypes } from '@/constants/orderInputTypes';
-  import OrderPlaceChooser from '../OrderPlaceChooser';
-  import OrderTimeSpanChooser from '../OrderTimeSpanChooser';
-  import OrderText from '../OrderText';
-  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
-  import PreviewNewOrderDlg from '../PreviewNewOrderDlg';
-  import showMessage from '@/hooks/showMessage.hook';
-  import isValidDateTime from '@/additional/isValidDateTime';
 
   export default {
     name: 'dy58-new-order-block',
@@ -513,8 +514,8 @@
        * После загрузки компонента отображаем online-пользователей станций и участков в секции "Кому"
        */
       onMounted(() => {
-        store.commit('clearShiftForSendingData');
-        store.commit('chooseOnlyOnlinePersonal');
+        store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
+        store.commit(CHOOSE_ONLY_ONLINE_PERSONAL);
       });
 
       /**

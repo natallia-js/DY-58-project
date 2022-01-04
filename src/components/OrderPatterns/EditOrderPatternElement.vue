@@ -68,7 +68,7 @@
     OrderPatternElementType,
     OrderPatternElementTypeNames,
     PossibleElementSizes,
-  } from '../../constants/orderPatterns';
+  } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy58-edit-order-pattern-element',

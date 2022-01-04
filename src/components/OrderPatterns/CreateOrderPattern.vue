@@ -135,15 +135,15 @@
   import { useStore } from 'vuex';
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
+  import { useConfirm } from 'primevue/useconfirm';
+  import { ORDER_PATTERN_TYPES, SPECIAL_TRAIN_CATEGORIES } from '@/constants/orderPatterns';
+  import objectId from '@/additional/objectId.generator';
+  import showMessage from '@/hooks/showMessage.hook';
+  import AllowClearInputText from '@/components//AllowClearInputText';
   import OrderCategoryChooser from './OrderCategoryChooser';
   import EditOrderPatternElement from './EditOrderPatternElement';
   import EditOrderPattern from './EditOrderPattern';
   import OrderPatternPreview from './OrderPatternPreview';
-  import { ORDER_PATTERN_TYPES, SPECIAL_TRAIN_CATEGORIES } from '../../constants/orderPatterns';
-  import objectId from '../../additional/objectId.generator';
-  import { useConfirm } from 'primevue/useconfirm';
-  import showMessage from '../../hooks/showMessage.hook';
-  import AllowClearInputText from '../AllowClearInputText';
 
   export default {
     name: 'dy58-create-order-pattern',

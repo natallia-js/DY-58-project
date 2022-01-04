@@ -1,4 +1,5 @@
 import { computed, watch } from 'vue';
+import { RESET_ORDER_NUMBERS_DATA } from '@/store/mutation-types';
 
 /**
  * Данный модуль предназначен для работы с текущими датой и временем.
@@ -17,7 +18,7 @@ export const useWatchCurrentDateTime = (state, props, store) => {
         (newVal.getMonth() !== lastOrderDateTime.getMonth()) ||
         (newVal.getFullYear() !== lastOrderDateTime.getFullYear())
       ) {
-        store.commit('resetOrderNumbersData', props.orderType);
+        store.commit(RESET_ORDER_NUMBERS_DATA, props.orderType);
       }
     }
     state.createDateTime = newVal;

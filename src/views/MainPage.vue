@@ -59,15 +59,22 @@
 
 
 <script>
-  import SideMenu from '../components/SideMenu.vue';
   import { computed, onMounted, reactive, watch } from 'vue';
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import IncomingNotificationsDataTable from '../components/IncomingNotificationsDataTable';
-  import OrdersInWorkDataTable from '../components/OrdersInWorkDataTable';
-  import OrdersInWorkTree from '@/components/OrdersInWorkTree.vue';
-  import showMessage from '../hooks/showMessage.hook';
   import { useStore } from 'vuex';
+  import IncomingNotificationsDataTable from '@/components/IncomingNotificationsDataTable';
+  import OrdersInWorkDataTable from '@/components/OrdersInWorkDataTable';
+  import OrdersInWorkTree from '@/components/OrdersInWorkTree';
+  import SideMenu from '@/components/SideMenu';
   import AppSettings from '@/components/AppSettings';
+  import showMessage from '@/hooks/showMessage.hook';
+  import {
+    SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER,
+    SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER,
+    SET_ACTIVE_MAIN_MENU_ITEM,
+    SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER,
+    SET_START_DATE_TO_GET_DATA_NO_CHECK,
+  } from '@/store/mutation-types';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
 
   export default {
     name: 'dy58-main-page',
@@ -88,12 +95,8 @@
         startDateToGetData: new Date(),
       });
 
-      const getLoadingWorkOrdersStatus = computed(() => store.getters.getLoadingWorkOrdersStatus);
-      const getWorkingOrdersNumber = computed(() => store.getters.getWorkingOrdersNumber);
-      const getErrorLoadingWorkOrders = computed(() => store.getters.getErrorLoadingWorkOrders);
-
       watch(() => state.startDateToGetData, (newVal) => {
-        store.commit('setStartDateToGetDataNoCheck', newVal);
+        store.commit(SET_START_DATE_TO_GET_DATA_NO_CHECK, newVal);
       });
 
       const getStartDateToGetData = computed(() => store.getters.getStartDateToGetData);
@@ -108,7 +111,7 @@
           } else {
             showSuccessMessage(result.message);
           }
-          store.commit('setDeleteOrdersChainResultSeenByUser', result.chainId);
+          store.commit(SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER, result.chainId);
         });
       });
 
@@ -119,7 +122,7 @@
           } else {
             showSuccessMessage(result.message);
           }
-          store.commit('setConfirmOrderResultSeenByUser', result.orderId);
+          store.commit(SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER, result.orderId);
         });
       });
 
@@ -130,23 +133,23 @@
           } else {
             showSuccessMessage(result.message);
           }
-          store.commit('setConfirmOrderForOthersResultSeenByUser', result.orderId);
+          store.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER, result.orderId);
         });
       });
 
       onMounted(() => {
-        store.commit('setActiveMainMenuItem', MainMenuItemsKeys.mainPage);
+        store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
         state.startDateToGetData = getStartDateToGetData.value;
       });
 
       return {
         state,
         getStartDateToGetData,
-        getLoadingWorkOrdersStatus,
-        getWorkingOrdersNumber,
-        getErrorLoadingWorkOrders,
-        isDSP: store.getters.isDSP,
-        isDSP_or_DSPoperator: store.getters.isDSP_or_DSPoperator,
+        getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
+        getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
+        getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
+        isDSP: computed(() => store.getters.isDSP),
+        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
       };
     },
   };

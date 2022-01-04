@@ -18,7 +18,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import ShowUserDataDlg from '../components/ShowUserDataDlg.vue';
+  import ShowUserDataDlg from '@/components/ShowUserDataDlg.vue';
 
   export default {
     name: 'dy58-nav-bar',

@@ -18,6 +18,16 @@
   import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
   import useWebSocket from '@/hooks/useWebSocket.hook';
   import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
+  import {
+    DETERMINE_LOGOUT_ITEM_ACTION,
+    DEL_CURR_LAST_ORDERS_PARAMS,
+    DEL_ORDER_PATTERNS_ELEMENTS_REFS,
+    SET_START_DATE_TO_GET_DATA,
+    NOTIFIED_ABOUT_NEW_INCOMING_ORDERS,
+    SET_CURR_DATE_TIME,
+    DEL_CURR_WORK_POLIGON_DATA,
+    DEL_CURR_ORDER_PATTERN_DATA,
+  } from '@/store/mutation-types';
 
   const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
@@ -47,12 +57,8 @@
         showBeforeLogoutDlg: false,
       });
 
-      const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
-      const getUserCredential = computed(() => store.getters.getUserCredential);
       const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
       const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
-      const getLoginDateTime = computed(() => store.getters.getLoginDateTime);
-      const getStartLogout = computed(() => store.getters.getStartLogout);
 
       onMounted(() => {
         timerId = setInterval(updateCurrDateTime, 1000);
@@ -69,7 +75,7 @@
       });
 
       const updateCurrDateTime = () => {
-        store.commit('setCurrDateTime', new Date());
+        store.commit(SET_CURR_DATE_TIME, new Date());
       };
 
       const updateAppState = () => {
@@ -84,17 +90,17 @@
             newIncomingOrdersSound.volume = store.getters.getSoundsVolume;
             newIncomingOrdersSound.play();
           }
-          store.commit('notifiedAboutNewIncomingOrders');
+          store.commit(NOTIFIED_ABOUT_NEW_INCOMING_ORDERS);
         }
       });
 
       /**
        *
        */
-      watch(getLoginDateTime, (newLoginDateTime) => {
+      watch(() => store.getters.getLoginDateTime, (newLoginDateTime) => {
         if (newLoginDateTime) {
-          store.commit('setStartDateToGetData', newLoginDateTime);
-          store.commit('determineLogoutItemAction');
+          store.commit(SET_START_DATE_TO_GET_DATA, newLoginDateTime);
+          store.commit(DETERMINE_LOGOUT_ITEM_ACTION);
         }
       });
 
@@ -106,9 +112,9 @@
        */
       watch(getUserWorkPoligon, (workPoligonNew) => {
         if (!workPoligonNew) {
-          store.commit('delCurrWorkPoligonData');
-          store.commit('delCurrOrderPatternsData');
-          store.commit('delOrderPatternsElementsRefs');
+          store.commit(DEL_CURR_WORK_POLIGON_DATA);
+          store.commit(DEL_CURR_ORDER_PATTERN_DATA);
+          store.commit(DEL_ORDER_PATTERNS_ELEMENTS_REFS);
           if (state.wsClient) {
             state.wsClient.closeWSConnection();
           }
@@ -132,7 +138,7 @@
       watch(getUserWorkPoligonData, (workPoligonDataNew) => {
         if (!workPoligonDataNew) {
           // ...
-          store.commit('delCurrLastOrdersParams');
+          store.commit(DEL_CURR_LAST_ORDERS_PARAMS);
         } else {
           store.dispatch('loadCurrSectorsShift');
           store.dispatch('loadLastOrdersParams');
@@ -140,7 +146,7 @@
         }
       });
 
-      watch(getStartLogout, (startLogoutVal) => {
+      watch(() => store.getters.getStartLogout, (startLogoutVal) => {
         if (startLogoutVal) {
           state.showBeforeLogoutDlg = true;
         }
@@ -152,8 +158,8 @@
 
       return {
         state,
-        isUserAuthenticated,
-        getUserCredential,
+        isUserAuthenticated: computed(() => store.getters.isUserAuthenticated),
+        getUserCredential: computed(() => store.getters.getUserCredential),
         getUserWorkPoligon,
         hideBeforeLogoutDlg,
       };

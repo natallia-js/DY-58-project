@@ -1,7 +1,38 @@
-import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { OrderPatternsNodeType } from '../../constants/orderPatterns';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+import { OrderPatternsNodeType } from '@/constants/orderPatterns';
+import {
+  DEL_CURR_ORDER_PATTERN_DATA,
+  SET_NEW_ORDER_PATTERNS_ARRAY,
+  SET_LOADING_ORDER_PATTERNS_STATUS,
+  CLEAR_LOADING_ORDER_PATTERNS_RESULT,
+  SET_LOADING_ORDER_PATTERNS_RESULT,
+  CLEAR_MODIFY_ORDER_CATEGORY_TITLE_RESULT,
+  SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT,
+  ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED,
+  SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED,
+  SET_ORDER_CATEGORY_TITLE,
+  CLEAR_DEL_ORDER_PATTERN_RESULT,
+  SET_DEL_ORDER_PATTERN_RESULT,
+  ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  DEL_ORDER_PATTERN,
+  CLEAR_MOD_ORDER_PATTERN_RESULT,
+  SET_MOD_ORDER_PATTERN_RESULT,
+  ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  MOD_ORDER_PATTERN,
+  CLEAR_CREATE_ORDER_PATTERN_RESULT,
+  SET_CREATE_ORDER_PATTERN_RESULT,
+  ADD_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED,
+  ADD_NEW_ORDER_PATERN,
+} from '@/store/mutation-types';
+import {
+  getOrderPatterns,
+  modOrderCategoryTitle,
+  deleteOrderPattern,
+  modifyOrderPattern,
+  createNewOrderPattern,
+} from '@/serverRequests/orderPatterns.requests';
 
 
 export const orderPatterns = {
@@ -209,7 +240,7 @@ export const orderPatterns = {
   },
 
   mutations: {
-    delCurrOrderPatternsData(state) {
+    [DEL_CURR_ORDER_PATTERN_DATA] (state) {
       state.patterns = [];
       state.loadingOrderPatterns = false;
       state.modifyOrderCategoryTitleResult = null;
@@ -221,30 +252,30 @@ export const orderPatterns = {
       state.createOrderPatternResult = null;
     },
 
-    setNewOrderPatternsArray(state, newPatternsArray) {
+    [SET_NEW_ORDER_PATTERNS_ARRAY] (state, newPatternsArray) {
       state.patterns = newPatternsArray || [];
     },
 
-    setLoadingOrderPatternsStatus(state, status) {
+    [SET_LOADING_ORDER_PATTERNS_STATUS] (state, status) {
       state.loadingOrderPatterns = status;
     },
 
-    clearLoadingOrderPatternsResult(state) {
+    [CLEAR_LOADING_ORDER_PATTERNS_RESULT] (state) {
       state.loadingOrderPatternsResult = null;
     },
 
-    setLoadingOrderPatternsResult(state, { error, message }) {
+    [SET_LOADING_ORDER_PATTERNS_RESULT] (state, { error, message }) {
       state.loadingOrderPatternsResult = {
         error,
         message,
       };
     },
 
-    clearModifyOrderCategoryTitleResult(state) {
+    [CLEAR_MODIFY_ORDER_CATEGORY_TITLE_RESULT] (state) {
       state.modifyOrderCategoryTitleResult = null;
     },
 
-    setModifyOrderCategoryTitleResult(state, { error, message, newTitle }) {
+    [SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT] (state, { error, message, newTitle }) {
       state.modifyOrderCategoryTitleResult = {
         error,
         message,
@@ -252,15 +283,15 @@ export const orderPatterns = {
       };
     },
 
-    addModifyOrderCategoryTitleRecsBeingProcessed(state) {
+    [ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED] (state) {
       state.modifyOrderCategoryTitleRecsBeingProcessed += 1;
     },
 
-    subModifyOrderCategoryTitleRecsBeingProcessed(state) {
+    [SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED] (state) {
       state.modifyOrderCategoryTitleRecsBeingProcessed -= 1;
     },
 
-    setOrderCategoryTitle(state, { service, orderType, title, newTitle }) {
+    [SET_ORDER_CATEGORY_TITLE] (state, { service, orderType, title, newTitle }) {
       state.patterns = state.patterns.map((pattern) => {
         if (pattern.service === service && pattern.type === orderType && pattern.category === title) {
           return {
@@ -272,34 +303,34 @@ export const orderPatterns = {
       });
     },
 
-    clearDelOrderPatternResult(state) {
+    [CLEAR_DEL_ORDER_PATTERN_RESULT] (state) {
       state.delOrderPatternResult = null;
     },
 
-    setDelOrderPatternResult(state, { error, message }) {
+    [SET_DEL_ORDER_PATTERN_RESULT] (state, { error, message }) {
       state.delOrderPatternResult = {
         error,
         message,
       };
     },
 
-    addDelOrderPatternRecsBeingProcessed(state) {
+    [ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.delOrderPatternRecsBeingProcessed += 1;
     },
 
-    subDelOrderPatternRecsBeingProcessed(state) {
+    [SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.delOrderPatternRecsBeingProcessed -= 1;
     },
 
-    delOrderPattern(state, orderPatternId) {
+    [DEL_ORDER_PATTERN] (state, orderPatternId) {
       state.patterns = state.patterns.filter((pattern) => pattern._id !== orderPatternId);
     },
 
-    clearModOrderPatternResult(state) {
+    [CLEAR_MOD_ORDER_PATTERN_RESULT] (state) {
       state.modOrderPatternResult = null;
     },
 
-    setModOrderPatternResult(state, { error, message, orderPattern }) {
+    [SET_MOD_ORDER_PATTERN_RESULT] (state, { error, message, orderPattern }) {
       state.modOrderPatternResult = {
         error,
         message,
@@ -307,15 +338,15 @@ export const orderPatterns = {
       };
     },
 
-    addModOrderPatternRecsBeingProcessed(state) {
+    [ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.modOrderPatternRecsBeingProcessed += 1;
     },
 
-    subModOrderPatternRecsBeingProcessed(state) {
+    [SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.modOrderPatternRecsBeingProcessed -= 1;
     },
 
-    modOrderPattern(state, { orderPatternId, newOrderPattern }) {
+    [MOD_ORDER_PATTERN] (state, { orderPatternId, newOrderPattern }) {
       state.patterns = state.patterns.map((pattern) => {
         if (pattern._id !== orderPatternId) {
           return pattern;
@@ -327,30 +358,29 @@ export const orderPatterns = {
       });
     },
 
-    clearCreateOrderPatternResult(state) {
+    [CLEAR_CREATE_ORDER_PATTERN_RESULT] (state) {
       state.createOrderPatternResult = null;
     },
 
-    setCreateOrderPatternResult(state, { error, message }) {
+    [SET_CREATE_ORDER_PATTERN_RESULT] (state, { error, message }) {
       state.createOrderPatternResult = {
         error,
         message,
       };
     },
 
-    addCreateOrderPatternRecsBeingProcessed(state) {
+    [ADD_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.createOrderPatternRecsBeingProcessed += 1;
     },
 
-    subCreateOrderPatternRecsBeingProcessed(state) {
+    [SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED] (state) {
       state.createOrderPatternRecsBeingProcessed -= 1;
     },
 
-    addNewOrderPattern(state, newPattern) {
-      state.patterns = [
-        ...state.patterns,
-        newPattern,
-      ];
+    [ADD_NEW_ORDER_PATERN] (state, newPattern) {
+      if (newPattern) {
+        state.patterns.push(newPattern);
+      }
     },
   },
 
@@ -359,119 +389,144 @@ export const orderPatterns = {
      *
      */
     async loadOrderPatterns(context) {
-      context.commit('setLoadingOrderPatternsStatus', true);
-      context.commit('clearLoadingOrderPatternsResult');
+      context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, true);
+      context.commit(CLEAR_LOADING_ORDER_PATTERNS_RESULT);
+
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit('setLoadingOrderPatternsResult', { error: true, message: 'Не определен рабочий полигон пользователя' });
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: 'Не определен рабочий полигон пользователя' });
         return;
       }
       try {
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getOrderPatterns,
-          {
-            workPoligonType: workPoligon.type,
-            workPoligonId: workPoligon.code,
-            getChildPatterns: true,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setLoadingOrderPatternsResult', { error: false, message: null });
-        context.commit('setNewOrderPatternsArray', response.data);
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при получении информации о шаблонах распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setLoadingOrderPatternsResult', { error: true, message: errMessage });
+        const responseData = await getOrderPatterns({
+          workPoligonType: workPoligon.type,
+          workPoligonId: workPoligon.code,
+          getChildPatterns: true,
+        });
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: false, message: null });
+        context.commit(SET_NEW_ORDER_PATTERNS_ARRAY, responseData);
+
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка подгрузки информации о шаблонах распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка подгрузки информации о шаблонах распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при подгрузке информации о шаблонах распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
       }
-      context.commit('setLoadingOrderPatternsStatus', false);
+      context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, false);
     },
 
     /**
      *
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
-      context.commit('addModifyOrderCategoryTitleRecsBeingProcessed');
-      context.commit('clearModifyOrderCategoryTitleResult');
+      context.commit(ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
+      context.commit(CLEAR_MODIFY_ORDER_CATEGORY_TITLE_RESULT);
       try {
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderCategoryTitle,
-          { service, orderType, title, newTitle },
-          { headers: getRequestAuthorizationHeader() }
-        );
-        context.commit('setModifyOrderCategoryTitleResult', {
+        const responseData = await modOrderCategoryTitle({ service, orderType, title, newTitle });
+        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
           error: false,
-          message: response.data.message,
-          newTitle: response.data.newTitle,
+          message: responseData.message,
+          newTitle: responseData.newTitle,
         });
-        context.commit('setOrderCategoryTitle', {
+        context.commit(SET_ORDER_CATEGORY_TITLE, {
           service,
           orderType,
           title,
-          newTitle: response.data.newTitle,
+          newTitle: responseData.newTitle,
         });
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при редактировании наименования категории распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setModifyOrderCategoryTitleResult', {
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка редактирования наименования категории распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка редактирования наименования категории распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при редактировании наименования категории распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
           error: true,
           message: errMessage,
           newTitle: null,
         });
       }
-      context.commit('subModifyOrderCategoryTitleRecsBeingProcessed');
+      context.commit(SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
     },
 
     /**
      *
      */
     async delOrderPattern(context, orderPatternId) {
-      context.commit('addDelOrderPatternRecsBeingProcessed');
-      context.commit('clearDelOrderPatternResult');
+      context.commit(ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
+      context.commit(CLEAR_DEL_ORDER_PATTERN_RESULT);
       try {
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.delOrderPattern,
-          { id: orderPatternId },
-          { headers: getRequestAuthorizationHeader() }
-        );
-        context.commit('setDelOrderPatternResult', { error: false, message: response.data.message });
-        context.commit('delOrderPattern', orderPatternId);
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при удалении шаблона распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setDelOrderPatternResult', { error: true, message: errMessage });
+        const responseData = await deleteOrderPattern(orderPatternId);
+        context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: false, message: responseData.message });
+        context.commit(DEL_ORDER_PATTERN, orderPatternId);
+
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка удаления шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка удаления шаблона распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при удалении шаблона распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
       }
-      context.commit('subDelOrderPatternRecsBeingProcessed');
+      context.commit(SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
 
     /**
      *
      */
     async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
-      context.commit('addModOrderPatternRecsBeingProcessed');
-      context.commit('clearModOrderPatternResult');
+      context.commit(ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
+      context.commit(CLEAR_MOD_ORDER_PATTERN_RESULT);
       try {
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.modOrderPattern,
-          { id, title, specialTrainCategories, elements },
-          { headers: getRequestAuthorizationHeader() }
-        );
-        context.commit('setModOrderPatternResult', {
+        const responseData = await modifyOrderPattern({ id, title, specialTrainCategories, elements });
+        context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
           error: false,
-          message: response.data.message,
-          orderPattern: response.data.orderPattern,
+          message: responseData.message,
+          orderPattern: responseData.orderPattern,
         });
-        context.commit('modOrderPattern', {
-          orderPatternId: response.data.orderPattern._id,
-          newOrderPattern: response.data.orderPattern,
+        context.commit(MOD_ORDER_PATTERN, {
+          orderPatternId: responseData.orderPattern._id,
+          newOrderPattern: responseData.orderPattern,
         });
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при редактировании шаблона распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setModOrderPatternResult', {
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка редактирования шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка редактирования шаблона распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при редактировании шаблона распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
           error: true,
           message: errMessage,
           orderPattern: null,
         });
       }
-      context.commit('subModOrderPatternRecsBeingProcessed');
+      context.commit(SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
 
     /**
@@ -480,38 +535,44 @@ export const orderPatterns = {
     async createOrderPattern(context, props) {
       const { service, type, category, title, specialTrainCategories, elements } = props;
 
-      context.commit('clearCreateOrderPatternResult');
-      context.commit('addCreateOrderPatternRecsBeingProcessed');
+      context.commit(CLEAR_CREATE_ORDER_PATTERN_RESULT);
+      context.commit(ADD_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);
 
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit('setCreateOrderPatternResult', { error: true, message: 'Не определен рабочий полигон пользователя' });
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: 'Не определен рабочий полигон пользователя' });
         return;
       }
       try {
-        const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
-          {
-            service,
-            type,
-            category,
-            title,
-            specialTrainCategories,
-            elements,
-            isPersonalPattern: true,
-            workPoligonType: workPoligon.type,
-            workPoligonId: workPoligon.code,
-          },
-          { headers: getRequestAuthorizationHeader() }
-        );
-        context.commit('setCreateOrderPatternResult', { error: false, message: response.data.message });
-        context.commit('addNewOrderPattern', response.data.orderPattern);
+        const responseData = await createNewOrderPattern({
+          service,
+          type,
+          category,
+          title,
+          specialTrainCategories,
+          elements,
+          isPersonalPattern: true,
+          workPoligonType: workPoligon.type,
+          workPoligonId: workPoligon.code,
+        });
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: false, message: responseData.message });
+        context.commit(ADD_NEW_ORDER_PATERN, responseData.orderPattern);
 
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при создании шаблона распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setCreateOrderPatternResult', { error: true, message: errMessage });
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка создания шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка создания шаблона распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при создании шаблона распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
       }
-      context.commit('subCreateOrderPatternRecsBeingProcessed');
+      context.commit(SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
   },
 };

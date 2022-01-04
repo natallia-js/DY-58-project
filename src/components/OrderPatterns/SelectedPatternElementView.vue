@@ -61,8 +61,8 @@
     OrderPatternElementType,
     ElementSizesCorrespondence,
     DRTrainTableColumns,
-  } from '../../constants/orderPatterns';
-  import AllowClearInputText from '../AllowClearInputText';
+  } from '@/constants/orderPatterns';
+  import AllowClearInputText from '@/components/AllowClearInputText';
 
   export default {
     name: 'dy58-selected-pattern-element-view',

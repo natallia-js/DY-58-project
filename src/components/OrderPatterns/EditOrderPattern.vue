@@ -48,10 +48,10 @@
 
 
 <script>
-  import Cursor from './Cursor';
-  import { OrderPatternElementType } from '../../constants/orderPatterns';
+  import { OrderPatternElementType } from '@/constants/orderPatterns';
   import OrderPatternElementView from './OrderPatternElementView';
   import EditOrderPatternElement from './EditOrderPatternElement';
+  import Cursor from './Cursor';
 
   export default {
     name: 'dy58-edit-order-pattern',

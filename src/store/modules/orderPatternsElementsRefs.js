@@ -1,6 +1,11 @@
-import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+import {
+  SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS,
+  SET_LOADING_REFS_RESULT,
+  CLEAR_LOADING_REFS_RESULT,
+  SET_ORDER_PATTERNS_ELEMENTS_REFS,
+  DEL_ORDER_PATTERNS_ELEMENTS_REFS,
+} from '@/store/mutation-types';
+import { getOrderPatternsElementsRefs } from '@/serverRequests/orderPatterns.requests';
 
 
 /**
@@ -36,24 +41,26 @@ export const orderPatternsElementsRefs = {
   },
 
   mutations: {
-    setLoadingOrderPatternsElementsRefsStatus: (state, status) => {
-      state.loadingRefs = status;
+    [SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS] (state, status) {
+      if (state.loadingRefs !== status) {
+        state.loadingRefs = status;
+      }
     },
 
-    setLoadingRefsResult: (state, { error, message }) => {
+    [SET_LOADING_REFS_RESULT] (state, { error, message }) {
       state.loadingRefsResult = {
         error,
         message,
       };
     },
 
-    clearLoadingRefsResult(state) {
+    [CLEAR_LOADING_REFS_RESULT] (state) {
       if (state.loadingRefsResult) {
         state.loadingRefsResult = null;
       }
     },
 
-    setOrderPatternsElementsRefs(state, refs) {
+    [SET_ORDER_PATTERNS_ELEMENTS_REFS] (state, refs) {
       if (!refs || !refs.length) {
         if (state.refs.length) {
           state.refs = [];
@@ -63,7 +70,7 @@ export const orderPatternsElementsRefs = {
       state.refs = refs;
     },
 
-    delOrderPatternsElementsRefs(state) {
+    [DEL_ORDER_PATTERNS_ELEMENTS_REFS] (state) {
       state.refs = [];
       state.loadingRefs = false;
       state.loadingRefsResult = null;
@@ -75,20 +82,29 @@ export const orderPatternsElementsRefs = {
      * Подгружает информацию о возможных смысловых значениях элементов шаблонов распоряжений.
      */
     async loadOrderPatternsElementsRefs(context) {
-      context.commit('setLoadingOrderPatternsElementsRefsStatus', true);
-      context.commit('clearLoadingRefsResult');
+      context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, true);
+      context.commit(CLEAR_LOADING_REFS_RESULT);
+
       try {
-        const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.getOrderPatternsElementsRefs,
-          { headers: getRequestAuthorizationHeader() }
-        );
-        context.commit('setLoadingRefsResult', { error: false, message: null });
-        context.commit('setOrderPatternsElementsRefs', response.data);
-      } catch ({ response }) {
-        const defaultErrMessage = 'Произошла неизвестная ошибка при получении информации о смысловых значениях элементов шаблонов распоряжений';
-        const errMessage = !response ? defaultErrMessage : (!response.data ? defaultErrMessage : response.data.message);
-        context.commit('setLoadingRefsResult', { error: true, message: errMessage });
+        const responseData = await getOrderPatternsElementsRefs();
+        context.commit(SET_LOADING_REFS_RESULT, { error: false, message: null });
+        context.commit(SET_ORDER_PATTERNS_ELEMENTS_REFS, responseData);
+
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при подгрузке информации о смысловых значениях элементов шаблонов распоряжений: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
       }
-      context.commit('setLoadingOrderPatternsElementsRefsStatus', false);
+      context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, false);
     },
   },
 }

@@ -38,19 +38,11 @@
     setup() {
       const store = useStore();
 
-      const serverConnectionState = computed(() => store.getters.getReadyState);
-      const serverConnectRetryAttemptsNumber = computed(() => store.getters.getRetryNum);
-      const lastNServerMessages = computed(() =>  store.getters.getLastNServerMessages);
-
       return {
-        serverConnectionState,
-        serverConnectRetryAttemptsNumber,
-        lastNServerMessages,
+        serverConnectionState: computed(() => store.getters.getReadyState),
+        serverConnectRetryAttemptsNumber: computed(() => store.getters.getRetryNum),
+        lastNServerMessages: computed(() => store.getters.getLastNServerMessages),
       };
     },
   };
 </script>
-
-
-<style scoped>
-</style>

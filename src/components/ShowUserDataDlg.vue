@@ -33,7 +33,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-user-info-dialog',
@@ -95,7 +95,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-</style>

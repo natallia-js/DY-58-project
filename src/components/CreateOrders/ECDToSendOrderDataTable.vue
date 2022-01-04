@@ -109,13 +109,18 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
-  import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
+  import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     CurrSectorsShiftTblColumnNames,
     CurrSectorsShiftTblColumns,
-  } from '../../store/modules/personal';
-  import ShowChoosePersonDlg from './ShowChoosePersonDlg';
+  } from '@/store/modules/personal';
+  import ShowChoosePersonDlg from '@/components/CreateOrders/ShowChoosePersonDlg';
+  import {
+    SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
+    SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
+    SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS,
+  } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-ecd-to-send-order-data-table',
@@ -182,17 +187,17 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllECDSectors',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitECDSector',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftECDSectors',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
@@ -202,22 +207,22 @@
       },
 
       sendCopyToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitECDSector',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftECDSectors',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllECDSectors',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       doNotSendToDefinitSector(ecdSectorId) {
-        this.$store.commit('setGetOrderStatusToDefinitECDSector',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
           { ecdSectorId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
@@ -235,7 +240,3 @@
     }
   }
 </script>
-
-
-<style scoped>
-</style>

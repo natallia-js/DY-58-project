@@ -26,6 +26,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import { CANCEL_LOGOUT } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-show-before-logout-dialog',
@@ -58,7 +59,7 @@
       showDlg: function (val) {
         this.dlgVisible = val;
         if (!val) {
-          this.$store.commit('cancelLogout');
+          this.$store.commit(CANCEL_LOGOUT);
         }
       },
 
@@ -72,7 +73,7 @@
 
     methods: {
       handleConfirmLogout() {
-        this.$store.commit('logout');
+        this.$store.dispatch('logout');
       },
 
       handleCloseDialog() {

@@ -27,6 +27,8 @@
 
 
 <script>
+  import { SET_USER_CHOSEN_STATUS } from '@/store/mutation-types';
+
   export default {
     name: 'dy58-choose-person-dialog',
 
@@ -80,7 +82,7 @@
 
     methods: {
       chooseUser() {
-        this.$store.commit('setUserChosenStatus', {
+        this.$store.commit(SET_USER_CHOSEN_STATUS, {
           userId: this.selectedUser.id,
           chooseUser: true,
           workPoligonType: this.workPoligonType,
@@ -90,7 +92,7 @@
       },
 
       unChooseUser() {
-        this.$store.commit('setUserChosenStatus', {
+        this.$store.commit(SET_USER_CHOSEN_STATUS, {
           userId: this.selectedUser.id,
           chooseUser: false,
           workPoligonType: this.workPoligonType,

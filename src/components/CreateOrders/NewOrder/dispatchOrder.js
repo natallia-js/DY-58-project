@@ -1,5 +1,5 @@
 import { computed, watch } from 'vue';
-import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
 /**
  * Данный модуль предназначен для сбора данных о распоряжении и для его издания.

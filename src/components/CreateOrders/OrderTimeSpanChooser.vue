@@ -39,7 +39,7 @@
 
 
 <script>
-  import { reactive, watch } from 'vue';
+  import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import isValidDateTime from '@/additional/isValidDateTime';
 
@@ -89,7 +89,7 @@
 
       return {
         state,
-        isDNC: store.getters.isDNC,
+        isDNC: computed(() => store.getters.isDNC),
       };
     },
   };

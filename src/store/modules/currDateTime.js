@@ -1,4 +1,5 @@
-import { getLocaleDateString, getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
+import { getLocaleDateString, getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+import { SET_CURR_DATE_TIME } from '@/store/mutation-types';
 
 
 export const currDateTime = {
@@ -27,7 +28,7 @@ export const currDateTime = {
   },
 
   mutations: {
-    setCurrDateTime(state, dt) {
+    [SET_CURR_DATE_TIME] (state, dt) {
       if (dt instanceof Date) {
         state.dateTime = dt;
       }

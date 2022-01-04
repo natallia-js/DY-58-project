@@ -48,9 +48,10 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import NewOrder from '../components/CreateOrders/NewOrder/index';
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import { ORDER_PATTERN_TYPES } from '../constants/orderPatterns';
+  import NewOrder from '@/components/CreateOrders/NewOrder/index';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
+  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy58-new-order-page',
@@ -83,7 +84,7 @@
     },
 
     mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.createOrder);
+      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.createOrder);
 
       switch (this.$route.params.orderType) {
         case ORDER_PATTERN_TYPES.ORDER:

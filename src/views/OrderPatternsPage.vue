@@ -12,9 +12,10 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import OrderPatternsTree from '../components/OrderPatterns/OrderPatternsTree';
-  import CreateOrderPattern from '../components/OrderPatterns/CreateOrderPattern';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
+  import OrderPatternsTree from '@/components/OrderPatterns/OrderPatternsTree';
+  import CreateOrderPattern from '@/components/OrderPatterns/CreateOrderPattern';
 
   export default {
     name: 'dy58-order-patterns-page',
@@ -29,14 +30,13 @@
         'isDNC',
         'isECD',
       ]),
-
       getMainMenuItemsKeys() {
         return MainMenuItemsKeys;
       },
     },
 
     mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.orderPatterns);
+      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.orderPatterns);
     },
   }
 </script>

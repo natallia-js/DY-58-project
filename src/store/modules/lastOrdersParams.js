@@ -1,6 +1,13 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../constants/servers';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+import { getLastOrdersParams } from '@/serverRequests/orders.requests';
+import {
+  DEL_CURR_LAST_ORDERS_PARAMS,
+  SET_LAST_ORDERS_NUMBER,
+  RESET_ORDER_NUMBERS_DATA,
+  SET_LAST_ORDERS_PARAMS,
+  CLEAR_LOADING_LAST_ORDERS_RESULT,
+  SET_LOADING_LAST_ORDERS_RESULT,
+  SET_LOADING_LAST_ORDERS_PARAMS_STATUS,
+} from '@/store/mutation-types';
 
 
 /**
@@ -11,7 +18,7 @@ export const lastOrdersParams = {
   state: {
     params: [],
     loadingParams: false,
-    errorLoadingParams: null,
+    loadingParamsResult: null,
   },
 
   getters: {
@@ -45,13 +52,13 @@ export const lastOrdersParams = {
   },
 
   mutations: {
-    delCurrLastOrdersParams(state) {
+    [DEL_CURR_LAST_ORDERS_PARAMS] (state) {
       if (state.params.length > 0) {
         state.params = [];
       }
     },
 
-    setLastOrdersNumber(state, { ordersType, number, createDateTime }) {
+    [SET_LAST_ORDERS_NUMBER] (state, { ordersType, number, createDateTime }) {
       const ordersParams = state.params.find((params) => params.ordersType === ordersType);
       if (ordersParams) {
         ordersParams.lastOrderNumber = number;
@@ -65,7 +72,7 @@ export const lastOrdersParams = {
       }
     },
 
-    resetOrderNumbersData(state, ordersType) {
+    [RESET_ORDER_NUMBERS_DATA] (state, ordersType) {
       const arrayIndex = state.params.findIndex((item) => item.ordersType === ordersType);
       if (arrayIndex >= 0) {
         state.params[arrayIndex] = {
@@ -76,7 +83,7 @@ export const lastOrdersParams = {
       }
     },
 
-    setLastOrdersParams(state, params) {
+    [SET_LAST_ORDERS_PARAMS] (state, params) {
       if (!params || !params.length) {
         state.params = [];
         return;
@@ -88,6 +95,21 @@ export const lastOrdersParams = {
           lastOrderDateTime: param.lastOrderDateTime ? new Date(param.lastOrderDateTime) : null,
         };
       });
+    },
+
+    [CLEAR_LOADING_LAST_ORDERS_RESULT] (state) {
+      state.loadingParamsResult = null;
+    },
+
+    [SET_LOADING_LAST_ORDERS_RESULT] (state, { error, message }) {
+      state.loadingParamsResult = {
+        error,
+        message,
+      };
+    },
+
+    [SET_LOADING_LAST_ORDERS_PARAMS_STATUS] (state, status) {
+      state.loadingParams = status;
     },
   },
 
@@ -101,25 +123,34 @@ export const lastOrdersParams = {
       if (!currPoligonData) {
         return;
       }
-      context.state.errorLoadingParams = null;
-      context.state.loadingParams = true;
+      context.commit(CLEAR_LOADING_LAST_ORDERS_RESULT);
+      context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, true);
       try {
         // Извлекаем информацию о последних номерах изданных распоряжений разных типов
         // на текущем полигоне управления
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setLastOrdersParams', response.data);
-      } catch (err) {
-        context.state.errorLoadingParams = err;
+        const responseData = await getLastOrdersParams({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workPoligonWorkPlaceId: context.getters.getUserWorkPoligon.subCode,
+        });
+        context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: false, message: null });
+        context.commit(SET_LAST_ORDERS_PARAMS, responseData);
+
+      } catch (error) {
+        let errMessage;
+        if (error.response) {
+          // The request was made and server responded
+          errMessage = 'Ошибка получения информации о последних изданных распоряжениях: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+        } else if (error.request) {
+          // The request was made but no response was received
+          errMessage = 'Ошибка получения информации о последних изданных распоряжениях: сервер не отвечает';
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          errMessage = 'Произошла неизвестная ошибка при получении информации о последних изданных распоряжениях: ' + error.message || JSON.stringify(error);
+        }
+        context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });
       }
-      context.state.loadingParams = false;
+      context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, false);
     },
   },
 }

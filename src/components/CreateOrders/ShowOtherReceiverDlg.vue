@@ -71,7 +71,7 @@
   import { computed, reactive, ref, watch } from 'vue';
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
-  import AllowClearInputText from '../AllowClearInputText';
+  import AllowClearInputText from '@/components/AllowClearInputText';
 
   export default {
     name: 'dy58-other-order-receiver-dialog',
@@ -155,7 +155,3 @@
     },
   };
 </script>
-
-
-<style scoped>
-</style>

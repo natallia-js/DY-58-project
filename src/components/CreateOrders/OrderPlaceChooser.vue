@@ -45,8 +45,8 @@
 
 
 <script>
-  import { computed, reactive } from 'vue';
-  import { ORDER_PLACE_VALUES } from '../../constants/orders';
+  import { reactive } from 'vue';
+  import { ORDER_PLACE_VALUES } from '@/constants/orders';
 
   export default {
     name: 'dy58-order-place-chooser',
@@ -89,7 +89,7 @@
 
       return {
         state,
-        ORDER_PLACE_VALUES: computed(() => ORDER_PLACE_VALUES),
+        ORDER_PLACE_VALUES,
         handleFocusStationDropdown,
         handleFocusSpanDropdown,
         handleChooseSpan,

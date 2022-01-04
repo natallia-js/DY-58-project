@@ -26,20 +26,25 @@
   </div>
 </template>
 
+
 <script>
-  import OrderPatternElementView from '../OrderPatterns/OrderPatternElementView';
+  import { mapGetters } from 'vuex';
+  import OrderPatternElementView from '@/components/OrderPatterns/OrderPatternElementView';
   import {
     ORDER_PATTERN_TYPES,
     OrderPatternElementType,
     ElementSizesCorrespondence,
-  } from '../../constants/orderPatterns';
-  import { mapGetters } from 'vuex';
+  } from '@/constants/orderPatterns';
   import {
     CurrShiftGetOrderStatus,
     FILLED_ORDER_DATE_ELEMENTS,
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
-  } from '../../constants/orders';
+  } from '@/constants/orders';
+  import {
+    SET_GET_ORDER_STATUS_TO_ALL_DSP,
+    SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+  } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-order-pattern-preview',
@@ -346,14 +351,14 @@
             break;
           case OrderPatternElementType.DR_TRAIN_TABLE:
             // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
-            this.$store.commit('setGetOrderStatusToAllDSP',
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
               { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
             // Затем, при необходимости, назначаем получение оригинала распоряжения тем станциям,
             // которые присутствуют в таблице поезда, идущего ДР
             if (event.value && event.value.length) {
               event.value.forEach((item) => {
                 if (item.stationId) {
-                  this.$store.commit('setGetOrderStatusToDefinitDSP',
+                  this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
                     { stationId: item.stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
                 }
               });

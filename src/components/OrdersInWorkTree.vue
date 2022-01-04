@@ -63,8 +63,8 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { getLocaleDateTimeString } from '../additional/dateTimeConvertions';
-  import ShowIncomingOrderDlg from '../components/ShowIncomingOrderDlg';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
 
   export default {
     name: 'dy58-orders-in-work-tree',

@@ -4,24 +4,12 @@
 
 
 <script>
-  import { mapMutations } from 'vuex';
-
   export default {
     name: 'dy58-logout',
 
-    props: {
-      //
-    },
-
     mounted() {
-      this.logout();
+      this.$store.dispatch('logout');
       this.$router.push({ name: 'AuthPage' });
-    },
-
-    methods: {
-      ...mapMutations([
-        'logout',
-      ]),
     },
   };
 </script>

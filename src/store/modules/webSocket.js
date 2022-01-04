@@ -1,4 +1,4 @@
-import { WS_SERVER_PARAMS } from '../../constants/servers';
+import { WS_SERVER_PARAMS } from '@/constants/servers';
 
 export const webSocket = {
   state: {

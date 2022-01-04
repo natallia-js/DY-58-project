@@ -158,11 +158,12 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { OrderPatternsNodeType, SPECIAL_TRAIN_CATEGORIES } from '../../constants/orderPatterns';
+  import { OrderPatternsNodeType, SPECIAL_TRAIN_CATEGORIES } from '@/constants/orderPatterns';
+  import objectId from '@/additional/objectId.generator';
+  import { DEL_ORDER_PATTERN, MOD_ORDER_PATTERN } from '@/store/mutation-types';
   import OrderPatternPreview from './OrderPatternPreview';
   import EditOrderPattern from './EditOrderPattern';
   import EditOrderPatternElement from './EditOrderPatternElement';
-  import objectId from '../../additional/objectId.generator';
 
   export default {
     name: 'dy58-order-patterns-tree',
@@ -438,7 +439,7 @@
             if (!this.selectedPattern || !this.selectedPattern.key) {
               return;
             }
-            this.$store.dispatch('delOrderPattern', this.selectedPattern.key);
+            this.$store.dispatch(DEL_ORDER_PATTERN, this.selectedPattern.key);
           },
         });
       },
@@ -591,7 +592,7 @@
         if (!this.editedPattern) {
           return;
         }
-        this.$store.dispatch('modOrderPattern', {
+        this.$store.dispatch(MOD_ORDER_PATTERN, {
           id: this.selectedPattern.key,
           title: this.editedPattern.title,
           specialTrainCategories: this.editedPattern.specialTrainCategories,

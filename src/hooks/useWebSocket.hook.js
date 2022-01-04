@@ -1,6 +1,7 @@
 import { computed, watch, reactive } from 'vue';
-import { WS_SERVER_PARAMS } from '../constants/servers';
-import { store } from '../store';
+import { WS_SERVER_PARAMS } from '@/constants/servers';
+import { store } from '@/store';
+import { SET_ONLINE_SHIFT_PERSONAL } from '@/store/mutation-types';
 
 
 // handle json messages
@@ -80,7 +81,7 @@ export default function useWebSocket({ socketUrl }) {
       if (msg.match(WS_SERVER_PARAMS.ONLINE_USERS_MESSAGE_PATTERN)) {
         const onlineUsersIds = JSON.parse(msg.slice(7));
         if (Array.isArray(onlineUsersIds)) {
-          store.commit('setOnlineShiftPersonal', onlineUsersIds);
+          store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsersIds);
         }
         return;
       }

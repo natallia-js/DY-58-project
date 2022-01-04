@@ -1,11 +1,11 @@
-import { OrderPatternElementType } from '../constants/orderPatterns';
 import {
   getLocaleDateString,
   getLocaleTimeString,
   getLocaleDateTimeString,
-} from './dateTimeConvertions';
-import { CurrShiftGetOrderStatus } from '../constants/orders';
-import { DRTrainTableColumns } from '../constants/orderPatterns';
+} from '@/additional/dateTimeConvertions';
+import { CurrShiftGetOrderStatus } from '@/constants/orders';
+import { DRTrainTableColumns } from '@/constants/orderPatterns';
+import { OrderPatternElementType } from '@/constants/orderPatterns';
 
 
 /**

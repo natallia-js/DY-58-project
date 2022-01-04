@@ -124,13 +124,18 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus, ReceiversPosts } from '../../constants/orders';
-  import { WORK_POLIGON_TYPES } from '../../constants/appCredentials';
+  import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     CurrStationsShiftTblColumnNames,
     CurrStationsShiftTblColumns,
-  } from '../../store/modules/personal';
-  import ShowChoosePersonDlg from './ShowChoosePersonDlg';
+  } from '@/store/modules/personal';
+  import ShowChoosePersonDlg from '@/components/CreateOrders/ShowChoosePersonDlg';
+  import {
+    SET_GET_ORDER_STATUS_TO_ALL_DSP,
+    SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+    SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+  } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-dsp-to-send-order-data-table',
@@ -197,42 +202,42 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit('setGetOrderStatusToAllDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
           { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit('setGetOrderStatusToAllLeftDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 
       doNotSendToAll() {
-        this.$store.commit('setGetOrderStatusToAllDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
           { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       doNotSendToDefinitStation(stationId) {
-        this.$store.commit('setGetOrderStatusToDefinitDSP',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
@@ -250,7 +255,3 @@
     }
   }
 </script>
-
-
-<style scoped>
-</style>

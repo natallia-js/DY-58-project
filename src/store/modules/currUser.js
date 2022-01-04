@@ -1,12 +1,22 @@
-import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../../constants/servers';
 import {
   APP_CODE_NAME,
   APP_CREDENTIALS,
   USER_CREDENTIALS_LOCAL_STORAGE_NAME,
   WORK_POLIGON_TYPES,
-} from '../../constants/appCredentials';
-import { getRequestAuthorizationHeader } from '../../serverRequests/common';
+} from '@/constants/appCredentials';
+import {
+  SET_USER_CREDENTIAL,
+  SET_USER_WORK_POLIGON,
+  LOGIN,
+  TRY_LOGIN_VIA_LOCAL_STORAGE,
+  CANCEL_LOGOUT,
+  PREPARE_FOR_LOGOUT,
+  START_LOGOUT_PROCESS,
+  LOGOUT_FINISHED_WITH_ERROR,
+  LOGOUT_FINISHED_WITHOUT_ERROR,
+  CLEAR_USER_DATA_ON_LOGOUT,
+} from '@/store/mutation-types';
+import { logoutWithDutyPass } from '@/serverRequests/auth.requests';
 
 
 /**
@@ -65,7 +75,7 @@ function checkUserAuthData(payload) {
   let workPoligonExists = false; // будет true, если хотя бы для одного из типов полномочий существует хотя бы один рабочий полигон
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
-    if (cred === APP_CREDENTIALS.DSP_FULL || cred === APP_CREDENTIALS.DSP_Operator) {
+    if (cred === APP_CREDENTIALS.DSP_FULL) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
         obj.poligons = [];
@@ -75,9 +85,23 @@ function checkUserAuthData(payload) {
           workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && !wp.subPoligonId),
         }];
       }
+    } else if (cred === APP_CREDENTIALS.DSP_Operator) {
+      const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
+      if (!poligon) {
+        obj.poligons = [];
+      } else {
+        obj.poligons = [{
+          type: WORK_POLIGON_TYPES.STATION,
+          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId),
+        }];
+      }
     } else if (cred === APP_CREDENTIALS.DNC_FULL) {
+      // filter, а не find, несмотря на то что все равно будет найден максимум 1 элемент (нужен пустой
+      // массив, если ничего не будет найдено)
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.DNC_SECTOR);
     } else if (cred === APP_CREDENTIALS.ECD_FULL) {
+      // filter, а не find, несмотря на то что все равно будет найден максимум 1 элемент (нужен пустой
+      // массив, если ничего не будет найдено)
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.ECD_SECTOR);
     }
     if (obj.poligons.length) {
@@ -89,6 +113,7 @@ function checkUserAuthData(payload) {
   if (!workPoligonExists) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
+
   return userCredsWithPoligons;
 }
 
@@ -110,10 +135,10 @@ export const currUser = {
     credential: null, // конкретное (одно) полномочие пользователя в данной системе
     workPoligon: null,  // информация о рабочем полигоне (одном) пользователя
     isAuthenticated: false, // true (прошел) либо false (не прошел) пользователь аутентификацию в системе
-    startLogout: false,
-    logoutWithDutyPass: false,
-    logoutStarted: false,
-    logoutFinished: false,
+    startLogout: false, // true (false) - начать (не начинать) процесс выхода из системы
+    logoutWithDutyPass: false, // true (false) - выход из системы со сдачей (без сдачи) дежурства
+    logoutStarted: false, // true (false) - начат (не начат) процесс выхода из системы
+    logoutFinished: false, // true (false) - закончен (не закончен) процесс выхода из системы
     logoutError: null,
   },
 
@@ -217,7 +242,7 @@ export const currUser = {
     /**
      * Сохраняет полномочия пользователя (строка credential), в т.ч. в LocalStorage.
      */
-    setUserCredential(state, credential) {
+    [SET_USER_CREDENTIAL] (state, credential) {
       if (credential) {
         state.credential = credential;
 
@@ -231,7 +256,7 @@ export const currUser = {
      * Сохраняет рабочий полигон пользователя, в т.ч. в LocalStorage.
      * workPoligon - объект с полями type, code, subCode
      */
-    setUserWorkPoligon(state, workPoligon) {
+    [SET_USER_WORK_POLIGON] (state, workPoligon) {
       if (workPoligon) {
         state.workPoligon = workPoligon;
 
@@ -244,7 +269,7 @@ export const currUser = {
     /**
      * Осуществляет вход в систему.
      */
-    login(state, payload) {
+    [LOGIN] (state, payload) {
       const {
         userId,
         jtwToken,
@@ -328,7 +353,7 @@ export const currUser = {
     /**
      * Пытается авторизовать пользователя через LocalStorage браузера.
      */
-    tryLoginViaLocalStorage(state) {
+    [TRY_LOGIN_VIA_LOCAL_STORAGE] (state) {
       if (state.isAuthenticated) {
         return;
       }
@@ -341,7 +366,7 @@ export const currUser = {
       }
 
       try {
-        this.commit('login', {
+        this.commit(LOGIN, {
           userId: locStorUserData.userId,
           jtwToken: locStorUserData.userToken,
           userInfo: locStorUserData.userInfo,
@@ -359,32 +384,39 @@ export const currUser = {
     },
 
     /**
-     * passDuty - true (выйти и сдать дежурство) / false (выйти без сдачи дежурства)
+     *
      */
-    async logout(state) {
+    [CANCEL_LOGOUT] (state) {
+      state.startLogout = false;
+      state.logoutStarted = false;
+      state.logoutFinished = false;
+      state.logoutError = null;
+    },
+
+    /**
+     *
+     */
+    [PREPARE_FOR_LOGOUT] (state, logoutWithDutyPass) {
+      state.logoutWithDutyPass = logoutWithDutyPass;
+      state.startLogout = true;
+    },
+
+    [START_LOGOUT_PROCESS] (state) {
       state.logoutStarted = true;
+    },
 
-      if (state.logoutWithDutyPass) {
-        try {
-          // Запрос на сдачу дежурства вначале обрабатывается на сервере
-          const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass, {},
-            { headers: getRequestAuthorizationHeader() }
-          );
-          if (!response.data || String(response.data.id) !== String(state.id)) {
-            state.logoutStarted = false;
-            state.logoutFinished = true;
-            state.logoutError = 'some error';
-            return;
-          }
-        }
-        catch (err) {
-          state.logoutStarted = false;
-          state.logoutFinished = true;
-          state.logoutError = err || 'some error';
-          return;
-        }
-      }
+    [LOGOUT_FINISHED_WITH_ERROR] (state, error) {
+      state.logoutStarted = false;
+      state.logoutFinished = true;
+      state.logoutError = error;
+    },
 
+    [LOGOUT_FINISHED_WITHOUT_ERROR] (state) {
+      state.logoutStarted = false;
+      state.logoutFinished = true;
+    },
+
+    [CLEAR_USER_DATA_ON_LOGOUT] (state) {
       state.id = null;
       state.token = null;
       state.name = '';
@@ -402,27 +434,44 @@ export const currUser = {
 
       state.isAuthenticated = false;
       state.loginDateTime = null;
-
-      state.logoutStarted = false;
-      state.logoutFinished = true;
     },
+  },
 
+  actions: {
     /**
-     *
+     * Позволяет выйти из системы как со сдачей, так и без сдачи дежурства.
      */
-    cancelLogout(state) {
-      state.startLogout = false;
-      state.logoutStarted = false;
-      state.logoutFinished = false;
-      state.logoutError = null;
-    },
+    async logout(context) {
+      context.commit(START_LOGOUT_PROCESS);
 
-    /**
-     *
-     */
-    prepareForLogout(state, logoutWithDutyPass) {
-      state.logoutWithDutyPass = logoutWithDutyPass;
-      state.startLogout = true;
+      // Если необходима сдача дежурства при выходе из системы, то...
+      if (context.state.logoutWithDutyPass) {
+        try {
+          // ...запрос на сдачу дежурства вначале обрабатывается на сервере
+          const responseData = await logoutWithDutyPass();
+          if (!responseData || String(responseData.id) !== String(context.state.id)) {
+            context.commit(LOGOUT_FINISHED_WITH_ERROR, 'Ошибка выхода из системы: не получен ответ от сервера либо выходит из системы не текущий пользователь');
+            return;
+          }
+        }
+        catch (error) {
+          let errMessage;
+          if (error.response) {
+            // The request was made and server responded
+            errMessage = 'Ошибка выхода из системы: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
+          } else if (error.request) {
+            // The request was made but no response was received
+            errMessage = 'Ошибка выхода из системы: сервер не отвечает';
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            errMessage = 'Произошла неизвестная ошибка при выходе из системы: ' + error.message || JSON.stringify(error);
+          }
+          context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
+          return;
+        }
+      }
+      context.commit(LOGOUT_FINISHED_WITHOUT_ERROR);
+      context.commit(CLEAR_USER_DATA_ON_LOGOUT);
     },
   },
 };

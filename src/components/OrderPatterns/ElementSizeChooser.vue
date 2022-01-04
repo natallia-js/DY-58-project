@@ -9,7 +9,7 @@
 
 
 <script>
-  import { PossibleElementSizes } from '../../constants/orderPatterns';
+  import { PossibleElementSizes } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy58-element-size-chooser',

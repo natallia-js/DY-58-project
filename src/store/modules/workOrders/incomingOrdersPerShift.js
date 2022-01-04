@@ -1,6 +1,10 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
-import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
+import {
+  SET_INCOMING_ORDERS_PER_SHIFT,
+  CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
+  SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
+  SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS,
+} from '@/store/mutation-types';
+import { getOrdersCreatedFromGivenDate } from '@/serverRequests/orders.requests';
 
 
 /**
@@ -39,23 +43,27 @@ export const incomingOrdersPerShift = {
   },
 
   mutations: {
-    setIncomingOrdersPerShift(state, ordersIds) {
+    [SET_INCOMING_ORDERS_PER_SHIFT] (state, ordersIds) {
       state.incomingOrdersPerShift = ordersIds;
     },
 
-    clearGettingIncomingOrdersPerShiftResult(state) {
-      state.gettingIncomingOrdersPerShiftResult = null;
+    [CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT] (state) {
+      if (state.gettingIncomingOrdersPerShiftResult) {
+        state.gettingIncomingOrdersPerShiftResult = null;
+      }
     },
 
-    setGettingIncomingOrdersPerShiftResult(state, { error, message }) {
+    [SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT] (state, { error, message }) {
       state.gettingIncomingOrdersPerShiftResult = {
         error,
         message,
       };
     },
 
-    setGettingIncomingOrdersPerShiftStatus(state, status) {
-      state.gettingIncomingOrdersPerShift = status;
+    [SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS] (state, status) {
+      if (state.gettingIncomingOrdersPerShift !== status) {
+        state.gettingIncomingOrdersPerShift = status;
+      }
     },
   },
 
@@ -63,27 +71,23 @@ export const incomingOrdersPerShift = {
     /**
      * Позволяет получить список id входящих распоряжений за смену.
      * Для оператора при ДСП извлекаются данные за заданный промежуток времени, которые приходили
-     * соответствующему ДСП.
+     * соответствующему ДСП (по-другому никак: информация извлекается из общей таблицы распоряжений,
+     * в которой фиксируются лишь получатели-станции и ДСП этих станций).
      */
     async loadIncomingOrdersPerShift(context) {
       if (!context.getters.isUserOnDuty) {
         return;
       }
-      context.commit('clearGettingIncomingOrdersPerShiftResult');
-      context.commit('setGettingIncomingOrdersPerShiftStatus', true);
+      context.commit(CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT);
+      context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, true);
       try {
-       const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersCreatedFromGivenDate,
-          {
-            datetime: context.getters.getLastTakeDutyTime,
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setGettingIncomingOrdersPerShiftResult', { error: false, message: null });
-        context.commit('setIncomingOrdersPerShift', response.data);
+        const responseData = await getOrdersCreatedFromGivenDate({
+          datetime: context.getters.getLastTakeDutyTime,
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+        });
+        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: false, message: null });
+        context.commit(SET_INCOMING_ORDERS_PER_SHIFT, responseData);
 
       } catch (error) {
         let errMessage;
@@ -97,9 +101,9 @@ export const incomingOrdersPerShift = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при получении информации о входящих распоряжениях за смену: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setGettingIncomingOrdersPerShiftResult', { error: true, message: errMessage });
+        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
       }
-      context.commit('setGettingIncomingOrdersPerShiftStatus', false);
+      context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, false);
     },
   },
 };

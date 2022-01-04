@@ -1,5 +1,10 @@
-import { store } from '../../store';
-import router from '../../router';
+import { store } from '@/store';
+import router from '@/router';
+import {
+  DETERMINE_LOGOUT_ITEM_ACTION,
+  SET_ACTIVE_MAIN_MENU_ITEM,
+  PREPARE_FOR_LOGOUT,
+} from '@/store/mutation-types';
 
 export const MainMenuItemsKeys = Object.freeze({
   mainPage: 0,
@@ -27,7 +32,7 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
       // В поле 'command' определено действие по умолчанию на случай, когда пользователь не принимает
       // дежурство (именно такое состояние - isUserOnDuty = false - является состоянием по умолчанию)
-      { key: MainMenuItemsKeys.exit, label: 'Выход', command: () => store.commit('prepareForLogout', false) },
+      { key: MainMenuItemsKeys.exit, label: 'Выход', command: () => store.commit(PREPARE_FOR_LOGOUT, false) },
     ],
   },
 
@@ -89,24 +94,24 @@ export const mainMenuItems = {
   },
 
   mutations: {
-    determineLogoutItemAction(state) {
+    [DETERMINE_LOGOUT_ITEM_ACTION] (state) {
       const logoutItem = state.mainMenuItems.find((item) => item.key === MainMenuItemsKeys.exit);
       if (!logoutItem) {
         return;
       }
       if (!store.getters.isUserOnDuty) {
         delete logoutItem.items;
-        logoutItem.command = () => store.commit('prepareForLogout', false);
+        logoutItem.command = () => store.commit(PREPARE_FOR_LOGOUT, false);
       } else {
         delete logoutItem.command;
         logoutItem.items = [
-          { label: 'Без сдачи дежурства', command: () => store.commit('prepareForLogout', false) },
-          { label: 'Со сдачей дежурства', command: () => store.commit('prepareForLogout', true) },
+          { label: 'Без сдачи дежурства', command: () => store.commit(PREPARE_FOR_LOGOUT, false) },
+          { label: 'Со сдачей дежурства', command: () => store.commit(PREPARE_FOR_LOGOUT, true) },
         ];
       }
     },
 
-    setActiveMainMenuItem(state, activeMainMenuItemKey) {
+    [SET_ACTIVE_MAIN_MENU_ITEM] (state, activeMainMenuItemKey) {
       state.mainMenuItems.forEach((item) => {
         if (item.key === activeMainMenuItemKey) {
           item.class = 'dy58-active-main-menu-item';

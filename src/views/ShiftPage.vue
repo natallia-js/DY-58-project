@@ -25,11 +25,12 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import ViewShiftForDSP from '../components/ViewShiftForDSP';
-  import ViewShiftForDNC from '../components/ViewShiftForDNC';
-  import ViewShiftForECD from '../components/ViewShiftForECD';
-  import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
+  import ViewShiftForDSP from '@/components/ViewShiftForDSP';
+  import ViewShiftForDNC from '@/components/ViewShiftForDNC';
+  import ViewShiftForECD from '@/components/ViewShiftForECD';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-shift-page',
@@ -46,7 +47,6 @@
         'getErrorLoadingCurrSectorsShift',
         'getUserWorkPoligon',
       ]),
-
       getMainMenuItemsKeys() {
         return MainMenuItemsKeys;
       },
@@ -56,7 +56,7 @@
     },
 
     mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.currShift);
+      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.currShift);
     },
   }
 </script>

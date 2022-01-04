@@ -6,34 +6,34 @@
       <div class="dy58-title-small p-mb-4">Авторизуйтесь в системе</div>
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
         <div class="p-field p-col-12 p-d-flex p-flex-column">
-          <label for="userName" :class="{'p-error': v$.userName.$invalid && submitted}">
+          <label for="userName" :class="{'p-error': v$.userName.$invalid && state.submitted}">
             <span style="color:red">*</span> Имя пользователя
           </label>
           <InputText
             id="userName"
             autofocus
             v-model="v$.userName.$model"
-            :class="{'p-invalid':v$.userName.$invalid && submitted}"
+            :class="{'p-invalid':v$.userName.$invalid && state.submitted}"
           />
           <small
-            v-if="(v$.userName.$invalid && submitted) || v$.userName.$pending.$response"
+            v-if="(v$.userName.$invalid && state.submitted) || v$.userName.$pending.$response"
             class="p-error"
           >
             Введите имя пользователя
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
-          <label for="password" :class="{'p-error':v$.password.$invalid && submitted}">
+          <label for="password" :class="{'p-error':v$.password.$invalid && state.submitted}">
             <span style="color:red">*</span> Пароль
           </label>
           <InputText
             id="password"
             type="password"
             v-model="v$.password.$model"
-            :class="{'p-invalid':v$.password.$invalid && submitted}"
+            :class="{'p-invalid':v$.password.$invalid && state.submitted}"
           />
           <small
-            v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response"
+            v-if="(v$.password.$invalid && state.submitted) || v$.password.$pending.$response"
             class="p-error"
           >
             Введите пароль
@@ -41,14 +41,14 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <div class="p-field-checkbox">
-            <Checkbox id="takeDuty" v-model="takeDuty" :binary="true" />
+            <Checkbox id="takeDuty" v-model="state.takeDuty" :binary="true" />
             <label for="takeDuty">Принять дежурство</label>
           </div>
         </div>
-        <div v-if="!waitingForServerResponse" class="p-col-12">
+        <div v-if="!state.waitingForServerResponse" class="p-col-12">
           <Button type="submit" label="Войти" />
         </div>
-        <div v-if="waitingForServerResponse" class="p-col-12">
+        <div v-else class="p-col-12">
           <ProgressSpinner />
         </div>
       </form>
@@ -58,148 +58,127 @@
 
 
 <script>
-  import { APP_CODE_NAME } from '../constants/appCredentials';
-  import { mapGetters, mapMutations } from 'vuex';
-  import { AUTH_SERVER_ACTIONS_PATHS } from '../constants/servers';
-  import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
+  import { reactive } from 'vue';
+  import { useStore } from 'vuex';
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
+  import router from '@/router';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+  import { loginUser } from '@/serverRequests/auth.requests';
+  import showMessage from '@/hooks/showMessage.hook';
+  import { LOGIN } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-auth-page',
 
-    data() {
-      return {
+    setup() {
+      const store = useStore();
+      const { showErrMessage } = showMessage();
+
+      const state = reactive({
         userName: '',
         password: '',
         takeDuty: false,
         submitted: false,
         waitingForServerResponse: false,
-      };
-    },
+      });
 
-    computed: {
-      ...mapGetters([
-        'isUserAuthenticated',
-        'getUserWorkPoligon',
-        'getUserCredential',
-      ]),
-
-      getAppCodeName() {
-        return APP_CODE_NAME;
-      },
-    },
-
-    setup: () => ({ v$: useVuelidate() }),
-
-    validations() {
-      return {
+      const rules = {
         userName: {
           required,
         },
         password: {
           required,
         },
-      }
-    },
+      };
 
-    methods: {
-      ...mapMutations([
-        'login',
-      ]),
+      const v$ = useVuelidate(rules, state);
 
-      async handleSubmit(isFormValid) {
-        this.submitted = true;
+      const handleSubmit = async (isFormValid) => {
+        state.submitted = true;
 
         if (!isFormValid) {
           return;
         }
-
-        const thisComponent = this;
-
-        if (!thisComponent.userName.length || !thisComponent.password.length) {
+        if (!state.userName.length || !state.password.length) {
           return;
         }
 
-        this.waitingForServerResponse = true;
+        state.waitingForServerResponse = true;
 
         try {
-          const response = await thisComponent.$http.post(AUTH_SERVER_ACTIONS_PATHS.login, {
-            login: thisComponent.userName,
-            password: thisComponent.password,
-            takeDuty: thisComponent.takeDuty,
+          const responseData = await loginUser({
+            login: state.userName,
+            password: state.password,
+            takeDuty: state.takeDuty,
           });
 
           const workPoligons = [];
-          if (response.data.stationWorkPoligons && response.data.stationWorkPoligons.length) {
+          if (responseData.stationWorkPoligons && responseData.stationWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.STATION,
-              workPoligons: response.data.stationWorkPoligons.map((poligon) => ({
-                poligonId: poligon['SWP_StID'],
-                subPoligonId: poligon['SWP_StWP_ID'],
+              workPoligons: responseData.stationWorkPoligons.map((poligon) => ({
+                poligonId: poligon.SWP_StID,
+                subPoligonId: poligon.SWP_StWP_ID,
               })),
             });
           }
-          if (response.data.dncSectorsWorkPoligons && response.data.dncSectorsWorkPoligons.length) {
+          if (responseData.dncSectorsWorkPoligons && responseData.dncSectorsWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.DNC_SECTOR,
-              workPoligons: response.data.dncSectorsWorkPoligons.map((poligon) => ({
-                poligonId: poligon['DNCSWP_DNCSID'],
+              workPoligons: responseData.dncSectorsWorkPoligons.map((poligon) => ({
+                poligonId: poligon.DNCSWP_DNCSID,
               })),
             });
           }
-          if (response.data.ecdSectorsWorkPoligons && response.data.ecdSectorsWorkPoligons.length) {
+          if (responseData.ecdSectorsWorkPoligons && responseData.ecdSectorsWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.ECD_SECTOR,
-              workPoligons: response.data.ecdSectorsWorkPoligons.map((poligon) => ({
-                poligonId: poligon['ECDSWP_ECDSID'],
+              workPoligons: responseData.ecdSectorsWorkPoligons.map((poligon) => ({
+                poligonId: poligon.ECDSWP_ECDSID,
               })),
             });
           }
 
-          this.login({
-            userId: response.data.userId,
-            jtwToken: response.data.token,
-            userInfo: response.data.userInfo,
-            lastTakeDutyTime: response.data.lastTakeDutyTime,
-            lastPassDutyTime: response.data.lastPassDutyTime,
-            credentials: response.data.credentials,
+          store.commit(LOGIN, {
+            userId: responseData.userId,
+            jtwToken: responseData.token,
+            userInfo: responseData.userInfo,
+            lastTakeDutyTime: responseData.lastTakeDutyTime,
+            lastPassDutyTime: responseData.lastPassDutyTime,
+            credentials: responseData.credentials,
             workPoligons,
           });
 
         } catch (e) {
-          thisComponent.$toast.add({
-            severity: 'error',
-            summary: 'Ошибка',
-            detail: (e && e.response && e.response.data && e.response.data.message) ?
-              e.response.data.message : (e && e.message) ? e.message : 'Что-то пошло не так',
-            life: 3000,
-          });
+          showErrMessage((e && e.response && e.response.data && e.response.data.message) ?
+              e.response.data.message : (e && e.message) ? e.message : 'Что-то пошло не так');
           return;
 
         } finally {
-          this.waitingForServerResponse = false;
+          state.waitingForServerResponse = false;
         }
 
-        if (thisComponent.isUserAuthenticated) {
+        if (store.getters.isUserAuthenticated) {
           // Если в процессе входа в систему программе удалось явно определить полномочия пользователя и его
           // рабочий полигон, то осуществляем переход на главную страницу...
-          if (thisComponent.getUserCredential && thisComponent.getUserWorkPoligon) {
-            thisComponent.$router.push({ name: 'MainPage' });
+          if (store.getters.getUserCredential && store.getters.getUserWorkPoligon) {
+            router.push({ name: 'MainPage' });
           // ...в противном случае переходим на страницу выбора полномочия, с которым пользователь будет
           // работать с программой, а также соответствующего рабочего полигона
           } else {
-            thisComponent.$router.push({ name: 'ConfirmAuthDataPage' });
+            router.push({ name: 'ConfirmAuthDataPage' });
           }
         } else {
-          thisComponent.$toast.add({
-            severity: 'error',
-            summary: 'Ошибка',
-            detail: 'Данный пользователь не прошел аутентификацию для работы с текущим приложением',
-            life: 3000,
-          });
+          showErrMessage('Данный пользователь не прошел аутентификацию для работы с текущим приложением');
         }
       }
+
+      return {
+        state,
+        v$,
+        handleSubmit,
+      };
     },
   }
 </script>

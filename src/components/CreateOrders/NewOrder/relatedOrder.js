@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions';
+import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
 /**
  * Данный модуль предназначен для работы со связанным распоряжением по отношению к издаваемому

@@ -61,9 +61,9 @@
 <script>
   import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
-  import OrderPatternText from './OrderPatternText';
-  import { OrderPatternElementType } from '../../constants/orderPatterns';
-  import { ORDER_TEXT_SOURCE } from '../../constants/orders';
+  import OrderPatternText from '@/components/CreateOrders/OrderPatternText';
+  import { OrderPatternElementType } from '@/constants/orderPatterns';
+  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
 
   export default {
     name: 'dy58-order-text',

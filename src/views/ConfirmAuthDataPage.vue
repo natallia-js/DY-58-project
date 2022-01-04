@@ -69,8 +69,11 @@
 
 <script>
   import { mapGetters, mapMutations } from 'vuex';
-  import { APP_CREDENTIALS_TRANSLATIONS, WORK_POLIGON_TYPES } from '../constants/appCredentials';
-  import { AUTH_SERVER_ACTIONS_PATHS } from '../constants/servers';
+  import { APP_CREDENTIALS_TRANSLATIONS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+  import { getStationsWorkPlacesData } from '@/serverRequests/stations.requests';
+  import { getDNCSectorsShortData } from '@/serverRequests/dncSectors.requests';
+  import { getECDSectorsShortData } from '@/serverRequests/ecdSectors.requests';
+  import { SET_USER_CREDENTIAL, SET_USER_WORK_POLIGON } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-confirm-auth-data-page',
@@ -146,8 +149,8 @@
 
     methods: {
       ...mapMutations([
-        'setUserCredential',
-        'setUserWorkPoligon',
+        SET_USER_CREDENTIAL,
+        SET_USER_WORK_POLIGON,
       ]),
 
       getAppCredentialsTranslations() {
@@ -160,8 +163,8 @@
 
       goToMainPage() {
         if (this.selectedCredential && this.selectedPoligon) {
-          this.setUserCredential(this.selectedCredential.cred);
-          this.setUserWorkPoligon({
+          this[SET_USER_CREDENTIAL](this.selectedCredential.cred);
+          this[SET_USER_WORK_POLIGON]({
             type: this.selectedPoligon.type,
             code: this.selectedPoligon.poligonId,
             subCode: this.selectedPoligon.subPoligonId || null,
@@ -171,15 +174,9 @@
       },
 
       async getStationsWorkPlacesData(stationIds) {
-        const headers = {
-          'Authorization': `Bearer ${this.getUserToken}`,
-        };
-        const response = await this.$http.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPlacesData,
-          { stationIds },
-          { headers }
-        );
-        return !response || !response.data ? [] :
-          response.data.map((sector) => {
+        const responseData = await getStationsWorkPlacesData({ stationIds });
+        return !responseData ? [] :
+          responseData.map((sector) => {
             return {
               code: sector.St_ID,
               title: `${sector.St_Title} (${sector.St_UNMC})`,
@@ -193,15 +190,9 @@
       },
 
       async getDNCSectorsShortData(dncSectorIds) {
-        const headers = {
-          'Authorization': `Bearer ${this.getUserToken}`,
-        };
-        const response = await this.$http.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsShortData,
-          { dncSectorIds },
-          { headers }
-        );
-        return !response || !response.data ? [] :
-          response.data.map((sector) => {
+        const responseData = await getDNCSectorsShortData({ dncSectorIds });
+        return !responseData ? [] :
+          responseData.map((sector) => {
             return {
               code: sector.DNCS_ID,
               title: sector.DNCS_Title,
@@ -210,15 +201,9 @@
       },
 
       async getECDSectorsShortData(ecdSectorIds) {
-        const headers = {
-          'Authorization': `Bearer ${this.getUserToken}`,
-        };
-        const response = await this.$http.post(AUTH_SERVER_ACTIONS_PATHS.getECDSectorsShortData,
-          { ecdSectorIds },
-          { headers }
-        );
-        return !response || !response.data ? [] :
-          response.data.map((sector) => {
+        const responseData = await getECDSectorsShortData({ ecdSectorIds });
+        return !responseData ? [] :
+          responseData.map((sector) => {
             return {
               code: sector.ECDS_ID,
               title: sector.ECDS_Title,

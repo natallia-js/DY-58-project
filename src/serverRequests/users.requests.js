@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AUTH_SERVER_ACTIONS_PATHS } from '../constants/servers';
+import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { getRequestAuthorizationHeader } from './common';
 
 export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) => {

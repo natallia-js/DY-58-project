@@ -134,7 +134,7 @@
 
 
 <script>
-  import compareStrings from '../additional/compareStrings';
+  import compareStrings from '@/additional/compareStrings';
 
   export default {
     name: 'dy58-view-ecd-sector-poligon-structure',

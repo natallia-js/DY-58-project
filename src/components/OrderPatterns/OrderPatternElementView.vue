@@ -212,16 +212,16 @@
 
 <script>
   import { onMounted, watch, computed, reactive, ref } from 'vue';
+  import { useStore } from 'vuex';
+  import { useConfirm } from 'primevue/useconfirm';
   import {
     OrderPatternElementType,
     ElementSizesCorrespondence,
     DRTrainTableColumns,
-  } from '../../constants/orderPatterns';
-  import { GID_EVENT_TYPE } from '../../constants/orders';
-  import showMessage from '../../hooks/showMessage.hook';
-  import { getLocaleDateTimeString } from '../../additional/dateTimeConvertions';
-  import { useStore } from 'vuex';
-  import { useConfirm } from 'primevue/useconfirm';
+  } from '@/constants/orderPatterns';
+  import { GID_EVENT_TYPE } from '@/constants/orders';
+  import showMessage from '@/hooks/showMessage.hook';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-order-pattern-element-view',

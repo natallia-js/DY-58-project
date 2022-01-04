@@ -1,5 +1,5 @@
-import { getLocaleDateTimeString } from '../../../additional/dateTimeConvertions';
-import { ORDER_PATTERN_TYPES } from '../../../constants/orderPatterns';
+import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
 
 /**

@@ -1,6 +1,9 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
-import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
+import {
+  CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT,
+  SET_REPORT_ON_ORDERS_DELIVERY_RESULT,
+  SET_REPORTING_ON_ORDER_DELIVERY_STATUS,
+} from '@/store/mutation-types';
+import { reportServerOnOrdersDelivery } from '@/serverRequests/orders.requests';
 
 
 /**
@@ -22,15 +25,17 @@ export const reportOnOrdersDelivery = {
      * "Чистит" текущий результат сообщения серверу о доставке новых распоряжений
      * на данный полигон управления.
      */
-    clearReportOnOrdersDeliveryResult(state) {
-      state.reportOnOrdersDeliveryResult = null;
+    [CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT] (state) {
+      if (state.reportOnOrdersDeliveryResult) {
+        state.reportOnOrdersDeliveryResult = null;
+      }
     },
 
     /**
      * Устанавливает результат сообщения серверу о доставке новых распоряжений
      * на данный полигон управления.
      */
-    setReportOnOrdersDeliveryResult(state, { error, message }) {
+    [SET_REPORT_ON_ORDERS_DELIVERY_RESULT] (state, { error, message }) {
       state.reportOnOrdersDeliveryResult = {
         error,
         message,
@@ -41,8 +46,10 @@ export const reportOnOrdersDelivery = {
      * Устанавливает статус процесса (идет процесс / не идет процесс) сообщения серверу
      * о доставке новых распоряжений на данный полигон управления.
      */
-    setReportingOnOrderDeliveryStatus(state, status) {
-      state.reportingOnOrdersDelivery = status;
+    [SET_REPORTING_ON_ORDER_DELIVERY_STATUS] (state, status) {
+      if (state.reportingOnOrdersDelivery !== status) {
+        state.reportingOnOrdersDelivery = status;
+      }
     },
   },
 
@@ -59,23 +66,18 @@ export const reportOnOrdersDelivery = {
         return;
       }
 
-      context.commit('setReportingOnOrderDeliveryStatus', true);
-      context.commit('clearReportOnOrdersDeliveryResult');
+      context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, true);
+      context.commit(CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT);
 
       try {
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
-            orderIds: newDeliveredOrderIds,
-            deliverDateTime: new Date(),
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setReportOnOrdersDeliveryResult', { error: false, message: response.data.message });
+        const responseData = await reportServerOnOrdersDelivery({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
+          orderIds: newDeliveredOrderIds,
+          deliverDateTime: new Date(),
+        });
+        context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: false, message: responseData.message });
 
       } catch (error) {
         let errMessage;
@@ -89,9 +91,9 @@ export const reportOnOrdersDelivery = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при сообщении серверу о доставке входящих распоряжений: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setReportOnOrdersDeliveryResult', { error: true, message: errMessage });
+        context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
       }
-      context.commit('setReportingOnOrderDeliveryStatus', false);
+      context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, false);
     },
   },
 };

@@ -27,11 +27,12 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { MainMenuItemsKeys } from '../store/modules/mainMenuItems';
-  import ViewStationPoligonStructure from '../components/ViewStationPoligonStructure';
-  import ViewDNCSectorPoligonStructure from '../components/ViewDNCSectorPoligonStructure';
-  import ViewECDSectorPoligonStructure from '../components/ViewECDSectorPoligonStructure';
-  import { WORK_POLIGON_TYPES } from '../constants/appCredentials';
+  import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
+  import ViewStationPoligonStructure from '@/components/ViewStationPoligonStructure';
+  import ViewDNCSectorPoligonStructure from '@/components/ViewDNCSectorPoligonStructure';
+  import ViewECDSectorPoligonStructure from '@/components/ViewECDSectorPoligonStructure';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-sector-structure-page',
@@ -66,7 +67,7 @@
     },
 
     mounted() {
-      this.$store.commit('setActiveMainMenuItem', this.getMainMenuItemsKeys.sectorStructure);
+      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.sectorStructure);
     },
   }
 </script>

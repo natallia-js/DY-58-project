@@ -1,6 +1,13 @@
-import axios from 'axios';
-import { DY58_SERVER_ACTIONS_PATHS } from '../../../constants/servers';
-import { getRequestAuthorizationHeader } from '../../../serverRequests/common';
+import {
+  SET_DELETE_ORDERS_CHAIN_RESULT,
+  SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER,
+  CLEAR_DELETE_ORDERS_CHAIN_RESULT,
+  CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
+  SET_ORDERS_CHAIN_BEING_DELETED,
+  SET_ORDERS_CHAIN_FINISHED_BEING_DELETED,
+  DELETE_CONFIRMED_ORDERS_CHAIN,
+} from '@/store/mutation-types';
+import { delConfirmedOrdersFromChain } from '@/serverRequests/orders.requests';
 
 
 /**
@@ -27,7 +34,7 @@ export const delWorkOrdersChains = {
     /**
      * Позволяет сохранить результат удаления цепочки распоряжений.
      */
-    setDeleteOrdersChainResult(state, { chainId, error, message }) {
+    [SET_DELETE_ORDERS_CHAIN_RESULT] (state, { chainId, error, message }) {
       const chainInfo = state.deleteOrdersChainsResults.find((item) => item.chainId === chainId);
       if (!chainInfo) {
         state.deleteOrdersChainsResults.push({ chainId, error, message, wasShownToUser: false });
@@ -42,7 +49,7 @@ export const delWorkOrdersChains = {
      * Для данного id цепочки распоряжений устанавливает флаг просмотра пользователем информации
      * о ее удалении из списка распоряжений, находящихся в работе.
      */
-    setDeleteOrdersChainResultSeenByUser(state, chainId) {
+    [SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER] (state, chainId) {
       const chainInfo = state.deleteOrdersChainsResults.find((item) => item.chainId === chainId);
       if (chainInfo) {
         chainInfo.wasShownToUser = true;
@@ -52,21 +59,21 @@ export const delWorkOrdersChains = {
     /**
      * Удаляет результат удаления цепочки распоряжений с заданным id.
      */
-    clearDeleteOrdersChainResult(state, chainId) {
+    [CLEAR_DELETE_ORDERS_CHAIN_RESULT] (state, chainId) {
       state.deleteOrdersChainsResults = state.deleteOrdersChainsResults.filter((item) => item.chainId !== chainId);
     },
 
     /**
      * Удаляет все результаты удаления цепочек распоряжений, просмотренные пользователем.
      */
-    clearAllDeleteOrdersChainResultsSeenByUser(state) {
+    [CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER] (state) {
       state.deleteOrdersChainsResults = state.deleteOrdersChainsResults.filter((item) => !item.wasShownToUser);
     },
 
     /**
      * Сохраняет id удаляемой цепочки распоряжений.
      */
-    setOrdersChainBeingDeleted(state, chainId) {
+    [SET_ORDERS_CHAIN_BEING_DELETED] (state, chainId) {
       if (!state.ordersChainsBeingDeleted.includes(chainId)) {
         state.ordersChainsBeingDeleted.push(chainId);
       }
@@ -75,7 +82,7 @@ export const delWorkOrdersChains = {
     /**
      * Удаляет сохраненный id цепочки распоряжений, операция удаления которой была завершена.
      */
-    setOrdersChainFinishedBeingDeleted(state, chainId) {
+    [SET_ORDERS_CHAIN_FINISHED_BEING_DELETED] (state, chainId) {
       state.ordersChainsBeingDeleted = state.ordersChainsBeingDeleted.filter((item) => item !== chainId);
     },
 
@@ -83,7 +90,7 @@ export const delWorkOrdersChains = {
      * Удаляется (из списка рабочих распоряжений) не вся цепочка рабочих распоряжений,
      * а лишь те принадлежащие ей распоряжения, которые были подтверждены пользователем.
      */
-    deleteConfirmedOrdersChain(state, chainId) {
+    [DELETE_CONFIRMED_ORDERS_CHAIN] (state, chainId) {
       state.data = state.data.filter((order) => !(order.orderChainId === chainId && order.confirmDateTime));
     },
   },
@@ -97,22 +104,17 @@ export const delWorkOrdersChains = {
       if (!context.getters.canUserDelConfirmedOrdersChains) {
         return;
       }
-      context.commit('clearDeleteOrdersChainResult', chainId);
-      context.commit('setOrdersChainBeingDeleted', chainId);
+      context.commit(CLEAR_DELETE_ORDERS_CHAIN_RESULT, chainId);
+      context.commit(SET_ORDERS_CHAIN_BEING_DELETED, chainId);
       try {
-        const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
-          {
-            workPoligonType: context.getters.getUserWorkPoligon.type,
-            workPoligonId: context.getters.getUserWorkPoligon.code,
-            workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
-            chainId,
-          },
-          {
-            headers: getRequestAuthorizationHeader(),
-          }
-        );
-        context.commit('setDeleteOrdersChainResult', { chainId, error: false, message: response.data.message });
-        context.commit('deleteConfirmedOrdersChain', chainId);
+        const responseData = await delConfirmedOrdersFromChain({
+          workPoligonType: context.getters.getUserWorkPoligon.type,
+          workPoligonId: context.getters.getUserWorkPoligon.code,
+          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
+          chainId,
+        });
+        context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: false, message: responseData.message });
+        context.commit(DELETE_CONFIRMED_ORDERS_CHAIN, chainId);
 
       } catch (error) {
         let errMessage;
@@ -126,9 +128,9 @@ export const delWorkOrdersChains = {
           // Something happened in setting up the request that triggered an Error
           errMessage = 'Произошла неизвестная ошибка при удалении цепочки распоряжений: ' + error.message || JSON.stringify(error);
         }
-        context.commit('setDeleteOrdersChainResult', { chainId, error: true, message: errMessage });
+        context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
       }
-      context.commit('setOrdersChainFinishedBeingDeleted', chainId);
+      context.commit(SET_ORDERS_CHAIN_FINISHED_BEING_DELETED, chainId);
     },
   },
 }

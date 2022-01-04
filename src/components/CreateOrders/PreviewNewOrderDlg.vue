@@ -40,9 +40,9 @@
 
 
 <script>
-  import { getLocaleDateTimeString, getTimeSpanString } from '../../additional/dateTimeConvertions';
-  import { formOrderText } from '../../additional/formOrderText';
   import { mapGetters } from 'vuex';
+  import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
+  import { formOrderText } from '@/additional/formOrderText';
 
   export default {
     name: 'dy58-preview-new-order-dialog',
