@@ -64,7 +64,7 @@ export const useDispatchOrder = (inputVals) => {
   });
 
   /**
-   * Издание распоряжения (отправка и сервер и передача всем причастным).
+   * Издание распоряжения (отправка на сервер и передача всем причастным).
    */
   const dispatchOrder = () => {
     state.waitingForServerResponse = true;
@@ -88,17 +88,13 @@ export const useDispatchOrder = (inputVals) => {
   };
 
   /**
-   * Количество распоряжений, для которых в настоящее время запущен процесс издания (сохранения на сервере)
-   */
-  const getDispatchOrdersBeingProcessed = computed(() => store.getters.getDispatchOrdersBeingProcessed);
-
-  /**
    * Для отображения результата операции издания распоряжения (отправки на сервер).
    */
   watch(() => store.getters.getDispatchOrderResult, (newVal) => {
     if (!newVal || newVal.orderType !== props.orderType) {
       return;
     }
+    state.waitingForServerResponse = false;
     if (!newVal.error) {
       showSuccessMessage(newVal.message);
     } else {
@@ -110,6 +106,7 @@ export const useDispatchOrder = (inputVals) => {
     getIssuedOrderPlaceObject,
     getPreviewOrderTimeSpanObject,
     dispatchOrder,
-    getDispatchOrdersBeingProcessed,
+    // Количество распоряжений, для которых в настоящее время запущен процесс издания (сохранения на сервере)
+    getDispatchOrdersBeingProcessed: computed(() => store.getters.getDispatchOrdersBeingProcessed),
   };
 };

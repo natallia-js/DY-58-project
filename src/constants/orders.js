@@ -33,6 +33,10 @@ export const ORDER_ELEMENTS_CAN_BE_EMPTY = [
   'Примечание',
 ];
 
+export const FILLED_DSP_TAKE_DUTY_ORDER_INPUT_ELEMENTS = Object.freeze({
+  DSP_OPERATOR_FIO: 'ФИО оператора ДСП',
+});
+
 export const FILLED_ORDER_DATE_ELEMENTS = Object.freeze({
   ORDER_DATE: 'Дата издания действующего распоряжения',
   REQUEST_DATE: 'Дата издания действующей заявки',

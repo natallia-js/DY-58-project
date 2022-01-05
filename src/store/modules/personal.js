@@ -6,6 +6,7 @@ import {
   getECDSectorsWorkPoligonsUsers,
 } from '@/serverRequests/users.requests';
 import objectId from '@/additional/objectId.generator';
+import compareStrings from '@/additional/compareStrings';
 import { store } from '@/store';
 import {
   CLEAR_SHIFT_FOR_SENDING_DATA,
@@ -70,7 +71,7 @@ export const OtherShiftTblColumns = [
 ];
 
 const getUserFIOString = ({ name, fatherName, surname }) => {
-  return `${surname} ${name.charAt(0)}.${fatherName ? fatherName.charAt(0) + '.': ''}`;
+  return `${surname} ${name.charAt(0)}.${fatherName && fatherName.length ? fatherName.charAt(0) + '.': ''}`;
 };
 
 
@@ -90,7 +91,7 @@ export const personal = {
     /**
      * Возвращает объект со списками всего персонала полигона управления
      */
-    getSectorPersonal: (state) => {
+    getSectorPersonal(state) {
       return state.sectorPersonal;
     },
 
@@ -154,7 +155,7 @@ export const personal = {
      * Еще один нюанс: в выборку не включаем операторов при ДСП (это те лица, у которых полигон
      * управления - не сама станция, а рабочее место на станции).
      */
-    getDSPShiftForSendingData: (state, getters) => {
+    getDSPShiftForSendingData(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
         !getters.getUserWorkPoligon || !getters.getUserWorkPoligonData) {
         return [];
@@ -223,6 +224,29 @@ export const personal = {
           sendOriginal: item.sendOriginal,
         };
       });
+    },
+
+    /**
+     * Возвращает массив с информацией обо всех операторах ДСП текущего полигона управления "Станция".
+     */
+    getCurrStationDSPOperators: (state, getters) => {
+      if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
+        !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData) {
+        return [];
+      }
+      const stationWithPersonal = state.sectorPersonal.sectorStationsShift.find((item) =>
+        String(item.stationId) === String(getters.getUserWorkPoligonData.St_ID)
+      );
+      if (!stationWithPersonal || !stationWithPersonal.people || !stationWithPersonal.people.length) {
+        return [];
+      }
+      return stationWithPersonal.people
+        .filter((item) => item.stationWorkPlaceId)
+        .map((item) => ({
+          workPlaceName: getters.getStationWorkPlaceNameById(item.stationWorkPlaceId),
+          userFIO: getUserFIOString({ name: item.name, fatherName: item.fatherName, surname: item.surname }),
+        }))
+        .sort((a, b) => compareStrings(`${a.workPlaceName}${a.userFIO}`.toLowerCase(), `${b.workPlaceName}${b.userFIO}`.toLowerCase()));
     },
 
     /**

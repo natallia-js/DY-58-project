@@ -1,11 +1,23 @@
 <template>
   <Toast />
 
+  <!-- Этот ConfirmDialog нужен для вложенных компонентов -->
   <ConfirmDialog style="max-width:700px"></ConfirmDialog>
+
+  <CreateDSPTakeDutyOrderDlg
+    :showDlg="state.showCreateDSPTakeDutyOrderDlg"
+    @close="hidePreviewNewDSPCreateTakeDutyOrderDlg"
+  />
 
   <div class="p-grid" style="margin:0">
     <div class="p-col-3 dy58-left-menu-panel">
-      <Button v-if="isDSP" label="Warning" class="p-button-raised p-button-warning p-mb-2" style="width:100%" />
+      <Button
+        v-if="canUserDispatchDSPTakeDutyOrder && !existsDSPTakeDutyOrder"
+        label="Необходимо издать распоряжение о принятии дежурства"
+        class="p-button-raised p-button-warning p-mb-2"
+        style="width:100%"
+        @click="() => state.showCreateDSPTakeDutyOrderDlg = true"
+      />
       <side-menu />
       <AppSettings />
     </div>
@@ -66,6 +78,7 @@
   import OrdersInWorkTree from '@/components/OrdersInWorkTree';
   import SideMenu from '@/components/SideMenu';
   import AppSettings from '@/components/AppSettings';
+  import CreateDSPTakeDutyOrderDlg from '@/components/CreateOrders/CreateDSPTakeDutyOrderDlg';
   import showMessage from '@/hooks/showMessage.hook';
   import {
     SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER,
@@ -85,6 +98,7 @@
       OrdersInWorkDataTable,
       OrdersInWorkTree,
       AppSettings,
+      CreateDSPTakeDutyOrderDlg,
     },
 
     setup() {
@@ -93,6 +107,8 @@
 
       const state = reactive({
         startDateToGetData: new Date(),
+        takeDutyOrderShouldBeDispatched: false,
+        showCreateDSPTakeDutyOrderDlg: false,
       });
 
       watch(() => state.startDateToGetData, (newVal) => {
@@ -137,6 +153,27 @@
         });
       });
 
+      /**
+       * Скрытие диалогового окна создания распоряжения о принятии дежурства ДСП.
+       */
+      const hidePreviewNewDSPCreateTakeDutyOrderDlg = () => {
+        state.showCreateDSPTakeDutyOrderDlg = false;
+      };
+
+      // по окончании загрузки информации о рабочих распоряжениях ТОЛЬКО ДЛЯ ДСП и ТОЛЬКО ЕСЛИ
+      // ОН НА ДЕЖУРСТВЕ проверяем:
+      // если в списке рабочих распоряжений отсутствует распоряжение о принятии держурства,
+      // изданное ЭТИМ же пользователем не ранее времени его последнего принятия дежурства, то
+      // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение
+      /* watch(() => store.getters.getLoadingWorkOrdersStatus, (newVal) => {
+        if (!store.getters.canUserDispatchDSPTakeDutyOrder) {
+          return;
+        }
+        if (!store.getters.existsDSPTakeDutyOrder) {
+          state.takeDutyOrderShouldBeDispatched = true;
+        }
+      }); */
+
       onMounted(() => {
         store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
         state.startDateToGetData = getStartDateToGetData.value;
@@ -150,6 +187,9 @@
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
         isDSP: computed(() => store.getters.isDSP),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
+        existsDSPTakeDutyOrder: computed(() => store.getters.existsDSPTakeDutyOrder),
+        hidePreviewNewDSPCreateTakeDutyOrderDlg,
       };
     },
   };

@@ -2,7 +2,7 @@
   <Dialog
     header="Предварительный просмотр"
     v-model:visible="dlgVisible"
-    style="width:auto; maxWidth:50%"
+    style="width:auto; maxWidth:800px"
     :modal="true"
     @hide="closeDialog"
   >

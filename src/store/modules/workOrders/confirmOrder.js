@@ -54,21 +54,6 @@ export const confirmOrder = {
     },
 
     /**
-     * Возвращает массив id подтверждаемых распоряжений (входящих уведомлений) либо пустой массив, если
-     * в настоящий момент нет подтверждаемых распоряжений.
-     */
-    getOrdersBeingConfirmed(state) {
-      return state.ordersBeingConfirmed;
-    },
-
-    /**
-     * Возвращает массив id распоряжений, за адресатов которых в настоящий момент проводится подтверждение.
-     */
-    getOrdersBeingConfirmedForOthers(state) {
-      return state.ordersBeingConfirmedForOthers;
-    },
-
-    /**
      * Возвращает true, если входящее распоряжение с заданным id в данный момент времени проходит
      * процедуру подтверждения, false - в противном случае.
      */
@@ -78,7 +63,7 @@ export const confirmOrder = {
 
     /**
      * Возвращает true, если рабочее распоряжение с заданным id в данный момент времени проходит
-     * процедуру подтверждения за другие полигоны управления (приемники данного распоряжения),
+     * процедуру подтверждения за другие полигоны управления (получатели данного распоряжения),
      * false - в противном случае.
      */
     isOrderBeingConfirmedForOthers(state) {
@@ -235,7 +220,7 @@ export const confirmOrder = {
      * Для заданного распоряжения позволяет установить дату его подтверждения за другие полигоны управления.
      */
     [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, { orderId, workPoligons, confirmDateTime }) {
-      if (!workPoligons || !workPoligons.length) {
+      if (!orderId || !workPoligons || !workPoligons.length || !confirmDateTime) {
         return;
       }
       const order = state.data.find((el) => el._id === orderId);
@@ -304,8 +289,6 @@ export const confirmOrder = {
     /**
      * Позволяет для данного рабочего распоряжения выставить статус "подтверждено" на сервере
      * за ряд рабочих полигонов.
-     * Данная функция не используется в рамках конкретного рабочего места полигона, только глобально
-     * для всего полигона.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
       if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
@@ -318,7 +301,6 @@ export const confirmOrder = {
         const responseData = await confirmOrdersForOthers({
           workPoligonType: context.getters.getUserWorkPoligon.type,
           workPoligonId: context.getters.getUserWorkPoligon.code,
-          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
           confirmWorkPoligons,
           orderId,
           confirmDateTime,

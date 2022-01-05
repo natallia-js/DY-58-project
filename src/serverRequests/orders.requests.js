@@ -26,9 +26,9 @@ export const confirmOrderForMyself = async ({ workPoligonType, workPoligonId, wo
   return response.data;
 };
 
-export const confirmOrdersForOthers = async ({ workPoligonType, workPoligonId, workSubPoligonId, confirmWorkPoligons, orderId, confirmDateTime }) => {
+export const confirmOrdersForOthers = async ({ workPoligonType, workPoligonId, confirmWorkPoligons, orderId, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
-    { workPoligonType, workPoligonId, workSubPoligonId, confirmWorkPoligons, orderId, confirmDateTime },
+    { workPoligonType, workPoligonId, confirmWorkPoligons, orderId, confirmDateTime },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

@@ -25,8 +25,17 @@ export const checkUserAuthority = {
     /**
      * Издавать распоряжения может лишь пользователь, принявший дежурство.
      */
-     canUserDispatchOrders(_state, getters) {
+    canUserDispatchOrders(_state, getters) {
       return getters.isUserOnDuty;
+    },
+
+    /**
+     * Возвращает true, если текущий пользователь на дежурстве и ДСП. В этом случае он
+     * может издавать распоряжения о принятии дежурства.
+     * Значение false возвращается в противном случае.
+     */
+    canUserDispatchDSPTakeDutyOrder(_state, getters) {
+      return getters.isUserOnDuty && getters.isDSP;
     },
   },
 };

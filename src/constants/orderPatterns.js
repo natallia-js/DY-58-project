@@ -60,3 +60,8 @@ export const DRTrainTableColumns = [
 export const SPECIAL_TRAIN_CATEGORIES = [
   'ДР', 'Н', 'ПВ', 'ПД', 'ПВПД', 'Т', 'Д', 'ТД', 'ВМ',
 ];
+
+// отметка особой категории распоряжений о принятии дежурства ДСП
+export const SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN = 'ДСП_ПД';
+// наименование распоряжения о принятии дежурства ДСП
+export const SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE = 'О принятии дежурства';

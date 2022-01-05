@@ -71,6 +71,21 @@ export const currWorkPoligonStructure = {
       }
     },
 
+    getStationWorkPlaceNameById(state, getters) {
+      return (workPlaceId) => {
+        const workPoligon = getters.getUserWorkPoligon;
+        if (!workPoligon || workPoligon.type !== WORK_POLIGON_TYPES.STATION || !state.station ||
+          !state.station.TStationWorkPlaces) {
+          return null;
+        }
+        const stationWorkPlace = state.station.TStationWorkPlaces.find((wp) => wp.SWP_ID === workPlaceId);
+        if (!stationWorkPlace) {
+          return null;
+        }
+        return stationWorkPlace.SWP_Name || null;
+      };
+    },
+
     getUserWorkPoligonData(state, getters) {
       const workPoligon = getters.getUserWorkPoligon;
       if (!workPoligon) {

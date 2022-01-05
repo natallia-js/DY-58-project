@@ -16,8 +16,8 @@
     :createdOnBehalfOf="state.createdOnBehalfOf"
     :specialTrainCategories="state.specialTrainCategories"
     @dispatch="dispatchOrder"
-    @close="hidePreviewNewOrderDlg">
-  </PreviewNewOrderDlg>
+    @close="hidePreviewNewOrderDlg"
+  />
 
   <div class="p-grid">
     <div class="p-col-6">
@@ -105,11 +105,11 @@
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
 
         <div
-          v-if="(orderType !== getOrderTypes.ECD_ORDER) && (orderType !== getOrderTypes.ECD_PROHIBITION)"
+          v-if="(orderType !== ORDER_PATTERN_TYPES.ECD_ORDER) && (orderType !== ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
-            <span v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-text-bold">
+            <span v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-text-bold">
               <span style="color:red">*</span> На приказ/запрещение
             </span>
             <span v-else class="p-text-bold">На распоряжение</span>
@@ -117,7 +117,7 @@
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
             v-model="v$.prevRelatedOrder.$model"
-            :options="getActiveOrders"
+            :options="getActiveOrdersToDisplayInTreeSelect"
             style="width:100%"
           />
           <div v-if="relatedOrderObject" class="p-mt-2">
@@ -127,7 +127,7 @@
             <p v-if="relatedOrderObjectStartDateTimeString">
               Время начала действия: {{ relatedOrderObjectStartDateTimeString }}
             </p>
-            <div v-if="orderType === getOrderTypes.ECD_NOTIFICATION" class="p-mb-2 p-mt-2">
+            <div v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-mb-2 p-mt-2">
               <label for="cancelOrderDateTime" :class="{'p-error':v$.cancelOrderDateTime.$invalid && submitted}">
                 <span class="p-text-bold">Отменяется с &#160;</span>
               </label>
@@ -152,22 +152,22 @@
 
         <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
 
-        <div v-if="orderType === getOrderTypes.ORDER" class="p-field p-col-12 p-m-0">
+        <div v-if="orderType === ORDER_PATTERN_TYPES.ORDER" class="p-field p-col-12 p-m-0">
           <SelectButton v-model="state.showOnGID" :options="showOnGIDOptions" optionLabel="name" />
         </div>
 
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="(orderType === getOrderTypes.ORDER && state.showOnGID.value) ||
-            (orderType === getOrderTypes.ECD_ORDER) ||
-            (orderType === getOrderTypes.ECD_PROHIBITION)"
+          v-if="(orderType === ORDER_PATTERN_TYPES.ORDER && state.showOnGID.value) ||
+            (orderType === ORDER_PATTERN_TYPES.ECD_ORDER) ||
+            (orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="orderPlace" :class="{'p-error':v$.orderPlace.$invalid && submitted}">
             <span class="p-text-bold">
               <span
-                v-if="![getOrderTypes.ECD_ORDER, getOrderTypes.ECD_PROHIBITION].includes(orderType)"
+                v-if="![ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
                 style="color:red">
                 *
               </span> Место действия
@@ -191,7 +191,7 @@
         <!-- ФЛАГ УТОЧНЕНИЯ ВРЕМЕНИ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="[getOrderTypes.ORDER, getOrderTypes.ECD_ORDER, getOrderTypes.ECD_PROHIBITION].includes(orderType)"
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
           class="p-field p-col-12 p-m-0"
         >
           <SelectButton
@@ -204,7 +204,7 @@
         <!-- ВРЕМЯ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="[getOrderTypes.ORDER, getOrderTypes.ECD_ORDER, getOrderTypes.ECD_PROHIBITION].includes(orderType) && state.defineOrderTimeSpan.value"
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) && state.defineOrderTimeSpan.value"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="timeSpan" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
@@ -264,7 +264,7 @@
               {{ getUserPostFIO }}
             </div>
             <div
-              v-if="[getOrderTypes.REQUEST, getOrderTypes.NOTIFICATION].includes(orderType)"
+              v-if="[ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION].includes(orderType)"
               class="p-col-12"
             >
               От имени
@@ -287,7 +287,7 @@
       <p class="p-text-bold p-mb-2">Кому адресовать</p>
       <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
       <Accordion :multiple="true">
-        <AccordionTab v-if="orderType !== getOrderTypes.NOTIFICATION">
+        <AccordionTab v-if="orderType !== ORDER_PATTERN_TYPES.NOTIFICATION">
           <template #header>
             <span><b>ДСП:</b> <span v-html="selectedDSPString"></span></span>
           </template>
@@ -297,7 +297,7 @@
             @input="v$.dspSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab v-if="!isDNC || !(orderType === getOrderTypes.REQUEST || orderType === getOrderTypes.NOTIFICATION)">
+        <AccordionTab v-if="!isDNC || !(orderType === ORDER_PATTERN_TYPES.REQUEST || orderType === ORDER_PATTERN_TYPES.NOTIFICATION)">
           <template #header>
             <span><b>ДНЦ:</b> <span v-html="selectedDNCString"></span></span>
           </template>
@@ -307,7 +307,7 @@
             @input="v$.dncSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab v-if="orderType === getOrderTypes.ORDER || orderType === getOrderTypes.NOTIFICATION">
+        <AccordionTab v-if="orderType === ORDER_PATTERN_TYPES.ORDER || orderType === ORDER_PATTERN_TYPES.NOTIFICATION">
           <template #header>
             <span><b>ЭЦД:</b> <span v-html="selectedECDString"></span></span>
           </template>
@@ -477,11 +477,6 @@
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
-      const getOrderTypes = computed(() => ORDER_PATTERN_TYPES);
-      const isDNC = computed(() => store.getters.isDNC);
-      const getUserPostFIO = computed(() => store.getters.getUserPostFIO);
-      const getActiveOrders = computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect);
-
       const getSectorStationOrBlockTitleById = computed(() => {
         if (relatedOrderObject.value && relatedOrderObject.value.place) {
           return store.getters.getSectorStationOrBlockTitleById({
@@ -612,15 +607,15 @@
         state,
         showOnGIDOptions,
         defineOrderTimeSpanOptions,
-        getOrderTypes,
-        isDNC,
+        ORDER_PATTERN_TYPES,
+        isDNC: computed(() => store.getters.isDNC),
         v$,
         submitted,
-        getUserPostFIO,
+        getUserPostFIO: computed(() => store.getters.getUserPostFIO),
         getOrderInputTypes: OrderInputTypes,
         handleSubmit,
         dispatchOrder: dispatchOrderObject.dispatchOrder,
-        getActiveOrders,
+        getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect),
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,

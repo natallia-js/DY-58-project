@@ -1,5 +1,5 @@
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constants/orderPatterns';
 
 
 /**
@@ -156,6 +156,29 @@ export const activeOrders = {
       return (orderType, orderNumber) => {
         return getters.getActiveOrdersOfGivenType(orderType).find((item) => String(item.number) === String(orderNumber));
       };
+    },
+
+    /**
+     * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
+     * дежурства ДСП, изданное текущим пользователем не ранее момента его последнего принятия дежурства.
+     * Если существует, функция возвращает true, в противном случае функция возвращает false.
+     *
+     * Функцию следует вызывать только в том случае, если текущий пользователь ДСП, находящийся на
+     * дежурстве!
+     */
+    existsDSPTakeDutyOrder(_state, getters) {
+      return getters.getRawWorkingOrders.find((order) => {
+        if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
+          return false;
+        }
+        if (!order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN)) {
+          return false;
+        }
+        if (!order.creator.id === getters.getUserId) {
+          return false;
+        }
+        return order.createDateTime >= getters.getLastTakeDutyTime;
+      }) ? true : false;
     },
   },
 };

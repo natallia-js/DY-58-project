@@ -2,7 +2,7 @@
   <Dialog
     :header="`Выбор получателя среди ${personalPost} ${sectorName || ''}`"
     v-model:visible="dlgVisible"
-    style="width:auto; maxWidth:50%"
+    style="width:auto; maxWidth:500px"
     :modal="true"
     @hide="closeDialog"
   >
