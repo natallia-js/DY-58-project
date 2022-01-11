@@ -4,6 +4,7 @@ import {
   SET_REPORTING_ON_ORDER_DELIVERY_STATUS,
 } from '@/store/mutation-types';
 import { reportServerOnOrdersDelivery } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -58,7 +59,10 @@ export const reportOnOrdersDelivery = {
      * Для распоряжений, для которых ранее не сообщалось серверу об их доставке на данный
      * полигон управления, сообщает о том, что они доставлены.
      */
-     async reportOnOrdersDelivery(context, orders) {
+    async reportOnOrdersDelivery(context, orders) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       // Сюда поместим идентификаторы тех распоряжений, о доставке которых необходимо сообщить серверу.
       const newDeliveredOrderIds = !orders ? [] :
         orders.filter((order) => !order.deliverDateTime).map((order) => order._id);
@@ -71,26 +75,13 @@ export const reportOnOrdersDelivery = {
 
       try {
         const responseData = await reportServerOnOrdersDelivery({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
-          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
           orderIds: newDeliveredOrderIds,
           deliverDateTime: new Date(),
         });
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: false, message: responseData.message });
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка при сообщении серверу о доставке входящих распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка при сообщении серверу о доставке входящих распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при сообщении серверу о доставке входящих распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих распоряжений');
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, false);

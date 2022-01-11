@@ -8,6 +8,7 @@ import {
   DELETE_CONFIRMED_ORDERS_CHAIN,
 } from '@/store/mutation-types';
 import { delConfirmedOrdersFromChain } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -101,33 +102,18 @@ export const delWorkOrdersChains = {
      * Данные удаляются лишь из таблицы рабочих распоряжений у заданного полигона управления.
      */
     async delConfirmedOrdersFromChain(context, chainId) {
-      if (!context.getters.canUserDelConfirmedOrdersChains) {
+      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserDelConfirmedOrdersChains) {
         return;
       }
       context.commit(CLEAR_DELETE_ORDERS_CHAIN_RESULT, chainId);
       context.commit(SET_ORDERS_CHAIN_BEING_DELETED, chainId);
       try {
-        const responseData = await delConfirmedOrdersFromChain({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
-          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
-          chainId,
-        });
+        const responseData = await delConfirmedOrdersFromChain({ chainId });
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: false, message: responseData.message });
         context.commit(DELETE_CONFIRMED_ORDERS_CHAIN, chainId);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка удаления цепочки распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка удаления цепочки распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при удалении цепочки распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления цепочки распоряжений');
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
       }
       context.commit(SET_ORDERS_CHAIN_FINISHED_BEING_DELETED, chainId);

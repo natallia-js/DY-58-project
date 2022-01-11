@@ -1,10 +1,12 @@
 import {
   SET_INCOMING_ORDERS_PER_SHIFT,
+  DEL_INCOMING_ORDERS_PER_SHIFT,
   CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS,
 } from '@/store/mutation-types';
 import { getOrdersCreatedFromGivenDate } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -47,6 +49,10 @@ export const incomingOrdersPerShift = {
       state.incomingOrdersPerShift = ordersIds;
     },
 
+    [DEL_INCOMING_ORDERS_PER_SHIFT] (state) {
+      state.incomingOrdersPerShift = null;
+    },
+
     [CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT] (state) {
       if (state.gettingIncomingOrdersPerShiftResult) {
         state.gettingIncomingOrdersPerShiftResult = null;
@@ -75,7 +81,7 @@ export const incomingOrdersPerShift = {
      * в которой фиксируются лишь получатели-станции и ДСП этих станций).
      */
     async loadIncomingOrdersPerShift(context) {
-      if (!context.getters.isUserOnDuty) {
+      if (!context.getters.canUserWorkWithSystem || !context.getters.isUserOnDuty) {
         return;
       }
       context.commit(CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT);
@@ -83,24 +89,12 @@ export const incomingOrdersPerShift = {
       try {
         const responseData = await getOrdersCreatedFromGivenDate({
           datetime: context.getters.getLastTakeDutyTime,
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
         });
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: false, message: null });
         context.commit(SET_INCOMING_ORDERS_PER_SHIFT, responseData);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка получения информации о входящих распоряжениях за смену: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка получения информации о входящих распоряжениях за смену: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при получении информации о входящих распоряжениях за смену: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о входящих распоряжениях за смену');
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, false);

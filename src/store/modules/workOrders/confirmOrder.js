@@ -16,6 +16,7 @@ import {
   SET_ORDER_CONFIRMED_FOR_OTHERS,
 } from '@/store/mutation-types';
 import { confirmOrderForMyself, confirmOrdersForOthers } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -251,8 +252,8 @@ export const confirmOrder = {
     /**
      * Позволяет для данного входящего уведомления выставить статус "подтверждено" на сервере.
      */
-     async confirmOrder(context, { orderId }) {
-      if (!context.getters.canUserConfirmOrder) {
+    async confirmOrder(context, { orderId }) {
+      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserConfirmOrder) {
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
@@ -260,9 +261,6 @@ export const confirmOrder = {
       try {
         const confirmDateTime = new Date();
         const responseData = await confirmOrderForMyself({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
-          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
           id: orderId,
           confirmDateTime,
         });
@@ -270,17 +268,7 @@ export const confirmOrder = {
         context.commit(SET_ORDER_CONFIRMED, { orderId: responseData.id, confirmDateTime });
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подтверждения распоряжения: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подтверждения распоряжения: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подтверждении распоряжения: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
       }
       context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
@@ -291,7 +279,8 @@ export const confirmOrder = {
      * за ряд рабочих полигонов.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
-      if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
+      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserConfirmOrderForOthers ||
+        !confirmWorkPoligons || !confirmWorkPoligons.length) {
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
@@ -299,8 +288,6 @@ export const confirmOrder = {
       try {
         const confirmDateTime = new Date();
         const responseData = await confirmOrdersForOthers({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
           confirmWorkPoligons,
           orderId,
           confirmDateTime,
@@ -309,17 +296,7 @@ export const confirmOrder = {
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons, confirmDateTime });
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подтверждения распоряжения: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подтверждения распоряжения: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подтверждении распоряжения: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
       }
       context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);

@@ -8,6 +8,7 @@ import {
   SET_LOADING_LAST_ORDERS_RESULT,
   SET_LOADING_LAST_ORDERS_PARAMS_STATUS,
 } from '@/store/mutation-types';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -119,6 +120,9 @@ export const lastOrdersParams = {
      * полигона управления.
      */
     async loadLastOrdersParams(context) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       const currPoligonData = context.getters.getUserWorkPoligonData;
       if (!currPoligonData) {
         return;
@@ -128,26 +132,12 @@ export const lastOrdersParams = {
       try {
         // Извлекаем информацию о последних номерах изданных распоряжений разных типов
         // на текущем полигоне управления
-        const responseData = await getLastOrdersParams({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
-          workPoligonWorkPlaceId: context.getters.getUserWorkPoligon.subCode,
-        });
+        const responseData = await getLastOrdersParams();
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: false, message: null });
         context.commit(SET_LAST_ORDERS_PARAMS, responseData);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка получения информации о последних изданных распоряжениях: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка получения информации о последних изданных распоряжениях: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при получении информации о последних изданных распоряжениях: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о последних изданных распоряжениях');
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, false);

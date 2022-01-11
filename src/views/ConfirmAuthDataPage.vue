@@ -1,7 +1,7 @@
 <template>
   <div class="p-d-flex" style="height: 100vh;">
 
-    <div v-if="gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
         Получаю информацию о рабочих полигонах...
       </div>
@@ -13,16 +13,16 @@
       </div>
     </div>
 
-    <div v-else-if="getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
-        <InlineMessage severity="error">{{ getDataError }}</InlineMessage>
+        <InlineMessage severity="error">{{ state.getDataError }}</InlineMessage>
       </div>
       <div class="p-col-12">
         <Button type="button" label="Назад" @click="goToAuthPage" class="p-mr-3" />
       </div>
     </div>
 
-    <div v-else-if="!gettingData && !getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
       <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
         <p class="p-text-bold p-mb-3">Полномочие</p>
@@ -31,14 +31,14 @@
           :key="cred.cred"
           class="p-field-radiobutton"
         >
-          <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="selectedCredential" />
-          <label :for="cred.cred" class="p-mr-3">{{ getAppCredentialsTranslations()[cred.cred] }}</label>
+          <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
+          <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
         </div>
       </div>
-      <div v-if="selectedCredential">
-        <div v-if="selectedCredential.poligons && selectedCredential.poligons.length">
+      <div v-if="state.selectedCredential">
+        <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
           <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
-          <div v-for="typedPoligon of selectedCredential.poligons" :key="typedPoligon.type">
+          <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
             <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
             <div
               v-for="workPoligon of typedPoligon.workPoligons"
@@ -49,7 +49,7 @@
                 :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
                 name="workPoligon"
                 :value="{ type: typedPoligon.type, ...workPoligon }"
-                v-model="selectedPoligon"
+                v-model="state.selectedPoligon"
               />
               <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
                 {{ getWorkPoligonTitle(typedPoligon.type, workPoligon.poligonId, workPoligon.subPoligonId) }}
@@ -60,7 +60,7 @@
       </div>
       <div class="p-col-12">
         <Button type="button" label="Назад" @click="goToAuthPage" class="p-mr-3" />
-        <Button type="button" label="Продолжить" v-if="selectedCredential && selectedPoligon" @click="goToMainPage" />
+        <Button type="button" label="Продолжить" v-if="state.selectedCredential && state.selectedPoligon" @click="goToMainPage" />
       </div>
     </div>
   </div>
@@ -68,112 +68,137 @@
 
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex';
+  import { computed, onMounted, reactive, watch } from 'vue';
+  import router from '@/router';
+  import { useRoute } from 'vue-router';
+  import { useStore } from 'vuex';
   import { APP_CREDENTIALS_TRANSLATIONS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+  import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import { getStationsWorkPlacesData } from '@/serverRequests/stations.requests';
   import { getDNCSectorsShortData } from '@/serverRequests/dncSectors.requests';
   import { getECDSectorsShortData } from '@/serverRequests/ecdSectors.requests';
-  import { SET_USER_CREDENTIAL, SET_USER_WORK_POLIGON } from '@/store/mutation-types';
+  import { startWorkWithoutTakingDuty, takeDutyUser } from '@/serverRequests/auth.requests';
+  import {
+    SET_USER_CREDENTIAL,
+    SET_USER_WORK_POLIGON,
+    SET_USER_TOKEN,
+    SET_USER_TAKE_PASS_DUTY_TIMES,
+  } from '@/store/mutation-types';
+  import showMessage from '@/hooks/showMessage.hook';
 
   export default {
     name: 'dy58-confirm-auth-data-page',
 
-    data() {
-      return {
+    setup() {
+      const store = useStore();
+      const route = useRoute();
+      const { showErrMessage } = showMessage();
+
+      const state = reactive({
         selectedCredential: null,
         selectedPoligon: null,
         workPoligonTitles: [],
         gettingData: false,
         getDataError: null,
-      };
-    },
+      });
 
-    watch: {
-      selectedCredential: function (val) {
+      const getAllPossibleCredentialsWithPoligons = computed(() => store.getters.getAllPossibleCredentialsWithPoligons);
+      const getUserCredential = computed(() => store.getters.getUserCredential);
+
+      watch(() => state.selectedCredential, (val) => {
         if (val.poligons && val.poligons.length === 1 &&
-            val.poligons[0].workPoligons && val.poligons[0].workPoligons.length === 1) {
-          this.selectedPoligon = { type: val.poligons[0].type, ...val.poligons[0].workPoligons[0] };
+          val.poligons[0].workPoligons && val.poligons[0].workPoligons.length === 1) {
+          state.selectedPoligon = { type: val.poligons[0].type, ...val.poligons[0].workPoligons[0] };
         } else {
-          this.selectedPoligon = null;
+          state.selectedPoligon = null;
         }
-      },
-    },
+      });
 
-    computed: {
-      ...mapGetters([
-        'getAllPossibleCredentialsWithPoligons',
-        'getUserCredential',
-        'getUserToken',
-        'getUserName',
-      ]),
-    },
+      onMounted(async () => {
+        // если полномочие у пользователя одно, выделяем его
+        if (getUserCredential.value) {
+          state.selectedCredential = getAllPossibleCredentialsWithPoligons.value.find((cred) => cred.cred = getUserCredential.value);
+        }
 
-    async created() {
-      // если полномочие у пользователя одно, выделяем его
-      if (this.getUserCredential) {
-        this.selectedCredential = this.getAllPossibleCredentialsWithPoligons.find((cred) => cred.cred = this.getUserCredential);
+        state.gettingData = true;
+
+        // делаем запрос к бэкенду для получения наименований рабочих полигонов
+        try {
+          for (let cred of getAllPossibleCredentialsWithPoligons.value) {
+            if (!cred.poligons || !cred.poligons.length) {
+              continue;
+            }
+            for (let typedPoligons of cred.poligons) {
+              let data = [];
+              switch (typedPoligons.type) {
+                case WORK_POLIGON_TYPES.STATION:
+                  data = await getStationsWorkPlacesDataLocal(typedPoligons.workPoligons.map((wp) => wp.poligonId));
+                  break;
+                case WORK_POLIGON_TYPES.DNC_SECTOR:
+                  data = await getDNCSectorsShortDataLocal(typedPoligons.workPoligons.map((wp) => wp.poligonId));
+                  break;
+                case WORK_POLIGON_TYPES.ECD_SECTOR:
+                  data = await getECDSectorsShortDataLocal(typedPoligons.workPoligons.map((wp) => wp.poligonId));
+                  break;
+              }
+              data.forEach((poligon) => {
+                state.workPoligonTitles.push({ type: typedPoligons.type, ...poligon });
+              });
+            }
+          }
+        } catch (err) {
+          state.getDataError = `При попытке получить информацию о рабочих полигонах возникла ошибка: ${err}`;
+        } finally {
+          state.gettingData = false;
+        }
+      });
+
+      const goToAuthPage = () => {
+        router.push({ name: 'AuthPage' });
       }
 
-      this.gettingData = true;
-
-      // делаем запрос к бэкенду для получения наименований рабочих полигонов
-      try {
-        for (let cred of this.getAllPossibleCredentialsWithPoligons) {
-          if (!cred.poligons || !cred.poligons.length) {
-            continue;
-          }
-          for (let typedPoligons of cred.poligons) {
-            let data = [];
-            switch (typedPoligons.type) {
-              case WORK_POLIGON_TYPES.STATION:
-                data = await this.getStationsWorkPlacesData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
-                break;
-              case WORK_POLIGON_TYPES.DNC_SECTOR:
-                data = await this.getDNCSectorsShortData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
-                break;
-              case WORK_POLIGON_TYPES.ECD_SECTOR:
-                data = await this.getECDSectorsShortData(typedPoligons.workPoligons.map((wp) => wp.poligonId));
-                break;
-            }
-            data.forEach((poligon) => {
-              this.workPoligonTitles.push({ type: typedPoligons.type, ...poligon });
+      const goToMainPage = async () => {
+        if (!state.selectedCredential || !state.selectedPoligon) {
+          return;
+        }
+        const desiredWorkPoligon = {
+          type: state.selectedPoligon.type,
+          code: state.selectedPoligon.poligonId,
+          subCode: state.selectedPoligon.subPoligonId || null,
+        };
+        // Делаем дополнительный запрос на сервер с указанием факта принятия дежурства либо входа в
+        // систему без принятия дежурства
+        try {
+          let responseData;
+          if (route.params.takeDuty === 'true') {
+            responseData = await takeDutyUser({
+              workPoligonType: desiredWorkPoligon.type,
+              workPoligonId: desiredWorkPoligon.code,
+              workSubPoligonId: desiredWorkPoligon.subCode,
+            });
+          } else {
+            responseData = await startWorkWithoutTakingDuty({
+              workPoligonType: desiredWorkPoligon.type,
+              workPoligonId: desiredWorkPoligon.code,
+              workSubPoligonId: desiredWorkPoligon.subCode,
             });
           }
-        }
-      } catch (err) {
-        this.getDataError = `При попытке получить информацию о рабочих полигонах возникла ошибка: ${err}`;
-      }
-
-      this.gettingData = false;
-    },
-
-    methods: {
-      ...mapMutations([
-        SET_USER_CREDENTIAL,
-        SET_USER_WORK_POLIGON,
-      ]),
-
-      getAppCredentialsTranslations() {
-        return APP_CREDENTIALS_TRANSLATIONS;
-      },
-
-      goToAuthPage() {
-        this.$router.push({ name: 'AuthPage' });
-      },
-
-      goToMainPage() {
-        if (this.selectedCredential && this.selectedPoligon) {
-          this[SET_USER_CREDENTIAL](this.selectedCredential.cred);
-          this[SET_USER_WORK_POLIGON]({
-            type: this.selectedPoligon.type,
-            code: this.selectedPoligon.poligonId,
-            subCode: this.selectedPoligon.subPoligonId || null,
+          store.commit(SET_USER_TOKEN, { token: responseData.token, saveInLocalStorage: true });
+          store.commit(SET_USER_TAKE_PASS_DUTY_TIMES, {
+            lastTakeDutyTime: responseData.lastTakeDutyTime ? new Date(responseData.lastTakeDutyTime) : null,
+            lastPassDutyTime: responseData.lastPassDutyTime ? new Date(responseData.lastPassDutyTime) : null,
           });
-          this.$router.push({ name: 'MainPage' });
+        } catch (error) {
+          const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка входа пользователя в систему');
+          showErrMessage(errMessage);
+          return;
         }
-      },
+        store.commit(SET_USER_CREDENTIAL, state.selectedCredential.cred);
+        store.commit(SET_USER_WORK_POLIGON, desiredWorkPoligon);
+        router.push({ name: 'MainPage' });
+      };
 
-      async getStationsWorkPlacesData(stationIds) {
+      const getStationsWorkPlacesDataLocal = async (stationIds) => {
         const responseData = await getStationsWorkPlacesData({ stationIds });
         return !responseData ? [] :
           responseData.map((sector) => {
@@ -187,9 +212,9 @@
                 })),
             };
           });
-      },
+      };
 
-      async getDNCSectorsShortData(dncSectorIds) {
+      const getDNCSectorsShortDataLocal = async (dncSectorIds) => {
         const responseData = await getDNCSectorsShortData({ dncSectorIds });
         return !responseData ? [] :
           responseData.map((sector) => {
@@ -198,9 +223,9 @@
               title: sector.DNCS_Title,
             };
           });
-      },
+      };
 
-      async getECDSectorsShortData(ecdSectorIds) {
+      const getECDSectorsShortDataLocal = async (ecdSectorIds) => {
         const responseData = await getECDSectorsShortData({ ecdSectorIds });
         return !responseData ? [] :
           responseData.map((sector) => {
@@ -209,10 +234,10 @@
               title: sector.ECDS_Title,
             };
           });
-      },
+      };
 
-      getWorkPoligonTitle(workPoligonType, workPoligonId, workSubPoligonId) {
-        const workPoligonData = this.workPoligonTitles.find((poligon) =>
+      const getWorkPoligonTitle = (workPoligonType, workPoligonId, workSubPoligonId) => {
+        const workPoligonData = state.workPoligonTitles.find((poligon) =>
           poligon.type === workPoligonType && poligon.code === workPoligonId);
         const workPoligonTitle = workPoligonData ? workPoligonData.title : workPoligonId;
         if (!workSubPoligonId) {
@@ -226,7 +251,16 @@
         return workSubPoligonData
           ? `${workPoligonTitle}, ${workSubPoligonData.title}`
           : `${workPoligonTitle}, ${workSubPoligonId}`;
-      },
-    },
+      };
+
+      return {
+        state,
+        APP_CREDENTIALS_TRANSLATIONS,
+        getAllPossibleCredentialsWithPoligons,
+        goToAuthPage,
+        goToMainPage,
+        getWorkPoligonTitle,
+      };
+    }
   };
 </script>

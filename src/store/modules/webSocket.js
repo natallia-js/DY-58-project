@@ -1,4 +1,14 @@
 import { WS_SERVER_PARAMS } from '@/constants/servers';
+import {
+  SET_SERVER_MESSAGE,
+  SET_WS_READY_STATE,
+  RESET_RETRY_NUM,
+  NEXT_RETRY_NUM,
+  RETRY_ON_CLOSE_WS_CONNECTION,
+  DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION,
+  DEL_ALL_WS_SERVER_MESSAGES,
+} from '@/store/mutation-types';
+
 
 export const webSocket = {
   state: {
@@ -33,7 +43,7 @@ export const webSocket = {
   },
 
   mutations: {
-    setServerMessage(state, messageObject) {
+    [SET_SERVER_MESSAGE] (state, messageObject) {
       if (!messageObject) {
         return;
       }
@@ -43,25 +53,29 @@ export const webSocket = {
       state.lastNServerMessages.push(messageObject);
     },
 
-    setReadyState(state, { ready, datetime }) {
+    [SET_WS_READY_STATE] (state, { ready, datetime }) {
       state.readyState.ready = ready;
       state.readyState.datetime = datetime;
     },
 
-    resetRetryNum(state) {
+    [RESET_RETRY_NUM] (state) {
       state.retryNum = 0;
     },
 
-    nextRetryNum(state) {
+    [NEXT_RETRY_NUM] (state) {
       state.retryNum += 1;
     },
 
-    retryOnCloseWSConnection(state) {
+    [RETRY_ON_CLOSE_WS_CONNECTION] (state) {
       state.retryOnCloseConnection = true;
     },
 
-    doNotRetryOnCloseWSConnection(state) {
+    [DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION] (state) {
       state.retryOnCloseConnection = false;
+    },
+
+    [DEL_ALL_WS_SERVER_MESSAGES] (state) {
+      state.lastNServerMessages = [];
     },
   },
 };

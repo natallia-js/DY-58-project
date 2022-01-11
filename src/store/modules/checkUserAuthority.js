@@ -1,6 +1,14 @@
 export const checkUserAuthority = {
   getters: {
     /**
+     * Работать с ДУ-58 может пользователь, прошедший процедуру аутентификации для работы с конкретным
+     * рабочим полигоном и имеющий конкретные полномочия в системе.
+     */
+    canUserWorkWithSystem(_state, getters) {
+      return getters.isUserAuthenticated && getters.getUserCredential && getters.getUserWorkPoligon;
+    },
+
+    /**
      * Любой пользователь, принявший дежурство, может подтвержать приходящие ему распоряжения.
      */
     canUserConfirmOrder(_state, getters) {

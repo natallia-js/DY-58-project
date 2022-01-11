@@ -1,5 +1,4 @@
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
-import { getRequestAuthorizationHeader } from '@/serverRequests/common';
 import {
   CLEAR_DISPATCH_ORDER_RESULT,
   ADD_ORDERS_BEING_DISPATCHED_NUMBER,
@@ -9,6 +8,7 @@ import {
   SET_LAST_ORDERS_NUMBER,
 } from '@/store/mutation-types';
 import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 export const orders = {
@@ -60,6 +60,9 @@ export const orders = {
      * Делает запрос на сервер с целью сохранения издаваемого распоряжения и передачи его причастным.
      */
     async dispatchOrder(context, params) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       const {
         type,
         number,
@@ -139,12 +142,7 @@ export const orders = {
                 sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
               };
             }),
-            workPoligon: {
-              id: context.getters.getUserWorkPoligon.code,
-              type: context.getters.getUserWorkPoligon.type,
-              workPlaceId: context.getters.getUserWorkPoligon.subCode,
-              title: context.getters.getUserWorkPoligonName,
-            },
+            workPoligonTitle: context.getters.getUserWorkPoligonName,
             creator: {
               id: context.getters.getUserId,
               post: context.getters.getUserPost,
@@ -154,25 +152,14 @@ export const orders = {
             orderChainId,
             showOnGID,
             specialTrainCategories,
-          },
-          { headers: getRequestAuthorizationHeader() }
+          }
         );
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
         context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_LAST_ORDERS_NUMBER, { ordersType: type, number, createDateTime });
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка отправки распоряжения на сервер: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка отправки распоряжения на сервер: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при отправке распоряжения на сервер: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка отправки распоряжения на сервер');
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
       }
 

@@ -14,8 +14,10 @@ import {
   SET_LOADING_WORK_ORDERS_STATUS,
   SET_NEW_WORK_ORDERS_ARRAY,
   UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT,
+  DEL_WORK_ORDERS,
 } from '@/store/mutation-types';
 import { getWorkOrdersFromServer } from '@/serverRequests/orders.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 function getWorkOrderObject(order) {
@@ -565,20 +567,24 @@ export const getWorkOrders = {
         }
       });
     },
+
+    [DEL_WORK_ORDERS] (state) {
+      state.data = [];
+    },
   },
 
   actions: {
     /**
      * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
      */
-     async loadWorkOrders(context) {
+    async loadWorkOrders(context) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(CLEAR_LOADING_WORK_ORDERS_RESULT);
       context.commit(SET_LOADING_WORK_ORDERS_STATUS, true);
       try {
         const responseData = await getWorkOrdersFromServer({
-          workPoligonType: context.getters.getUserWorkPoligon.type,
-          workPoligonId: context.getters.getUserWorkPoligon.code,
-          workSubPoligonId: context.getters.getUserWorkPoligon.subCode,
           startDate: context.getters.getStartDateToGetData,
         });
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: false, message: null });
@@ -594,17 +600,7 @@ export const getWorkOrders = {
         context.commit(CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка получения информации о рабочих распоряжениях: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка получения информации о рабочих распоряжениях: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при получении информации о рабочих распоряжениях: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о рабочих распоряжениях');
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_LOADING_WORK_ORDERS_STATUS, false);

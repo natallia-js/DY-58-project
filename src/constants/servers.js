@@ -1,4 +1,5 @@
 const AUTH_SERVER_ADDRESS = process.env.VUE_APP_AUTH_SERVER_ADDRESS;
+export const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
 export const WS_SERVER_PARAMS = Object.freeze({
   RETRY_CONNECTION_INTERVAL: 5000,
@@ -18,6 +19,9 @@ export const WS_SERVER_PARAMS = Object.freeze({
 
 export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
   login: `${AUTH_SERVER_ADDRESS}/api/auth/login`,
+  startWorkWithoutTakingDuty: `${AUTH_SERVER_ADDRESS}/api/auth/startWorkWithoutTakingDuty`,
+  takeDuty: `${AUTH_SERVER_ADDRESS}/api/auth/takeDuty`,
+  logout: `${AUTH_SERVER_ADDRESS}/api/auth/logout`,
   logoutWithDutyPass: `${AUTH_SERVER_ADDRESS}/api/auth/logoutWithDutyPass`,
 
   getStationsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/shortDefinitData`,

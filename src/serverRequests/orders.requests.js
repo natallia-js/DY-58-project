@@ -2,57 +2,57 @@ import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { getRequestAuthorizationHeader } from './common';
 
-export const getLastOrdersParams = async ({ workPoligonType, workPoligonId, workPoligonWorkPlaceId }) => {
+export const getLastOrdersParams = async () => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
-    { workPoligonType, workPoligonId, workPoligonWorkPlaceId },
+    {},
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const getOrdersCreatedFromGivenDate = async ({ datetime, workPoligonType, workPoligonId }) => {
+export const getOrdersCreatedFromGivenDate = async ({ datetime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersCreatedFromGivenDate,
-    { datetime, workPoligonType, workPoligonId },
+    { datetime },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const confirmOrderForMyself = async ({ workPoligonType, workPoligonId, workSubPoligonId, id, confirmDateTime }) => {
+export const confirmOrderForMyself = async ({ id, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
-    { workPoligonType, workPoligonId, workSubPoligonId, id, confirmDateTime },
+    { id, confirmDateTime },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const confirmOrdersForOthers = async ({ workPoligonType, workPoligonId, confirmWorkPoligons, orderId, confirmDateTime }) => {
+export const confirmOrdersForOthers = async ({ confirmWorkPoligons, orderId, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
-    { workPoligonType, workPoligonId, confirmWorkPoligons, orderId, confirmDateTime },
+    { confirmWorkPoligons, orderId, confirmDateTime },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const delConfirmedOrdersFromChain = async ({ workPoligonType, workPoligonId, workSubPoligonId, chainId }) => {
+export const delConfirmedOrdersFromChain = async ({ chainId }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
-    { workPoligonType, workPoligonId, workSubPoligonId, chainId },
+    { chainId },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const getWorkOrdersFromServer = async ({ workPoligonType, workPoligonId, workSubPoligonId, startDate }) => {
+export const getWorkOrdersFromServer = async ({ startDate }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
-    { workPoligonType, workPoligonId, workSubPoligonId, startDate },
+    { startDate },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const reportServerOnOrdersDelivery = async ({ workPoligonType, workPoligonId, workSubPoligonId, orderIds, deliverDateTime }) => {
+export const reportServerOnOrdersDelivery = async ({ orderIds, deliverDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
-    { workPoligonType, workPoligonId, workSubPoligonId, orderIds, deliverDateTime },
+    { orderIds, deliverDateTime },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
@@ -70,7 +70,7 @@ export const dispatchOrderToServer = async (params) => {
     dspToSend,
     ecdToSend,
     otherToSend,
-    workPoligon,
+    workPoligonTitle,
     creator,
     createdOnBehalfOf,
     orderChainId,
@@ -89,7 +89,7 @@ export const dispatchOrderToServer = async (params) => {
       dspToSend,
       ecdToSend,
       otherToSend,
-      workPoligon,
+      workPoligonTitle,
       creator,
       createdOnBehalfOf,
       orderChainId,

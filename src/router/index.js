@@ -9,7 +9,6 @@ import CurrJournalPage from '@/views/CurrJournalPage';
 import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
-import { TRY_LOGIN_VIA_LOCAL_STORAGE } from '@/store/mutation-types';
 
 const routes = [
   {
@@ -33,7 +32,7 @@ const routes = [
     name: 'MainPage',
     component: MainPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -41,7 +40,7 @@ const routes = [
     name: 'SectorStructurePage',
     component: SectorStructurePage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -49,7 +48,7 @@ const routes = [
     name: 'ShiftPage',
     component: ShiftPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -57,7 +56,7 @@ const routes = [
     name: 'CurrJournalPage',
     component: CurrJournalPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -65,7 +64,7 @@ const routes = [
     name: 'NewOrderPage',
     component: NewOrderPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -73,7 +72,7 @@ const routes = [
     name: 'OrderPatternsPage',
     component: OrderPatternsPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
   {
@@ -81,7 +80,7 @@ const routes = [
     name: 'HelpPage',
     component: HelpPage,
     meta: {
-      requiresAuth: true,
+      requiresFullAuth: true,
     },
   },
 ];
@@ -93,73 +92,38 @@ const router = createRouter({
 });
 
 
-router.beforeEach((to, from, next) => {
-  // Страница, куда осуществляется переход, требует аутентификации?
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Да, аутентификация требуется
+router.beforeEach(async (to, from, next) => {
+  // Вне зависимости от того, на какую страницу хочет попасть пользователь, проверяем,
+  // проходил ли он уже процедуру частичной аутентификации (login + password)
+  if (!store.getters.isUserAuthenticated) {
+    // Нет -> пытаемся аутентифицировать пользователя через localstorage
+    // (такое, в частности, возможно при перезагрузке страницы). Успешная аутентификация
+    // через localstorage может привести к полной аутентификации в системе
+    await store.dispatch('tryLoginViaLocalStorage');
+  }
 
-    // Пользователь уже аутентифицирован?
-    if (!store.getters.isUserAuthenticated) {
-      // Нет -> пытаемся аутентифицировать пользователя через localstorage
-      // (такое, в частности, возможно при перезагрузке страницы)
-      store.commit(TRY_LOGIN_VIA_LOCAL_STORAGE);
-    }
-
-    // Пользователь аутентифицирован?
-    if (store.getters.isUserAuthenticated) {
-      // Да
-      // Если определен рабочий полигон пользователя, то направляем пользователя туда, куда он хотел попасть,
-      // за исключением страницы /confirmAuthDataPage: на данную страницу у него нет пути
-      if (store.getters.getUserWorkPoligon) {
-        if (to.path !== '/confirmAuthDataPage') {
-          next();
-        } else {
-          next({
-            path: from.path,
-          });
-        }
-      } else {
-        // В противном случае перенаправляем на страницу, где он сможет определить свой рабочий полигон
-        if (to.path !== '/confirmAuthDataPage') {
-          next({
-            path: '/confirmAuthDataPage',
-          });
-        } else {
-          next();
-        }
-      }
+  // Если пользователь полностью аутентифицирован, то он не может попасть на страницы, требующие
+  // частичной аутентификации либо не требующие аутентификации вовсе
+  if (store.getters.canUserWorkWithSystem) {
+    if (to.matched.some(record => record.meta.requiresFullAuth)) {
+      next();
+    } else if (to.matched.some(record => record.meta.requiresAuth)) {
+      next({ path: (from.path !== '/confirmAuthDataPage') ? from.path : '/mainPage', });
     } else {
-      // Нет -> переходим на страницу аутентификации
-      next({
-        path: '/',
-      });
+      next({ path: (from.path !== '/' && from.path !== '/confirmAuthDataPage') ? from.path : '/mainPage', });
     }
-
-  } else { // if (to.matched.some(record => record.meta.guest)) {
-    // Страница не требует аутентификации
-
-    // Пользователь не аутентифицирован?
-    if (!store.getters.isUserAuthenticated) {
-      // Не аутентифицирован -> пытаемся аутентифицировать пользователя через localstorage
-      store.commit(TRY_LOGIN_VIA_LOCAL_STORAGE);
-    }
-
-    // Пользователь аутентифицирован?
-    if (store.getters.isUserAuthenticated) {
-      // Да
-      // Если пользователь хочет попасть на страницу, связанную с аутентификацией, то
-      // сделать он этого не сможет, пока не выйдет из системы, за исключением случая, когда
-      // не определен его рабочий полигон
-      if ((to.path === '/') && store.getters.getUserWorkPoligon) {
-        next({
-          path: (from.path !== '/') ? from.path : '/mainPage',
-        });
-      } else {
-        next();
-      }
+  } else if (store.getters.isUserAuthenticated) {
+    if (to.matched.some(record => record.meta.requiresFullAuth)) {
+      next({ path: '/confirmAuthDataPage' });
+    } else if (to.matched.some(record => record.meta.requiresAuth)) {
+      next();
     } else {
-      // Нет
-      // Перенаправляем пользователя туда, куда он хотел попасть
+      next({ path: '/confirmAuthDataPage' });
+    }
+  } else {
+    if (to.path !== '/') {
+      next({ path : '/'});
+    } else {
       next();
     }
   }

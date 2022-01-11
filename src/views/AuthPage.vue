@@ -41,8 +41,8 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <div class="p-field-checkbox">
-            <Checkbox id="takeDuty" v-model="state.takeDuty" :binary="true" />
-            <label for="takeDuty">Принять дежурство</label>
+            <Checkbox id="take-duty" v-model="state.takeDuty" :binary="true" />
+            <label for="take-duty">Принять дежурство</label>
           </div>
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
@@ -64,9 +64,9 @@
   import { useVuelidate } from '@vuelidate/core';
   import router from '@/router';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-  import { loginUser } from '@/serverRequests/auth.requests';
+  import { authUser } from '@/serverRequests/auth.requests';
   import showMessage from '@/hooks/showMessage.hook';
-  import { LOGIN } from '@/store/mutation-types';
+  import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
   export default {
     name: 'dy58-auth-page',
@@ -94,6 +94,9 @@
 
       const v$ = useVuelidate(rules, state);
 
+      /**
+       *
+       */
       const handleSubmit = async (isFormValid) => {
         state.submitted = true;
 
@@ -105,15 +108,19 @@
         }
 
         state.waitingForServerResponse = true;
+        let responseData;
+        const workPoligons = [];
 
         try {
-          const responseData = await loginUser({
+          // Делаем запрос на сервер о входе пользователя в систему.
+          // Если запрос завершится успешно, пользователь получит jwt-token, который позволит
+          // ему продолжить работу с системой. Останется лишь определить рабочий полигон, на
+          // котором пользователь будет работать в системе.
+          responseData = await authUser({
             login: state.userName,
             password: state.password,
-            takeDuty: state.takeDuty,
           });
 
-          const workPoligons = [];
           if (responseData.stationWorkPoligons && responseData.stationWorkPoligons.length) {
             workPoligons.push({
               type: WORK_POLIGON_TYPES.STATION,
@@ -139,40 +146,47 @@
               })),
             });
           }
-
-          store.commit(LOGIN, {
-            userId: responseData.userId,
-            jtwToken: responseData.token,
-            userInfo: responseData.userInfo,
-            lastTakeDutyTime: responseData.lastTakeDutyTime,
-            lastPassDutyTime: responseData.lastPassDutyTime,
-            credentials: responseData.credentials,
-            workPoligons,
-          });
-
-        } catch (e) {
-          showErrMessage((e && e.response && e.response.data && e.response.data.message) ?
-              e.response.data.message : (e && e.message) ? e.message : 'Что-то пошло не так');
-          return;
-
-        } finally {
+        } catch (error) {
           state.waitingForServerResponse = false;
+          const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка входа пользователя в систему');
+          showErrMessage(errMessage);
+          return;
         }
 
-        if (store.getters.isUserAuthenticated) {
-          // Если в процессе входа в систему программе удалось явно определить полномочия пользователя и его
-          // рабочий полигон, то осуществляем переход на главную страницу...
-          if (store.getters.getUserCredential && store.getters.getUserWorkPoligon) {
-            router.push({ name: 'MainPage' });
-          // ...в противном случае переходим на страницу выбора полномочия, с которым пользователь будет
-          // работать с программой, а также соответствующего рабочего полигона
-          } else {
-            router.push({ name: 'ConfirmAuthDataPage' });
-          }
-        } else {
-          showErrMessage('Данный пользователь не прошел аутентификацию для работы с текущим приложением');
+        await store.dispatch('login', {
+          userId: responseData.userId,
+          jtwToken: responseData.token,
+          userInfo: responseData.userInfo,
+          lastTakeDutyTime: null,
+          lastPassDutyTime: null,
+          credentials: responseData.credentials,
+          workPoligons,
+          takeDuty: state.takeDuty,
+        });
+
+        state.waitingForServerResponse = false;
+
+        const loginResult = store.getters.getLoginResult;
+        if (!loginResult || loginResult.error) {
+          const errMessage = !loginResult ? 'Что-то пошло не так' : loginResult.message;
+          showErrMessage(errMessage);
+          return;
         }
-      }
+
+        if (store.getters.canUserWorkWithSystem === true) {
+          // Если в процессе входа в систему программе удалось явно определить полномочия пользователя и его
+          // рабочий полигон, то осуществляем переход на главную страницу
+          router.push({ name: 'MainPage' });
+        } else if (store.getters.isUserAuthenticated === true) {
+          // Если в процессе входа в систему программе не удалось определить полномочия пользователя и его
+          // рабочий полигон, но пользователь успешно прошел процедуру частичной аутентификации (имя + пароль),
+          // то осуществляем переход на страницу выбора полномочия, с которым пользователь будет работать
+          // с программой, а также соответствующего рабочего полигона
+          router.push({ name: 'ConfirmAuthDataPage', params: { takeDuty: state.takeDuty } });
+        } else {
+          showErrMessage('Вы не прошли аутентификацию для работы с текущим приложением');
+        }
+      };
 
       return {
         state,

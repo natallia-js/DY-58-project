@@ -33,6 +33,7 @@ import {
   modifyOrderPattern,
   createNewOrderPattern,
 } from '@/serverRequests/orderPatterns.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 export const orderPatterns = {
@@ -53,10 +54,6 @@ export const orderPatterns = {
   getters: {
     getCurrentUserId(_state, getters) {
       return getters.getUserId;
-    },
-
-    getCurrentUserToken(_state, getters) {
-      return getters.getUserToken;
     },
 
     getLoadingOrderPatternsStatus(state) {
@@ -389,6 +386,9 @@ export const orderPatterns = {
      *
      */
     async loadOrderPatterns(context) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, true);
       context.commit(CLEAR_LOADING_ORDER_PATTERNS_RESULT);
 
@@ -407,17 +407,7 @@ export const orderPatterns = {
         context.commit(SET_NEW_ORDER_PATTERNS_ARRAY, responseData);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подгрузки информации о шаблонах распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подгрузки информации о шаблонах распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подгрузке информации о шаблонах распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о шаблонах распоряжений');
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, false);
@@ -427,6 +417,9 @@ export const orderPatterns = {
      *
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
       context.commit(CLEAR_MODIFY_ORDER_CATEGORY_TITLE_RESULT);
       try {
@@ -443,17 +436,7 @@ export const orderPatterns = {
           newTitle: responseData.newTitle,
         });
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка редактирования наименования категории распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка редактирования наименования категории распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при редактировании наименования категории распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования наименования категории распоряжений');
         context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
           error: true,
           message: errMessage,
@@ -467,6 +450,9 @@ export const orderPatterns = {
      *
      */
     async delOrderPattern(context, orderPatternId) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
       context.commit(CLEAR_DEL_ORDER_PATTERN_RESULT);
       try {
@@ -475,17 +461,7 @@ export const orderPatterns = {
         context.commit(DEL_ORDER_PATTERN, orderPatternId);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка удаления шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка удаления шаблона распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при удалении шаблона распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления шаблона распоряжений');
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
       }
       context.commit(SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -495,6 +471,9 @@ export const orderPatterns = {
      *
      */
     async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
       context.commit(CLEAR_MOD_ORDER_PATTERN_RESULT);
       try {
@@ -509,17 +488,7 @@ export const orderPatterns = {
           newOrderPattern: responseData.orderPattern,
         });
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка редактирования шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка редактирования шаблона распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при редактировании шаблона распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования шаблона распоряжений');
         context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
           error: true,
           message: errMessage,
@@ -533,6 +502,9 @@ export const orderPatterns = {
      *
      */
     async createOrderPattern(context, props) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       const { service, type, category, title, specialTrainCategories, elements } = props;
 
       context.commit(CLEAR_CREATE_ORDER_PATTERN_RESULT);
@@ -559,17 +531,7 @@ export const orderPatterns = {
         context.commit(ADD_NEW_ORDER_PATERN, responseData.orderPattern);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка создания шаблона распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка создания шаблона распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при создании шаблона распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка создания шаблона распоряжений');
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
       }
       context.commit(SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);

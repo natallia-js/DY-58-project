@@ -2,9 +2,33 @@ import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { getRequestAuthorizationHeader } from './common';
 
-export const loginUser = async ({ login, password, takeDuty }) => {
+export const authUser = async ({ login, password }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.login,
-    { login, password, takeDuty },
+    { login, password },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
+export const startWorkWithoutTakingDuty = async ({ workPoligonType, workPoligonId, workSubPoligonId }) => {
+  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.startWorkWithoutTakingDuty,
+    { workPoligonType, workPoligonId, workSubPoligonId },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
+export const takeDutyUser = async ({ workPoligonType, workPoligonId, workSubPoligonId }) => {
+  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.takeDuty,
+    { workPoligonType, workPoligonId, workSubPoligonId },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
+export const logoutUser = async () => {
+  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logout,
+    {},
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

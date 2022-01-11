@@ -22,11 +22,11 @@
           :breakpoints="{'960px':'75vw'}"
         >
           <div class="p-d-flex p-flex-column">
-            <label for="newNumber" :class="{'p-error':v$.number.$invalid && submitted,'p-mb-2':true}">
+            <label for="new-number" :class="{'p-error':v$.number.$invalid && submitted,'p-mb-2':true}">
               <span class="p-text-bold"><span style="color:red">*</span> Новый номер</span>
             </label>
             <InputText
-              id="newNumber"
+              id="new-number"
               v-model="v$.number.$model"
               :class="{'p-invalid':v$.number.$invalid && submitted}"
             />
@@ -62,11 +62,11 @@
       <!-- ДАТА И ВРЕМЯ СОЗДАНИЯ РАСПОРЯЖЕНИЯ -->
 
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
-        <label for="createDateTimeString" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
+        <label for="create-date-time-string" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
         </label>
         <InputText
-          id="createDateTimeString"
+          id="create-date-time-string"
           disabled
           v-model="v$.createDateTimeString.$model"
           :class="{'p-invalid':v$.createDateTimeString.$invalid && submitted}"
@@ -82,11 +82,11 @@
       <!-- ДАТА И ВРЕМЯ ПРИНЯТИЯ ДЕЖУРСТВА -->
 
       <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
-        <label for="takeDutyDateTime" :class="{'p-error':v$.takeDutyDateTime.$invalid && submitted}">
+        <label for="take-duty-date-time" :class="{'p-error':v$.takeDutyDateTime.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Время принятия дежурства</span>
         </label>
         <Calendar
-          id="takeDutyDateTime"
+          id="take-duty-date-time"
           :showTime="true"
           hourFormat="24"
           :hideOnDateTimeSelect="true"
@@ -102,25 +102,62 @@
           Не определено/неверно определено время принятия дежурства
         </small>
       </div>
-{{JSON.stringify(getCurrStationDSPOperators)}}
-      <!--<div>
-        <PickList v-model="cars" dataKey="vin">
-          <template #sourceheader>
+
+      <!-- СМЕННЫЙ ПЕРСОНАЛ, С КОТОРЫМ ДСП ЗАСТУПАЕТ НА ДЕЖУРСТВО -->
+
+      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+        <label for="dsp-operators" :class="{'p-error':v$.dspOperators.$invalid && submitted}">
+          <span class="p-text-bold">Определите персонал, принимающий смену</span>
+        </label>
+        <PickList v-model="state.dspOperators" dataKey="id" id="dsp-operators">
+          <!--<template #sourceheader>
             Допустимый перечень лиц
           </template>
           <template #targetheader>
             Выбранные лица
-          </template>
+          </template>-->
           <template #item="slotProps">
-            <div v-for="person of getCurrStationDSPOperators" class="p-caritem">
-              <div>
-                <span class="p-caritem-vin">{{slotProps.item.vin}}</span>
-              </div>
+            <div>
+              <p>{{slotProps.item.workPlaceName}}:</p>
+              <p>{{slotProps.item.userFIO}}</p>
             </div>
-
           </template>
         </PickList>
-      </div>-->
+        <small
+          v-if="(v$.takeDutyDateTime.$invalid && submitted) || v$.takeDutyDateTime.$pending.$response"
+          class="p-error"
+        >
+          Проверьте правильность определения сменного персонала
+        </small>
+      </div>
+
+      <!-- ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ -->
+
+      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+        <label for="additional-order-text" :class="{'p-error':v$.additionalOrderText.$invalid && submitted}">
+          <span class="p-text-bold">Дополнительная информация</span>
+        </label>
+        <div>
+          <Button
+            label="Вставить перенос строки"
+            @click="handleInsertRowbreak"
+          />
+        </div>
+        <textarea
+          id="additional-order-text"
+          v-model="state.additionalOrderText"
+          rows="5"
+          :style="{ width: '100%', minWidth: '100%', maxWidth: '100%' }"
+          class="p-component p-p-2"
+          ref="textarea"
+        />
+        <small
+          v-if="(v$.additionalOrderText.$invalid && submitted) || v$.additionalOrderText.$pending.$response"
+          class="p-error"
+        >
+          Проверьте правильность указания дополнительной информации
+        </small>
+      </div>
 
       <div class="p-col-12 p-mt-2 p-text-right">
         <Button type="submit" class="p-mr-2" label="Сохранить" />
@@ -135,7 +172,7 @@
   import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
-  import { required  } from '@vuelidate/validators';
+  import { required, minLength } from '@vuelidate/validators';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
   import {
@@ -144,7 +181,7 @@
     SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE,
     OrderPatternElementType,
   } from '@/constants/orderPatterns';
-  import { ORDER_TEXT_SOURCE, FILLED_DSP_TAKE_DUTY_ORDER_INPUT_ELEMENTS } from '@/constants/orders';
+  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import { useWatchCurrentDateTime } from '@/components/CreateOrders/NewOrder/watchCurrentDateTime';
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
@@ -175,6 +212,8 @@
         createDateTimeString: store.getters.getCurrDateString,
         takeDutyDateTime: store.getters.getLastTakeDutyTime,
         waitingForServerResponse: false,
+        dspOperators: [store.getters.getCurrStationDSPOperators, []],
+        additionalOrderText: null,
       });
 
       const rules = reactive({
@@ -182,13 +221,22 @@
         createDateTime: { required, isValidDateTime },
         createDateTimeString: { required },
         takeDutyDateTime: { required, isValidDateTime },
+        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
+        dspOperators: { minLength: minLength(1) },
+        additionalOrderText: {},
       });
+
+      const textarea = ref(null);
 
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state);
 
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
+
+      watch(() => store.getters.getCurrStationDSPOperators, (newVal) => {
+        state.dspOperators = [newVal, []];
+      });
 
       useWatchCurrentDateTime(state, props, store);
 
@@ -201,13 +249,17 @@
 
       const closeDialog = () => { emit('close') };
 
+      //
+      const handleInsertRowbreak = () => {
+        state.additionalOrderText += '<br />';
+        textarea.value.focus();
+      };
+
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
-
         if (!isFormValid) {
             return;
         }
-
         confirm.require({
           message: 'Сохранить распоряжение?',
           header: 'Подтверждение действия',
@@ -219,13 +271,29 @@
       };
 
       const getOrderText = () => {
+        const orderText = [];
+        if (state.dspOperators && state.dspOperators[1] && state.dspOperators[1].length) {
+          orderText.push(
+            {
+              type: OrderPatternElementType.TEXT,
+              ref: null,
+              value: `На дежурство заступили: ${state.dspOperators[1].map((item) => `${item.userFIO} (${item.workPlaceName})`).join(', ')}`,
+            },
+          );
+        }
+        if (state.additionalOrderText) {
+          orderText.push(
+            {
+              type: OrderPatternElementType.TEXT,
+              ref: null,
+              value: orderText.length ? '<br />' + state.additionalOrderText : state.additionalOrderText,
+            }
+          );
+        }
         return {
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,
           orderTitle: SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE,
-          orderText: [
-            { type: OrderPatternElementType.TEXT, ref: null, value: 'На дежурство заступили: ' },
-            { type: OrderPatternElementType.SELECT, ref: FILLED_DSP_TAKE_DUTY_ORDER_INPUT_ELEMENTS.DSP_OPERATOR_FIO, value: '' },
-          ],
+          orderText,
         };
       };
 
@@ -273,6 +341,8 @@
         state,
         submitted,
         v$,
+        textarea,
+        handleInsertRowbreak,
         getCurrStationDSPOperators: computed(() => store.getters.getCurrStationDSPOperators),
         newNumberOverlayPanel,
         changeOrderNumber,
@@ -282,3 +352,26 @@
     },
   };
 </script>
+
+<style>
+  .p-picklist {
+    min-height: 15rem !important;
+    max-height: 15rem !important;
+  }
+  .p-picklist-list-wrapper {
+    height: 100% !important;
+  }
+  .p-picklist-list {
+    min-height: 100% !important;
+    max-height: 100% !important;
+  }
+  @media screen and (max-width: 960px) {
+    .p-picklist[pv_id_6] {
+      max-height: 100% !important;
+    }
+    .p-picklist-list-wrapper {
+      min-height: 10rem !important;
+      max-height: 10rem !important;
+    }
+  }
+</style>

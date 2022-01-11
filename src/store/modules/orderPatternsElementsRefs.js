@@ -6,6 +6,7 @@ import {
   DEL_ORDER_PATTERNS_ELEMENTS_REFS,
 } from '@/store/mutation-types';
 import { getOrderPatternsElementsRefs } from '@/serverRequests/orderPatterns.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -82,26 +83,18 @@ export const orderPatternsElementsRefs = {
      * Подгружает информацию о возможных смысловых значениях элементов шаблонов распоряжений.
      */
     async loadOrderPatternsElementsRefs(context) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, true);
       context.commit(CLEAR_LOADING_REFS_RESULT);
-
       try {
         const responseData = await getOrderPatternsElementsRefs();
         context.commit(SET_LOADING_REFS_RESULT, { error: false, message: null });
         context.commit(SET_ORDER_PATTERNS_ELEMENTS_REFS, responseData);
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подгрузке информации о смысловых значениях элементов шаблонов распоряжений: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений');
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, false);

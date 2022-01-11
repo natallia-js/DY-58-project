@@ -43,6 +43,7 @@ export const DEL_ORDER_PATTERNS_ELEMENTS_REFS = 'delOrderPatternsElementsRefs';
 
 // Incoming Orders Per Shift
 export const SET_INCOMING_ORDERS_PER_SHIFT = 'setIncomingOrdersPerShift';
+export const DEL_INCOMING_ORDERS_PER_SHIFT = 'delIncomingOrdersPerShift';
 export const CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT = 'clearGettingIncomingOrdersPerShiftResult';
 export const SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT = 'setGettingIncomingOrdersPerShiftResult';
 export const SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS = 'setGettingIncomingOrdersPerShiftStatus';
@@ -64,6 +65,7 @@ export const SET_LOADING_WORK_ORDERS_RESULT = 'setLoadingWorkOrdersResult';
 export const SET_LOADING_WORK_ORDERS_STATUS = 'setLoadingWorkOrdersStatus';
 export const SET_NEW_WORK_ORDERS_ARRAY = 'setNewWorkOrdersArray';
 export const UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT = 'updateNumberOfIncomingOrdersPerShift';
+export const DEL_WORK_ORDERS = 'delWorkOrders';
 
 // Incoming Orders
 export const NOTIFIED_ABOUT_NEW_INCOMING_ORDERS = 'notifiedAboutNewIncomingOrders';
@@ -79,14 +81,18 @@ export const SET_CURR_DATE_TIME = 'setCurrDateTime';
 // Curr User
 export const SET_USER_CREDENTIAL = 'setUserCredential';
 export const SET_USER_WORK_POLIGON = 'setUserWorkPoligon';
-export const LOGIN = 'login';
-export const TRY_LOGIN_VIA_LOCAL_STORAGE = 'tryLoginViaLocalStorage';
+export const SET_USER_TOKEN = 'setUserToken';
+export const SET_USER_PASS_DUTY_TIME = 'setUserPassDutyTime';
+export const SET_USER_TAKE_PASS_DUTY_TIMES = 'setUserTakePassDutyTimes';
 export const CANCEL_LOGOUT = 'cancelLogout';
 export const PREPARE_FOR_LOGOUT = 'prepareForLogout';
 export const START_LOGOUT_PROCESS = 'startLogoutProcess';
 export const LOGOUT_FINISHED_WITH_ERROR = 'logoutFinishedWithError';
 export const LOGOUT_FINISHED_WITHOUT_ERROR = 'logoutFinishedWithoutError';
+export const SET_USER_DATA_ON_LOGIN = 'setUserDataOnLogin';
 export const CLEAR_USER_DATA_ON_LOGOUT = 'clearUserDataOnLogout';
+export const CLEAR_LOGIN_RESULT = 'clearLoginResult';
+export const SET_LOGIN_RESULT = 'setLoginResult';
 
 // Curr Work Poligon Structure
 export const DEL_CURR_WORK_POLIGON_DATA = 'delCurrWorkPoligonData';
@@ -139,3 +145,13 @@ export const ADD_OTHER_GET_ORDER_RECORD = 'addOtherGetOrderRecord';
 export const EDIT_OTHER_GET_ORDER_RECORD = 'editOtherGetOrderRecord';
 export const DEL_OTHER_GET_ORDER_RECORD = 'delOtherGetOrderRecord';
 export const DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID = 'delOtherGetOrderRecordByAdditionalId';
+export const DEL_CURR_SECTORS_SHIFT = 'delCurrSectorsShift';
+
+// WebSocket
+export const SET_SERVER_MESSAGE = 'setServerMessage';
+export const SET_WS_READY_STATE = 'setWebSocketReadyState';
+export const RESET_RETRY_NUM = 'resetRetryNum';
+export const NEXT_RETRY_NUM = 'nextRetryNum';
+export const RETRY_ON_CLOSE_WS_CONNECTION = 'retryOnCloseWSConnection';
+export const DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION = 'doNotRetryOnCloseWSConnection';
+export const DEL_ALL_WS_SERVER_MESSAGES = 'delAllWSServerMessages';

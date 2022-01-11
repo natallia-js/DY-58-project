@@ -29,7 +29,9 @@ import {
   EDIT_OTHER_GET_ORDER_RECORD,
   DEL_OTHER_GET_ORDER_RECORD,
   DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
+  DEL_CURR_SECTORS_SHIFT
 } from '@/store/mutation-types';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 export const CurrSectorsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
@@ -243,7 +245,10 @@ export const personal = {
       return stationWithPersonal.people
         .filter((item) => item.stationWorkPlaceId)
         .map((item) => ({
-          workPlaceName: getters.getStationWorkPlaceNameById(item.stationWorkPlaceId),
+          id: `${item.stationWorkPlaceId}${item._id}`,
+          userId: item._id,
+          workPlaceId: item.stationWorkPlaceId,
+          workPlaceName: getters.getStationWorkPlaceNameById(item.stationWorkPlaceId) || '',
           userFIO: getUserFIOString({ name: item.name, fatherName: item.fatherName, surname: item.surname }),
         }))
         .sort((a, b) => compareStrings(`${a.workPlaceName}${a.userFIO}`.toLowerCase(), `${b.workPlaceName}${b.userFIO}`.toLowerCase()));
@@ -656,13 +661,17 @@ export const personal = {
       }
       state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item.additionalId !== additionalId);
     },
+
+    [DEL_CURR_SECTORS_SHIFT] (state) {
+      state.sectorPersonal = {};
+    },
   },
 
   actions: {
     /**
      * Подгружает информацию обо всем персонале участка ДСП.
      */
-     async loadShiftDataForDSP(context) {
+    async loadShiftDataForDSP(context) {
       // Если не известна структура рабочего полигона, то продолжать не можем
       if (!context.getters.getUserWorkPoligonData) {
         return;
@@ -760,17 +769,7 @@ export const personal = {
         context.state.sectorPersonal = shiftPersonal || {};
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подгрузки персонала участка ДСП: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подгрузки персонала участка ДСП: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ДСП: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ДСП');
         context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
@@ -875,17 +874,7 @@ export const personal = {
         context.state.sectorPersonal = shiftPersonal || {};
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подгрузки персонала участка ДНЦ: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подгрузки персонала участка ДНЦ: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ДНЦ: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ДНЦ');
         context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
@@ -990,17 +979,7 @@ export const personal = {
         context.state.sectorPersonal = shiftPersonal || {};
 
       } catch (error) {
-        let errMessage;
-        if (error.response) {
-          // The request was made and server responded
-          errMessage = 'Ошибка подгрузки персонала участка ЭЦД: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-        } else if (error.request) {
-          // The request was made but no response was received
-          errMessage = 'Ошибка подгрузки персонала участка ЭЦД: сервер не отвечает';
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          errMessage = 'Произошла неизвестная ошибка при подгрузке персонала участка ЭЦД: ' + error.message || JSON.stringify(error);
-        }
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ЭЦД');
         context.state.errorLoadingCurrShift = errMessage;
       }
       context.state.loadingCurrShift = false;
@@ -1012,8 +991,7 @@ export const personal = {
      * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя.
      */
     async loadCurrSectorsShift(context) {
-      // если ранее начатая загрузка данных не завершена, то повторно ничего не запускаем
-      if (context.state.loadingCurrShift) {
+      if (!context.getters.canUserWorkWithSystem) {
         return;
       }
       const workPoligon = context.getters.getUserWorkPoligon;

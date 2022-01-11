@@ -7,16 +7,26 @@ import {
 import {
   SET_USER_CREDENTIAL,
   SET_USER_WORK_POLIGON,
-  LOGIN,
-  TRY_LOGIN_VIA_LOCAL_STORAGE,
+  SET_USER_TOKEN,
+  SET_USER_PASS_DUTY_TIME,
+  SET_USER_TAKE_PASS_DUTY_TIMES,
   CANCEL_LOGOUT,
   PREPARE_FOR_LOGOUT,
   START_LOGOUT_PROCESS,
   LOGOUT_FINISHED_WITH_ERROR,
   LOGOUT_FINISHED_WITHOUT_ERROR,
+  SET_USER_DATA_ON_LOGIN,
   CLEAR_USER_DATA_ON_LOGOUT,
+  CLEAR_LOGIN_RESULT,
+  SET_LOGIN_RESULT,
 } from '@/store/mutation-types';
-import { logoutWithDutyPass } from '@/serverRequests/auth.requests';
+import {
+  startWorkWithoutTakingDuty,
+  takeDutyUser,
+  logoutUser,
+  logoutWithDutyPass,
+} from '@/serverRequests/auth.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 /**
@@ -134,7 +144,10 @@ export const currUser = {
                                            // рабочими полигонами (из них необходимо выбрать одно полномочие и один полигон)
     credential: null, // конкретное (одно) полномочие пользователя в данной системе
     workPoligon: null,  // информация о рабочем полигоне (одном) пользователя
-    isAuthenticated: false, // true (прошел) либо false (не прошел) пользователь аутентификацию в системе
+    isAuthenticated: false, // true (прошел) либо false (не прошел) пользователь полную аутентификацию в системе
+                            // (не только login и password, но и полномочия в системе, и рабочий полигон)
+    loginProcessIsUnderway: false, // true - идет процесс входа в систему, false - не идет
+    loginResult: null,
     startLogout: false, // true (false) - начать (не начинать) процесс выхода из системы
     logoutWithDutyPass: false, // true (false) - выход из системы со сдачей (без сдачи) дежурства
     logoutStarted: false, // true (false) - начат (не начат) процесс выхода из системы
@@ -169,6 +182,12 @@ export const currUser = {
     },
     getUserToken(state) {
       return state.token;
+    },
+    isLoginProcessUnderway(state) {
+      return state.loginProcessIsUnderway;
+    },
+    getLoginResult(state) {
+      return state.loginResult;
     },
     getLastTakeDutyTime(state) {
       return state.lastTakeDutyTime;
@@ -228,10 +247,7 @@ export const currUser = {
       if (!state.lastTakeDutyTime) {
         return false;
       }
-      if (!state.lastPassDutyTime) {
-        return true;
-      }
-      if (state.lastTakeDutyTime <= state.lastPassDutyTime) {
+      if (state.lastPassDutyTime && state.lastTakeDutyTime.getTime() <= state.lastPassDutyTime.getTime()) {
         return false;
       }
       return true;
@@ -243,13 +259,11 @@ export const currUser = {
      * Сохраняет полномочия пользователя (строка credential), в т.ч. в LocalStorage.
      */
     [SET_USER_CREDENTIAL] (state, credential) {
-      if (credential) {
-        state.credential = credential;
+      state.credential = credential;
 
-        const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-        locStorUserData.lastCredential = credential;
-        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
-      }
+      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+      locStorUserData.lastCredential = credential;
+      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
     },
 
     /**
@@ -257,130 +271,90 @@ export const currUser = {
      * workPoligon - объект с полями type, code, subCode
      */
     [SET_USER_WORK_POLIGON] (state, workPoligon) {
-      if (workPoligon) {
-        state.workPoligon = workPoligon;
+      state.workPoligon = workPoligon;
 
+      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+      locStorUserData.lastWorkPoligon = workPoligon;
+      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
+    },
+
+    /**
+     * Сохраняет token пользователя (строка token), в т.ч. в LocalStorage.
+     */
+    [SET_USER_TOKEN] (state, { token, saveInLocalStorage }) {
+      state.token = token;
+
+      if (saveInLocalStorage) {
         const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-        locStorUserData.lastWorkPoligon = workPoligon;
+        locStorUserData.userToken = token;
         localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
       }
     },
 
     /**
-     * Осуществляет вход в систему.
+     * Сохраняет дату и время последней сдачи дежурства пользователем (строка lastPassDutyTime),
+     * в т.ч. в LocalStorage.
      */
-    [LOGIN] (state, payload) {
+     [SET_USER_PASS_DUTY_TIME] (state, { lastPassDutyTime }) {
+      state.lastPassDutyTime = lastPassDutyTime;
+
+      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+      locStorUserData.lastPassDutyTime = lastPassDutyTime;
+      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
+    },
+
+    /**
+     * Сохраняет даты и время последнего принятия и сдачи дежурства пользователем (строки
+     * lastTakeDutyTime и lastPassDutyTime), в т.ч. в LocalStorage.
+     */
+    [SET_USER_TAKE_PASS_DUTY_TIMES] (state, { lastTakeDutyTime, lastPassDutyTime }) {
+      state.lastTakeDutyTime = lastTakeDutyTime;
+      state.lastPassDutyTime = lastPassDutyTime;
+
+      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+      locStorUserData.lastTakeDutyTime = lastTakeDutyTime;
+      locStorUserData.lastPassDutyTime = lastPassDutyTime;
+      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
+    },
+
+    [CLEAR_LOGIN_RESULT] (state) {
+      state.loginResult = null;
+    },
+
+    [SET_LOGIN_RESULT] (state, { error, message }) {
+      state.loginResult = {
+        error,
+        message,
+      };
+    },
+
+    [SET_USER_DATA_ON_LOGIN] (state, payload) {
       const {
         userId,
-        jtwToken,
+        userToken,
         userInfo,
+        userCredsWithPoligons,
+        userCredential,
+        userWorkPoligon,
         lastTakeDutyTime,
         lastPassDutyTime,
-        credentials,
-        workPoligons,
-        lastCredential,
-        lastWorkPoligon,
       } = payload;
 
-      // Проверяем полученную информацию, предназначенную для входа пользователя в систему
-      const userCredsWithPoligons = checkUserAuthData(payload);
-
-      // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon, проверяем,
-      // есть ли данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
-      let trueLastCredential = false;
-      let trueLastWorkPoligon = false;
-      const credWithPoligons = !lastCredential ? null : userCredsWithPoligons.find((cred) => cred.cred === lastCredential);
-      if (credWithPoligons) {
-        trueLastCredential = true;
-        const credPoligon = !lastWorkPoligon ? null : credWithPoligons.poligons.find((poligon) =>
-          (poligon.type === lastWorkPoligon.type) &&
-          poligon.workPoligons.find((wp) =>
-            wp.poligonId === lastWorkPoligon.code &&
-            ((!lastWorkPoligon.subCode && !wp.subPoligonId) || (wp.subPoligonId === lastWorkPoligon.subCode))
-          )
-        );
-        if (credPoligon) {
-          trueLastWorkPoligon = true;
-        } else {
-          // если полигон явно не удалось определить, то и полномочие считаем неопределенным
-          // (нам нужно, чтобы определены/неопределены были оба одновременно)
-          trueLastCredential = false;
-        }
-      }
-
-      // полномочие, с которым будет работать пользователь (если удалось однозначно определить)
-      const userCredential = trueLastCredential ? lastCredential :
-        (userCredsWithPoligons && userCredsWithPoligons.length === 1 ? userCredsWithPoligons[0].cred : null);
-
-      // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
-      const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
-        (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
-        {
-          type: userCredsWithPoligons[0].poligons[0].type,
-          code: userCredsWithPoligons[0].poligons[0].workPoligons[0].poligonId,
-          subCode: userCredsWithPoligons[0].poligons[0].workPoligons[0].subPoligonId || null,
-        };
-
-      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
-        userId,
-        userToken: jtwToken,
-        userInfo,
-        lastTakeDutyTime,
-        lastPassDutyTime,
-        userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
-        userWorkPoligons: workPoligons,
-        lastCredential: userCredential,
-        lastWorkPoligon: userWorkPoligon,
-      }));
-
       state.id = userId;
-      state.token = jtwToken;
+      state.token = userToken;
       state.name = userInfo.name;
       state.surname = userInfo.surname;
-      state.fatherName = userInfo.fatherName ? userInfo.fatherName : '';
+      state.fatherName = userInfo.fatherName || '';
       state.post = userInfo.post;
       state.service = userInfo.service;
       state.possibleCredentialsWithPoligons = userCredsWithPoligons; // именно все возможные полномочия в данном приложении!
       state.credential = userCredential;
       state.workPoligon = userWorkPoligon;
-      state.lastTakeDutyTime = lastTakeDutyTime ? new Date(lastTakeDutyTime) : null,
-      state.lastPassDutyTime = lastPassDutyTime ? new Date(lastPassDutyTime) : null,
+      state.lastTakeDutyTime = lastTakeDutyTime,
+      state.lastPassDutyTime = lastPassDutyTime,
 
       state.isAuthenticated = true;
       state.loginDateTime = new Date();
-    },
-
-    /**
-     * Пытается авторизовать пользователя через LocalStorage браузера.
-     */
-    [TRY_LOGIN_VIA_LOCAL_STORAGE] (state) {
-      if (state.isAuthenticated) {
-        return;
-      }
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-
-      if (!locStorUserData || !locStorUserData.userToken || !locStorUserData.userInfo ||
-        !locStorUserData.userCredentials || !locStorUserData.userWorkPoligons) {
-        return;
-      }
-
-      try {
-        this.commit(LOGIN, {
-          userId: locStorUserData.userId,
-          jtwToken: locStorUserData.userToken,
-          userInfo: locStorUserData.userInfo,
-          lastTakeDutyTime: locStorUserData.lastTakeDutyTime,
-          lastPassDutyTime: locStorUserData.lastPassDutyTime,
-          credentials: locStorUserData.userCredentials,
-          workPoligons: locStorUserData.userWorkPoligons,
-          lastCredential: locStorUserData.lastCredential,
-          lastWorkPoligon: locStorUserData.lastWorkPoligon,
-        });
-
-      } catch (e) {
-        // do nothing
-      }
     },
 
     /**
@@ -439,36 +413,189 @@ export const currUser = {
 
   actions: {
     /**
+     * Позволяет осуществить вход в систему.
+     */
+    async login(context, payload) {
+      const {
+        userId,
+        jtwToken,
+        userInfo,
+        lastTakeDutyTime, // не указывается, если takeDuty = true; предполагается, что значение строковое
+        lastPassDutyTime, // не указывается, если takeDuty = true; предполагается, что значение строковое
+        credentials,
+        workPoligons,
+        takeDuty,
+        lastCredential,
+        lastWorkPoligon,
+      } = payload;
+
+      if (context.state.isAuthenticated) {
+        return;
+      }
+
+      // Без этой строчки не пойдут запросы на сервер в текущей функции
+      context.commit(SET_USER_TOKEN, { token: jtwToken, saveInLocalStorage: false });
+
+      context.commit(CLEAR_LOGIN_RESULT);
+      context.state.loginProcessIsUnderway = true;
+
+      try {
+        // Проверяем полученную информацию, предназначенную для входа пользователя в систему
+        const userCredsWithPoligons = checkUserAuthData(payload);
+
+        // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon (это происходит
+        // при входе в систему с данными, подгруженными из Local Storage), проверяем,
+        // есть ли данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
+        let trueLastCredential = false;
+        let trueLastWorkPoligon = false;
+        const credWithPoligons = !lastCredential ? null : userCredsWithPoligons.find((cred) => cred.cred === lastCredential);
+        if (credWithPoligons) {
+          trueLastCredential = true;
+          const credPoligon = !lastWorkPoligon ? null : credWithPoligons.poligons.find((poligon) =>
+            (poligon.type === lastWorkPoligon.type) &&
+            poligon.workPoligons.find((wp) =>
+              wp.poligonId === lastWorkPoligon.code &&
+              ((!lastWorkPoligon.subCode && !wp.subPoligonId) || (wp.subPoligonId === lastWorkPoligon.subCode))
+            )
+          );
+          if (credPoligon) {
+            trueLastWorkPoligon = true;
+          } else {
+            // если полигон явно не удалось определить, то и полномочие считаем неопределенным
+            // (нам нужно, чтобы определены/неопределены были оба одновременно)
+            trueLastCredential = false;
+          }
+        }
+
+        // полномочие, с которым будет работать пользователь (если удалось однозначно определить)
+        const userCredential = trueLastCredential ? lastCredential :
+          (userCredsWithPoligons && userCredsWithPoligons.length === 1 ? userCredsWithPoligons[0].cred : null);
+
+        // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
+        const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
+          (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
+          {
+            type: userCredsWithPoligons[0].poligons[0].type,
+            code: userCredsWithPoligons[0].poligons[0].workPoligons[0].poligonId,
+            subCode: userCredsWithPoligons[0].poligons[0].workPoligons[0].subPoligonId || null,
+          };
+
+        let _lastTakeDutyTime = lastTakeDutyTime; // строка
+        let _lastPassDutyTime = lastPassDutyTime; // строка
+        let userToken = jtwToken;
+
+        // если удалось однозначно определить полномочие и рабочий полигон пользователя,
+        // то отправляем запрос на сервер о начале работы на данном рабочем полигоне;
+        // вид запроса зависит от того, входит пользователь в систему с принятием дежурства или без
+
+        if (userCredential && userWorkPoligon) {
+          let responseData;
+          if (takeDuty === true) {
+            responseData = await takeDutyUser({
+              workPoligonType: userWorkPoligon.type,
+              workPoligonId: userWorkPoligon.code,
+              workSubPoligonId: userWorkPoligon.subCode,
+            });
+          } else {
+            responseData = await startWorkWithoutTakingDuty({
+              workPoligonType: userWorkPoligon.type,
+              workPoligonId: userWorkPoligon.code,
+              workSubPoligonId: userWorkPoligon.subCode,
+            });
+          }
+          userToken = responseData.token;
+          _lastTakeDutyTime = responseData.lastTakeDutyTime;
+          _lastPassDutyTime = responseData.lastPassDutyTime;
+        }
+
+        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
+          userId,
+          userToken,
+          userInfo,
+          lastTakeDutyTime: _lastTakeDutyTime,
+          lastPassDutyTime: _lastPassDutyTime,
+          userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
+          userWorkPoligons: workPoligons,
+          lastCredential: userCredential,
+          lastWorkPoligon: userWorkPoligon,
+        }));
+
+        context.commit(SET_USER_DATA_ON_LOGIN, {
+          userId,
+          userToken,
+          userInfo,
+          userCredsWithPoligons,
+          userCredential,
+          userWorkPoligon,
+          lastTakeDutyTime: _lastTakeDutyTime ? new Date(_lastTakeDutyTime) : null,
+          lastPassDutyTime: _lastPassDutyTime ? new Date(_lastPassDutyTime) : null,
+        });
+
+        const message = (userCredential && userWorkPoligon) ? 'Вход в систему выполнен успешно' :
+          'Для входа в систему необходимо определить полномочия и рабочий полигон';
+        context.commit(SET_LOGIN_RESULT, { error: false, message });
+
+      } catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка входа в систему');
+        context.commit(SET_LOGIN_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.state.loginProcessIsUnderway = false;
+      }
+    },
+
+    /**
+     * Пытается авторизовать пользователя через LocalStorage браузера.
+     */
+    async tryLoginViaLocalStorage(context) {
+      if (context.state.isAuthenticated) {
+        return;
+      }
+
+      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
+
+      if (!locStorUserData || !locStorUserData.userId || !locStorUserData.userToken ||
+        !locStorUserData.userInfo || !locStorUserData.userCredentials || !locStorUserData.userWorkPoligons) {
+        return;
+      }
+
+      await context.dispatch('login', {
+        userId: locStorUserData.userId,
+        jtwToken: locStorUserData.userToken,
+        userInfo: locStorUserData.userInfo,
+        lastTakeDutyTime: locStorUserData.lastTakeDutyTime,
+        lastPassDutyTime: locStorUserData.lastPassDutyTime,
+        credentials: locStorUserData.userCredentials,
+        workPoligons: locStorUserData.userWorkPoligons,
+        // Login из Local Storage не подразумевает вход в систему с дополнительным принятием дежурства
+        takeDuty: false,
+        lastCredential: locStorUserData.lastCredential,
+        lastWorkPoligon: locStorUserData.lastWorkPoligon,
+      });
+    },
+
+    /**
      * Позволяет выйти из системы как со сдачей, так и без сдачи дежурства.
      */
     async logout(context) {
+      if (!context.state.isAuthenticated) {
+        return;
+      }
       context.commit(START_LOGOUT_PROCESS);
-
-      // Если необходима сдача дежурства при выходе из системы, то...
-      if (context.state.logoutWithDutyPass) {
-        try {
-          // ...запрос на сдачу дежурства вначале обрабатывается на сервере
-          const responseData = await logoutWithDutyPass();
-          if (!responseData || String(responseData.id) !== String(context.state.id)) {
-            context.commit(LOGOUT_FINISHED_WITH_ERROR, 'Ошибка выхода из системы: не получен ответ от сервера либо выходит из системы не текущий пользователь');
-            return;
-          }
+      try {
+        let responseData;
+        if (context.state.logoutWithDutyPass) {
+          responseData = await logoutWithDutyPass();
+          context.commit(SET_USER_PASS_DUTY_TIME, responseData.lastPassDutyTime);
+        } else {
+          responseData = await logoutUser();
         }
-        catch (error) {
-          let errMessage;
-          if (error.response) {
-            // The request was made and server responded
-            errMessage = 'Ошибка выхода из системы: ' + error.response.data ? error.response.data.message : JSON.stringify(error);
-          } else if (error.request) {
-            // The request was made but no response was received
-            errMessage = 'Ошибка выхода из системы: сервер не отвечает';
-          } else {
-            // Something happened in setting up the request that triggered an Error
-            errMessage = 'Произошла неизвестная ошибка при выходе из системы: ' + error.message || JSON.stringify(error);
-          }
-          context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
-          return;
-        }
+        context.commit(SET_USER_TOKEN, { token: responseData.token, saveInLocalStorage: true });
+      }
+      catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка выхода из системы');
+        context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
+        return;
       }
       context.commit(LOGOUT_FINISHED_WITHOUT_ERROR);
       context.commit(CLEAR_USER_DATA_ON_LOGOUT);
