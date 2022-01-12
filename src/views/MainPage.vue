@@ -11,6 +11,10 @@
 
   <div class="p-grid" style="margin:0">
     <div class="p-col-3 dy58-left-menu-panel">
+      <!-- Данная кнопка - ТОЛЬКО ДЛЯ ДСП и ТОЛЬКО ЕСЛИ ОН НА ДЕЖУРСТВЕ. Проверяем:
+      // если в списке рабочих распоряжений отсутствует распоряжение о принятии держурства,
+      // изданное ЭТИМ же пользователем не ранее времени его последнего принятия дежурства, то
+      // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение-->
       <Button
         v-if="canUserDispatchDSPTakeDutyOrder && !existsDSPTakeDutyOrder"
         label="Необходимо издать распоряжение о принятии дежурства"
@@ -71,7 +75,7 @@
 
 
 <script>
-  import { computed, onMounted, reactive, watch } from 'vue';
+  import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import IncomingNotificationsDataTable from '@/components/IncomingNotificationsDataTable';
   import OrdersInWorkDataTable from '@/components/OrdersInWorkDataTable';
@@ -106,17 +110,17 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
-        startDateToGetData: new Date(),
-        takeDutyOrderShouldBeDispatched: false,
+        startDateToGetData: store.getters.getStartDateToGetData || new Date(),
         showCreateDSPTakeDutyOrderDlg: false,
       });
+
+      store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
 
       watch(() => state.startDateToGetData, (newVal) => {
         store.commit(SET_START_DATE_TO_GET_DATA_NO_CHECK, newVal);
       });
 
-      const getStartDateToGetData = computed(() => store.getters.getStartDateToGetData);
-      watch(getStartDateToGetData, (newVal) => {
+      watch(() => store.getters.getStartDateToGetData, (newVal) => {
         state.startDateToGetData = newVal;
       });
 
@@ -160,28 +164,8 @@
         state.showCreateDSPTakeDutyOrderDlg = false;
       };
 
-      // по окончании загрузки информации о рабочих распоряжениях ТОЛЬКО ДЛЯ ДСП и ТОЛЬКО ЕСЛИ
-      // ОН НА ДЕЖУРСТВЕ проверяем:
-      // если в списке рабочих распоряжений отсутствует распоряжение о принятии держурства,
-      // изданное ЭТИМ же пользователем не ранее времени его последнего принятия дежурства, то
-      // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение
-      /* watch(() => store.getters.getLoadingWorkOrdersStatus, (newVal) => {
-        if (!store.getters.canUserDispatchDSPTakeDutyOrder) {
-          return;
-        }
-        if (!store.getters.existsDSPTakeDutyOrder) {
-          state.takeDutyOrderShouldBeDispatched = true;
-        }
-      }); */
-
-      onMounted(() => {
-        store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
-        state.startDateToGetData = getStartDateToGetData.value;
-      });
-
       return {
         state,
-        getStartDateToGetData,
         getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
         getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),

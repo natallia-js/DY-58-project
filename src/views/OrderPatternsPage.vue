@@ -11,7 +11,8 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
   import OrderPatternsTree from '@/components/OrderPatterns/OrderPatternsTree';
@@ -25,18 +26,15 @@
       CreateOrderPattern,
     },
 
-    computed: {
-      ...mapGetters([
-        'isDNC',
-        'isECD',
-      ]),
-      getMainMenuItemsKeys() {
-        return MainMenuItemsKeys;
-      },
-    },
+    setup() {
+      const store = useStore();
 
-    mounted() {
-      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.orderPatterns);
+      store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.orderPatterns);
+
+      return {
+        isDNC: computed(() => store.getters.isDNC),
+        isECD: computed(() => store.getters.isECD),
+      };
     },
   }
 </script>

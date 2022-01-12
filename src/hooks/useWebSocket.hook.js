@@ -94,6 +94,7 @@ export default function useWebSocket({ socketUrl }) {
      */
     const toDoOnOpenWSConnection = () => {
       store.commit(SET_WS_READY_STATE, { ready: true, datetime: new Date() });
+      store.commit(RESET_RETRY_NUM);
 
       // Настраиваем периодическое обновление информации в приложении.
       // Обновлению подлежит лишь информация о:

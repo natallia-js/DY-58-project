@@ -12,7 +12,7 @@ export const checkUserAuthority = {
      * Любой пользователь, принявший дежурство, может подтвержать приходящие ему распоряжения.
      */
     canUserConfirmOrder(_state, getters) {
-      return getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty;
     },
 
     /**
@@ -20,21 +20,21 @@ export const checkUserAuthority = {
      * из списка распоряжений, находящихся в работе.
      */
     canUserDelConfirmedOrdersChains(_state, getters) {
-      return getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty;
     },
 
     /**
      * Подтвердить распоряжение за других может лишь находящийся на дежурстве пользователь.
      */
     canUserConfirmOrderForOthers(_state, getters) {
-      return getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty;
     },
 
     /**
      * Издавать распоряжения может лишь пользователь, принявший дежурство.
      */
     canUserDispatchOrders(_state, getters) {
-      return getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty;
     },
 
     /**
@@ -43,7 +43,7 @@ export const checkUserAuthority = {
      * Значение false возвращается в противном случае.
      */
     canUserDispatchDSPTakeDutyOrder(_state, getters) {
-      return getters.isUserOnDuty && getters.isDSP;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP;
     },
   },
 };

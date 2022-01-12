@@ -102,7 +102,7 @@ export const delWorkOrdersChains = {
      * Данные удаляются лишь из таблицы рабочих распоряжений у заданного полигона управления.
      */
     async delConfirmedOrdersFromChain(context, chainId) {
-      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserDelConfirmedOrdersChains) {
+      if (!context.getters.canUserDelConfirmedOrdersChains) {
         return;
       }
       context.commit(CLEAR_DELETE_ORDERS_CHAIN_RESULT, chainId);

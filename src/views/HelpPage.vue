@@ -6,20 +6,17 @@
 
 
 <script>
+  import { useStore } from 'vuex';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-help-page',
 
-    computed: {
-      getMainMenuItemsKeys() {
-        return MainMenuItemsKeys;
-      },
-    },
+    setup() {
+      const store = useStore();
 
-    mounted() {
-      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.help);
+      store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.help);
     },
   }
 </script>

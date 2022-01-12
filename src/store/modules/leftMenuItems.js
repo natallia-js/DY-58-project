@@ -6,6 +6,7 @@ export const leftMenuItems = {
           label: 'Входящие за смену',
           info: getters.getNumberOfIncomingOrdersPerShift,
           error: getters.getErrorGettingIncomingOrdersPerShift,
+          icon: getters.getGettingIncomingOrdersPerShiftStatus ? 'pi pi-spin pi-spinner' : null,
         },
         {
           label: 'Не подтверждено',

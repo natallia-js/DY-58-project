@@ -6,20 +6,21 @@
 
 
 <script>
+  import { useStore } from 'vuex';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-curr-journal-page',
 
-    computed: {
-      getMainMenuItemsKeys() {
-        return MainMenuItemsKeys;
-      },
-    },
+    setup() {
+      const store = useStore();
 
-    mounted() {
-      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.currJournal);
+      store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.currJournal);
+
+      return {
+        //
+      };
     },
   }
 </script>

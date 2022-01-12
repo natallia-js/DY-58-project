@@ -60,9 +60,6 @@ export const orders = {
      * Делает запрос на сервер с целью сохранения издаваемого распоряжения и передачи его причастным.
      */
     async dispatchOrder(context, params) {
-      if (!context.getters.canUserWorkWithSystem) {
-        return;
-      }
       const {
         type,
         number,

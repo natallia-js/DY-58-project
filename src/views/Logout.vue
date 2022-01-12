@@ -4,12 +4,17 @@
 
 
 <script>
+  import { useStore } from 'vuex';
+  import router from '@/router';
+
   export default {
     name: 'dy58-logout',
 
-    mounted() {
-      this.$store.dispatch('logout');
-      this.$router.push({ name: 'AuthPage' });
+    setup() {
+      const store = useStore();
+
+      store.dispatch('logout');
+      router.push({ name: 'AuthPage' });
     },
   };
 </script>

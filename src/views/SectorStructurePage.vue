@@ -6,15 +6,15 @@
     </div>
     <div v-else-if="!getErrorLoadingCurrWorkPoligonStructure" class="p-ml-2 p-mt-2 p-mr-4 p-mb-4">
       <view-station-poligon-structure
-        v-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.STATION"
+        v-if="getUserWorkPoligon && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION"
         :stationObj="getWorkPoligon"
       />
       <view-d-n-c-sector-poligon-structure
-        v-else-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.DNC_SECTOR"
+        v-else-if="getUserWorkPoligon && getUserWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR"
         :sectorObj="getWorkPoligon"
       />
       <view-e-c-d-sector-poligon-structure
-        v-else-if="getUserWorkPoligon && getUserWorkPoligon.type === getWorkPoligonTypes.ECD_SECTOR"
+        v-else-if="getUserWorkPoligon && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR"
         :sectorObj="getWorkPoligon"
       />
     </div>
@@ -26,7 +26,8 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
   import ViewStationPoligonStructure from '@/components/ViewStationPoligonStructure';
@@ -43,31 +44,28 @@
       ViewECDSectorPoligonStructure,
     },
 
-    computed: {
-      ...mapGetters([
-        'getUserWorkPoligon',
-        'getUserWorkPoligonData',
-        'getLoadingCurrWorkPoligonStructureStatus',
-        'getErrorLoadingCurrWorkPoligonStructure',
-      ]),
+    setup() {
+      const store = useStore();
 
-      getMainMenuItemsKeys() {
-        return MainMenuItemsKeys;
-      },
-      getWorkPoligonTypes() {
-        return WORK_POLIGON_TYPES;
-      },
-      getWorkPoligon() {
-        const poligon = this.getUserWorkPoligon ?? {};
-        if (this.getUserWorkPoligonData) {
-          return { ...poligon, ...this.getUserWorkPoligonData };
+      store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.sectorStructure);
+
+      const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
+      const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
+      const getWorkPoligon = computed(() => {
+        const poligon = getUserWorkPoligon.value ?? {};
+        if (getUserWorkPoligonData.value) {
+          return { ...poligon, ...getUserWorkPoligonData.value };
         }
         return poligon;
-      },
-    },
+      });
 
-    mounted() {
-      this.$store.commit(SET_ACTIVE_MAIN_MENU_ITEM, this.getMainMenuItemsKeys.sectorStructure);
+      return {
+        WORK_POLIGON_TYPES,
+        getUserWorkPoligon,
+        getWorkPoligon,
+        getLoadingCurrWorkPoligonStructureStatus: computed(() => store.getters.getLoadingCurrWorkPoligonStructureStatus),
+        getErrorLoadingCurrWorkPoligonStructure: computed(() => store.getters.getErrorLoadingCurrWorkPoligonStructure),
+      };
     },
   }
 </script>

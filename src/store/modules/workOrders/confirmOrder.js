@@ -253,7 +253,7 @@ export const confirmOrder = {
      * Позволяет для данного входящего уведомления выставить статус "подтверждено" на сервере.
      */
     async confirmOrder(context, { orderId }) {
-      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserConfirmOrder) {
+      if (!context.getters.canUserConfirmOrder) {
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
@@ -279,8 +279,7 @@ export const confirmOrder = {
      * за ряд рабочих полигонов.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
-      if (!context.getters.canUserWorkWithSystem || !context.getters.canUserConfirmOrderForOthers ||
-        !confirmWorkPoligons || !confirmWorkPoligons.length) {
+      if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
