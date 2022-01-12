@@ -108,9 +108,9 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some(record => record.meta.requiresFullAuth)) {
       next();
     } else if (to.matched.some(record => record.meta.requiresAuth)) {
-      next({ path: (from.path !== '/confirmAuthDataPage') ? from.path : '/mainPage', });
+      next({ path: (from.path === '/' || from.path === '/confirmAuthDataPage') ? '/mainPage' : from.path, });
     } else {
-      next({ path: (from.path !== '/' && from.path !== '/confirmAuthDataPage') ? from.path : '/mainPage', });
+      next({ path: (from.path === '/' || from.path === '/confirmAuthDataPage') ? '/mainPage' : from.path, });
     }
   } else if (store.getters.isUserAuthenticated) {
     if (to.matched.some(record => record.meta.requiresFullAuth)) {
@@ -118,11 +118,11 @@ router.beforeEach(async (to, from, next) => {
     } else if (to.matched.some(record => record.meta.requiresAuth)) {
       next();
     } else {
-      next({ path: '/confirmAuthDataPage' });
+      next();
     }
   } else {
     if (to.path !== '/') {
-      next({ path : '/'});
+      next({ path: '/' });
     } else {
       next();
     }
