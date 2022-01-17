@@ -3,7 +3,7 @@ export const WS_SERVER_ADDRESS = process.env.VUE_APP_WS_SERVER_ADDRESS;
 
 export const WS_SERVER_PARAMS = Object.freeze({
   RETRY_CONNECTION_INTERVAL: 5000,
-  UPDATE_DATA_INTERVAL: 30000,
+  UPDATE_DATA_INTERVAL: 10000,
   CONNECTION_OK_MESSAGE: 'connection OK',
 
   // сообщения от сервера
@@ -12,7 +12,7 @@ export const WS_SERVER_PARAMS = Object.freeze({
 
   // сообщения серверу
   PONG_MESSAGE: (data) => `pong ${data}`,
-  GET_ONLINE_USERS: (usersIds) => `online ${JSON.stringify(usersIds)}`,
+  GET_ONLINE_USERS: (workPoligonsData) => `online ${JSON.stringify(workPoligonsData)}`,
 
   MAX_SERVER_MESSAGES_STORED: 10,
 });

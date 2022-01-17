@@ -476,45 +476,69 @@ export const personal = {
 
     /**
      * Для всего персонала полигона управления позволяет установить признак
-     * нахождения online: для лиц, id которых находятся в массиве onlineUsersIds,
-     * online = true, для остальных online = false.
+     * нахождения online.
+     * Массив onlineUsers содержит список объектов, каждый из которых имеет поля type, id, workPlaceId -
+     * информация о рабочем полигоне, и поле people - массив id лиц, которые online на данном рабочем
+     * полигоне.
      */
-    [SET_ONLINE_SHIFT_PERSONAL] (state, onlineUsersIds) {
-      function setOnlineSectorsShift(sectorsArray) {
-        if (sectorsArray && sectorsArray.length) {
-          sectorsArray.forEach((sector) => {
-            if (!sector.people || !sector.people.length) {
-              return;
-            }
-            sector.people.forEach((user) => {
-              const userOnlineStatus = onlineUsersIds.includes(user._id);
-              if (user.online !== userOnlineStatus) {
-                user.online = userOnlineStatus;
-              }
-            });
-            if (!sector.lastUserChoiceId) {
-              const onlineUser = sector.people.find((user) => user.online);
-              if (onlineUser) {
-                sector.lastUserChoiceId = onlineUser._id;
-                sector.lastUserChoice = getUserFIOString({
-                  name: onlineUser.name,
-                  fatherName: onlineUser.fatherName,
-                  surname: onlineUser.surname,
-                });
-                sector.lastUserChoiceOnline = onlineUser.online;
-              }
+    [SET_ONLINE_SHIFT_PERSONAL] (state, onlineUsers) {
+      if (!onlineUsers || !Array.isArray(onlineUsers) || !state.sectorPersonal) {
+        return;
+      }
+      function setOnlineSectorsShift(sectorsArray, sectorType) {
+        if (!sectorsArray) {
+          return;
+        }
+        sectorsArray.forEach((sectorData) => {
+          if (!sectorData.people || !sectorData.people.length) {
+            return;
+          }
+
+          let newSectorUsersInfo;
+          if (sectorType === WORK_POLIGON_TYPES.STATION) {
+            newSectorUsersInfo = onlineUsers.filter((item) => item.type === sectorType && String(item.id) === String(sectorData.stationId));
+          } else {
+            newSectorUsersInfo = onlineUsers.find((item) => item.type === sectorType && String(item.id) === String(sectorData.sectorId));
+          }
+
+          sectorData.people.forEach((user) => {
+            let userOnlineStatus;
+            if (sectorType === WORK_POLIGON_TYPES.STATION) {
+              const currUserInfo = newSectorUsersInfo.find((item) =>
+                (!user.stationWorkPlaceId && !item.workPlaceId) ||
+                (user.stationWorkPlaceId && item.workPlaceId && String(user.stationWorkPlaceId) === String(item.workPlaceId))
+              );
+              userOnlineStatus = currUserInfo && currUserInfo.people && currUserInfo.people.includes(user._id);
             } else {
-              const lastChosenUser = sector.people.find((user) => user._id === sector.lastUserChoiceId);
-              if (sector.lastUserChoiceOnline !== lastChosenUser.online) {
-                sector.lastUserChoiceOnline = lastChosenUser.online;
-              }
+              userOnlineStatus = newSectorUsersInfo && newSectorUsersInfo.people && newSectorUsersInfo.people.includes(user._id);
+            }
+            if (user.online !== userOnlineStatus) {
+              user.online = userOnlineStatus;
             }
           });
-        }
+
+          if (!sectorData.lastUserChoiceId) {
+            const onlineUser = (sectorData && sectorData.people) ? sectorData.people.find((user) => user.online) : null;
+            if (onlineUser) {
+              sectorData.lastUserChoiceId = onlineUser._id;
+              sectorData.lastUserChoice = getUserFIOString({
+                name: onlineUser.name,
+                fatherName: onlineUser.fatherName,
+                surname: onlineUser.surname,
+              });
+              sectorData.lastUserChoiceOnline = onlineUser.online;
+            }
+          } else {
+            const lastChosenUser = sectorData.people.find((user) => user._id === sectorData.lastUserChoiceId);
+            if (sectorData.lastUserChoiceOnline !== lastChosenUser.online) {
+              sectorData.lastUserChoiceOnline = lastChosenUser.online;
+            }
+          }
+        });
       }
-      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift);
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift);
-      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift);
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, WORK_POLIGON_TYPES.STATION);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, WORK_POLIGON_TYPES.DNC_SECTOR);
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, WORK_POLIGON_TYPES.ECD_SECTOR);
     },
 
     /**

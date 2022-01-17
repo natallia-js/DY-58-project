@@ -68,6 +68,10 @@ export default function useWebSocket({ socketUrl }) {
       }
     };
 
+    function getUserDataStringToSendToWSServer() {
+      return `${store.getters.getUserId},${store.getters.getUserWorkPoligon.type},${store.getters.getUserWorkPoligon.code},${store.getters.getUserWorkPoligon.subCode}`;
+    }
+
     /**
      * actions to perform when a message comes from the websocket server
      */
@@ -76,14 +80,14 @@ export default function useWebSocket({ socketUrl }) {
       store.commit(SET_SERVER_MESSAGE, { message: msg, datetime: new Date() });
       // Обработка PING-сообщения от сервера
       if (msg === WS_SERVER_PARAMS.SERVER_PING_MESSAGE) {
-        sendMessageToServer(WS_SERVER_PARAMS.PONG_MESSAGE(store.getters.getUserId));
+        sendMessageToServer(WS_SERVER_PARAMS.PONG_MESSAGE(getUserDataStringToSendToWSServer()));
         return;
       }
       // Обработка сообщения от сервера, содержащего информацию об id online-пользователей
       if (msg.match(WS_SERVER_PARAMS.ONLINE_USERS_MESSAGE_PATTERN)) {
-        const onlineUsersIds = JSON.parse(msg.slice(7));
-        if (Array.isArray(onlineUsersIds)) {
-          store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsersIds);
+        const onlineUsers = JSON.parse(msg.slice(7));
+        if (Array.isArray(onlineUsers)) {
+          store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsers);
         }
         return;
       }
@@ -100,7 +104,7 @@ export default function useWebSocket({ socketUrl }) {
       // Обновлению подлежит лишь информация о:
       // - online-статусе персонала рабочего полигона
       updateDataTimerId = setInterval(() => {
-        sendMessageToServer(WS_SERVER_PARAMS.GET_ONLINE_USERS(store.getters.getShiftPersonalIds));
+        sendMessageToServer(WS_SERVER_PARAMS.GET_ONLINE_USERS(store.getters.getWorkPoligonsShortStructure));
       }, WS_SERVER_PARAMS.UPDATE_DATA_INTERVAL);
     };
 

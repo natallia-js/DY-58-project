@@ -71,6 +71,42 @@ export const currWorkPoligonStructure = {
       }
     },
 
+    /**
+     * Используется лишь функцией, периодически запрашивающей информацию по online-пользователям у сервера.
+     */
+    getWorkPoligonsShortStructure(_state, getters) {
+      const workPoligon = getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        return [];
+      }
+      const wpStructure = [];
+      if (getters.getSectorPersonal.sectorStationsShift) {
+        getters.getSectorPersonal.sectorStationsShift.forEach((el) => {
+          wpStructure.push({
+            type: WORK_POLIGON_TYPES.STATION,
+            id: el.stationId,
+          });
+        });
+      }
+      if (getters.getSectorPersonal.DNCSectorsShift) {
+        getters.getSectorPersonal.DNCSectorsShift.forEach((el) => {
+          wpStructure.push({
+            type: WORK_POLIGON_TYPES.DNC_SECTOR,
+            id: el.sectorId,
+          });
+        });
+      }
+      if (getters.getSectorPersonal.ECDSectorsShift) {
+        getters.getSectorPersonal.ECDSectorsShift.forEach((el) => {
+          wpStructure.push({
+            type: WORK_POLIGON_TYPES.ECD_SECTOR,
+            id: el.sectorId,
+          });
+        });
+      }
+      return wpStructure;
+    },
+
     getStationWorkPlaceNameById(state, getters) {
       return (workPlaceId) => {
         const workPoligon = getters.getUserWorkPoligon;
