@@ -1,5 +1,5 @@
-import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
+import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import {
   getDNCSectorsWorkPoligonsUsers,
   getStationsWorkPoligonsUsers,
@@ -48,12 +48,14 @@ export const CurrSectorsShiftTblColumns = [
 export const CurrStationsShiftTblColumnNames = Object.freeze({
   sector: 'sector',
   station: 'station',
+  post: 'post',
   fio: 'fio',
   notification: 'notification',
 });
 
 export const CurrStationsShiftTblColumns = [
   { field: CurrStationsShiftTblColumnNames.station, title: 'Станция', width: '30%', },
+  { field: CurrStationsShiftTblColumnNames.post, title: 'Должность', width: '15%', },
   { field: CurrStationsShiftTblColumnNames.fio, title: 'ФИО', width: '30%', },
   { field: CurrStationsShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
 ];
@@ -75,6 +77,10 @@ export const OtherShiftTblColumns = [
 const getUserFIOString = ({ name, fatherName, surname }) => {
   return `${surname} ${name.charAt(0)}.${fatherName && fatherName.length ? fatherName.charAt(0) + '.': ''}`;
 };
+
+/* const getUserPostFIOString = ({ post, name, fatherName, surname }) => {
+  return `${post} ${surname} ${name.charAt(0)}.${fatherName && fatherName.length ? fatherName.charAt(0) + '.': ''}`;
+}; */
 
 
 /**
@@ -133,14 +139,16 @@ export const personal = {
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.DNC_SECTOR,
           sector: item.sectorTitle,
+          post: item.lastUserChoicePost || '',
           fio: item.lastUserChoice || '',
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
           people: item.people
-            .filter((el) => el.post === ReceiversPosts.DNC)
+            .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL))
             .map((el) => {
               return {
                 id: el._id,
+                post: el.post,
                 fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                 online: el.online,
               };
@@ -151,11 +159,11 @@ export const personal = {
     },
 
     /**
-     * Возвращает информацию о всех ДСП станций, связанных с текущим полигом управления.
-     * Данным ДСП и может адресоваться информация, отправляемая текущим пользователем.
+     * Возвращает информацию обо всех ДСП и Операторах ДСП станций, связанных с текущим полигом управления.
+     * Данным лицам и может адресоваться информация, отправляемая текущим пользователем.
      * Если полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
-     * Еще один нюанс: в выборку не включаем операторов при ДСП (это те лица, у которых полигон
-     * управления - не сама станция, а рабочее место на станции).
+     * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как ДСП, так и оператор при
+     * ДСП одной и той же станции. Т.е. возможно дублирование информации.
      */
     getDSPShiftForSendingData(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
@@ -180,14 +188,16 @@ export const personal = {
             type: WORK_POLIGON_TYPES.STATION,
             station: item.stationTitle,
             sector: item.trainSectorTitle || '',
+            post: item.lastUserChoicePost || '',
             fio: item.lastUserChoice || '',
             fioId: item.lastUserChoiceId,
             fioOnline: item.lastUserChoiceOnline,
             people: item.people
-              .filter((el) => el.post === ReceiversPosts.DSP && !el.stationWorkPlaceId)
+              .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL) || el.appsCredentials.includes(APP_CREDENTIALS.DSP_Operator))
               .map((el) => {
                 return {
                   id: el._id,
+                  post: el.post,
                   fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                   online: el.online,
                 };
@@ -211,14 +221,16 @@ export const personal = {
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.ECD_SECTOR,
           sector: item.sectorTitle,
+          post: item.lastUserChoicePost || '',
           fio: item.lastUserChoice || '',
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
           people: item.people
-            .filter((el) => el.post === ReceiversPosts.ECD)
+            .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
             .map((el) => {
               return {
                 id: el._id,
+                post: el.post,
                 fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                 online: el.online,
               };
@@ -290,6 +302,7 @@ export const personal = {
       }
       const clearSendItem = (item) => {
         if (item.lastUserChoice || item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend) {
+          item.lastUserChoicePost = null;
           item.lastUserChoice = null;
           item.lastUserChoiceId = null;
           item.lastUserChoiceOnline = false;
@@ -520,6 +533,7 @@ export const personal = {
           if (!sectorData.lastUserChoiceId) {
             const onlineUser = (sectorData && sectorData.people) ? sectorData.people.find((user) => user.online) : null;
             if (onlineUser) {
+              sectorData.lastUserChoicePost = onlineUser.post;
               sectorData.lastUserChoiceId = onlineUser._id;
               sectorData.lastUserChoice = getUserFIOString({
                 name: onlineUser.name,
@@ -546,17 +560,17 @@ export const personal = {
      * Он вызывается при открытии данного окна и позволяет заполнить таблицы в секции "Кому".
      * Заполнение происходит путем определения для каждого участка / станции первого ПОДХОДЯЩЕГО из
      * online-пользователей данного участка / станции.
-     * Полагается, что пользователи участков ДНЦ и ЭЦД - ДНЦ и ЭЦД соответственно (другие должности не
-     * рассматриваются), пользователя участков ДСП - только ДСП данных станций.
-     * Пользователи рабочих мест на станциях не рассматриваются.
      */
     [CHOOSE_ONLY_ONLINE_PERSONAL] (state) {
-      function setOnlineSectorsShift(sectorsArray, userPost) {
+      function setOnlineSectorsShift(sectorsArray, userCredsCheckFunction) {
         if (sectorsArray && sectorsArray.length) {
           sectorsArray.forEach((sector) => {
             if (sector.people) {
-              const onlineUser = sector.people.find((user) => user.post === userPost && user.online && !user.stationWorkPlaceId);
+              const onlineUser = sector.people.find((user) =>
+                userCredsCheckFunction(user.appsCredentials) && user.online
+              );
               if (onlineUser) {
+                sector.lastUserChoicePost = onlineUser.post;
                 sector.lastUserChoiceId = onlineUser._id;
                 sector.lastUserChoice = getUserFIOString({
                   name: onlineUser.name,
@@ -565,6 +579,7 @@ export const personal = {
                 });
                 sector.lastUserChoiceOnline = onlineUser.online;
               } else {
+                sector.lastUserChoicePost = null;
                 sector.lastUserChoiceId = null;
                 sector.lastUserChoice = null;
                 sector.lastUserChoiceOnline = false;
@@ -573,9 +588,9 @@ export const personal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, ReceiversPosts.DNC);
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, ReceiversPosts.DSP);
-      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, ReceiversPosts.ECD);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.DNC_FULL));
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds.includes(APP_CREDENTIALS.DSP_FULL) && creds.includes(APP_CREDENTIALS.DSP_Operator));
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.ECD_FULL));
     },
 
     /**
@@ -603,6 +618,7 @@ export const personal = {
               return;
             }
             sector.lastUserChoiceId = chooseUser ? userId : null;
+            sector.lastUserChoicePost = chooseUser ? neededUser.post : null,
             sector.lastUserChoice = chooseUser ? getUserFIOString({
               name: neededUser.name,
               fatherName: neededUser.fatherName,
@@ -758,7 +774,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.DNCSectorsShift.forEach((item) => {
                 if (item.sectorId === user.dncSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -771,7 +790,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.ECDSectorsShift.forEach((item) => {
                 if (item.sectorId === user.ecdSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -784,7 +806,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.sectorStationsShift.forEach((item) => {
                 if (item.stationId === user.stationId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -862,7 +887,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.DNCSectorsShift.forEach((item) => {
                 if (item.sectorId === user.dncSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -875,7 +903,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.sectorStationsShift.forEach((item) => {
                 if (item.stationId === user.stationId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -889,7 +920,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.ECDSectorsShift.forEach((item) => {
                 if (item.sectorId === user.ecdSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -967,7 +1001,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.ECDSectorsShift.forEach((item) => {
                 if (item.sectorId === user.ecdSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -980,7 +1017,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.sectorStationsShift.forEach((item) => {
                 if (item.stationId === user.stationId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });
@@ -994,7 +1034,10 @@ export const personal = {
             responseData.forEach((user) => {
               shiftPersonal.DNCSectorsShift.forEach((item) => {
                 if (item.sectorId === user.dncSectorId) {
-                  item.people.push({ ...user });
+                  item.people.push({
+                    ...user,
+                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                  });
                 }
               });
             });

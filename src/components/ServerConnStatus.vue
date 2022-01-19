@@ -21,7 +21,10 @@
     </div>
     <div v-else>
       <p v-for="(message, index) in lastNServerMessages" :key="index">
-        {{ message.datetime.toLocaleString() }}: {{ message.message }}
+        <span>{{ message.datetime.toLocaleString() }}: </span>
+        <span v-if="!message.message">?</span>
+        <span v-if="message.message.length <= MAX_MESSAGE_STRING_LENGTH_TO_DISPLAY">{{ message.message }}</span>
+        <span v-else>{{ message.message.slice(0, MAX_MESSAGE_STRING_LENGTH_TO_DISPLAY) }}...</span>
       </p>
     </div>
   </div>
@@ -31,6 +34,8 @@
 <script>
   import { computed } from 'vue';
   import { useStore } from 'vuex';
+
+  const MAX_MESSAGE_STRING_LENGTH_TO_DISPLAY = 300;
 
   export default {
     name: 'dy58-server-conn-status',
@@ -42,6 +47,7 @@
         serverConnectionState: computed(() => store.getters.getReadyState),
         serverConnectRetryAttemptsNumber: computed(() => store.getters.getRetryNum),
         lastNServerMessages: computed(() => store.getters.getLastNServerMessages),
+        MAX_MESSAGE_STRING_LENGTH_TO_DISPLAY,
       };
     },
   };

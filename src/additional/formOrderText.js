@@ -108,21 +108,21 @@ export function formOrderText(props) {
 
   if (dncToSend && dncToSend.length) {
     const substring = (obj) => {
-      return `${obj.placeTitle} ДНЦ${obj.fio ? ' ' + obj.fio : ''}`;
+      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
     };
     formToStrings(dncToSend, substring);
   }
 
   if (dspToSend && dspToSend.length) {
     const substring = (obj) => {
-      return `${obj.placeTitle} ДСП${obj.fio ? ' ' + obj.fio : ''}`;
+      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
     };
     formToStrings(dspToSend, substring);
   }
 
   if (ecdToSend && ecdToSend.length) {
     const substring = (obj) => {
-      return `${obj.placeTitle} ЭЦД${obj.fio ? ' ' + obj.fio : ''}`;
+      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
     };
     formToStrings(ecdToSend, substring);
   }

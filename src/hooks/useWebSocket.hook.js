@@ -86,9 +86,7 @@ export default function useWebSocket({ socketUrl }) {
       // Обработка сообщения от сервера, содержащего информацию об id online-пользователей
       if (msg.match(WS_SERVER_PARAMS.ONLINE_USERS_MESSAGE_PATTERN)) {
         const onlineUsers = JSON.parse(msg.slice(7));
-        if (Array.isArray(onlineUsers)) {
-          store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsers);
-        }
+        store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsers);
         return;
       }
     };

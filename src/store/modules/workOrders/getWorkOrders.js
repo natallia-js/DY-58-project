@@ -1,5 +1,4 @@
 import { OrderPatternElementType } from '@/constants/orderPatterns';
-import { ReceiversPosts } from '@/constants/orders';
 import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
 import { formOrderText } from '@/additional/formOrderText';
 import { upperCaseFirst } from '@/additional/stringFunctions';
@@ -32,6 +31,7 @@ function getWorkOrderObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        post: item.post,
         fio: item.fio,
         id: +item.id,
         placeTitle: item.placeTitle,
@@ -44,6 +44,7 @@ function getWorkOrderObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        post: item.post,
         fio: item.fio,
         id: +item.id,
         placeTitle: item.placeTitle,
@@ -56,6 +57,7 @@ function getWorkOrderObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        post: item.post,
         fio: item.fio,
         id: +item.id,
         placeTitle: item.placeTitle,
@@ -330,7 +332,7 @@ export const getWorkOrders = {
                     id: dsp.id,
                     type: dsp.type,
                     place: dsp.placeTitle,
-                    post: ReceiversPosts.DSP,
+                    post: dsp.post,
                     fio: dsp.fio,
                     deliverDateTime: dsp.deliverDateTime,
                     confirmDateTime: dsp.confirmDateTime,
@@ -343,7 +345,7 @@ export const getWorkOrders = {
                     id: dnc.id,
                     type: dnc.type,
                     place: dnc.placeTitle,
-                    post: ReceiversPosts.DNC,
+                    post: dnc.post,
                     fio: dnc.fio,
                     deliverDateTime: dnc.deliverDateTime,
                     confirmDateTime: dnc.confirmDateTime,
@@ -356,7 +358,7 @@ export const getWorkOrders = {
                     id: ecd.id,
                     type: ecd.type,
                     place: ecd.placeTitle,
-                    post: ReceiversPosts.ECD,
+                    post: ecd.post,
                     fio: ecd.fio,
                     deliverDateTime: ecd.deliverDateTime,
                     confirmDateTime: ecd.confirmDateTime,

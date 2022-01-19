@@ -4,12 +4,12 @@
       :showDlg="showChoosePersonDlg"
       :personal="sectorPersonal"
       :selectedPerson="selectedPerson"
-      :personalPost="getDSPPost"
       :sectorId="sectorId"
       :sectorName="sectorName"
       :workPoligonType="workPoligonTypes.STATION"
       @close="hideChoosePersonDlg"
     ></ShowChoosePersonDlg>
+
     <DataTable
       :value="getDSPShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
@@ -124,7 +124,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
+  import { CurrShiftGetOrderStatus } from '@/constants/orders';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     CurrStationsShiftTblColumnNames,
@@ -171,10 +171,6 @@
 
       getCurrShiftTblColumns() {
         return CurrStationsShiftTblColumns;
-      },
-
-      getDSPPost() {
-        return ReceiversPosts.DSP;
       },
 
       workPoligonTypes() {
@@ -245,7 +241,7 @@
         this.sectorPersonal = people || [];
         this.selectedPerson = selectedPerson;
         this.sectorId = sectorId;
-        this.sectorName = sectorName;
+        this.sectorName = `ст. ${sectorName}`;
         this.showChoosePersonDlg = true;
       },
 

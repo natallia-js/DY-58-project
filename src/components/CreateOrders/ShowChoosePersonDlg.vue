@@ -1,15 +1,20 @@
 <template>
   <Dialog
-    :header="`Выбор получателя среди ${personalPost} ${sectorName || ''}`"
+    :header="`Выберите получателя, ${sectorName || ''}`"
     v-model:visible="dlgVisible"
     style="width:auto; maxWidth:500px"
     :modal="true"
     @hide="closeDialog"
   >
-    <Listbox v-model="selectedUser" :options="personal" optionLabel="fio" :multiple="false">
+    <Listbox
+      v-model="selectedUser"
+      :options="personalArr"
+      optionLabel="postFio"
+      :multiple="false"
+    >
       <template #option="slotProps">
         <div>
-          <span :class="{'dy58-info': slotProps.option.online}">{{ slotProps.option.fio }}</span>
+          <span :class="{'dy58-info': slotProps.option.online}">{{ slotProps.option.postFio }}</span>
         </div>
       </template>
     </Listbox>
@@ -46,10 +51,6 @@
         type: Boolean,
         required: true,
       },
-      personalPost: {
-        type: String,
-        required: true,
-      },
       personal: {
         type: Array,
         required: true,
@@ -68,6 +69,12 @@
       workPoligonType: {
         type: String,
         required: true,
+      },
+    },
+
+    computed: {
+      personalArr() {
+        return this.personal.map((el) => ({ ...el, postFio: `${el.post} ${el.fio}` }));
       },
     },
 

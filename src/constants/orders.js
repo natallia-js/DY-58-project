@@ -12,12 +12,6 @@ export const WorkMessStates = Object.freeze({
   cameLongAgo: 1,
 });
 
-export const ReceiversPosts = Object.freeze({
-  DNC: 'ДНЦ',
-  DSP: 'ДСП',
-  ECD: 'ЭЦД',
-});
-
 export const ORDER_TEXT_SOURCE = Object.freeze({
   pattern: 'pattern',
   nopattern: 'nopattern',

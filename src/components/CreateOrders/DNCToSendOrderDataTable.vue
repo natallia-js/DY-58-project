@@ -4,12 +4,12 @@
       :showDlg="showChoosePersonDlg"
       :personal="sectorPersonal"
       :selectedPerson="selectedPerson"
-      :personalPost="getDNCPost"
       :sectorId="sectorId"
       :sectorName="sectorName"
       :workPoligonType="workPoligonTypes.DNC_SECTOR"
       @close="hideChoosePersonDlg"
     ></ShowChoosePersonDlg>
+
     <DataTable
       :value="getDNCShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
@@ -109,7 +109,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { CurrShiftGetOrderStatus, ReceiversPosts } from '@/constants/orders';
+  import { CurrShiftGetOrderStatus } from '@/constants/orders';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     CurrSectorsShiftTblColumnNames,
@@ -156,10 +156,6 @@
 
       getCurrSectorsShiftTblColumns() {
         return CurrSectorsShiftTblColumns;
-      },
-
-      getDNCPost() {
-        return ReceiversPosts.DNC;
       },
 
       workPoligonTypes() {
@@ -230,7 +226,7 @@
         this.sectorPersonal = people || [];
         this.selectedPerson = selectedPerson;
         this.sectorId = sectorId;
-        this.sectorName = sectorName;
+        this.sectorName = `уч. ДНЦ ${sectorName}`;
         this.showChoosePersonDlg = true;
       },
 
