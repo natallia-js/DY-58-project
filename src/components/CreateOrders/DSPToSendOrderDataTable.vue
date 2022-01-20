@@ -49,7 +49,12 @@
               {{ slotProps.data[col.field] }}
               <a
                 class="dy58-send-status-btn"
-                @click="() => openChoosePersonDlg(slotProps.data.people,
+                @click="() => openChoosePersonDlg(
+                  slotProps.data.people
+                    // Добавляем дополнительное поле для его отображения в диалоговом окне
+                    .map((item) => ({ ...item, postFio: `${item.post} ${item.fio}` }))
+                    // Удаляем повторяющиеся элементы
+                    .filter((item, index, array) => array.findIndex((el) => el.postFio === item.postFio) === index),
                   slotProps.data.fioId
                     ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline }
                     : null,

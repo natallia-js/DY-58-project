@@ -27,6 +27,7 @@ import {
   logoutWithDutyPass,
 } from '@/serverRequests/auth.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import { getUserFIOString, getUserPostFIOString } from '@/store/modules/personal';
 
 
 /**
@@ -150,8 +151,7 @@ export const currUser = {
     loginResult: null,
     startLogout: false, // true (false) - начать (не начинать) процесс выхода из системы
     logoutWithDutyPass: false, // true (false) - выход из системы со сдачей (без сдачи) дежурства
-    logoutStarted: false, // true (false) - начат (не начат) процесс выхода из системы
-    logoutFinished: false, // true (false) - закончен (не закончен) процесс выхода из системы
+    logoutProcessIsUnderway: false, // true (false) - идет (не идет) процесс выхода из системы
     logoutError: null,
   },
 
@@ -175,10 +175,10 @@ export const currUser = {
       return state.service;
     },
     getUserFIO(state) {
-      return `${state.surname} ${state.name.charAt(0)}.` + `${state.fatherName ? state.fatherName.charAt(0) + '.' : ''}`;
+      return getUserFIOString({ name: state.name, fatherName: state.fatherName, surname: state.surname });
     },
     getUserPostFIO(state) {
-      return `${state.post} ${state.surname} ${state.name.charAt(0)}.` + `${state.fatherName ? state.fatherName.charAt(0) + '.' : ''}`;
+      return getUserPostFIOString({ post: state.post, name: state.name, fatherName: state.fatherName, surname: state.surname });
     },
     getUserToken(state) {
       return state.token;
@@ -234,11 +234,8 @@ export const currUser = {
     getlogoutWithDutyPass(state) {
       return state.logoutWithDutyPass;
     },
-    getLogoutStarted(state) {
-      return state.logoutStarted;
-    },
-    getLogoutFinished(state) {
-      return state.logoutFinished;
+    isLogoutProcessUnderway(state) {
+      return state.logoutProcessIsUnderway;
     },
     getLogoutError(state) {
       return state.logoutError;
@@ -362,8 +359,7 @@ export const currUser = {
      */
     [CANCEL_LOGOUT] (state) {
       state.startLogout = false;
-      state.logoutStarted = false;
-      state.logoutFinished = false;
+      state.logoutProcessIsUnderway = false;
       state.logoutError = null;
     },
 
@@ -376,18 +372,16 @@ export const currUser = {
     },
 
     [START_LOGOUT_PROCESS] (state) {
-      state.logoutStarted = true;
+      state.logoutProcessIsUnderway = true;
     },
 
     [LOGOUT_FINISHED_WITH_ERROR] (state, error) {
-      state.logoutStarted = false;
-      state.logoutFinished = true;
+      state.logoutProcessIsUnderway = false;
       state.logoutError = error;
     },
 
     [LOGOUT_FINISHED_WITHOUT_ERROR] (state) {
-      state.logoutStarted = false;
-      state.logoutFinished = true;
+      state.logoutProcessIsUnderway = false;
     },
 
     [CLEAR_USER_DATA_ON_LOGOUT] (state) {

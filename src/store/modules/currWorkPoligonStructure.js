@@ -42,9 +42,10 @@ export const currWorkPoligonStructure = {
     },
 
     getUserWorkPoligonName(state, getters) {
+      const defaultMessage = 'Наименование рабочего полигона неизвестно';
       const workPoligon = getters.getUserWorkPoligon;
       if (!workPoligon) {
-        return;
+        return defaultMessage;
       }
       let poligonName;
       let workPlaceName;
@@ -61,13 +62,13 @@ export const currWorkPoligonStructure = {
             }
             return workPlaceName ? `${poligonName} ${workPlaceName}` : poligonName;
           }
-          return null;
+          return defaultMessage;
         case WORK_POLIGON_TYPES.DNC_SECTOR:
           return state.sector ? state.sector.DNCS_Title : null;
         case WORK_POLIGON_TYPES.ECD_SECTOR:
           return state.sector ? state.sector.ECDS_Title : null;
         default:
-          return 'Наименование рабочего полигона неизвестно';
+          return defaultMessage;
       }
     },
 

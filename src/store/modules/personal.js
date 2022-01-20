@@ -6,7 +6,6 @@ import {
   getECDSectorsWorkPoligonsUsers,
 } from '@/serverRequests/users.requests';
 import objectId from '@/additional/objectId.generator';
-import compareStrings from '@/additional/compareStrings';
 import { store } from '@/store';
 import {
   CLEAR_SHIFT_FOR_SENDING_DATA,
@@ -74,13 +73,13 @@ export const OtherShiftTblColumns = [
   { field: OtherShiftTblColumnNames.notification, title: 'Уведомление', width: '200px', },
 ];
 
-const getUserFIOString = ({ name, fatherName, surname }) => {
+export const getUserFIOString = ({ name, fatherName, surname }) => {
   return `${surname} ${name.charAt(0)}.${fatherName && fatherName.length ? fatherName.charAt(0) + '.': ''}`;
 };
 
-/* const getUserPostFIOString = ({ post, name, fatherName, surname }) => {
-  return `${post} ${surname} ${name.charAt(0)}.${fatherName && fatherName.length ? fatherName.charAt(0) + '.': ''}`;
-}; */
+export const getUserPostFIOString = ({ post, name, fatherName, surname }) => {
+  return `${post} ${getUserFIOString({ name, fatherName, surname })}`;
+};
 
 
 /**
@@ -144,7 +143,7 @@ export const personal = {
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
           people: item.people
-            .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL))
+            .filter((el) => el.appsCredentials === APP_CREDENTIALS.DNC_FULL)
             .map((el) => {
               return {
                 id: el._id,
@@ -193,7 +192,9 @@ export const personal = {
             fioId: item.lastUserChoiceId,
             fioOnline: item.lastUserChoiceOnline,
             people: item.people
-              .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL) || el.appsCredentials.includes(APP_CREDENTIALS.DSP_Operator))
+              .filter((el) =>
+                el.appsCredentials === APP_CREDENTIALS.DSP_FULL ||
+                el.appsCredentials === APP_CREDENTIALS.DSP_Operator)
               .map((el) => {
                 return {
                   id: el._id,
@@ -226,7 +227,7 @@ export const personal = {
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
           people: item.people
-            .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
+            .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
             .map((el) => {
               return {
                 id: el._id,
@@ -241,9 +242,37 @@ export const personal = {
     },
 
     /**
-     * Возвращает массив с информацией обо всех операторах ДСП текущего полигона управления "Станция".
+     * Возвращает массив ДСП (Операторов при ДСП) текущего рабочего места полигона управления "Станция".
      */
-    getCurrStationDSPOperators: (state, getters) => {
+    getCurrStationWorkPlaceUsers: (state, getters) => {
+      const userWorkPoligon = getters.getUserWorkPoligon;
+      if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
+        !state.sectorPersonal.sectorStationsShift || !userWorkPoligon) {
+        return [];
+      }
+      const stationWithPersonal = state.sectorPersonal.sectorStationsShift.find((item) =>
+        String(item.stationId) === String(userWorkPoligon.code)
+      );
+      if (!stationWithPersonal || !stationWithPersonal.people || !stationWithPersonal.people.length) {
+        return [];
+      }
+      return stationWithPersonal.people
+        .filter((item) =>
+          (!userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
+          (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId === userWorkPoligon.subCode)
+        )
+        .map((item) => ({
+          userId: item._id,
+          userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
+        }));
+    },
+
+    /**
+     * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего
+     * полигона управления "Станция". Информация группируется по принадлежности пользователей
+     * к конкретному рабочему месту (глобальному - сама станция, либо рабочему месту в рамках станции).
+     */
+    getCurrStationDSPAndDSPOperators: (state, getters) => {
       if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
         !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData) {
         return [];
@@ -254,16 +283,36 @@ export const personal = {
       if (!stationWithPersonal || !stationWithPersonal.people || !stationWithPersonal.people.length) {
         return [];
       }
-      return stationWithPersonal.people
-        .filter((item) => item.stationWorkPlaceId)
-        .map((item) => ({
-          id: `${item.stationWorkPlaceId}${item._id}`,
-          userId: item._id,
-          workPlaceId: item.stationWorkPlaceId,
-          workPlaceName: getters.getStationWorkPlaceNameById(item.stationWorkPlaceId) || '',
-          userFIO: getUserFIOString({ name: item.name, fatherName: item.fatherName, surname: item.surname }),
-        }))
-        .sort((a, b) => compareStrings(`${a.workPlaceName}${a.userFIO}`.toLowerCase(), `${b.workPlaceName}${b.userFIO}`.toLowerCase()));
+      const groupedPeople = [];
+      const stationName = getters.getUserWorkPoligonData.St_Title;
+      const addDataInGroup = (groupName, data) => {
+        const group = groupedPeople.find((item) => item.groupName === groupName);
+        if (!group) {
+          groupedPeople.push({
+            groupName: groupName,
+            items: [data],
+          });
+        } else {
+          group.items.push(data);
+        }
+      };
+      stationWithPersonal.people
+        .filter((item) =>
+          item.appsCredentials === APP_CREDENTIALS.DSP_FULL ||
+          item.appsCredentials === APP_CREDENTIALS.DSP_Operator)
+        .forEach((item) => {
+          const dataToAdd = {
+            key: `${item.stationId}${item.stationWorkPlaceId || ''}${item._id}`,
+            userId: item._id,
+            userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
+          };
+          if (!item.stationWorkPlaceId) {
+            addDataInGroup(stationName, dataToAdd);
+          } else {
+            addDataInGroup(getters.getStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
+          }
+        });
+      return groupedPeople;
     },
 
     /**
@@ -588,9 +637,9 @@ export const personal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.DNC_FULL));
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds.includes(APP_CREDENTIALS.DSP_FULL) && creds.includes(APP_CREDENTIALS.DSP_Operator));
-      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.ECD_FULL));
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds === APP_CREDENTIALS.DNC_FULL);
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds === APP_CREDENTIALS.DSP_FULL || creds === APP_CREDENTIALS.DSP_Operator);
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds === APP_CREDENTIALS.ECD_FULL);
     },
 
     /**
@@ -776,7 +825,12 @@ export const personal = {
                 if (item.sectorId === user.dncSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ДНЦ данному приложению известен лишь набор полномочий DNC_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DNC_FULL)
+                        ? APP_CREDENTIALS.DNC_FULL
+                        : null,
                   });
                 }
               });
@@ -792,7 +846,12 @@ export const personal = {
                 if (item.sectorId === user.ecdSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ЭЦД данному приложению известен лишь набор полномочий ECD_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.ECD_FULL)
+                        ? APP_CREDENTIALS.ECD_FULL
+                        : null,
                   });
                 }
               });
@@ -808,7 +867,14 @@ export const personal = {
                 if (item.stationId === user.stationId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на станциях данному приложению известны лишь наборы полномочий DSP_FULL и DSP_Operator
+                    appsCredentials:
+                      user.appsCredentials.length === 0 || !user.stationId ? null :
+                        !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_FULL)
+                          ? APP_CREDENTIALS.DSP_FULL
+                          : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
+                            ? APP_CREDENTIALS.DSP_Operator
+                            : null,
                   });
                 }
               });
@@ -889,7 +955,12 @@ export const personal = {
                 if (item.sectorId === user.dncSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ДНЦ данному приложению известен лишь набор полномочий DNC_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DNC_FULL)
+                        ? APP_CREDENTIALS.DNC_FULL
+                        : null,
                   });
                 }
               });
@@ -905,7 +976,14 @@ export const personal = {
                 if (item.stationId === user.stationId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на станциях данному приложению известны лишь наборы полномочий DSP_FULL и DSP_Operator
+                    appsCredentials:
+                      user.appsCredentials.length === 0 || !user.stationId ? null :
+                        !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_FULL)
+                          ? APP_CREDENTIALS.DSP_FULL
+                          : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
+                            ? APP_CREDENTIALS.DSP_Operator
+                            : null,
                   });
                 }
               });
@@ -922,7 +1000,12 @@ export const personal = {
                 if (item.sectorId === user.ecdSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ЭЦД данному приложению известен лишь набор полномочий ECD_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.ECD_FULL)
+                        ? APP_CREDENTIALS.ECD_FULL
+                        : null,
                   });
                 }
               });
@@ -1003,7 +1086,12 @@ export const personal = {
                 if (item.sectorId === user.ecdSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ЭЦД данному приложению известен лишь набор полномочий ECD_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.ECD_FULL)
+                        ? APP_CREDENTIALS.ECD_FULL
+                        : null,
                   });
                 }
               });
@@ -1019,7 +1107,14 @@ export const personal = {
                 if (item.stationId === user.stationId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на станциях данному приложению известны лишь наборы полномочий DSP_FULL и DSP_Operator
+                    appsCredentials:
+                      user.appsCredentials.length === 0 || !user.stationId ? null :
+                        !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_FULL)
+                          ? APP_CREDENTIALS.DSP_FULL
+                          : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
+                            ? APP_CREDENTIALS.DSP_Operator
+                            : null,
                   });
                 }
               });
@@ -1036,7 +1131,12 @@ export const personal = {
                 if (item.sectorId === user.dncSectorId) {
                   item.people.push({
                     ...user,
-                    appsCredentials: user.appsCredentials.length > 0 ? user.appsCredentials[0].creds : [],
+                    // на участках ДНЦ данному приложению известен лишь набор полномочий DNC_FULL
+                    appsCredentials:
+                      user.appsCredentials.length > 0 &&
+                      user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DNC_FULL)
+                        ? APP_CREDENTIALS.DNC_FULL
+                        : null,
                   });
                 }
               });

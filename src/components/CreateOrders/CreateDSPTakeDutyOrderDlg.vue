@@ -79,9 +79,73 @@
         </small>
       </div>
 
-      <!-- ДАТА И ВРЕМЯ ПРИНЯТИЯ ДЕЖУРСТВА -->
+      <!-- КТО И ВО СКОЛЬКО СДАЛ ДЕЖУРСТВО -->
 
-      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+        <label for="pass-duty-user-post-fio" :class="{'p-error':v$.passDutyUserPostFIO.$invalid && submitted}">
+          <span class="p-text-bold"><span style="color:red">*</span> Дежурство сдал</span>
+        </label>
+        <Dropdown
+          id="pass-duty-user-post-fio"
+          v-model="v$.passDutyUserPostFIO.$model"
+          :options="getCurrStationWorkPlaceUsers"
+          optionLabel="userPostFIO"
+          dataKey="userId"
+          :class="{'p-invalid':v$.passDutyUserPostFIO.$invalid && submitted}"
+        >
+        </Dropdown>
+        <small
+          v-if="(v$.passDutyUserPostFIO.$invalid && submitted) || v$.passDutyUserPostFIO.$pending.$response"
+          class="p-error"
+        >
+          Определите ФИО работника, сдавшего дежурство
+        </small>
+      </div>
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+        <label for="pass-duty-date-time" :class="{'p-error':v$.passDutyDateTime.$invalid && submitted}">
+          <span class="p-text-bold"><span style="color:red">*</span> Время сдачи дежурства</span>
+        </label>
+        <Calendar
+          id="pass-duty-date-time"
+          :showTime="true"
+          hourFormat="24"
+          :hideOnDateTimeSelect="true"
+          :showIcon="true"
+          :manualInput="true"
+          v-model="v$.passDutyDateTime.$model"
+          :class="{'p-invalid':v$.passDutyDateTime.$invalid && submitted}"
+        />
+        <small
+          v-if="(v$.passDutyDateTime.$invalid && submitted) || v$.passDutyDateTime.$pending.$response"
+          class="p-error"
+        >
+          Не определено/неверно определено время сдачи дежурства
+        </small>
+      </div>
+
+      <!-- КТО И ВО СКОЛЬКО ПРИНЯЛ ДЕЖУРСТВО -->
+
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+        <label for="take-duty-user-post-fio" :class="{'p-error':v$.takeDutyUserPostFIO.$invalid && submitted}">
+          <span class="p-text-bold"><span style="color:red">*</span> Дежурство принял</span>
+        </label>
+        <Dropdown
+          id="take-duty-user-post-fio"
+          v-model="v$.takeDutyUserPostFIO.$model"
+          :options="getCurrStationWorkPlaceUsers"
+          optionLabel="userPostFIO"
+          dataKey="userId"
+          :class="{'p-invalid':v$.takeDutyUserPostFIO.$invalid && submitted}"
+        >
+        </Dropdown>
+        <small
+          v-if="(v$.takeDutyUserPostFIO.$invalid && submitted) || v$.takeDutyUserPostFIO.$pending.$response"
+          class="p-error"
+        >
+          Определите ФИО работника, принявшего дежурство
+        </small>
+      </div>
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="take-duty-date-time" :class="{'p-error':v$.takeDutyDateTime.$invalid && submitted}">
           <span class="p-text-bold"><span style="color:red">*</span> Время принятия дежурства</span>
         </label>
@@ -175,13 +239,14 @@
   import { required, minLength } from '@vuelidate/validators';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     ORDER_PATTERN_TYPES,
     SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
     SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE,
     OrderPatternElementType,
   } from '@/constants/orderPatterns';
-  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
+  import { CurrShiftGetOrderStatus, ORDER_TEXT_SOURCE } from '@/constants/orders';
   import { useWatchCurrentDateTime } from '@/components/CreateOrders/NewOrder/watchCurrentDateTime';
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
@@ -210,17 +275,28 @@
         number: store.getters.getNextOrdersNumber(orderType),
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
+        passDutyUserPostFIO: '',
+        passDutyDateTime: store.getters.getLastTakeDutyTime,
+        takeDutyUserPostFIO: !store.getters.getUserId ? null :
+          { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO },
         takeDutyDateTime: store.getters.getLastTakeDutyTime,
         waitingForServerResponse: false,
-        dspOperators: [store.getters.getCurrStationDSPOperators, []],
+        dspOperators: [store.getters.getCurrStationWorkPlaceUsers, []],
         additionalOrderText: null,
       });
+
+      const takeDutyTimeNoLessPassDutyTime = (value) => {
+        return value >= state.passDutyDateTime;
+      };
 
       const rules = reactive({
         number: { required, isNumber },
         createDateTime: { required, isValidDateTime },
         createDateTimeString: { required },
-        takeDutyDateTime: { required, isValidDateTime },
+        passDutyUserPostFIO: { required },
+        passDutyDateTime: { required, isValidDateTime },
+        takeDutyUserPostFIO: { required },
+        takeDutyDateTime: { required, isValidDateTime, takeDutyTimeNoLessPassDutyTime },
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
         dspOperators: { minLength: minLength(1) },
         additionalOrderText: {},
@@ -234,7 +310,11 @@
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
-      watch(() => store.getters.getCurrStationDSPOperators, (newVal) => {
+      // Изменение значения времени сдачи дежурства приводит к установке такого же значения в поле
+      // принятия дежурства
+      watch(() => state.passDutyDateTime, (newVal) => state.takeDutyDateTime = newVal);
+
+      watch(() => store.getters.getCurrStationWorkPlaceUsers, (newVal) => {
         state.dspOperators = [newVal, []];
       });
 
@@ -270,8 +350,16 @@
         });
       };
 
-      const getOrderText = () => {
-        const orderText = [];
+      const getOrderTextObject = () => {
+        const orderText = [
+          { type: OrderPatternElementType.DATETIME, ref: null, value: state.takeDutyDateTime },
+          { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство принял' },
+          { type: OrderPatternElementType.INPUT, ref: null, value: state.takeDutyUserPostFIO.userPostFIO },
+          { type: OrderPatternElementType.DATETIME, ref: null, value: state.passDutyDateTime },
+          { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство сдал' },
+          { type: OrderPatternElementType.INPUT, ref: null, value: state.passDutyUserPostFIO.userPostFIO },
+        ];
+
         if (state.dspOperators && state.dspOperators[1] && state.dspOperators[1].length) {
           orderText.push(
             {
@@ -308,10 +396,20 @@
           number: +state.number,
           createDateTime: state.createDateTime,
           place: null,
-          timeSpan: { start: state.takeDutyDateTime, end: state.takeDutyDateTime, tillCancellation: false },
-          orderText: getOrderText(),
+          timeSpan: { start: state.takeDutyDateTime, end: null, tillCancellation: true },
+          orderText: getOrderTextObject(),
           dncToSend: [],
-          dspToSend: [],
+          // Данное поле нужно обязательно заполнить, чтобы когда распоряжение появится во входящих,
+          // его можно было подтвердить
+          dspToSend: [{
+            id: store.getters.getUserWorkPoligon.code,
+            type: WORK_POLIGON_TYPES.STATION,
+            station: store.getters.getSectorStations.find((st) =>
+              String(st.St_ID) === String(store.getters.getUserWorkPoligon.code)).St_Title,
+            post: null,
+            fio: null,
+            sendOriginal: CurrShiftGetOrderStatus.sendOriginal,
+          }],
           ecdToSend: [],
           otherToSend: [],
           orderChainId: null,
@@ -343,7 +441,7 @@
         v$,
         textarea,
         handleInsertRowbreak,
-        getCurrStationDSPOperators: computed(() => store.getters.getCurrStationDSPOperators),
+        getCurrStationWorkPlaceUsers: computed(() => store.getters.getCurrStationWorkPlaceUsers),
         newNumberOverlayPanel,
         changeOrderNumber,
         closeDialog,

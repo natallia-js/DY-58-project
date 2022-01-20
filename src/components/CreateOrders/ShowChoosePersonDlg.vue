@@ -8,13 +8,13 @@
   >
     <Listbox
       v-model="selectedUser"
-      :options="personalArr"
+      :options="personal"
       optionLabel="postFio"
       :multiple="false"
     >
       <template #option="slotProps">
         <div>
-          <span :class="{'dy58-info': slotProps.option.online}">{{ slotProps.option.postFio }}</span>
+          <span>{{ slotProps.option.postFio }}</span>
         </div>
       </template>
     </Listbox>
@@ -69,12 +69,6 @@
       workPoligonType: {
         type: String,
         required: true,
-      },
-    },
-
-    computed: {
-      personalArr() {
-        return this.personal.map((el) => ({ ...el, postFio: `${el.post} ${el.fio}` }));
       },
     },
 

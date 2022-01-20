@@ -16,8 +16,8 @@
       // изданное ЭТИМ же пользователем не ранее времени его последнего принятия дежурства, то
       // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение-->
       <Button
-        v-if="canUserDispatchDSPTakeDutyOrder && !existsDSPTakeDutyOrder"
-        label="Необходимо издать распоряжение о принятии дежурства"
+        v-if="canUserDispatchDSPTakeDutyOrder"
+        label="Издать распоряжение о принятии дежурства"
         class="p-button-raised p-button-warning p-mb-2"
         style="width:100%"
         @click="() => state.showCreateDSPTakeDutyOrderDlg = true"
@@ -169,10 +169,8 @@
         getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
         getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
-        isDSP: computed(() => store.getters.isDSP),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
-        existsDSPTakeDutyOrder: computed(() => store.getters.existsDSPTakeDutyOrder),
         hidePreviewNewDSPCreateTakeDutyOrderDlg,
       };
     },
