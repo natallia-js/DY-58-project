@@ -401,6 +401,7 @@
         number: store.getters.getNextOrdersNumber(props.orderType),
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
+        updateCreateDateTimeRegularly: true,
         prevRelatedOrder: props.prevOrderId ? { [props.prevOrderId]: true } : null,
         cancelOrderDateTime: null,
         orderPlace: {

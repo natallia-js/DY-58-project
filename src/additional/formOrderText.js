@@ -3,7 +3,7 @@ import {
   getLocaleTimeString,
   getLocaleDateTimeString,
 } from '@/additional/dateTimeConvertions';
-import { CurrShiftGetOrderStatus } from '@/constants/orders';
+import { CurrShiftGetOrderStatus, ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 import { DRTrainTableColumns } from '@/constants/orderPatterns';
 import { OrderPatternElementType } from '@/constants/orderPatterns';
 
@@ -106,32 +106,30 @@ export function formOrderText(props) {
     }
   };
 
-  if (dncToSend && dncToSend.length) {
-    const substring = (obj) => {
-      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
+  const formSubstring = (defPost) => {
+    return (obj) => {
+      let post;
+      if (obj.post) post = ' ' + obj.post;
+      else if (!obj.fio && defPost) post = defPost;
+      else post = '';
+      return `${obj.placeTitle} ${post}${obj.fio ? ' ' + obj.fio : ''}`;
     };
-    formToStrings(dncToSend, substring);
+  };
+
+  if (dncToSend && dncToSend.length) {
+    formToStrings(dncToSend, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.DNC));
   }
 
   if (dspToSend && dspToSend.length) {
-    const substring = (obj) => {
-      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
-    };
-    formToStrings(dspToSend, substring);
+    formToStrings(dspToSend, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.DSP));
   }
 
   if (ecdToSend && ecdToSend.length) {
-    const substring = (obj) => {
-      return `${obj.placeTitle} ${obj.post ? ' ' + obj.post : ''}${obj.fio ? ' ' + obj.fio : ''}`;
-    };
-    formToStrings(ecdToSend, substring);
+    formToStrings(ecdToSend, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.ECD));
   }
 
   if (otherToSend && otherToSend.length) {
-    const substring = (obj) => {
-      return `${obj.placeTitle}${!obj.post ? '' : ' ' + obj.post}${!obj.fio ? '' : ' ' + obj.fio}`;
-    };
-    formToStrings(otherToSend, substring);
+    formToStrings(otherToSend, formSubstring(null));
   }
 
   if (originalToString) {

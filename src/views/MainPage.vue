@@ -6,6 +6,7 @@
 
   <CreateDSPTakeDutyOrderDlg
     :showDlg="state.showCreateDSPTakeDutyOrderDlg"
+    :editExistingTakeDutyOrder="state.editExistingTakeDutyOrder"
     @close="hidePreviewNewDSPCreateTakeDutyOrderDlg"
   />
 
@@ -17,10 +18,17 @@
       // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение-->
       <Button
         v-if="canUserDispatchDSPTakeDutyOrder"
-        label="Издать распоряжение о принятии дежурства"
+        label="Новая запись о принятии дежурства"
         class="p-button-raised p-button-warning p-mb-2"
         style="width:100%"
-        @click="() => state.showCreateDSPTakeDutyOrderDlg = true"
+        @click="() => { state.editExistingTakeDutyOrder = false; state.showCreateDSPTakeDutyOrderDlg = true; }"
+      />
+      <Button
+        v-if="getExistingDSPTakeDutyOrder && canUserDispatchDSPTakeDutyOrder"
+        label="Редактировать текущую запись о принятии дежурства"
+        class="p-button-raised p-button-secondary p-mb-2"
+        style="width:100%"
+        @click="() => { state.editExistingTakeDutyOrder = true; state.showCreateDSPTakeDutyOrderDlg = true; }"
       />
       <side-menu />
       <AppSettings />
@@ -112,6 +120,7 @@
       const state = reactive({
         startDateToGetData: store.getters.getStartDateToGetData || new Date(),
         showCreateDSPTakeDutyOrderDlg: false,
+        editExistingTakeDutyOrder: false,
       });
 
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
@@ -171,6 +180,7 @@
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
+        getExistingDSPTakeDutyOrder: computed(() => store.getters.getExistingDSPTakeDutyOrder),
         hidePreviewNewDSPCreateTakeDutyOrderDlg,
       };
     },

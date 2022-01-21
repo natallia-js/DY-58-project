@@ -34,12 +34,8 @@
         <template #body="slotProps">
           <div v-if="col.field !== getCurrShiftTblColumnNames.notification"
               :class="[
-                {'dy58-send-original': [getCurrShiftTblColumnNames.station,
-                                        getCurrShiftTblColumnNames.fio].includes(col.field)
-                                        && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
-                {'dy58-send-copy': [getCurrShiftTblColumnNames.station,
-                                    getCurrShiftTblColumnNames.fio].includes(col.field)
-                                    && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
+                {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
+                {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
               ]"
           >
             <span v-if="col.field !== getCurrShiftTblColumnNames.fio">

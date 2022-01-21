@@ -48,7 +48,6 @@ import TieredMenu from 'primevue/tieredmenu';
 import Slider from 'primevue/slider';
 import Panel from 'primevue/panel';
 import OverlayPanel from 'primevue/overlaypanel';
-import PickList from 'primevue/picklist';
 
 const app = createApp(App);
 
@@ -94,6 +93,5 @@ app.component('TieredMenu', TieredMenu);
 app.component('Slider', Slider);
 app.component('Panel', Panel);
 app.component('OverlayPanel', OverlayPanel);
-app.component('PickList', PickList);
 
 app.mount('#app');

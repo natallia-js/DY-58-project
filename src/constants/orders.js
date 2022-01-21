@@ -70,3 +70,16 @@ export const GID_EVENT_TYPE = Object.freeze({
   FOLLOWING: 2,
   DEPARURE: 3,
 });
+
+export const ORDERS_RECEIVERS_DEFAULT_POSTS = Object.freeze({
+  DNC: 'ДНЦ',
+  DSP: 'ДСП',
+  ECD: 'ЭЦД',
+});
+
+export const DSP_TAKE_ORDER_TEXT_ELEMENTS =  Object.freeze({
+  TAKE_DUTY_FIO: 'ФИО принявшего дежурство',
+  TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',
+  PASS_DUTY_FIO: 'ФИО сдавшего дежурство',
+  PASS_DUTY_DATETIME: 'Дата-время сдачи дежурства',
+});

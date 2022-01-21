@@ -160,25 +160,19 @@ export const activeOrders = {
 
     /**
      * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
-     * дежурства ДСП, изданное текущим пользователем не ранее момента его последнего принятия дежурства.
-     * Если существует, функция возвращает true, в противном случае функция возвращает false.
+     * дежурства ДСП.
+     * Если существует, функция возвращает его, в противном случае функция возвращает null.
      *
-     * Функцию следует вызывать только в том случае, если текущий пользователь ДСП, находящийся на
-     * дежурстве!
+     * Функцию следует вызывать только в том случае, если текущий пользователь - ДСП либо оператор
+     * при ДСП, находящийся на дежурстве!
      */
-    existsDSPTakeDutyOrder(_state, getters) {
+    getExistingDSPTakeDutyOrder(_state, getters) {
       return getters.getRawWorkingOrders.find((order) => {
         if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
           return false;
         }
-        if (!order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN)) {
-          return false;
-        }
-        if (!order.creator.id === getters.getUserId) {
-          return false;
-        }
-        return order.createDateTime >= getters.getLastTakeDutyTime;
-      }) ? true : false;
+        return order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN);
+      });
     },
   },
 };

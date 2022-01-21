@@ -2,7 +2,7 @@
   <Toast />
 
   <Dialog
-    header="Издание распоряжения о принятии дежурства"
+    :header="!editExistingTakeDutyOrder ? 'Новая запись о принятии дежурства' : 'Редактирование текущей записи о принятии дежурства'"
     v-model:visible="state.dlgVisible"
     style="width:auto; maxWidth:800px"
     :modal="true"
@@ -14,6 +14,7 @@
 
       <div class="p-field p-col-4 p-d-flex p-flex-column p-m-0">
         <OverlayPanel
+          v-if="!editExistingTakeDutyOrder"
           ref="newNumberOverlayPanel"
           appendTo="body"
           :showCloseIcon="true"
@@ -43,6 +44,7 @@
             :class="{'p-invalid':v$.number.$invalid && submitted}"
           />
           <Button
+            v-if="!editExistingTakeDutyOrder"
             icon="pi pi-times-circle"
             class="p-button-outlined dy58-addon-button"
             v-tooltip.bottom="'Нарушить текущую нумерацию'"
@@ -170,25 +172,26 @@
       <!-- СМЕННЫЙ ПЕРСОНАЛ, С КОТОРЫМ ДСП ЗАСТУПАЕТ НА ДЕЖУРСТВО -->
 
       <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
-        <label for="dsp-operators" :class="{'p-error':v$.dspOperators.$invalid && submitted}">
-          <span class="p-text-bold">Определите персонал, принимающий смену</span>
+        <label for="adjacent-station-shift" :class="{'p-error':v$.adjacentStationShift.$invalid && submitted}">
+          <span class="p-text-bold">Персонал станции, принимающий дежурство</span>
         </label>
-        <PickList v-model="state.dspOperators" dataKey="id" id="dsp-operators">
-          <!--<template #sourceheader>
-            Допустимый перечень лиц
-          </template>
-          <template #targetheader>
-            Выбранные лица
-          </template>-->
-          <template #item="slotProps">
+        <MultiSelect
+          id="adjacent-station-shift"
+          v-model="v$.adjacentStationShift.$model"
+          :options="getCurrStationUsersThatDoNotBelongToCurrWorkPlace"
+          optionLabel="userPostFIO"
+          optionGroupLabel="groupName"
+          optionGroupChildren="items"
+          dataKey="key"
+        >
+          <template #optiongroup="slotProps">
             <div>
-              <p>{{slotProps.item.workPlaceName}}:</p>
-              <p>{{slotProps.item.userFIO}}</p>
+              <div>{{ slotProps.option.groupName }}</div>
             </div>
           </template>
-        </PickList>
+        </MultiSelect>
         <small
-          v-if="(v$.takeDutyDateTime.$invalid && submitted) || v$.takeDutyDateTime.$pending.$response"
+          v-if="(v$.adjacentStationShift.$invalid && submitted) || v$.adjacentStationShift.$pending.$response"
           class="p-error"
         >
           Проверьте правильность определения сменного персонала
@@ -246,10 +249,15 @@
     SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE,
     OrderPatternElementType,
   } from '@/constants/orderPatterns';
-  import { CurrShiftGetOrderStatus, ORDER_TEXT_SOURCE } from '@/constants/orders';
+  import {
+    CurrShiftGetOrderStatus,
+    DSP_TAKE_ORDER_TEXT_ELEMENTS,
+    ORDER_TEXT_SOURCE,
+  } from '@/constants/orders';
   import { useWatchCurrentDateTime } from '@/components/CreateOrders/NewOrder/watchCurrentDateTime';
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-create-dsp-take-duty-order-dialog',
@@ -258,6 +266,10 @@
 
     props: {
       showDlg: {
+        type: Boolean,
+        required: true,
+      },
+      editExistingTakeDutyOrder: {
         type: Boolean,
         required: true,
       },
@@ -270,18 +282,112 @@
 
       const orderType = ORDER_PATTERN_TYPES.ORDER;
 
+      // Существующее (ранее изданное) распоряжение о принятии дежурства
+      const existingDSPTakeDutyOrder = computed(() => store.getters.getExistingDSPTakeDutyOrder);
+
+      // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
+      const getCurrStationWorkPlaceUsers = computed(() => store.getters.getCurrStationWorkPlaceUsers);
+      //
+      const getCurrStationUsersThatDoNotBelongToCurrWorkPlace = computed(() => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace);
+
+      const initOrderNumber = () => {
+        if (!props.editExistingTakeDutyOrder) {
+          state.number = store.getters.getNextOrdersNumber(orderType);
+        } else if (existingDSPTakeDutyOrder.value) {
+          state.number = existingDSPTakeDutyOrder.value.number;
+        } else {
+          state.number = '';
+        }
+      };
+
+      const initOrderCreateDateTime = () => {
+        if (!props.editExistingTakeDutyOrder) {
+          state.createDateTime = store.getters.getCurrDateTimeWithoutMilliseconds;
+          state.createDateTimeString = store.getters.getCurrDateString;
+        } else if (existingDSPTakeDutyOrder.value) {
+          state.createDateTime = existingDSPTakeDutyOrder.value.createDateTime;
+          state.createDateTimeString = getLocaleDateTimeString(existingDSPTakeDutyOrder.value.createDateTime, true);
+        } else {
+          state.createDateTime = '';
+          state.createDateTimeString = '';
+        }
+      };
+
+      const getOrderTextParamValue = (paramName, orderText) => {
+        if (!paramName || !orderText || !orderText.length) {
+          return null;
+        }
+        const textElement = orderText.find((el) => el.ref === paramName);
+        return textElement ? textElement.value : null;
+      };
+
+      // Ищет объект пользователя текущего рабочего места, который соответствует указанному в запросе
+      // параметру текста распоряжения
+      const getCurrStationWorkPlaceUserObjectFromOrderText = (paramName, orderText) => {
+        if (!paramName || !orderText || !orderText.length || !getCurrStationWorkPlaceUsers.value) {
+          return null;
+        }
+        const userPostFIO = getOrderTextParamValue(paramName, orderText);
+        return getCurrStationWorkPlaceUsers.value.find((user) => user.userPostFIO === userPostFIO);
+      };
+
+      const initOrderPassData = () => {
+        if (!props.editExistingTakeDutyOrder) {
+          if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText)
+            state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          else
+            state.passDutyUserPostFIO = null;
+          state.passDutyDateTime = store.getters.getLastTakeDutyTime;
+        } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+          state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.passDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
+        } else {
+          state.passDutyUserPostFIO = null;
+          state.passDutyDateTime = '';
+        }
+      };
+
+      const initOrderTakeData = () => {
+        if (!props.editExistingTakeDutyOrder) {
+          state.takeDutyUserPostFIO = !store.getters.getUserId ? null :
+            { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
+          state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
+        } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+          state.takeDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.takeDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
+        } else {
+          state.takeDutyUserPostFIO = null;
+          state.takeDutyDateTime = '';
+        }
+      };
+
+      // Действия на показ/скрытие диалога
+      watch(() => props.showDlg, (newVal) => {
+        if (newVal) {
+          // Инициализация элементов формы диалога в зависимости от того, хочет пользователь
+          // создать новое распоряжение либо отредактировать существующее
+          initOrderNumber();
+          initOrderCreateDateTime();
+          state.updateCreateDateTimeRegularly = !props.editExistingTakeDutyOrder;
+          initOrderPassData();
+          initOrderTakeData();
+
+          console.log(store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace)
+        }
+      });
+
       const state = reactive({
         dlgVisible: false,
-        number: store.getters.getNextOrdersNumber(orderType),
-        createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
-        createDateTimeString: store.getters.getCurrDateString,
-        passDutyUserPostFIO: '',
-        passDutyDateTime: store.getters.getLastTakeDutyTime,
-        takeDutyUserPostFIO: !store.getters.getUserId ? null :
-          { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO },
-        takeDutyDateTime: store.getters.getLastTakeDutyTime,
+        number: '',
+        createDateTime: '',
+        createDateTimeString: '',
+        updateCreateDateTimeRegularly: true,
+        passDutyUserPostFIO: null,
+        passDutyDateTime: '',
+        takeDutyUserPostFIO: null,
+        takeDutyDateTime: '',
         waitingForServerResponse: false,
-        dspOperators: [store.getters.getCurrStationWorkPlaceUsers, []],
+        adjacentStationShift: null,
         additionalOrderText: null,
       });
 
@@ -298,7 +404,7 @@
         takeDutyUserPostFIO: { required },
         takeDutyDateTime: { required, isValidDateTime, takeDutyTimeNoLessPassDutyTime },
         // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        dspOperators: { minLength: minLength(1) },
+        adjacentStationShift: { minLength: minLength(1) },
         additionalOrderText: {},
       });
 
@@ -308,15 +414,11 @@
       const v$ = useVuelidate(rules, state);
 
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
-      watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
+      //watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
       // Изменение значения времени сдачи дежурства приводит к установке такого же значения в поле
       // принятия дежурства
       watch(() => state.passDutyDateTime, (newVal) => state.takeDutyDateTime = newVal);
-
-      watch(() => store.getters.getCurrStationWorkPlaceUsers, (newVal) => {
-        state.dspOperators = [newVal, []];
-      });
 
       useWatchCurrentDateTime(state, props, store);
 
@@ -352,20 +454,20 @@
 
       const getOrderTextObject = () => {
         const orderText = [
-          { type: OrderPatternElementType.DATETIME, ref: null, value: state.takeDutyDateTime },
+          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_DATETIME, value: state.takeDutyDateTime },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство принял' },
-          { type: OrderPatternElementType.INPUT, ref: null, value: state.takeDutyUserPostFIO.userPostFIO },
-          { type: OrderPatternElementType.DATETIME, ref: null, value: state.passDutyDateTime },
+          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, value: state.takeDutyUserPostFIO.userPostFIO },
+          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_DATETIME, value: state.passDutyDateTime },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство сдал' },
-          { type: OrderPatternElementType.INPUT, ref: null, value: state.passDutyUserPostFIO.userPostFIO },
+          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_FIO, value: state.passDutyUserPostFIO.userPostFIO },
         ];
 
-        if (state.dspOperators && state.dspOperators[1] && state.dspOperators[1].length) {
+        if (state.adjacentStationShift && state.adjacentStationShift[1] && state.adjacentStationShift[1].length) {
           orderText.push(
             {
               type: OrderPatternElementType.TEXT,
               ref: null,
-              value: `На дежурство заступили: ${state.dspOperators[1].map((item) => `${item.userFIO} (${item.workPlaceName})`).join(', ')}`,
+              value: `На дежурство заступили: ${state.adjacentStationShift[1].map((item) => `${item.userFIO} (${item.workPlaceName})`).join(', ')}`,
             },
           );
         }
@@ -441,7 +543,8 @@
         v$,
         textarea,
         handleInsertRowbreak,
-        getCurrStationWorkPlaceUsers: computed(() => store.getters.getCurrStationWorkPlaceUsers),
+        getCurrStationWorkPlaceUsers,
+        getCurrStationUsersThatDoNotBelongToCurrWorkPlace,
         newNumberOverlayPanel,
         changeOrderNumber,
         closeDialog,

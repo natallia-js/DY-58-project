@@ -243,6 +243,9 @@ export const personal = {
 
     /**
      * Возвращает массив ДСП (Операторов при ДСП) текущего рабочего места полигона управления "Станция".
+     * Т.е. возвращаются не все пользователи ДСП и Операторы при ДСП станции, а только те, кто зарегистрирован
+     * для работы на данном рабочем месте (место самого ДСП станции либо место на станции - если речь идет
+     * об Операторе при ДСП).
      */
     getCurrStationWorkPlaceUsers: (state, getters) => {
       const userWorkPoligon = getters.getUserWorkPoligon;
@@ -258,8 +261,11 @@ export const personal = {
       }
       return stationWithPersonal.people
         .filter((item) =>
-          (!userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
-          (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId === userWorkPoligon.subCode)
+          (item.appsCredentials === APP_CREDENTIALS.DSP_FULL || item.appsCredentials === APP_CREDENTIALS.DSP_Operator) &&
+          (
+            (!userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
+            (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId === userWorkPoligon.subCode)
+          )
         )
         .map((item) => ({
           userId: item._id,
@@ -269,12 +275,16 @@ export const personal = {
 
     /**
      * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего
-     * полигона управления "Станция". Информация группируется по принадлежности пользователей
-     * к конкретному рабочему месту (глобальному - сама станция, либо рабочему месту в рамках станции).
+     * полигона управления "Станция". В выборку не включаются рабочие места текущего пользователя.
+     * Например, на некоторой станции есть рабочее место ДСП, рабочее место оператора при ДСП №1 и
+     * рабочее место оператора при ДСП №2. Если зашел пользователь с рабочего места оператора при ДСП №1,
+     * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места оператора при ДСП №2.
+     * Возвращаемая информация группируется по принадлежности пользователей к конкретному рабочему месту.
      */
-    getCurrStationDSPAndDSPOperators: (state, getters) => {
+    getCurrStationUsersThatDoNotBelongToCurrWorkPlace: (state, getters) => {
+      const userWorkPoligon = getters.getUserWorkPoligon;
       if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
-        !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData) {
+        !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData || !userWorkPoligon) {
         return [];
       }
       const stationWithPersonal = state.sectorPersonal.sectorStationsShift.find((item) =>
@@ -298,8 +308,13 @@ export const personal = {
       };
       stationWithPersonal.people
         .filter((item) =>
-          item.appsCredentials === APP_CREDENTIALS.DSP_FULL ||
-          item.appsCredentials === APP_CREDENTIALS.DSP_Operator)
+          (item.appsCredentials === APP_CREDENTIALS.DSP_FULL || item.appsCredentials === APP_CREDENTIALS.DSP_Operator) &&
+          (
+            (!userWorkPoligon.subCode && item.stationWorkPlaceId) ||
+            (userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
+            (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId !== userWorkPoligon.subCode)
+          )
+        )
         .forEach((item) => {
           const dataToAdd = {
             key: `${item.stationId}${item.stationWorkPlaceId || ''}${item._id}`,

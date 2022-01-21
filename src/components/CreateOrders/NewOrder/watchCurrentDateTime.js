@@ -19,11 +19,15 @@ export const useWatchCurrentDateTime = (state, props, store) => {
         store.commit(RESET_ORDER_NUMBERS_DATA, props.orderType);
       }
     }
-    state.createDateTime = newVal;
+    if (state.updateCreateDateTimeRegularly) {
+      state.createDateTime = newVal;
+    }
   });
 
   // Для оперативного отображения текущих даты и времени (дата-время создания распоряжения)
   watch(() => store.getters.getCurrDateTimeString, (newVal) => {
-    state.createDateTimeString = newVal;
+    if (state.updateCreateDateTimeRegularly) {
+      state.createDateTimeString = newVal;
+    }
   });
 };

@@ -1,9 +1,14 @@
 import { computed, watch } from 'vue';
-import { CurrShiftGetOrderStatus, ORDER_PLACE_VALUES } from '@/constants/orders';
+import {
+  CurrShiftGetOrderStatus,
+  ORDER_PLACE_VALUES,
+  ORDERS_RECEIVERS_DEFAULT_POSTS,
+} from '@/constants/orders';
 import {
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
 } from '@/store/mutation-types';
+
 
 /**
  * Данный модуль предназначен для работы с участками, на которые необходимо передать
@@ -39,25 +44,32 @@ export const useSectorsToSendOrder = (state, store) => {
 
   // Возвращает строку для отображения персонала (конкретного типа),
   // выбранного в качестве получателей распоряжения
-  const formSelectedPersonalString = (personalArray, placeFieldName) => {
+  const formSelectedPersonalString = (personalArray, placeFieldName, defaultPost) => {
     if (!personalArray) {
       return '';
     }
     let originalToString = '';
     let copyToString = '';
     const sendOriginalTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal);
+
+    const reducerFunction = (accumulator, currentValue, index) => {
+      let post;
+      if (currentValue.post) post = ' ' + currentValue.post;
+      else if (!currentValue.fio && defaultPost) post = defaultPost;
+      else post = '';
+      return accumulator + `${currentValue[placeFieldName]}` +
+        `${post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+        `${index === sendOriginalTo.length - 1 ? '' : ', '}`;
+    };
+
     if (sendOriginalTo.length) {
       originalToString = '<span class="dy58-send-original">Оригинал:</span> ' +
-        sendOriginalTo.reduce((accumulator, currentValue, index) =>
-          accumulator + `${currentValue[placeFieldName]}${!currentValue.post ? '' : ' ' + currentValue.post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-          `${index === sendOriginalTo.length - 1 ? '' : ', '}`, '');
+        sendOriginalTo.reduce(reducerFunction, '');
     }
     let sendCopyTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendCopy);
     if (sendCopyTo.length) {
       copyToString = '<span class="dy58-send-copy">Копия:</span> ' +
-        sendCopyTo.reduce((accumulator, currentValue, index) =>
-          accumulator + `${currentValue[placeFieldName]}${!currentValue.post ? '' : ' ' + currentValue.post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-          `${index === sendCopyTo.length - 1 ? '' : ', '}`, '');
+        sendCopyTo.reduce(reducerFunction, '');
     }
     let resultString = '';
     if (originalToString) {
@@ -70,16 +82,20 @@ export const useSectorsToSendOrder = (state, store) => {
   };
 
   // Строка для отображения информации о выбранных ДСП
-  const selectedDSPString = computed(() => formSelectedPersonalString(dspSectorsToSendOrderNoDupl.value, 'station'));
+  const selectedDSPString = computed(() =>
+    formSelectedPersonalString(dspSectorsToSendOrderNoDupl.value, 'station', ORDERS_RECEIVERS_DEFAULT_POSTS.DSP));
 
   // Строка для отображения информации о выбранных ДНЦ
-  const selectedDNCString = computed(() => formSelectedPersonalString(dncSectorsToSendOrderNoDupl.value, 'sector'));
+  const selectedDNCString = computed(() =>
+    formSelectedPersonalString(dncSectorsToSendOrderNoDupl.value, 'sector', ORDERS_RECEIVERS_DEFAULT_POSTS.DNC));
 
   // Строка для отображения информации о выбранных ДСП
-  const selectedECDString = computed(() => formSelectedPersonalString(ecdSectorsToSendOrderNoDupl.value, 'sector'));
+  const selectedECDString = computed(() =>
+    formSelectedPersonalString(ecdSectorsToSendOrderNoDupl.value, 'sector', ORDERS_RECEIVERS_DEFAULT_POSTS.ECD));
 
   // Строка для отображения информации о выбранных иных адресатах
-  const selectedOtherAddresseesString = computed(() => formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle'));
+  const selectedOtherAddresseesString = computed(() =>
+    formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle', null));
 
   // При изменении значения параметра места действия распоряжения меняем список "Кому" по станциям
   watch(() => state.orderPlace, (newVal) => {
