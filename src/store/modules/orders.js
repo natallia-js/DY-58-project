@@ -75,6 +75,7 @@ export const orders = {
         createdOnBehalfOf,
         showOnGID,
         specialTrainCategories,
+        idOfTheOrderToCancel = null,
       } = params;
 
       if (!context.getters.canUserDispatchOrders) {
@@ -149,6 +150,7 @@ export const orders = {
             orderChainId,
             showOnGID,
             specialTrainCategories,
+            idOfTheOrderToCancel,
           }
         );
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });

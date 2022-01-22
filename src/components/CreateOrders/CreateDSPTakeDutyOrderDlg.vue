@@ -242,7 +242,6 @@
   import { required, minLength } from '@vuelidate/validators';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
-  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import {
     ORDER_PATTERN_TYPES,
     SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
@@ -251,7 +250,6 @@
     OrderPatternElementType_Future,
   } from '@/constants/orderPatterns';
   import {
-    CurrShiftGetOrderStatus,
     DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS,
     ORDER_TEXT_SOURCE,
     FILLED_ORDER_INPUT_ELEMENTS,
@@ -284,7 +282,7 @@
 
       const orderType = ORDER_PATTERN_TYPES.ORDER;
 
-      // Существующее (ранее изданное) распоряжение о принятии дежурства
+      // Существующее (ранее изданное) распоряжение о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ
       const existingDSPTakeDutyOrder = computed(() => store.getters.getExistingDSPTakeDutyOrder);
 
       // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
@@ -366,19 +364,25 @@
         if (!paramName || !orderText || !orderText.length || !getCurrStationWorkPlaceUsers.value) {
           return null;
         }
-        const userPostFIO = getOrderTextParamValue(paramName, orderText);
-        return getCurrStationWorkPlaceUsers.value.find((user) => user.userPostFIO === userPostFIO);
+        return getOrderTextParamValue(paramName, orderText);
       };
 
       const initOrderPassData = () => {
         if (!props.editExistingTakeDutyOrder) {
-          if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText)
-            state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
-          else
+          if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+            const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+            if (prevValue) {
+              state.passDutyUserPostFIO = { userId: prevValue.userId, userPostFIO: prevValue.value };
+            }
+          } else {
             state.passDutyUserPostFIO = null;
+          }
           state.passDutyDateTime = store.getters.getLastTakeDutyTime;
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          if (prevValue) {
+            state.passDutyUserPostFIO = { userId: prevValue.userId, userPostFIO: prevValue.value };
+          }
           state.passDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.passDutyUserPostFIO = null;
@@ -392,7 +396,10 @@
             { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
           state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.takeDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          if (prevValue) {
+            state.takeDutyUserPostFIO = { userId: prevValue.userId, userPostFIO: prevValue.value };
+          }
           state.takeDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.takeDutyUserPostFIO = null;
@@ -402,8 +409,14 @@
 
       const initAdjacentStationShift = () => {
         if (props.editExistingTakeDutyOrder && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.adjacentStationShift = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
-          console.log('state.adjacentStationShift',state.adjacentStationShift)
+          const prevValue = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
+          if (prevValue && prevValue instanceof Array) {
+            state.adjacentStationShift = prevValue.map((item) => ({
+              key: item.key,
+              userId: item.userId,
+              userPostFIO: item.value,
+            }));
+          }
         } else {
           state.adjacentStationShift = null;
         }
@@ -432,7 +445,6 @@
         }
       });
 
-
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       //watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
@@ -440,6 +452,7 @@
       // принятия дежурства
       watch(() => state.passDutyDateTime, (newVal) => state.takeDutyDateTime = newVal);
 
+      // Для оперативного отображения даты-времени издания распоряжения при создании нового распоряжения
       useWatchCurrentDateTime(state, props, store);
 
       const newNumberOverlayPanel = ref();
@@ -474,22 +487,42 @@
 
       const getOrderTextObject = () => {
         const orderText = [
-          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME, value: state.takeDutyDateTime },
+          {
+            type: OrderPatternElementType.DATETIME,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME,
+            value: state.takeDutyDateTime,
+          },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство принял' },
-          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, value: state.takeDutyUserPostFIO.userPostFIO },
+          {
+            type: OrderPatternElementType_Future.OBJECT,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO,
+            value: JSON.stringify({ userId: state.takeDutyUserPostFIO.userId, value: state.takeDutyUserPostFIO.userPostFIO }),
+          },
           { type: OrderPatternElementType.LINEBREAK, ref: null, value: null },
-          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME, value: state.passDutyDateTime },
+          {
+            type: OrderPatternElementType.DATETIME,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME,
+            value: state.passDutyDateTime,
+          },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство сдал' },
-          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, value: state.passDutyUserPostFIO.userPostFIO },
+          {
+            type: OrderPatternElementType_Future.OBJECT,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO,
+            value: JSON.stringify({ userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO }),
+          },
         ];
         if (state.adjacentStationShift && state.adjacentStationShift.length) {
           orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
           orderText.push({ type: OrderPatternElementType.TEXT, ref: null, value: 'На дежурство заступили:' });
           orderText.push(
             {
-              type: OrderPatternElementType_Future.STRINGS_LIST,
+              type: OrderPatternElementType_Future.OBJECTS_LIST,
               ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
-              value: state.adjacentStationShift.map((item) => item.userPostFIO),
+              value: JSON.stringify(state.adjacentStationShift.map((item) => ({
+                key: item.key,
+                userId: item.userId,
+                value: item.userPostFIO,
+              }))),
             },
           );
         }
@@ -514,32 +547,28 @@
       const dispatchOrder = () => {
         state.waitingForServerResponse = true;
 
-        store.dispatch('dispatchOrder', {
-          type: orderType,
-          number: +state.number,
-          createDateTime: state.createDateTime,
-          place: null,
-          timeSpan: { start: state.takeDutyDateTime, end: null, tillCancellation: true },
-          orderText: getOrderTextObject(),
-          dncToSend: [],
-          // Данное поле нужно обязательно заполнить, чтобы когда распоряжение появится во входящих,
-          // его можно было подтвердить
-          dspToSend: [{
-            id: store.getters.getUserWorkPoligon.code,
-            type: WORK_POLIGON_TYPES.STATION,
-            station: store.getters.getSectorStations.find((st) =>
-              String(st.St_ID) === String(store.getters.getUserWorkPoligon.code)).St_Title,
-            post: null,
-            fio: null,
-            sendOriginal: CurrShiftGetOrderStatus.sendOriginal,
-          }],
-          ecdToSend: [],
-          otherToSend: [],
-          orderChainId: null,
-          createdOnBehalfOf: null,
-          showOnGID: false,
-          specialTrainCategories: [SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN],
-        });
+        if (!props.editExistingTakeDutyOrder) {
+          // Издание нового распоряжения
+          store.dispatch('dispatchOrder', {
+            type: orderType,
+            number: +state.number,
+            createDateTime: state.createDateTime,
+            place: null,
+            timeSpan: { start: state.takeDutyDateTime, end: null, tillCancellation: true },
+            orderText: getOrderTextObject(),
+            dncToSend: [],
+            dspToSend: [], // не адресовать текущей станции!!! (иначе придется править бэкенд)
+            ecdToSend: [],
+            otherToSend: [],
+            orderChainId: null,
+            createdOnBehalfOf: null,
+            showOnGID: false,
+            specialTrainCategories: [SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN],
+            idOfTheOrderToCancel: existingDSPTakeDutyOrder.value ? existingDSPTakeDutyOrder.value._id : null,
+          });
+        } else {
+          // Редактирование распоряжения
+        }
       };
 
       /**
@@ -552,11 +581,17 @@
         state.waitingForServerResponse = false;
         if (!newVal.error) {
           showSuccessMessage(newVal.message);
+          // если диалог не закрывать, то нужно раскомментировать выше строки для обновления номера распоряжения
           closeDialog();
         } else {
           showErrMessage(newVal.message);
         }
       });
+
+      /**
+       * Для отображения результата операции редактирования распоряжения (на сервере).
+       */
+      // watch ...
 
       return {
         state,
@@ -574,26 +609,3 @@
     },
   };
 </script>
-
-<style>
-  .p-picklist {
-    min-height: 15rem !important;
-    max-height: 15rem !important;
-  }
-  .p-picklist-list-wrapper {
-    height: 100% !important;
-  }
-  .p-picklist-list {
-    min-height: 100% !important;
-    max-height: 100% !important;
-  }
-  @media screen and (max-width: 960px) {
-    .p-picklist[pv_id_6] {
-      max-height: 100% !important;
-    }
-    .p-picklist-list-wrapper {
-      min-height: 10rem !important;
-      max-height: 10rem !important;
-    }
-  }
-</style>

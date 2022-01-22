@@ -121,7 +121,8 @@ function getOrderTextElementTypedValue(element) {
     case OrderPatternElementType.DATETIME:
       return new Date(element.value);
     case OrderPatternElementType.DR_TRAIN_TABLE:
-    case OrderPatternElementType_Future.STRINGS_LIST:
+    case OrderPatternElementType_Future.OBJECT:
+    case OrderPatternElementType_Future.OBJECTS_LIST:
       return JSON.parse(element.value);
     default:
       return element.value;

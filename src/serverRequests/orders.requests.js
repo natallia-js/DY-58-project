@@ -76,6 +76,7 @@ export const dispatchOrderToServer = async (params) => {
     orderChainId,
     showOnGID,
     specialTrainCategories,
+    idOfTheOrderToCancel,
   } = params;
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
     {
@@ -95,6 +96,7 @@ export const dispatchOrderToServer = async (params) => {
       orderChainId,
       showOnGID,
       specialTrainCategories,
+      idOfTheOrderToCancel,
     },
     { headers: getRequestAuthorizationHeader() }
   );

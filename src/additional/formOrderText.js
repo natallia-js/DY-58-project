@@ -63,11 +63,14 @@ export function formOrderText(props) {
       case OrderPatternElementType.LINEBREAK:
         substring = '<br />';
         break;
-      case OrderPatternElementType_Future.STRINGS_LIST:
-        console.log('currVal.value', typeof currVal.value)
+      case OrderPatternElementType_Future.OBJECT:
+        if (currVal.value) {
+          substring = currVal.value.value;
+        }
+        break;
+      case OrderPatternElementType_Future.OBJECTS_LIST:
         if (currVal.value instanceof Array) {
-          substring = currVal.value.join(', ');
-          console.log('substring', substring)
+          substring = currVal.value.map((el) => el.value).join(', ');
         }
         break;
     }

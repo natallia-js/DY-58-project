@@ -160,19 +160,39 @@ export const activeOrders = {
 
     /**
      * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
-     * дежурства ДСП.
-     * Если существует, функция возвращает его, в противном случае функция возвращает null.
+     * дежурства ДСП, изданное на ТЕКУЩЕМ РАБОЧЕМ МЕСТЕ.
+     * Если существует, функция возвращает последнее такое найденное распоряжение (по времени издания),
+     * в противном случае функция возвращает null.
      *
      * Функцию следует вызывать только в том случае, если текущий пользователь - ДСП либо оператор
      * при ДСП, находящийся на дежурстве!
      */
     getExistingDSPTakeDutyOrder(_state, getters) {
-      return getters.getRawWorkingOrders.find((order) => {
+      const workPoligon = getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        return null;
+      }
+      const orders = getters.getRawWorkingOrders.filter((order) => {
         if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
           return false;
         }
-        return order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN);
+        return (order.workPoligon.type === workPoligon.type) && (order.workPoligon.id === workPoligon.code) &&
+          (
+            (!order.workPoligon.workPlaceId && !workPoligon.subCode) ||
+            (order.workPoligon.workPlaceId && workPoligon.subCode && order.workPoligon.workPlaceId === workPoligon.subCode)
+          ) &&
+          order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN);
       });
+      if (!orders.length) {
+        return null;
+      }
+      // сортируем распоряжения в порядке убывания времени издания и возвращаем порвое распоряжение
+      // в отсортированном массиве
+      return orders.sort((a, b) => {
+        if (a.createDateTime < b.createDateTime) return 1;
+        if (a.createDateTime > b.createDateTime) return -1;
+        return 0;
+      })[0];
     },
   },
 };

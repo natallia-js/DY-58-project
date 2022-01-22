@@ -37,7 +37,8 @@ export const OrderPatternElementType = Object.freeze({
 // определенных видов.
 export const OrderPatternElementType_Future = Object.freeze({
   // данные типы элементов шаблонов распоряжений необходимы лишь при формировании распоряжения ДСП о приеме дежурства
-  STRINGS_LIST: 'stringsList',
+  OBJECT: 'object',
+  OBJECTS_LIST: 'objectsList',
 });
 
 export const OrderPatternElementTypeNames = Object.freeze({
