@@ -248,11 +248,13 @@
     SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
     SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE,
     OrderPatternElementType,
+    OrderPatternElementType_Future,
   } from '@/constants/orderPatterns';
   import {
     CurrShiftGetOrderStatus,
-    DSP_TAKE_ORDER_TEXT_ELEMENTS,
+    DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS,
     ORDER_TEXT_SOURCE,
+    FILLED_ORDER_INPUT_ELEMENTS,
   } from '@/constants/orders';
   import { useWatchCurrentDateTime } from '@/components/CreateOrders/NewOrder/watchCurrentDateTime';
   import isValidDateTime from '@/additional/isValidDateTime';
@@ -287,8 +289,45 @@
 
       // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
       const getCurrStationWorkPlaceUsers = computed(() => store.getters.getCurrStationWorkPlaceUsers);
-      //
+      // Список пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах, отличных от данного
       const getCurrStationUsersThatDoNotBelongToCurrWorkPlace = computed(() => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace);
+
+      const state = reactive({
+        dlgVisible: false,
+        number: '',
+        createDateTime: '',
+        createDateTimeString: '',
+        updateCreateDateTimeRegularly: true,
+        passDutyUserPostFIO: null,
+        passDutyDateTime: '',
+        takeDutyUserPostFIO: null,
+        takeDutyDateTime: '',
+        waitingForServerResponse: false,
+        adjacentStationShift: null,
+        additionalOrderText: null,
+      });
+
+      const takeDutyTimeNoLessPassDutyTime = (value) => {
+        return value >= state.passDutyDateTime;
+      };
+
+      const rules = reactive({
+        number: { required, isNumber },
+        createDateTime: { required, isValidDateTime },
+        createDateTimeString: { required },
+        passDutyUserPostFIO: { required },
+        passDutyDateTime: { required, isValidDateTime },
+        takeDutyUserPostFIO: { required },
+        takeDutyDateTime: { required, isValidDateTime, takeDutyTimeNoLessPassDutyTime },
+        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
+        adjacentStationShift: { minLength: minLength(1) },
+        additionalOrderText: {},
+      });
+
+      const textarea = ref(null);
+
+      const submitted = ref(false);
+      const v$ = useVuelidate(rules, state);
 
       const initOrderNumber = () => {
         if (!props.editExistingTakeDutyOrder) {
@@ -334,13 +373,13 @@
       const initOrderPassData = () => {
         if (!props.editExistingTakeDutyOrder) {
           if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText)
-            state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+            state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
           else
             state.passDutyUserPostFIO = null;
           state.passDutyDateTime = store.getters.getLastTakeDutyTime;
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
-          state.passDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.passDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.passDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.passDutyUserPostFIO = null;
           state.passDutyDateTime = '';
@@ -353,11 +392,28 @@
             { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
           state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.takeDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
-          state.takeDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.takeDutyUserPostFIO = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.takeDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.takeDutyUserPostFIO = null;
           state.takeDutyDateTime = '';
+        }
+      };
+
+      const initAdjacentStationShift = () => {
+        if (props.editExistingTakeDutyOrder && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+          state.adjacentStationShift = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
+          console.log('state.adjacentStationShift',state.adjacentStationShift)
+        } else {
+          state.adjacentStationShift = null;
+        }
+      };
+
+      const initAdditionalOrderText = () => {
+        if (props.editExistingTakeDutyOrder && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+          state.additionalOrderText = getOrderTextParamValue(FILLED_ORDER_INPUT_ELEMENTS.NOTE, existingDSPTakeDutyOrder.value.orderText.orderText);
+        } else {
+          state.additionalOrderText = null;
         }
       };
 
@@ -371,47 +427,11 @@
           state.updateCreateDateTimeRegularly = !props.editExistingTakeDutyOrder;
           initOrderPassData();
           initOrderTakeData();
-
-          console.log(store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace)
+          initAdjacentStationShift();
+          initAdditionalOrderText();
         }
       });
 
-      const state = reactive({
-        dlgVisible: false,
-        number: '',
-        createDateTime: '',
-        createDateTimeString: '',
-        updateCreateDateTimeRegularly: true,
-        passDutyUserPostFIO: null,
-        passDutyDateTime: '',
-        takeDutyUserPostFIO: null,
-        takeDutyDateTime: '',
-        waitingForServerResponse: false,
-        adjacentStationShift: null,
-        additionalOrderText: null,
-      });
-
-      const takeDutyTimeNoLessPassDutyTime = (value) => {
-        return value >= state.passDutyDateTime;
-      };
-
-      const rules = reactive({
-        number: { required, isNumber },
-        createDateTime: { required, isValidDateTime },
-        createDateTimeString: { required },
-        passDutyUserPostFIO: { required },
-        passDutyDateTime: { required, isValidDateTime },
-        takeDutyUserPostFIO: { required },
-        takeDutyDateTime: { required, isValidDateTime, takeDutyTimeNoLessPassDutyTime },
-        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        adjacentStationShift: { minLength: minLength(1) },
-        additionalOrderText: {},
-      });
-
-      const textarea = ref(null);
-
-      const submitted = ref(false);
-      const v$ = useVuelidate(rules, state);
 
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       //watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
@@ -454,31 +474,32 @@
 
       const getOrderTextObject = () => {
         const orderText = [
-          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_DATETIME, value: state.takeDutyDateTime },
+          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME, value: state.takeDutyDateTime },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство принял' },
-          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.TAKE_DUTY_FIO, value: state.takeDutyUserPostFIO.userPostFIO },
-          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_DATETIME, value: state.passDutyDateTime },
+          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, value: state.takeDutyUserPostFIO.userPostFIO },
+          { type: OrderPatternElementType.LINEBREAK, ref: null, value: null },
+          { type: OrderPatternElementType.DATETIME, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME, value: state.passDutyDateTime },
           { type: OrderPatternElementType.TEXT, ref: null, value: 'дежурство сдал' },
-          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS.PASS_DUTY_FIO, value: state.passDutyUserPostFIO.userPostFIO },
+          { type: OrderPatternElementType.INPUT, ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, value: state.passDutyUserPostFIO.userPostFIO },
         ];
-
-        if (state.adjacentStationShift && state.adjacentStationShift[1] && state.adjacentStationShift[1].length) {
+        if (state.adjacentStationShift && state.adjacentStationShift.length) {
+          orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
+          orderText.push({ type: OrderPatternElementType.TEXT, ref: null, value: 'На дежурство заступили:' });
           orderText.push(
             {
-              type: OrderPatternElementType.TEXT,
-              ref: null,
-              value: `На дежурство заступили: ${state.adjacentStationShift[1].map((item) => `${item.userFIO} (${item.workPlaceName})`).join(', ')}`,
+              type: OrderPatternElementType_Future.STRINGS_LIST,
+              ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
+              value: state.adjacentStationShift.map((item) => item.userPostFIO),
             },
           );
         }
         if (state.additionalOrderText) {
-          orderText.push(
-            {
-              type: OrderPatternElementType.TEXT,
-              ref: null,
-              value: orderText.length ? '<br />' + state.additionalOrderText : state.additionalOrderText,
-            }
-          );
+          orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
+          orderText.push({
+            type: OrderPatternElementType.TEXT,
+            ref: FILLED_ORDER_INPUT_ELEMENTS.NOTE,
+            value: state.additionalOrderText,
+          });
         }
         return {
           orderTextSource: ORDER_TEXT_SOURCE.nopattern,

@@ -32,6 +32,14 @@ export const OrderPatternElementType = Object.freeze({
   LINEBREAK: 'linebreak',
 });
 
+// Типы элементов шаблонов распоряжений, которые не могут использоваться (пока) пользователями для
+// создания новых шаблонов. Данные типы элементов используются самим ДУ-58 для формирования распоряжений
+// определенных видов.
+export const OrderPatternElementType_Future = Object.freeze({
+  // данные типы элементов шаблонов распоряжений необходимы лишь при формировании распоряжения ДСП о приеме дежурства
+  STRINGS_LIST: 'stringsList',
+});
+
 export const OrderPatternElementTypeNames = Object.freeze({
   TEXT: 'Текст',
   INPUT: 'Поле ввода',

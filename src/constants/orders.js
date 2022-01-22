@@ -27,10 +27,6 @@ export const ORDER_ELEMENTS_CAN_BE_EMPTY = [
   'Примечание',
 ];
 
-export const FILLED_DSP_TAKE_DUTY_ORDER_INPUT_ELEMENTS = Object.freeze({
-  DSP_OPERATOR_FIO: 'ФИО оператора ДСП',
-});
-
 export const FILLED_ORDER_DATE_ELEMENTS = Object.freeze({
   ORDER_DATE: 'Дата издания действующего распоряжения',
   REQUEST_DATE: 'Дата издания действующей заявки',
@@ -65,6 +61,10 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   ARR_STATION: 'Станция прибытия',
 });
 
+export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
+  NOTE: 'Примечание',
+});
+
 export const GID_EVENT_TYPE = Object.freeze({
   ARRIVAL: 1,
   FOLLOWING: 2,
@@ -77,9 +77,13 @@ export const ORDERS_RECEIVERS_DEFAULT_POSTS = Object.freeze({
   ECD: 'ЭЦД',
 });
 
-export const DSP_TAKE_ORDER_TEXT_ELEMENTS =  Object.freeze({
+// Смысловые значения элементов шаблона распоряжения о принятии дежурства ДСП.
+// Данные смысловые значения вынесены отдельно, т.к. их нет в общем списке, и они используются
+// исключительно данной программой.
+export const DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS =  Object.freeze({
   TAKE_DUTY_FIO: 'ФИО принявшего дежурство',
   TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',
   PASS_DUTY_FIO: 'ФИО сдавшего дежурство',
   PASS_DUTY_DATETIME: 'Дата-время сдачи дежурства',
+  TAKE_DUTY_PERSONAL: 'Персонал, принимающий дежурство',
 });

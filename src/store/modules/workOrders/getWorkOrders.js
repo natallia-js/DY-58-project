@@ -1,4 +1,4 @@
-import { OrderPatternElementType } from '@/constants/orderPatterns';
+import { OrderPatternElementType, OrderPatternElementType_Future } from '@/constants/orderPatterns';
 import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
 import { formOrderText } from '@/additional/formOrderText';
 import { upperCaseFirst } from '@/additional/stringFunctions';
@@ -121,6 +121,7 @@ function getOrderTextElementTypedValue(element) {
     case OrderPatternElementType.DATETIME:
       return new Date(element.value);
     case OrderPatternElementType.DR_TRAIN_TABLE:
+    case OrderPatternElementType_Future.STRINGS_LIST:
       return JSON.parse(element.value);
     default:
       return element.value;

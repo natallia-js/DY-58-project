@@ -5,7 +5,7 @@ import {
 } from '@/additional/dateTimeConvertions';
 import { CurrShiftGetOrderStatus, ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 import { DRTrainTableColumns } from '@/constants/orderPatterns';
-import { OrderPatternElementType } from '@/constants/orderPatterns';
+import { OrderPatternElementType, OrderPatternElementType_Future } from '@/constants/orderPatterns';
 
 
 /**
@@ -62,6 +62,13 @@ export function formOrderText(props) {
         break;
       case OrderPatternElementType.LINEBREAK:
         substring = '<br />';
+        break;
+      case OrderPatternElementType_Future.STRINGS_LIST:
+        console.log('currVal.value', typeof currVal.value)
+        if (currVal.value instanceof Array) {
+          substring = currVal.value.join(', ');
+          console.log('substring', substring)
+        }
         break;
     }
     return prevVal + ' ' + substring;
