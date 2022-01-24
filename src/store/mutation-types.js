@@ -20,10 +20,14 @@ export const SET_ACTIVE_MAIN_MENU_ITEM = 'setActiveMainMenuItem';
 
 // Orders
 export const CLEAR_DISPATCH_ORDER_RESULT = 'clearDispatchOrderResult';
+export const CLEAR_EDIT_DISPATCHED_ORDER_RESULT = 'clearEditDispatchedOrderResult';
 export const ADD_ORDERS_BEING_DISPATCHED_NUMBER = 'addOrdersBeingDispatchedNumber';
+export const ADD_DISPATCHED_ORDERS_BEING_EDITED_NUMBER = 'addDispatchedOrdersBeingEditedNumber';
 export const SUB_ORDERS_BEING_DISPATCHED_NUMBER = 'subOrdersBeingDispatchedNumber';
+export const SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER = 'subDispatchedOrdersBeingEditedNumber';
 export const SET_DISPATCH_ORDER_RESULT = 'setDispatchOrderResult';
-export const ADD_ORDER = 'addOrder';
+export const SET_EDIT_DISPATCHED_ORDER_RESULT = 'setEditDispatchedOrderResult';
+//export const ADD_ORDER = 'addOrder';
 
 // Last Orders Params
 export const DEL_CURR_LAST_ORDERS_PARAMS = 'delCurrLastOrdersParams';

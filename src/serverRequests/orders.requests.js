@@ -102,3 +102,21 @@ export const dispatchOrderToServer = async (params) => {
   );
   return response.data;
 };
+
+export const editDispatchedOrderOnServer = async (params) => {
+  const {
+    id,
+    timeSpan,
+    orderText,
+  } = params;
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.editDispatchedOrder,
+    {
+      id,
+      timeSpan,
+      orderText,
+    },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+

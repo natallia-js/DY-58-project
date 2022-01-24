@@ -496,7 +496,7 @@
           {
             type: OrderPatternElementType_Future.OBJECT,
             ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO,
-            value: JSON.stringify({ userId: state.takeDutyUserPostFIO.userId, value: state.takeDutyUserPostFIO.userPostFIO }),
+            value: /*JSON.stringify(*/{ userId: state.takeDutyUserPostFIO.userId, value: state.takeDutyUserPostFIO.userPostFIO }/*)*/,
           },
           { type: OrderPatternElementType.LINEBREAK, ref: null, value: null },
           {
@@ -508,7 +508,7 @@
           {
             type: OrderPatternElementType_Future.OBJECT,
             ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO,
-            value: JSON.stringify({ userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO }),
+            value: /*JSON.stringify(*/{ userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO }/*)*/,
           },
         ];
         if (state.adjacentStationShift && state.adjacentStationShift.length) {
@@ -518,11 +518,11 @@
             {
               type: OrderPatternElementType_Future.OBJECTS_LIST,
               ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
-              value: JSON.stringify(state.adjacentStationShift.map((item) => ({
+              value: /*JSON.stringify(*/state.adjacentStationShift.map((item) => ({
                 key: item.key,
                 userId: item.userId,
                 value: item.userPostFIO,
-              }))),
+              }))/*)*/,
             },
           );
         }
@@ -566,8 +566,14 @@
             specialTrainCategories: [SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN],
             idOfTheOrderToCancel: existingDSPTakeDutyOrder.value ? existingDSPTakeDutyOrder.value._id : null,
           });
-        } else {
+        } else if (existingDSPTakeDutyOrder.value) {
           // Редактирование распоряжения
+          store.dispatch('editDispatchedOrder', {
+            type: orderType,
+            id: existingDSPTakeDutyOrder.value._id,
+            timeSpan: { start: state.takeDutyDateTime, end: null, tillCancellation: true },
+            orderText: getOrderTextObject(),
+          });
         }
       };
 
@@ -591,7 +597,18 @@
       /**
        * Для отображения результата операции редактирования распоряжения (на сервере).
        */
-      // watch ...
+      watch(() => store.getters.getEditDispatchedOrderResult, (newVal) => {
+        if (!newVal || newVal.orderType !== orderType) {
+          return;
+        }
+        state.waitingForServerResponse = false;
+        if (!newVal.error) {
+          showSuccessMessage(newVal.message);
+          closeDialog();
+        } else {
+          showErrMessage(newVal.message);
+        }
+      });
 
       return {
         state,

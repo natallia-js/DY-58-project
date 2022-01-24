@@ -59,6 +59,7 @@ export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
   getLastOrdersParams: `${AUTH_SERVER_ADDRESS}/api/lastOrdersParams/data`,
   getWorkOrders: `${AUTH_SERVER_ADDRESS}/api/workOrders/data`,
   dispatchOrder: `${AUTH_SERVER_ADDRESS}/api/orders/add`,
+  editDispatchedOrder: `${AUTH_SERVER_ADDRESS}/api/orders/mod`,
   confirmOrder: `${AUTH_SERVER_ADDRESS}/api/workOrders/confirmOrder`,
   confirmOrdersForOthers: `${AUTH_SERVER_ADDRESS}/api/workOrders/confirmOrdersForOthers`,
   reportOnOrdersDelivery: `${AUTH_SERVER_ADDRESS}/api/workOrders/reportOnDelivery`,

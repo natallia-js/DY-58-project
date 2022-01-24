@@ -75,6 +75,20 @@ function getWorkOrderObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
       };
     }),
+    stationWorkPlacesToSend: order.stationWorkPlacesToSend.map((item) => {
+      return {
+        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+        deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        post: item.post,
+        fio: item.fio,
+        id: +item.id,
+        workPlaceId: item.workPlaceId ? +item.workPlaceId : null,
+        placeTitle: item.placeTitle,
+        sendOriginal: Boolean(item.sendOriginal),
+        type: item.type,
+        _id: item._id,
+      };
+    }),
     number: order.number,
     orderText: !order.orderText ? null : {
       ...order.orderText,
@@ -549,6 +563,8 @@ export const getWorkOrders = {
           }
         }
       });
+
+      console.log('state.data',state.data)
     },
 
     /**
