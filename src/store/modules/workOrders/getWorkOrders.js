@@ -1,4 +1,11 @@
-import { OrderPatternElementType, OrderPatternElementType_Future } from '@/constants/orderPatterns';
+import { store } from '@/store';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import {
+  OrderPatternElementType,
+  OrderPatternElementType_Future,
+  SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
+  SPECIAL_ORDER_SUBPATTERN_TYPES,
+} from '@/constants/orderPatterns';
 import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
 import { formOrderText } from '@/additional/formOrderText';
 import { upperCaseFirst } from '@/additional/stringFunctions';
@@ -75,20 +82,28 @@ function getWorkOrderObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
       };
     }),
-    stationWorkPlacesToSend: order.stationWorkPlacesToSend.map((item) => {
-      return {
-        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
-        deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
-        post: item.post,
-        fio: item.fio,
-        id: +item.id,
-        workPlaceId: item.workPlaceId ? +item.workPlaceId : null,
-        placeTitle: item.placeTitle,
-        sendOriginal: Boolean(item.sendOriginal),
-        type: item.type,
-        _id: item._id,
-      };
-    }),
+    // Если текущий рабочий полигон - не станция, то это поле останется пустым.
+    // В противном случае заполняем данное поле информацией, отсеивая информацию не по текущей станции.
+    stationWorkPlacesToSend: order.stationWorkPlacesToSend
+      .filter((item) =>
+        store.getters.getUserWorkPoligon &&
+        store.getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION &&
+        String(item.id) === String(store.getters.getUserWorkPoligon.code)
+      )
+      .map((item) => {
+        return {
+          confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+          deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+          post: item.post,
+          fio: item.fio,
+          id: +item.id,
+          workPlaceId: item.workPlaceId ? +item.workPlaceId : null,
+          placeTitle: item.placeTitle,
+          sendOriginal: Boolean(item.sendOriginal),
+          type: item.type,
+          _id: item._id,
+        };
+      }),
     number: order.number,
     orderText: !order.orderText ? null : {
       ...order.orderText,
@@ -311,7 +326,10 @@ export const getWorkOrders = {
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
-            extendedOrderTitle: `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
+            extendedOrderTitle:
+              item.specialTrainCategories && item.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
+                `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${item.orderText.orderTitle}` :
+                `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
             orderTitle: item.orderText.orderTitle,
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({
@@ -340,49 +358,59 @@ export const getWorkOrders = {
             },
             orderChainId: item.orderChainId,
             chainMembersNumber: getters.getRawWorkingOrders.filter((el) => el.orderChainId === item.orderChainId).length,
-            receivers: function() {
-              const receiversArray = [];
-              if (item.dspToSend) {
-                receiversArray.push(...item.dspToSend.map((dsp) => {
-                  return {
-                    id: dsp.id,
-                    type: dsp.type,
-                    place: dsp.placeTitle,
-                    post: dsp.post,
-                    fio: dsp.fio,
-                    deliverDateTime: dsp.deliverDateTime,
-                    confirmDateTime: dsp.confirmDateTime,
-                  };
-                }));
-              }
-              if (item.dncToSend) {
-                receiversArray.push(...item.dncToSend.map((dnc) => {
-                  return {
-                    id: dnc.id,
-                    type: dnc.type,
-                    place: dnc.placeTitle,
-                    post: dnc.post,
-                    fio: dnc.fio,
-                    deliverDateTime: dnc.deliverDateTime,
-                    confirmDateTime: dnc.confirmDateTime,
-                  };
-                }));
-              }
-              if (item.ecdToSend) {
-                receiversArray.push(...item.ecdToSend.map((ecd) => {
-                  return {
-                    id: ecd.id,
-                    type: ecd.type,
-                    place: ecd.placeTitle,
-                    post: ecd.post,
-                    fio: ecd.fio,
-                    deliverDateTime: ecd.deliverDateTime,
-                    confirmDateTime: ecd.confirmDateTime,
-                  };
-                }));
-              }
-              return receiversArray;
-            },
+            receivers: [
+              ...(!item.dspToSend ? [] : item.dspToSend.map((dsp) => {
+                return {
+                  id: dsp.id,
+                  type: dsp.type,
+                  place: dsp.placeTitle,
+                  post: dsp.post,
+                  fio: dsp.fio,
+                  deliverDateTime: dsp.deliverDateTime,
+                  confirmDateTime: dsp.confirmDateTime,
+                };
+              })),
+              ...(!item.dncToSend ? [] : item.dncToSend.map((dnc) => {
+                return {
+                  id: dnc.id,
+                  type: dnc.type,
+                  place: dnc.placeTitle,
+                  post: dnc.post,
+                  fio: dnc.fio,
+                  deliverDateTime: dnc.deliverDateTime,
+                  confirmDateTime: dnc.confirmDateTime,
+                };
+              })),
+              ...(!item.ecdToSend ? [] : item.ecdToSend.map((ecd) => {
+                return {
+                  id: ecd.id,
+                  type: ecd.type,
+                  place: ecd.placeTitle,
+                  post: ecd.post,
+                  fio: ecd.fio,
+                  deliverDateTime: ecd.deliverDateTime,
+                  confirmDateTime: ecd.confirmDateTime,
+                };
+              })),
+            ],
+            stationReceivers: item.stationWorkPlacesToSend.map((item) => {
+              // Должность и ФИО лица, находящегося на смене на рабочем месте станции, которому адресована копия
+              // распоряжения, берем из последнего распоряжения о приеме/сдаче дежурства.
+              // Но только в том случае, если на данном рабочем месте распоряжение еще не подтверждено.
+              let { post, fio } = !item.confirmDateTime
+                ? getters.getWorkPlacePostFIOFromExistingDSPTakeDutyOrder(item.workPlaceId)
+                : { post: item.post, fio: item.fio };
+              return {
+                id: item.id,
+                type: item.type,
+                workPlaceId: item.workPlaceId,
+                place: item.placeTitle,
+                post,
+                fio,
+                deliverDateTime: item.deliverDateTime,
+                confirmDateTime: item.confirmDateTime,
+              };
+            }),
           };
         });
     },
@@ -563,8 +591,6 @@ export const getWorkOrders = {
           }
         }
       });
-
-      console.log('state.data',state.data)
     },
 
     /**

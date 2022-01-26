@@ -25,36 +25,6 @@ import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBl
 export const confirmOrder = {
   getters: {
     /**
-     * Для заданного распоряжения возвращает массив объектов рабочих полигонов, по которым
-     * не было подтверждения получения данного распоряжения.
-     */
-    getOrderUnconfirmedWorkPoligons(state) {
-      return (orderId) => {
-        const order = state.data.find((el) => el._id === orderId);
-        if (!order) {
-          return [];
-        }
-        const unconfirmedWorkPoligons = [];
-        const findUnconfirmedWorkPoligons = (typedPoligons) => {
-          if (typedPoligons && typedPoligons.length) {
-            typedPoligons.forEach((poligon) => {
-              if (!poligon.confirmDateTime) {
-                unconfirmedWorkPoligons.push({
-                  workPoligonId: poligon.id,
-                  workPoligonType: poligon.type,
-                });
-              }
-            });
-          }
-        };
-        findUnconfirmedWorkPoligons(order.dspToSend);
-        findUnconfirmedWorkPoligons(order.dncToSend);
-        findUnconfirmedWorkPoligons(order.ecdToSend);
-        return unconfirmedWorkPoligons;
-      };
-    },
-
-    /**
      * Возвращает true, если входящее распоряжение с заданным id в данный момент времени проходит
      * процедуру подтверждения, false - в противном случае.
      */
@@ -230,19 +200,29 @@ export const confirmOrder = {
       }
       workPoligons.forEach((poligon) => {
         let foundPoligon;
+        let foundWorkPlace;
         switch (poligon.workPoligonType) {
           case WORK_POLIGON_TYPES.STATION:
-            foundPoligon = order.dspToSend.find((dsp) => dsp.id === poligon.workPoligonId);
+            foundPoligon = order.dspToSend.find((dsp) => dsp.id === poligon.workPoligonId && !dsp.confirmDateTime);
+            foundWorkPlace = order.stationWorkPlacesToSend.find((swp) =>
+              swp.id === poligon.workPoligonId && swp.workPlaceId === poligon.workPlaceId && !swp.confirmDateTime);
             break;
           case WORK_POLIGON_TYPES.DNC_SECTOR:
-            foundPoligon = order.dncToSend.find((dnc) => dnc.id === poligon.workPoligonId);
+            foundPoligon = order.dncToSend.find((dnc) => dnc.id === poligon.workPoligonId && !dnc.confirmDateTime);
             break;
           case WORK_POLIGON_TYPES.ECD_SECTOR:
-            foundPoligon = order.ecdToSend.find((ecd) => ecd.id === poligon.workPoligonId);
+            foundPoligon = order.ecdToSend.find((ecd) => ecd.id === poligon.workPoligonId && !ecd.confirmDateTime);
             break;
         }
         if (foundPoligon) {
           foundPoligon.confirmDateTime = confirmDateTime;
+          foundPoligon.post = poligon.post;
+          foundPoligon.fio = poligon.fio;
+        }
+        if (foundWorkPlace) {
+          foundWorkPlace.confirmDateTime = confirmDateTime;
+          foundWorkPlace.post = poligon.post;
+          foundWorkPlace.fio = poligon.fio;
         }
       });
     },

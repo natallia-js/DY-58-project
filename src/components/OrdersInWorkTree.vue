@@ -20,7 +20,10 @@
             'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId)
           }]"
         >
-          <b>{{ slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}</b>,
+          <b> {{ slotProps.node.specialTrainCategories &&
+            slotProps.node.specialTrainCategories.includes(specialOrderDSPTakeDutySign) ?
+            specialOrderSubpatternTypes.RECORD : slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}
+          </b>,
           {{ slotProps.node.orderTitle || '?' }},
           от {{ slotProps.node.time }}
         </span>
@@ -65,6 +68,7 @@
   import { mapGetters } from 'vuex';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
+  import { SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN, SPECIAL_ORDER_SUBPATTERN_TYPES } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy58-orders-in-work-tree',
@@ -97,6 +101,14 @@
           return null;
         }
         return this.getCreateRelativeOrderContextMenu(this.chosenOrder.key);
+      },
+
+      specialOrderDSPTakeDutySign() {
+        return SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN;
+      },
+
+      specialOrderSubpatternTypes() {
+        return SPECIAL_ORDER_SUBPATTERN_TYPES;
       },
     },
 

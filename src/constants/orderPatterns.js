@@ -7,6 +7,10 @@ export const ORDER_PATTERN_TYPES = Object.freeze({
   ECD_NOTIFICATION: 'уведомление/отмена запрещения',
 });
 
+export const SPECIAL_ORDER_SUBPATTERN_TYPES = Object.freeze({
+  RECORD: 'запись',
+});
+
 export const OrderPatternsNodeType = Object.freeze({
   SERVICE: 'service',
   ORDER_TYPE: 'orderType',
@@ -73,4 +77,4 @@ export const SPECIAL_TRAIN_CATEGORIES = [
 // отметка особой категории распоряжений о принятии дежурства ДСП
 export const SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN = 'ДСП_ПД';
 // наименование распоряжения о принятии дежурства ДСП
-export const SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE = 'О принятии дежурства';
+export const SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE = 'О приеме/сдаче дежурства';

@@ -45,5 +45,13 @@ export const checkUserAuthority = {
     canUserDispatchDSPTakeDutyOrder(_state, getters) {
       return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
     },
+
+    /**
+     * Возвращает true, если текущий пользователь имеет право подтверждать рабочие распоряжения за других
+     * лиц на станции (такое право есть у ДСП и Операторов ДСП в отношении всех рабочих мест на их станции).
+     */
+    canUserConfirmOrdersForOthersOnStationWorkPlaces(_state, getters) {
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
+    },
   },
 };

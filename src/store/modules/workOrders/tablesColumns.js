@@ -36,6 +36,16 @@ const WorkMessReceiversTblColumnsTitles = Object.freeze({
   confirmDateTime: 'confirmDateTime',
 });
 
+// Условные наименования столбцов таблицы рабочих мест-приемников рабочих распоряжений на станции
+// (названия столбцов должны соответствовать названию полей массива данных для корректного
+// отображения информации)
+const WorkMessStationReceiversTblColumnsTitles = Object.freeze({
+  place: 'place',
+  post: 'post',
+  fio: 'fio',
+  confirmDateTime: 'confirmDateTime',
+});
+
 
 /**
  * Данный модуль предназначен для работы с данными о столбцах таблиц в зависимости от должности
@@ -92,6 +102,14 @@ export const tablesColumns = {
     },
 
     /**
+     * Возвращает информацию об условных наименованиях столбцов таблицы рабочих мест-приемников
+     * рабочих распоряжений на станции.
+     */
+    getWorkMessStationReceiversTblColumnsTitles() {
+      return WorkMessStationReceiversTblColumnsTitles;
+    },
+
+    /**
      * Возвращает информацию о столбцах таблицы рабочих распоряжений.
      */
     getWorkMessTblColumns() {
@@ -109,7 +127,7 @@ export const tablesColumns = {
     /**
      * Возвращает информацию о столбцах таблицы полигонов-приемников рабочих распоряжений.
      */
-     getWorkMessReceiversTblColumns(_state, _getters, _rootState, rootGetters) {
+    getWorkMessReceiversTblColumns(_state, _getters, _rootState, rootGetters) {
       let tblCols = [
         { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '25%', },
         { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '25%', },
@@ -125,6 +143,18 @@ export const tablesColumns = {
         }
         return col;
       });
+    },
+
+    /**
+     * Возвращает информацию о столбцах таблицы рабочих мест-приемников рабочих распоряжений на станции.
+     */
+    getWorkMessStationReceiversTblColumns() {
+      return [
+        { field: WorkMessStationReceiversTblColumnsTitles.place, title: 'Рабочее место', width: '25%', },
+        { field: WorkMessStationReceiversTblColumnsTitles.post, title: 'Должность', width: '25%', },
+        { field: WorkMessStationReceiversTblColumnsTitles.fio, title: 'ФИО', width: '25%', },
+        { field: WorkMessStationReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '25%', },
+      ];
     },
   },
 };

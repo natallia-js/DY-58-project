@@ -269,7 +269,10 @@ export const personal = {
         )
         .map((item) => ({
           userId: item._id,
-          userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
+          post: item.post,
+          name: item.name,
+          fatherName: item.fatherName,
+          surname: item.surname,
         }));
     },
 
@@ -318,8 +321,14 @@ export const personal = {
         .forEach((item) => {
           const dataToAdd = {
             key: `${item.stationId}${item.stationWorkPlaceId || ''}${item._id}`,
+            workPoligonType: userWorkPoligon.type,
+            workPoligonId: item.stationId,
+            workPlaceId: item.stationWorkPlaceId,
             userId: item._id,
-            userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
+            post: item.post,
+            name: item.name,
+            fatherName: item.fatherName,
+            surname: item.surname,
           };
           if (!item.stationWorkPlaceId) {
             addDataInGroup(stationName, dataToAdd);

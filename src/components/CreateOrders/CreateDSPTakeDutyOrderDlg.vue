@@ -2,7 +2,7 @@
   <Toast />
 
   <Dialog
-    :header="!editExistingTakeDutyOrder ? 'Новая запись о принятии дежурства' : 'Редактирование текущей записи о принятии дежурства'"
+    :header="!editExistingTakeDutyOrder ? 'Новая запись о приеме/сдаче дежурства' : 'Редактирование текущей записи о приеме/сдаче дежурства'"
     v-model:visible="state.dlgVisible"
     style="width:auto; maxWidth:800px"
     :modal="true"
@@ -149,7 +149,7 @@
       </div>
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="take-duty-date-time" :class="{'p-error':v$.takeDutyDateTime.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Время принятия дежурства</span>
+          <span class="p-text-bold"><span style="color:red">*</span> Время приема дежурства</span>
         </label>
         <Calendar
           id="take-duty-date-time"
@@ -165,7 +165,7 @@
           v-if="(v$.takeDutyDateTime.$invalid && submitted) || v$.takeDutyDateTime.$pending.$response"
           class="p-error"
         >
-          Не определено/неверно определено время принятия дежурства
+          Не определено/неверно определено время приема дежурства
         </small>
       </div>
 
@@ -258,6 +258,7 @@
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import { getUserPostFIOString } from '@/store/modules/personal';
 
   export default {
     name: 'dy58-create-dsp-take-duty-order-dialog',
@@ -286,9 +287,11 @@
       const existingDSPTakeDutyOrder = computed(() => store.getters.getExistingDSPTakeDutyOrder);
 
       // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
-      const getCurrStationWorkPlaceUsers = computed(() => store.getters.getCurrStationWorkPlaceUsers);
-      // Список пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах, отличных от данного
-      const getCurrStationUsersThatDoNotBelongToCurrWorkPlace = computed(() => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace);
+      const getCurrStationWorkPlaceUsers = computed(() =>
+        store.getters.getCurrStationWorkPlaceUsers.map((item) => ({
+          userId: item.userId,
+          userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
+        })));
 
       const state = reactive({
         dlgVisible: false,
@@ -330,8 +333,10 @@
       const initOrderNumber = () => {
         if (!props.editExistingTakeDutyOrder) {
           state.number = store.getters.getNextOrdersNumber(orderType);
+
         } else if (existingDSPTakeDutyOrder.value) {
           state.number = existingDSPTakeDutyOrder.value.number;
+
         } else {
           state.number = '';
         }
@@ -341,9 +346,11 @@
         if (!props.editExistingTakeDutyOrder) {
           state.createDateTime = store.getters.getCurrDateTimeWithoutMilliseconds;
           state.createDateTimeString = store.getters.getCurrDateString;
+
         } else if (existingDSPTakeDutyOrder.value) {
           state.createDateTime = existingDSPTakeDutyOrder.value.createDateTime;
           state.createDateTimeString = getLocaleDateTimeString(existingDSPTakeDutyOrder.value.createDateTime, true);
+
         } else {
           state.createDateTime = '';
           state.createDateTimeString = '';
@@ -378,6 +385,7 @@
             state.passDutyUserPostFIO = null;
           }
           state.passDutyDateTime = store.getters.getLastTakeDutyTime;
+
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
           const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
           if (prevValue) {
@@ -395,12 +403,14 @@
           state.takeDutyUserPostFIO = !store.getters.getUserId ? null :
             { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
           state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
+
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
           const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
           if (prevValue) {
             state.takeDutyUserPostFIO = { userId: prevValue.userId, userPostFIO: prevValue.value };
           }
           state.takeDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
+
         } else {
           state.takeDutyUserPostFIO = null;
           state.takeDutyDateTime = '';
@@ -413,7 +423,14 @@
           if (prevValue && prevValue instanceof Array) {
             state.adjacentStationShift = prevValue.map((item) => ({
               key: item.key,
+              workPoligonType: item.workPoligonType,
+              workPoligonId: item.workPoligonId,
+              workPlaceId: item.workPlaceId,
               userId: item.userId,
+              post: item.post,
+              name: item.name,
+              fatherName: item.fatherName,
+              surname: item.surname,
               userPostFIO: item.value,
             }));
           }
@@ -496,7 +513,7 @@
           {
             type: OrderPatternElementType_Future.OBJECT,
             ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO,
-            value: /*JSON.stringify(*/{ userId: state.takeDutyUserPostFIO.userId, value: state.takeDutyUserPostFIO.userPostFIO }/*)*/,
+            value: { userId: state.takeDutyUserPostFIO.userId, value: state.takeDutyUserPostFIO.userPostFIO },
           },
           { type: OrderPatternElementType.LINEBREAK, ref: null, value: null },
           {
@@ -508,7 +525,7 @@
           {
             type: OrderPatternElementType_Future.OBJECT,
             ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO,
-            value: /*JSON.stringify(*/{ userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO }/*)*/,
+            value: { userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO },
           },
         ];
         if (state.adjacentStationShift && state.adjacentStationShift.length) {
@@ -518,11 +535,18 @@
             {
               type: OrderPatternElementType_Future.OBJECTS_LIST,
               ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
-              value: /*JSON.stringify(*/state.adjacentStationShift.map((item) => ({
+              value: state.adjacentStationShift.map((item) => ({
                 key: item.key,
+                workPoligonType: item.workPoligonType,
+                workPoligonId: item.workPoligonId,
+                workPlaceId: item.workPlaceId,
                 userId: item.userId,
+                post: item.post,
+                name: item.name,
+                fatherName: item.fatherName,
+                surname: item.surname,
                 value: item.userPostFIO,
-              }))/*)*/,
+              })),
             },
           );
         }
@@ -617,7 +641,17 @@
         textarea,
         handleInsertRowbreak,
         getCurrStationWorkPlaceUsers,
-        getCurrStationUsersThatDoNotBelongToCurrWorkPlace,
+        // Список пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах, отличных от данного
+        getCurrStationUsersThatDoNotBelongToCurrWorkPlace: computed(() =>
+          store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace.map((item) => {
+            return {
+              ...item,
+              items: item.items.map((el) => ({
+                ...el,
+                userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
+              })),
+            };
+          })),
         newNumberOverlayPanel,
         changeOrderNumber,
         closeDialog,

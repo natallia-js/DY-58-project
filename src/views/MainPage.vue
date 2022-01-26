@@ -18,14 +18,14 @@
       // необходимо предупредить об этом пользователя и предложить ему издать такое распоряжение-->
       <Button
         v-if="canUserDispatchDSPTakeDutyOrder"
-        label="Запись о принятии/сдаче дежурства"
+        label="Запись о приеме/сдаче дежурства"
         class="p-button-raised p-button-warning p-mb-2"
         style="width:100%"
         @click="() => { state.editExistingTakeDutyOrder = false; state.showCreateDSPTakeDutyOrderDlg = true; }"
       />
       <Button
         v-if="getExistingDSPTakeDutyOrder && canUserDispatchDSPTakeDutyOrder"
-        label="Редактировать текущую запись о принятии/сдаче дежурства"
+        label="Редактировать текущую запись о приеме/сдаче дежурства"
         class="p-button-raised p-button-secondary p-mb-2"
         style="width:100%"
         @click="() => { state.editExistingTakeDutyOrder = true; state.showCreateDSPTakeDutyOrderDlg = true; }"

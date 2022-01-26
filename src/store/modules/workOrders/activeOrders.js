@@ -1,5 +1,7 @@
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constants/orderPatterns';
+import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
+import { getUserFIOString } from '@/store/modules/personal';
 
 
 /**
@@ -193,6 +195,39 @@ export const activeOrders = {
         if (a.createDateTime > b.createDateTime) return -1;
         return 0;
       })[0];
+    },
+
+    /**
+     * Вызывать только в том случае, если текущий рабочий полигон - станция.
+     * Для данного рабочего места на станции возвращает должность и ФИО лица из текста последнего изданного
+     * распоряжения о приеме/сдаче дежурства (имеется в виду персонал рабочих мест на этой же станции, за
+     * исключением текущего рабочего места).
+     */
+    getWorkPlacePostFIOFromExistingDSPTakeDutyOrder(_state, getters) {
+      return (workPlaceId) => {
+        const dspTakeDutyOrder = getters.getExistingDSPTakeDutyOrder;
+        if (!dspTakeDutyOrder || !dspTakeDutyOrder.orderText || !dspTakeDutyOrder.orderText.orderText) {
+          return { post: null, fio: null };
+        }
+        const neededTextElement = dspTakeDutyOrder.orderText.orderText.find((el) =>
+          el.ref === DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL
+        );
+        if (!neededTextElement || !neededTextElement.value) {
+          return { post: null, fio: null };
+        }
+        const neededTextElementValue = neededTextElement.value.find((el) => el.workPlaceId === workPlaceId);
+        if (!neededTextElementValue) {
+          return { post: null, fio: null };
+        }
+        return {
+          post: neededTextElementValue.post,
+          fio: getUserFIOString({
+            name: neededTextElementValue.name,
+            fatherName: neededTextElementValue.fatherName,
+            surname: neededTextElementValue.surname,
+          }),
+        };
+      };
     },
   },
 };

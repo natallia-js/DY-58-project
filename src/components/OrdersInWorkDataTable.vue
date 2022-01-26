@@ -113,54 +113,136 @@
             <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
           </div>
           <div class="p-col">
-            <DataTable :value="slotProps.data.receivers()">
-              <Column v-for="col2 of getWorkMessReceiversTblColumns"
-                :field="col2.field"
-                :header="col2.title"
-                :key="col2.field"
-                :style="{ width: col2.width, }"
-                headerClass="dy58-table-header-cell-class"
-                bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
+            <div>
+              <p>Адресаты:</p>
+              <DataTable :value="slotProps.data.receivers">
+                <Column v-for="col2 of getWorkMessReceiversTblColumns"
+                  :field="col2.field"
+                  :header="col2.title"
+                  :key="col2.field"
+                  :style="{ width: col2.width, }"
+                  headerClass="dy58-table-header-cell-class"
+                  bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
+                >
+                  <template #body="slotProps2">
+                    <div v-if="col2.field !== getWorkMessReceiversTblColumnsTitles.confirmDateTime"
+                      style="width:100%"
+                      :class="[
+                        {'dy58-not-delivered-order': !slotProps2.data.deliverDateTime},
+                        {'dy58-not-confirmed-order': slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
+                      ]"
+                    >
+                      {{ slotProps2.data[col2.field] }}
+                    </div>
+                    <div v-else>
+                      <span v-if="slotProps2.data[col2.field]">
+                        {{ getDateTimeString(slotProps2.data[col2.field]) }}
+                      </span>
+                      <Button
+                        v-else-if="canUserConfirmOrderForOthers &&
+                          !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                          !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                          orderCanBeConfirmedFor(slotProps.data)"
+                        label="Подтвердить"
+                        class="p-button-primary p-button-text"
+                        @click="confirmOrderForOthers(slotProps.data.id, [{
+                          workPoligonType: slotProps2.data.type,
+                          workPoligonId: slotProps2.data.id,
+                          post: slotProps2.data.post,
+                          fio: slotProps2.data.fio,
+                        }])"
+                      />
+                    </div>
+                  </template>
+                </Column>
+              </DataTable>
+              <div style="text-align:right"
+                v-if="canUserConfirmOrderForOthers &&
+                  !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                  !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                  orderCanBeConfirmedFor(slotProps.data) &&
+                  getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).length"
               >
-                <template #body="slotProps2">
-                  <div v-if="col2.field !== getWorkMessReceiversTblColumnsTitles.confirmDateTime"
-                    style="width:100%"
-                    :class="[
-                      {'dy58-not-delivered-order': !slotProps2.data.deliverDateTime},
-                      {'dy58-not-confirmed-order': slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
-                    ]"
-                  >
-                    {{ slotProps2.data[col2.field] }}
-                  </div>
-                  <div v-else>
-                    <span v-if="slotProps2.data[col2.field]">
-                      {{ getDateTimeString(slotProps2.data[col2.field]) }}
-                    </span>
-                    <Button
-                      v-else-if="canUserConfirmOrderForOthers &&
-                        !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                        !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
-                        orderCanBeConfirmedFor(slotProps.data)"
-                      label="Подтвердить"
-                      class="p-button-primary p-button-text"
-                      @click="confirmOrderForOthers(slotProps.data.id, { type: slotProps2.data.type, id: slotProps2.data.id })"
-                    />
-                  </div>
-                </template>
-              </Column>
-            </DataTable>
-            <div style="text-align:right"
-              v-if="canUserConfirmOrderForOthers &&
-                !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
-                orderCanBeConfirmedFor(slotProps.data) &&
-                getOrderUnconfirmedWorkPoligons(slotProps.data.id).length"
-            >
-              <Button
-                label="Подтвердить все"
-                class="p-button-primary p-button-text"
-                @click="confirmOrderForOthers(slotProps.data.id, null)"
-              />
+                <Button
+                  label="Подтвердить все"
+                  class="p-button-primary p-button-text"
+                  @click="confirmOrderForOthers(slotProps.data.id,
+                    getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).map((item) => ({
+                      workPoligonType: item.type,
+                      workPoligonId: item.id,
+                      post: item.post,
+                      fio: item.fio,
+                    })))"
+                />
+              </div>
+            </div>
+            <br />
+            <div v-if="canUserConfirmOrdersForOthersOnStationWorkPlaces">
+              <p>Получатели на станции:</p>
+              <DataTable :value="slotProps.data.stationReceivers">
+                <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
+                  :field="col3.field"
+                  :header="col3.title"
+                  :key="col3.field"
+                  :style="{ width: col3.width, }"
+                  headerClass="dy58-table-header-cell-class"
+                  bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
+                >
+                  <template #body="slotProps3">
+                    <div v-if="col3.field !== getWorkMessStationReceiversTblColumnsTitles.confirmDateTime"
+                      style="width:100%"
+                      :class="[
+                        {'dy58-not-delivered-order': !slotProps3.data.deliverDateTime},
+                        {'dy58-not-confirmed-order': slotProps3.data.deliverDateTime && !slotProps3.data.confirmDateTime},
+                      ]"
+                    >
+                      {{ slotProps3.data[col3.field] }}
+                    </div>
+                    <div v-else>
+                      <span v-if="slotProps3.data[col3.field]">
+                        {{ getDateTimeString(slotProps3.data[col3.field]) }}
+                      </span>
+                      <div v-else-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                        !isOrderBeingConfirmedForOthers(slotProps.data.id)">
+                        <Button
+                          label="Подтвердить"
+                          class="p-button-primary p-button-text"
+                          @click="confirmOrderForOthers(slotProps.data.id, [{
+                            workPoligonType: slotProps3.data.type,
+                            workPoligonId: slotProps3.data.id,
+                            workPlaceId: slotProps3.data.workPlaceId,
+                            post: slotProps3.data.post,
+                            fio: slotProps3.data.fio,
+                          }])"
+                        />
+                      </div>
+                      <Button
+                        label="Удалить"
+                        class="p-button-primary p-button-text"
+                        @click="() => {}"
+                      />
+                    </div>
+                  </template>
+                </Column>
+              </DataTable>
+              <div style="text-align:right"
+                v-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                  !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                  getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).length"
+              >
+                <Button
+                  label="Подтвердить все"
+                  class="p-button-primary p-button-text"
+                  @click="confirmOrderForOthers(slotProps.data.id,
+                    getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).map((item) => ({
+                      workPoligonType: item.type,
+                      workPoligonId: item.id,
+                      workPlaceId: item.workPlaceId,
+                      post: item.post,
+                      fio: item.fio,
+                    })))"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -198,10 +280,11 @@
         'getWorkingOrders',
         'getWorkMessTblColumnsTitles',
         'getWorkMessReceiversTblColumnsTitles',
+        'getWorkMessStationReceiversTblColumnsTitles',
         'getWorkMessTblColumns',
         'getWorkMessReceiversTblColumns',
+        'getWorkMessStationReceiversTblColumns',
         'getOrdersChainsBeingDeleted',
-        'getOrderUnconfirmedWorkPoligons',
         'getUserWorkPoligon',
         'isOrderBeingConfirmedForOthers',
         'canUserConfirmOrderForOthers',
@@ -210,6 +293,7 @@
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
         'getActiveOrders',
+        'canUserConfirmOrdersForOthersOnStationWorkPlaces',
       ]),
 
       getWorkMessStates() {
@@ -260,7 +344,7 @@
        * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
        * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: вне зависимости
        * от того, кто из них издал распоряжение, все они имеют право на подтверждение данного
-       * распоряжения за других лиц).
+       * распоряжения за тех лиц, кому это распоряжение адресовалось).
        * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
        * за других.
        */
@@ -300,22 +384,36 @@
       },
 
       /**
-       * Значение параметра workPoligon - объект с информацией о рабочем полигоне, за который необходимо
-       * подтвердить распоряжение.
-       * Если значение параметра workPoligon null, то распоряжение подтверждается за все рабочие
-       * полигоны, которые его еще не подтвердили.
-      */
-      confirmOrderForOthers(orderId, workPoligon) {
-        let confirmWorkPoligons;
-        if (!workPoligon) {
-          confirmWorkPoligons = this.getOrderUnconfirmedWorkPoligons(orderId);
-        } else {
-          confirmWorkPoligons = [{
-            workPoligonType: workPoligon.type,
-            workPoligonId: workPoligon.id,
-          }];
+       * Значение параметра confirmWorkPoligons - массив объектов с информацией о рабочих полигонах / рабочих
+       * местах на станции, за которые необходимо подтвердить распоряжение.
+       */
+      confirmOrderForOthers(orderId, confirmWorkPoligons) {
+        if (confirmWorkPoligons && confirmWorkPoligons.length) {
+          this.$store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
         }
-        this.$store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
+      },
+
+      /**
+       * Для заданного списка исходных (указанных явно пользователем при создании) адресатов распоряжения
+       * возвращает массив таких адресатов, для которых не было подтверждения получения данного распоряжения.
+       */
+      getOrderUnconfirmedWorkPoligons(receivers) {
+        return receivers ? receivers.filter((el) => !el.confirmDateTime) : [];
+      },
+
+      /**
+       * Для заданного списка адресатов распоряжения на станции возвращает массив таких адресатов,
+       * для которых не было подтверждения получения данного распоряжения.
+       */
+      getOrderUnconfirmedStationWorkPoligons(stationReceivers) {
+        return stationReceivers ? stationReceivers.filter((el) => !el.confirmDateTime) : [];
+      },
+
+      /**
+       * Позволяет удалить адресата распоряжения из списка получателей распоряжения на рабочих местах станции.
+       */
+      deleteOrderStationWorkPoligon() {
+        //
       },
     },
   }
