@@ -160,6 +160,12 @@ export const activeOrders = {
       };
     },
 
+    isOrderActive(_state, getters) {
+      return (orderId) => {
+        getters.getActiveOrders.find((order) => String(order._id) === String(orderId));
+      };
+    },
+
     /**
      * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
      * дежурства ДСП, изданное на ТЕКУЩЕМ РАБОЧЕМ МЕСТЕ.

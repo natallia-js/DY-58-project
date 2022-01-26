@@ -120,3 +120,10 @@ export const editDispatchedOrderOnServer = async (params) => {
   return response.data;
 };
 
+export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId }) => {
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delStationWorkPlaceReceiver,
+    { orderId, workPlaceId },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};

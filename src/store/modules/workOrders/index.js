@@ -5,6 +5,8 @@ import { confirmOrder } from './confirmOrder';
 import { incomingOrdersPerShift } from './incomingOrdersPerShift';
 import { incomingOrders } from './incomingOrders';
 import { activeOrders } from './activeOrders';
+import { dispatchOrder } from './dispatchOrder';
+import { editOrder } from './editOrder';
 import { delWorkOrdersChains } from './delWorkOrdersChains';
 import { contextMenus } from './contextMenus';
 
@@ -40,6 +42,14 @@ export const workOrders = {
     ordersBeingConfirmedForOthers: [],
     // массив результатов подтверждения распоряжений за другие полигоны (с привязкой к id распоряжений)
     confirmOrdersForOthersResults: [],
+
+    dispatchOrderResult: null,
+    dispatchOrdersBeingProcessed: 0,
+
+    editDispatchedOrderResult: null,
+    editDispatchedOrdersBeingProcessed: 0,
+
+    delStationWorkPlaceReceiverResult: null,
   },
 
   getters: {
@@ -52,6 +62,8 @@ export const workOrders = {
     ...delWorkOrdersChains.getters,
     ...confirmOrder.getters,
     ...contextMenus.getters,
+    ...dispatchOrder.getters,
+    ...editOrder.getters,
   },
 
   mutations: {
@@ -61,6 +73,8 @@ export const workOrders = {
     ...incomingOrders.mutations,
     ...incomingOrdersPerShift.mutations,
     ...delWorkOrdersChains.mutations,
+    ...dispatchOrder.mutations,
+    ...editOrder.mutations,
   },
 
   actions: {
@@ -69,5 +83,7 @@ export const workOrders = {
     ...confirmOrder.actions,
     ...incomingOrdersPerShift.actions,
     ...delWorkOrdersChains.actions,
+    ...dispatchOrder.actions,
+    ...editOrder.actions,
   },
 };

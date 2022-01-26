@@ -188,10 +188,11 @@ export const confirmOrder = {
     },
 
     /**
-     * Для заданного распоряжения позволяет установить дату его подтверждения за другие полигоны управления.
+     * Для заданного распоряжения позволяет установить информацию о его подтверждении
+     * за другие полигоны управления.
      */
-    [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, { orderId, workPoligons, confirmDateTime }) {
-      if (!orderId || !workPoligons || !workPoligons.length || !confirmDateTime) {
+    [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, { orderId, workPoligons }) {
+      if (!orderId || !workPoligons || !workPoligons.length) {
         return;
       }
       const order = state.data.find((el) => el._id === orderId);
@@ -203,24 +204,24 @@ export const confirmOrder = {
         let foundWorkPlace;
         switch (poligon.workPoligonType) {
           case WORK_POLIGON_TYPES.STATION:
-            foundPoligon = order.dspToSend.find((dsp) => dsp.id === poligon.workPoligonId && !dsp.confirmDateTime);
+            foundPoligon = order.dspToSend.find((dsp) => String(dsp.id) === String(poligon.workPoligonId) && !dsp.confirmDateTime);
             foundWorkPlace = order.stationWorkPlacesToSend.find((swp) =>
-              swp.id === poligon.workPoligonId && swp.workPlaceId === poligon.workPlaceId && !swp.confirmDateTime);
+              String(swp.id) === String(poligon.workPoligonId) && String(swp.workPlaceId) === String(poligon.workPlaceId) && !swp.confirmDateTime);
             break;
           case WORK_POLIGON_TYPES.DNC_SECTOR:
-            foundPoligon = order.dncToSend.find((dnc) => dnc.id === poligon.workPoligonId && !dnc.confirmDateTime);
+            foundPoligon = order.dncToSend.find((dnc) => String(dnc.id) === String(poligon.workPoligonId) && !dnc.confirmDateTime);
             break;
           case WORK_POLIGON_TYPES.ECD_SECTOR:
-            foundPoligon = order.ecdToSend.find((ecd) => ecd.id === poligon.workPoligonId && !ecd.confirmDateTime);
+            foundPoligon = order.ecdToSend.find((ecd) => String(ecd.id) === String(poligon.workPoligonId) && !ecd.confirmDateTime);
             break;
         }
         if (foundPoligon) {
-          foundPoligon.confirmDateTime = confirmDateTime;
+          foundPoligon.confirmDateTime = poligon.confirmDateTime ? new Date(poligon.confirmDateTime) : null,
           foundPoligon.post = poligon.post;
           foundPoligon.fio = poligon.fio;
         }
         if (foundWorkPlace) {
-          foundWorkPlace.confirmDateTime = confirmDateTime;
+          foundWorkPlace.confirmDateTime = poligon.confirmDateTime ? new Date(poligon.confirmDateTime) : null,
           foundWorkPlace.post = poligon.post;
           foundWorkPlace.fio = poligon.fio;
         }
@@ -272,7 +273,7 @@ export const confirmOrder = {
           confirmDateTime,
         });
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
-        context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons, confirmDateTime });
+        context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');

@@ -8,7 +8,6 @@ import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { webSocket } from './modules/webSocket';
 import { lastOrdersParams } from './modules/lastOrdersParams';
-import { orders } from './modules/orders';
 import { workOrders } from './modules/workOrders/index';
 import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
 import { checkUserAuthority } from './modules/checkUserAuthority';
@@ -25,7 +24,6 @@ export const store = createStore({
     currWorkPoligonStructure,
     webSocket,
     lastOrdersParams,
-    orders,
     workOrders,
     orderPatternsElementsRefs,
     checkUserAuthority,

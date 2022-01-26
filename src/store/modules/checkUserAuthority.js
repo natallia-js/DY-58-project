@@ -53,5 +53,12 @@ export const checkUserAuthority = {
     canUserConfirmOrdersForOthersOnStationWorkPlaces(_state, getters) {
       return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
     },
+
+    /**
+     * Возвращает true, если текущий пользователь имеет право удалять
+     */
+    canUserDeleteOrderStationReceivers(_state, getters) {
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
+    },
   },
 };

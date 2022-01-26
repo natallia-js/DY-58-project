@@ -1,6 +1,6 @@
 <template>
   <Toast />
-  <ConfirmPopup></ConfirmPopup>
+  <ConfirmPopup group="confirmClearOrderPattern"></ConfirmPopup>
   <div class="p-grid">
     <div class="p-col-4">
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
@@ -321,6 +321,7 @@
       const handleClearOrderPattern = (event) => {
         confirm.require({
           target: event.currentTarget,
+          group: "confirmClearOrderPattern",
           message: 'Очистить шаблон?',
           icon: 'pi pi-exclamation-circle',
           accept: () => {

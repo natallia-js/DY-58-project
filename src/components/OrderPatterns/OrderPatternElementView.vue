@@ -72,7 +72,7 @@
 
   <div v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE" class="dy58-dy-train-table-block">
     <Toast />
-    <ConfirmPopup></ConfirmPopup>
+    <ConfirmPopup group="confirmDelAllTableRecords"></ConfirmPopup>
     <div class="p-mb-1">
       <Button
         icon="pi pi-download"
@@ -387,6 +387,7 @@
       const clearDRTrainTable = (event) => {
         confirm.require({
           target: event.target,
+          group: "confirmDelAllTableRecords",
           message: 'Удалить все записи таблицы?',
           icon: 'pi pi-exclamation-circle',
           accept: () => {

@@ -27,6 +27,9 @@ export const SUB_ORDERS_BEING_DISPATCHED_NUMBER = 'subOrdersBeingDispatchedNumbe
 export const SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER = 'subDispatchedOrdersBeingEditedNumber';
 export const SET_DISPATCH_ORDER_RESULT = 'setDispatchOrderResult';
 export const SET_EDIT_DISPATCHED_ORDER_RESULT = 'setEditDispatchedOrderResult';
+export const SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT = 'setDelStationWorkPlaceReceiverResult';
+export const CLEAR_DEL_STATION_WORK_PLACE_RECEIVER_RESULT = 'clearDelStationWorkPlaceReceiverResult';
+export const DEL_ORDER_STATION_RECEIVER = 'delOrderStationReceiver';
 //export const ADD_ORDER = 'addOrder';
 
 // Last Orders Params

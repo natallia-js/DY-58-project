@@ -1,9 +1,11 @@
 <template>
   <div>
+    <ConfirmPopup group="confirmDelStationReceiver"></ConfirmPopup>
+
     <ShowIncomingOrderDlg
-      :showDlg="showIncomingOrderDlg"
+      :showDlg="state.showIncomingOrderDlg"
       dlgTitle="Информация о рабочем распоряжении"
-      :order="chosenOrder"
+      :order="state.chosenOrder"
       :orderNeedsToBeConfirmed="false"
       @close="hideOrderInfo"
     >
@@ -17,9 +19,9 @@
       :rowHover="true"
       dataKey="id"
       :scrollable="true" scrollHeight="flex"
-      v-model:expandedRows="expandedRows"
+      v-model:expandedRows="state.expandedRows"
       contextmenu
-      v-model:contextMenuSelection="selectedWorkOrdersTableRecord"
+      v-model:contextMenuSelection="state.selectedWorkOrdersTableRecord"
       @rowContextmenu="handleWorkOrdersTableRightClick"
     >
       <Column
@@ -69,7 +71,7 @@
                     icon="pi pi-ellipsis-h"
                     class="p-button-info p-button-sm dy58-order-action-button"
                     v-tooltip.bottom="'Подробнее'"
-                    @click="() => showOrderInfo(slotProps.data)"
+                    @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
                 <div class="p-mb-1">
@@ -78,7 +80,7 @@
                     icon="pi pi-times"
                     class="p-button-secondary p-button-sm dy58-order-action-button"
                     v-tooltip.bottom="slotProps.data.chainMembersNumber > 1 ? 'Не показывать цепочку' : 'Не показывать'"
-                    @click="() => deleteOrdersChain(slotProps.data.orderChainId)"
+                    @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
                 <div>
@@ -89,7 +91,7 @@
                     :id="`overlay_tmenu${slotProps.data.id}`"
                   />
                   <Button
-                    v-if="canUserDispatchOrders && getActiveOrders.find((order) => order._id === slotProps.data.id)"
+                    v-if="canUserDispatchOrders && isOrderActive(slotProps.data.id)"
                     icon="pi pi-file"
                     class="p-button-success p-button-sm dy58-order-action-button"
                     v-tooltip.bottom="'Создать'"
@@ -199,9 +201,14 @@
                       {{ slotProps3.data[col3.field] }}
                     </div>
                     <div v-else>
-                      <span v-if="slotProps3.data[col3.field]">
+                      <div v-if="slotProps3.data[col3.field]">
                         {{ getDateTimeString(slotProps3.data[col3.field]) }}
-                      </span>
+                        <Button
+                          label="Удалить"
+                          class="p-button-primary p-button-text"
+                          @click="deleteOrderStationWorkPoligon($event, slotProps.data.id, slotProps3.data.workPlaceId)"
+                        />
+                      </div>
                       <div v-else-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
                         !isOrderBeingConfirmedForOthers(slotProps.data.id)">
                         <Button
@@ -216,11 +223,6 @@
                           }])"
                         />
                       </div>
-                      <Button
-                        label="Удалить"
-                        class="p-button-primary p-button-text"
-                        @click="() => {}"
-                      />
                     </div>
                   </template>
                 </Column>
@@ -254,8 +256,9 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
-  import { WorkMessStates } from '@/constants/orders';
+  import { computed, reactive, ref } from 'vue';
+  import { useStore } from 'vuex';
+  import { useConfirm } from 'primevue/useconfirm';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
 
@@ -266,78 +269,61 @@
       ShowIncomingOrderDlg,
     },
 
-    data() {
-      return {
+    setup() {
+      const store = useStore();
+      const confirm = useConfirm();
+      const menu = ref();
+
+      const state = reactive({
         expandedRows: [],
         selectedWorkOrdersTableRecord: null,
         showIncomingOrderDlg: false,
         chosenOrder: null,
-      };
-    },
+      });
 
-    computed: {
-      ...mapGetters([
-        'getWorkingOrders',
-        'getWorkMessTblColumnsTitles',
-        'getWorkMessReceiversTblColumnsTitles',
-        'getWorkMessStationReceiversTblColumnsTitles',
-        'getWorkMessTblColumns',
-        'getWorkMessReceiversTblColumns',
-        'getWorkMessStationReceiversTblColumns',
-        'getOrdersChainsBeingDeleted',
-        'getUserWorkPoligon',
-        'isOrderBeingConfirmedForOthers',
-        'canUserConfirmOrderForOthers',
-        'canUserDispatchOrders',
-        'canUserDelConfirmedOrdersChains',
-        'getCreateRelativeOrderContextMenu',
-        'getDeleteOrdersChainAction',
-        'getActiveOrders',
-        'canUserConfirmOrdersForOthersOnStationWorkPlaces',
-      ]),
+      const getWorkMessTblColumns = computed(() => store.getters.getWorkMessTblColumns);
+      const getWorkMessTblColumnsTitles = computed(() => store.getters.getWorkMessTblColumnsTitles);
 
-      getWorkMessStates() {
-        return WorkMessStates;
-      },
+      const getWorkMessTblColumnsExceptExpander = computed(() =>
+        getWorkMessTblColumns.value.filter((el) => el.field !== getWorkMessTblColumnsTitles.value.expander));
 
-      getWorkMessTblColumnsExceptExpander() {
-        return this.getWorkMessTblColumns.filter((el) => el.field !== this.getWorkMessTblColumnsTitles.expander);
-      },
+      const getExpanderColumnObject = computed(() =>
+        getWorkMessTblColumns.value.find((el) => el.field === getWorkMessTblColumnsTitles.value.expander));
 
-      getExpanderColumnObject() {
-        return this.getWorkMessTblColumns.find((el) => el.field === this.getWorkMessTblColumnsTitles.expander);
-      },
+      const canUserDelConfirmedOrdersChains = computed(() => store.getters.canUserDelConfirmedOrdersChains);
 
-      workOrdersTableContextMenuItems() {
+      const getDeleteOrdersChainAction = computed(() => store.getters.getDeleteOrdersChainAction);
+
+      const getCreateRelativeOrderContextMenu = computed(() => store.getters.getCreateRelativeOrderContextMenu);
+
+      const workOrdersTableContextMenuItems = computed(() => {
         const items = [];
-
-        if (this.selectedWorkOrdersTableRecord) {
-          if (this.canUserDelConfirmedOrdersChains) {
-            const ordersInChain = this.$store.getters.getOrdersInChain(this.selectedWorkOrdersTableRecord.orderChainId);
+        if (state.selectedWorkOrdersTableRecord) {
+          if (canUserDelConfirmedOrdersChains.value) {
+            const ordersInChain = store.getters.getOrdersInChain(state.selectedWorkOrdersTableRecord.orderChainId);
             items.push({
               label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
               icon: 'pi pi-times',
               command: () => {
-                this.getDeleteOrdersChainAction(this.selectedWorkOrdersTableRecord.orderChainId, this.$confirm);
+                getDeleteOrdersChainAction.value(state.selectedWorkOrdersTableRecord.orderChainId, confirm);
               },
             });
           }
-
           const createRelativeOrderContextMenuItems =
-            this.getCreateRelativeOrderContextMenu(this.selectedWorkOrdersTableRecord.id);
+            getCreateRelativeOrderContextMenu.value(state.selectedWorkOrdersTableRecord.id);
           if (createRelativeOrderContextMenuItems.length) {
             items.push(...createRelativeOrderContextMenuItems);
           }
         }
-
         if (!items.length) {
           items.push({
             label: 'У вас нет прав на выполнение действий над распоряжениями',
           });
         }
-
         return items;
-      },
+      });
+
+      const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
 
       /**
        * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов.
@@ -348,73 +334,111 @@
        * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
        * за других.
        */
-      orderCanBeConfirmedFor() {
+      const orderCanBeConfirmedFor = computed(() => {
         return (order) => {
-          return (order.senderWorkPoligon.type === this.getUserWorkPoligon.type) &&
-            (order.senderWorkPoligon.id === this.getUserWorkPoligon.code);
+          return (order.senderWorkPoligon.type === getUserWorkPoligon.value.type) &&
+            (order.senderWorkPoligon.id === getUserWorkPoligon.value.code);
         };
-      },
-    },
+      });
 
-    methods: {
-      createRelativeOrderContextMenuItems(orderId) {
-        return this.getCreateRelativeOrderContextMenu(orderId);
-      },
+      const createRelativeOrderContextMenuItems = (orderId) => {
+        return getCreateRelativeOrderContextMenu.value(orderId);
+      };
 
-      showOrderInfo(order) {
-        this.chosenOrder = order;
-        this.showIncomingOrderDlg = true;
-      },
+      const showOrderInfo = (order) => {
+        state.chosenOrder = order;
+        state.showIncomingOrderDlg = true;
+      };
 
-      hideOrderInfo() {
-        this.chosenOrder = null;
-        this.showIncomingOrderDlg = false;
-      },
+      const hideOrderInfo = () => {
+        state.chosenOrder = null;
+        state.showIncomingOrderDlg = false;
+      };
 
-      deleteOrdersChain(chainId) {
-        this.getDeleteOrdersChainAction(chainId, this.$confirm);
-      },
+      const deleteOrdersChain = (chainId) => {
+        getDeleteOrdersChainAction.value(chainId, confirm);
+      };
 
-      handleWorkOrdersTableRightClick(event) {
-        this.$refs.menu.show(event.originalEvent);
-      },
+      const handleWorkOrdersTableRightClick = (event) => {
+        menu.value.show(event.originalEvent);
+      };
 
-      getDateTimeString(datetime, showSeconds) {
+      const getDateTimeString = (datetime, showSeconds) => {
         return getLocaleDateTimeString(datetime, showSeconds);
-      },
+      };
 
       /**
        * Значение параметра confirmWorkPoligons - массив объектов с информацией о рабочих полигонах / рабочих
        * местах на станции, за которые необходимо подтвердить распоряжение.
        */
-      confirmOrderForOthers(orderId, confirmWorkPoligons) {
+      const confirmOrderForOthers = (orderId, confirmWorkPoligons) => {
         if (confirmWorkPoligons && confirmWorkPoligons.length) {
-          this.$store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
+          store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
         }
-      },
+      };
 
       /**
        * Для заданного списка исходных (указанных явно пользователем при создании) адресатов распоряжения
        * возвращает массив таких адресатов, для которых не было подтверждения получения данного распоряжения.
        */
-      getOrderUnconfirmedWorkPoligons(receivers) {
+      const getOrderUnconfirmedWorkPoligons = (receivers) => {
         return receivers ? receivers.filter((el) => !el.confirmDateTime) : [];
-      },
+      };
 
       /**
        * Для заданного списка адресатов распоряжения на станции возвращает массив таких адресатов,
        * для которых не было подтверждения получения данного распоряжения.
        */
-      getOrderUnconfirmedStationWorkPoligons(stationReceivers) {
+      const getOrderUnconfirmedStationWorkPoligons = (stationReceivers) => {
         return stationReceivers ? stationReceivers.filter((el) => !el.confirmDateTime) : [];
-      },
+      };
 
       /**
        * Позволяет удалить адресата распоряжения из списка получателей распоряжения на рабочих местах станции.
        */
-      deleteOrderStationWorkPoligon() {
-        //
-      },
+      const deleteOrderStationWorkPoligon = (event, orderId, workPlaceId) => {
+        confirm.require({
+          target: event.currentTarget,
+          group: 'confirmDelStationReceiver',
+          message: 'Удалить запись?',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            store.dispatch('delStationWorkPlaceReceiver', { orderId, workPlaceId });
+          },
+        });
+      };
+
+      return {
+        state,
+        menu,
+        getWorkingOrders: computed(() => store.getters.getWorkingOrders),
+        getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
+        getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
+        getWorkMessReceiversTblColumns: computed(() => store.getters.getWorkMessReceiversTblColumns),
+        getWorkMessStationReceiversTblColumns: computed(() => store.getters.getWorkMessStationReceiversTblColumns),
+        getOrdersChainsBeingDeleted: computed(() => store.getters.getOrdersChainsBeingDeleted),
+        isOrderBeingConfirmedForOthers: computed(() => store.getters.isOrderBeingConfirmedForOthers),
+        canUserConfirmOrderForOthers: computed(() => store.getters.canUserConfirmOrderForOthers),
+        canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
+        isOrderActive: computed(() => store.getters.isOrderActive),
+        canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
+        getWorkMessTblColumnsTitles,
+        canUserDelConfirmedOrdersChains,
+        getWorkMessTblColumnsExceptExpander,
+        getExpanderColumnObject,
+        workOrdersTableContextMenuItems,
+        orderCanBeConfirmedFor,
+        createRelativeOrderContextMenuItems,
+        showOrderInfo,
+        hideOrderInfo,
+        deleteOrdersChain,
+        handleWorkOrdersTableRightClick,
+        getDateTimeString,
+        confirmOrderForOthers,
+        getOrderUnconfirmedWorkPoligons,
+        getOrderUnconfirmedStationWorkPoligons,
+        deleteOrderStationWorkPoligon,
+      };
     },
   }
 </script>

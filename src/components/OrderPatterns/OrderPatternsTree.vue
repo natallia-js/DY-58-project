@@ -1,5 +1,5 @@
 <template>
-  <ConfirmPopup></ConfirmPopup>
+  <ConfirmPopup group="confirmDelOrderPattern"></ConfirmPopup>
   <Toast />
   <div v-if="getLoadingOrderPatternsStatus">
     <ProgressSpinner />
@@ -433,6 +433,7 @@
       deleteOrderPattern(event) {
         this.$confirm.require({
           target: event.currentTarget,
+          group: "confirmDelOrderPattern",
           message: 'Удалить шаблон?',
           icon: 'pi pi-exclamation-circle',
           accept: () => {
