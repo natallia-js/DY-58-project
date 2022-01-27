@@ -139,8 +139,10 @@ export const lastOrdersParams = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о последних изданных распоряжениях');
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, false);
       }
-      context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, false);
     },
   },
 }

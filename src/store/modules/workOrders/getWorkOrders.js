@@ -10,9 +10,6 @@ import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTim
 import { formOrderText } from '@/additional/formOrderText';
 import { upperCaseFirst } from '@/additional/stringFunctions';
 import {
-  CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER,
-  CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
-  CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
   SET_START_DATE_TO_GET_DATA,
   SET_START_DATE_TO_GET_DATA_NO_CHECK,
   CLEAR_LOADING_WORK_ORDERS_RESULT,
@@ -343,6 +340,7 @@ export const getWorkOrders = {
             senderWorkPoligon: {
               id: item.senderWorkPoligon.id,
               type: item.senderWorkPoligon.type,
+              workPlaceId: item.senderWorkPoligon.workPlaceId,
             },
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
@@ -625,6 +623,7 @@ export const getWorkOrders = {
      */
     async loadWorkOrders(context) {
       if (!context.getters.canUserWorkWithSystem) {
+        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: 'Не могу загрузить рабочие распоряжения: у вас нет прав на работу с системой' });
         return;
       }
       context.commit(CLEAR_LOADING_WORK_ORDERS_RESULT);
@@ -641,15 +640,14 @@ export const getWorkOrders = {
           userId: context.getters.getUserId,
         });
         context.dispatch('reportOnOrdersDelivery', responseData);
-        context.commit(CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
-        context.commit(CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER);
-        context.commit(CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о рабочих распоряжениях');
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_LOADING_WORK_ORDERS_STATUS, false);
       }
-      context.commit(SET_LOADING_WORK_ORDERS_STATUS, false);
     },
   },
 }

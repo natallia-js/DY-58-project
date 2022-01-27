@@ -96,8 +96,10 @@ export const orderPatternsElementsRefs = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений');
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, false);
       }
-      context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, false);
     },
   },
 }

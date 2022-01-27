@@ -83,8 +83,10 @@ export const reportOnOrdersDelivery = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих распоряжений');
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, false);
       }
-      context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, false);
     },
   },
 };

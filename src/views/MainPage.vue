@@ -93,11 +93,10 @@
   import CreateDSPTakeDutyOrderDlg from '@/components/CreateOrders/CreateDSPTakeDutyOrderDlg';
   import showMessage from '@/hooks/showMessage.hook';
   import {
-    SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER,
-    SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER,
     SET_ACTIVE_MAIN_MENU_ITEM,
     SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER,
     SET_START_DATE_TO_GET_DATA_NO_CHECK,
+    CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
 
@@ -133,37 +132,26 @@
         state.startDateToGetData = newVal;
       });
 
-      watch(() => store.getters.getDeleteOrdersChainsResultsUnseenByUser, (newVal) => {
-        newVal.forEach((result) => {
+      /**
+       * Отображение результатов удаления цепочек распоряжений.
+       * Этот код именно здесь, т.к. удаление цепочек распоряжений может производиться из нескольких мест
+       * (компонентов), размещенных на этой странице.
+       */
+      watch(() => store.getters.getDeleteOrdersChainsResultsUnseenByUserNumber, (newVal) => {
+        if (newVal === 0) {
+          return;
+        }
+        const seenChainIdsResults = [];
+        store.getters.getDeleteOrdersChainsResultsUnseenByUser.forEach((result) => {
           if (result.error) {
             showErrMessage(result.message);
           } else {
             showSuccessMessage(result.message);
           }
-          store.commit(SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER, result.chainId);
+          seenChainIdsResults.push(result.chainId);
         });
-      });
-
-      watch(() => store.getters.getConfirmOrdersResultsUnseenByUser, (newVal) => {
-        newVal.forEach((result) => {
-          if (result.error) {
-            showErrMessage(result.message);
-          } else {
-            showSuccessMessage(result.message);
-          }
-          store.commit(SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER, result.orderId);
-        });
-      });
-
-      watch(() => store.getters.getConfirmOrdersForOthersResultsUnseenByUser, (newVal) => {
-        newVal.forEach((result) => {
-          if (result.error) {
-            showErrMessage(result.message);
-          } else {
-            showSuccessMessage(result.message);
-          }
-          store.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER, result.orderId);
-        });
+        store.commit(SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER, seenChainIdsResults);
+        store.commit(CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
       });
 
       /**

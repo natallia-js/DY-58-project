@@ -64,7 +64,17 @@
               </p>
             </div>
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.state">
-              <i v-if="isOrderBeingConfirmedForOthers(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
+              <!-- Вместо кнопок действий пользователя над распоряжением отображаем статус ожидания,
+              если идет один из следующих процессов, связанных с текущим распоряжением:
+              1. подтверждение за получателей на глобальных полигонах управления
+              2. подтверждение за получателей на станционных рабочих местах
+              3. удаление цепочки распоряжений, частью которой является данное распоряжение -->
+              <i
+                v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
+                  isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id) ||
+                  getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)"
+                class="pi pi-spin pi-check-circle"
+              ></i>
               <div v-else>
                 <div class="p-mb-1">
                   <Button
@@ -115,7 +125,10 @@
             <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
           </div>
           <div class="p-col">
-            <div>
+
+            <!-- Если таблица адресатов распоряжения на глобальных рабочих полигонах пуста, не отображаем ее -->
+
+            <div v-if="slotProps.data.receivers && slotProps.data.receivers.length">
               <p>Адресаты:</p>
               <DataTable :value="slotProps.data.receivers">
                 <Column v-for="col2 of getWorkMessReceiversTblColumns"
@@ -144,6 +157,7 @@
                         v-else-if="canUserConfirmOrderForOthers &&
                           !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
                           !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                          !isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id) &&
                           orderCanBeConfirmedFor(slotProps.data)"
                         label="Подтвердить"
                         class="p-button-primary p-button-text"
@@ -158,12 +172,17 @@
                   </template>
                 </Column>
               </DataTable>
-              <div style="text-align:right"
-                v-if="canUserConfirmOrderForOthers &&
+              <div v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
+                isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
+                style="text-align:right"
+              >
+                <i class="pi pi-spin pi-spinner"></i>
+              </div>
+              <div v-else-if="canUserConfirmOrderForOthers &&
                   !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                  !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
                   orderCanBeConfirmedFor(slotProps.data) &&
                   getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).length"
+                style="text-align:right"
               >
                 <Button
                   label="Подтвердить все"
@@ -177,8 +196,9 @@
                     })))"
                 />
               </div>
+              <br />
             </div>
-            <br />
+
             <div v-if="canUserConfirmOrdersForOthersOnStationWorkPlaces">
               <p>Получатели на станции:</p>
               <DataTable :value="slotProps.data.stationReceivers">
@@ -203,14 +223,14 @@
                     <div v-else>
                       <div v-if="slotProps3.data[col3.field]">
                         {{ getDateTimeString(slotProps3.data[col3.field]) }}
-                        <Button
-                          label="Удалить"
-                          class="p-button-primary p-button-text"
-                          @click="deleteOrderStationWorkPoligon($event, slotProps.data.id, slotProps3.data.workPlaceId)"
-                        />
                       </div>
-                      <div v-else-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                        !isOrderBeingConfirmedForOthers(slotProps.data.id)">
+                      <div
+                        v-else-if="canUserConfirmOrderForOthers &&
+                          !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                          orderCanBeConfirmedForOnStation(slotProps.data) &&
+                          !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+                          !isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
+                        >
                         <Button
                           label="Подтвердить"
                           class="p-button-primary p-button-text"
@@ -223,14 +243,27 @@
                           }])"
                         />
                       </div>
+                      <div v-if="orderStationWorkPlaceReceiverCanBeDeleted(slotProps.data, slotProps3.data.type, slotProps3.data.id, slotProps3.data.workPlaceId)">
+                        <Button
+                          label="Удалить"
+                          class="p-button-primary p-button-text"
+                          @click="deleteOrderStationWorkPoligon($event, slotProps.data.id, slotProps3.data.workPlaceId)"
+                        />
+                      </div>
                     </div>
                   </template>
                 </Column>
               </DataTable>
-              <div style="text-align:right"
-                v-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                  !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
+              <div v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
+                isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
+                style="text-align:right"
+              >
+                <i class="pi pi-spin pi-spinner"></i>
+              </div>
+              <div v-else-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
+                  orderCanBeConfirmedForOnStation(slotProps.data) &&
                   getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).length"
+                style="text-align:right"
               >
                 <Button
                   label="Подтвердить все"
@@ -256,11 +289,18 @@
 
 
 <script>
-  import { computed, reactive, ref } from 'vue';
+  import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
+  import showMessage from '@/hooks/showMessage.hook';
+  import {
+    SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER,
+    CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
+    SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
+    CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
+  } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
@@ -273,6 +313,7 @@
       const store = useStore();
       const confirm = useConfirm();
       const menu = ref();
+      const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
         expandedRows: [],
@@ -326,19 +367,70 @@
       const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
 
       /**
-       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов.
+       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
+       * (т.е. за те полигоны, которые присутствовали в секции "Кому" при издании распоряжения).
        * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-       * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: вне зависимости
-       * от того, кто из них издал распоряжение, все они имеют право на подтверждение данного
-       * распоряжения за тех лиц, кому это распоряжение адресовалось).
+       * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: их рабочие
+       * полигоны - разные: рабочий полигон = рабочее место).
        * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
        * за других.
        */
       const orderCanBeConfirmedFor = computed(() => {
-        return (order) => {
-          return (order.senderWorkPoligon.type === getUserWorkPoligon.value.type) &&
-            (order.senderWorkPoligon.id === getUserWorkPoligon.value.code);
-        };
+        return (order) =>
+          (
+            order && order.senderWorkPoligon && getUserWorkPoligon.value &&
+            (order.senderWorkPoligon.type === getUserWorkPoligon.value.type) &&
+            (String(order.senderWorkPoligon.id) === String(getUserWorkPoligon.value.code)) &&
+            (
+              (!order.senderWorkPoligon.workPlaceId && !getUserWorkPoligon.value.subCode) ||
+              (order.senderWorkPoligon.workPlaceId && getUserWorkPoligon.value.subCode && String(order.senderWorkPoligon.workPlaceId) === String(getUserWorkPoligon.value.subCode))
+            )
+          ) ? true : false;
+      });
+
+      /**
+       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
+       * в рамках станции (т.е. подтвердить за конкретные рабочие места).
+       * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
+       * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: их рабочие
+       * полигоны - разные: рабочий полигон = рабочее место) либо если распоряжение адресовалось
+       * текущей станции в момент его издания (в этом случае за других может подтвердить распоряжение
+       * как ДСП, так и Оператор при ДСП).
+       * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
+       * за других в рамках станции.
+       */
+      const orderCanBeConfirmedForOnStation = computed(() => {
+        return (order) =>
+          (
+            orderCanBeConfirmedFor.value(order) ||
+            (
+              order.receivers && getUserWorkPoligon.value && order.receivers.find((el) =>
+                (el.type === getUserWorkPoligon.value.type) &&
+                (String(el.id) === String(getUserWorkPoligon.value.code))
+              )
+            )
+          ) ? true : false;
+       });
+
+      /**
+       * Возвращает true, если возможно удаление адресата распоряжения из таблицы адресатов на рабочих
+       * местах станции, false - в противном случае. Такое удаление для конкретной записи таблицы возможно
+       * лишь в том случае, если распоряжение было издано на данном рабочем месте либо если удаляет запись
+       * лицо с того рабочего места, которому распоряжение адресовалось.
+       */
+      const orderStationWorkPlaceReceiverCanBeDeleted = computed(() => {
+        return (order, workPoligonType, workPoligonId, workPlaceId) =>
+          (
+            orderCanBeConfirmedFor.value(order) ||
+            (
+              getUserWorkPoligon.value && (getUserWorkPoligon.value.type === workPoligonType) &&
+              (String(getUserWorkPoligon.value.code) === String(workPoligonId)) &&
+              (
+                (!getUserWorkPoligon.value.subCode && !workPlaceId) ||
+                (getUserWorkPoligon.value.subCode && workPlaceId && String(getUserWorkPoligon.value.subCode) === String(workPlaceId))
+              )
+            )
+          ) ? true : false;
       });
 
       const createRelativeOrderContextMenuItems = (orderId) => {
@@ -395,6 +487,8 @@
 
       /**
        * Позволяет удалить адресата распоряжения из списка получателей распоряжения на рабочих местах станции.
+       * Удаление производится как в рамках основной таблицы распоряжений, так и в рамках таблицы рабочих
+       * распоряжений на сервере.
        */
       const deleteOrderStationWorkPoligon = (event, orderId, workPlaceId) => {
         confirm.require({
@@ -407,6 +501,46 @@
           },
         });
       };
+
+      /**
+       * Отображение результатов подтверждения распоряжений за других лиц (на сервере).
+       */
+      watch(() => store.getters.getConfirmOrdersForOthersResultsUnseenByUserNumber, (newVal) => {
+        if (newVal === 0) {
+          return;
+        }
+        const seenOrderIdsResults = [];
+        store.getters.getConfirmOrdersForOthersResultsUnseenByUser.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          seenOrderIdsResults.push(result.orderId);
+        });
+        store.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER, seenOrderIdsResults);
+        store.commit(CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER);
+      });
+
+      /**
+       * Отображение результатов удаления получателей распоряжения на рабочих местах станции (на сервере).
+       */
+      watch(() => store.getters.getDelStationWorkPlaceReceiverResultsUnseenByUserNumber, (newVal) => {
+        if (newVal === 0) {
+          return;
+        }
+        const seenOrderIdsResults = [];
+        store.getters.getDelStationWorkPlaceReceiverResultsUnseenByUser.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          seenOrderIdsResults.push(result.orderId);
+        });
+        store.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER, seenOrderIdsResults);
+        store.commit(CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER);
+      });
 
       return {
         state,
@@ -422,12 +556,15 @@
         canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
         isOrderActive: computed(() => store.getters.isOrderActive),
         canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
+        isOrderBeingDeletedStationWorkPlaceReceiver: computed(() => store.getters.isOrderBeingDeletedStationWorkPlaceReceiver),
         getWorkMessTblColumnsTitles,
         canUserDelConfirmedOrdersChains,
         getWorkMessTblColumnsExceptExpander,
         getExpanderColumnObject,
         workOrdersTableContextMenuItems,
         orderCanBeConfirmedFor,
+        orderCanBeConfirmedForOnStation,
+        orderStationWorkPlaceReceiverCanBeDeleted,
         createRelativeOrderContextMenuItems,
         showOrderInfo,
         hideOrderInfo,

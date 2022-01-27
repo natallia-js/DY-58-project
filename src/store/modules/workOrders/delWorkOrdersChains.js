@@ -29,6 +29,13 @@ export const delWorkOrdersChains = {
     getDeleteOrdersChainsResultsUnseenByUser(state) {
       return state.deleteOrdersChainsResults.filter((res) => !res.wasShownToUser);
     },
+
+    /**
+     * Возвращает количество тех результатов удаления цепочек распоряжений, которые не были отображены пользователю.
+     */
+     getDeleteOrdersChainsResultsUnseenByUserNumber(_state, getters) {
+      return getters.getDeleteOrdersChainsResultsUnseenByUser.length;
+    },
   },
 
   mutations: {
@@ -47,14 +54,19 @@ export const delWorkOrdersChains = {
     },
 
     /**
-     * Для данного id цепочки распоряжений устанавливает флаг просмотра пользователем информации
-     * о ее удалении из списка распоряжений, находящихся в работе.
+     * Для данных id цепочек распоряжений устанавливает флаг просмотра пользователем информации
+     * об их удалении из списка распоряжений, находящихся в работе.
      */
-    [SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER] (state, chainId) {
-      const chainInfo = state.deleteOrdersChainsResults.find((item) => item.chainId === chainId);
-      if (chainInfo) {
-        chainInfo.wasShownToUser = true;
+    [SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER] (state, chainIds) {
+      if (!chainIds) {
+        return;
       }
+      chainIds.forEach((chainId) => {
+        const chainInfo = state.deleteOrdersChainsResults.find((item) => item.chainId === chainId);
+        if (chainInfo) {
+          chainInfo.wasShownToUser = true;
+        }
+      });
     },
 
     /**
@@ -115,8 +127,10 @@ export const delWorkOrdersChains = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления цепочки распоряжений');
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_ORDERS_CHAIN_FINISHED_BEING_DELETED, chainId);
       }
-      context.commit(SET_ORDERS_CHAIN_FINISHED_BEING_DELETED, chainId);
     },
   },
 }

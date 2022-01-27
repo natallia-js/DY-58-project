@@ -50,11 +50,27 @@ export const confirmOrder = {
     },
 
     /**
+     * Возвращает количество тех результатов подтверждения распоряжений (входящих уведомлений),
+     * которые не были отображены пользователю.
+     */
+    getConfirmOrdersResultsUnseenByUserNumber(_state, getters) {
+      return getters.getConfirmOrdersResultsUnseenByUser.length;
+    },
+
+    /**
      * Возвращает те результаты подтверждения распоряжений (за другие полигоны),
      * которые не были отображены пользователю.
      */
     getConfirmOrdersForOthersResultsUnseenByUser(state) {
       return state.confirmOrdersForOthersResults.filter((res) => !res.wasShownToUser);
+    },
+
+    /**
+     * Возвращает количество тех результатов подтверждения распоряжений (за другие полигоны),
+     * которые не были отображены пользователю.
+     */
+     getConfirmOrdersForOthersResultsUnseenByUserNumber(_state, getters) {
+      return getters.getConfirmOrdersForOthersResultsUnseenByUser.length;
     },
   },
 
@@ -136,25 +152,35 @@ export const confirmOrder = {
     },
 
     /**
-     * Для данного id распоряжения (входящего уведомления) устанавливает флаг просмотра
-     * пользователем информации о его подтверждении.
+     * Для данных id распоряжений (входящих уведомлений) устанавливает флаг просмотра
+     * пользователем информации об их подтверждении.
      */
-    [SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER] (state, orderId) {
-      const orderInfo = state.confirmOrdersResults.find((item) => item.orderId === orderId);
-      if (orderInfo) {
-        orderInfo.wasShownToUser = true;
+    [SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER] (state, orderIds) {
+      if (!orderIds) {
+        return;
       }
+      orderIds.forEach((orderId) => {
+        const orderInfo = state.confirmOrdersResults.find((item) => item.orderId === orderId);
+        if (orderInfo) {
+          orderInfo.wasShownToUser = true;
+        }
+      });
     },
 
     /**
-     * Для данного id распоряжения устанавливает флаг просмотра пользователем информации о его
+     * Для данных id распоряжений устанавливает флаг просмотра пользователем информации об их
      * подтверждении за другие полигоны управления.
      */
-    [SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER] (state, orderId) {
-      const orderInfo = state.confirmOrdersForOthersResults.find((item) => item.orderId === orderId);
-      if (orderInfo) {
-        orderInfo.wasShownToUser = true;
+    [SET_CONFIRM_ORDER_FOR_OTHERS_RESULT_SEEN_BY_USER] (state, orderIds) {
+      if (!orderIds) {
+        return;
       }
+      orderIds.forEach((orderId) => {
+        const orderInfo = state.confirmOrdersForOthersResults.find((item) => item.orderId === orderId);
+        if (orderInfo) {
+          orderInfo.wasShownToUser = true;
+        }
+      });
     },
 
     /**
@@ -235,24 +261,28 @@ export const confirmOrder = {
      */
     async confirmOrder(context, { orderId }) {
       if (!context.getters.canUserConfirmOrder) {
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: 'У вас нат прав на подтверждение распоряжения' });
+        return;
+      }
+      if (context.getters.isOrderBeingConfirmed(orderId)) {
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED, orderId);
+      const confirmDateTime = new Date();
       try {
-        const confirmDateTime = new Date();
-        const responseData = await confirmOrderForMyself({
-          id: orderId,
-          confirmDateTime,
-        });
+        const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
-        context.commit(SET_ORDER_CONFIRMED, { orderId: responseData.id, confirmDateTime });
+        context.commit(SET_ORDER_CONFIRMED, { orderId: responseData.id, confirmDateTime: responseData.confirmDateTime });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
       }
-      context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
     },
 
     /**
@@ -260,13 +290,21 @@ export const confirmOrder = {
      * за ряд рабочих полигонов.
      */
     async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
-      if (!context.getters.canUserConfirmOrderForOthers || !confirmWorkPoligons || !confirmWorkPoligons.length) {
+      if (!orderId) {
+        return;
+      }
+      if (!context.getters.canUserConfirmOrderForOthers) {
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        return;
+      }
+      if (!confirmWorkPoligons || !confirmWorkPoligons.length) {
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Не определены рабочие полигоны для подтверждения распоряжения' });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
+      const confirmDateTime = new Date();
       try {
-        const confirmDateTime = new Date();
         const responseData = await confirmOrdersForOthers({
           confirmWorkPoligons,
           orderId,
@@ -278,8 +316,10 @@ export const confirmOrder = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
       }
-      context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
     },
   },
 };

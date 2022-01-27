@@ -144,9 +144,10 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка отправки распоряжения на сервер');
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
-      }
 
-      context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER);
+      } finally {
+        context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER);
+      }
     },
   },
 };

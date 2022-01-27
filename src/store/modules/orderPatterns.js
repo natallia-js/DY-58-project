@@ -409,8 +409,10 @@ export const orderPatterns = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о шаблонах распоряжений');
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, false);
       }
-      context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, false);
     },
 
     /**
@@ -442,8 +444,10 @@ export const orderPatterns = {
           message: errMessage,
           newTitle: null,
         });
+
+      } finally {
+        context.commit(SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
       }
-      context.commit(SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
     },
 
     /**
@@ -463,8 +467,10 @@ export const orderPatterns = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления шаблона распоряжений');
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
       }
-      context.commit(SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
 
     /**
@@ -494,8 +500,10 @@ export const orderPatterns = {
           message: errMessage,
           orderPattern: null,
         });
+
+      } finally {
+        context.commit(SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
       }
-      context.commit(SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
 
     /**
@@ -533,8 +541,10 @@ export const orderPatterns = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка создания шаблона распоряжений');
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);
       }
-      context.commit(SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);
     },
   },
 };

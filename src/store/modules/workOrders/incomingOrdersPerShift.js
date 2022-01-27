@@ -96,8 +96,10 @@ export const incomingOrdersPerShift = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о входящих распоряжениях за смену');
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, false);
       }
-      context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, false);
     },
   },
 };

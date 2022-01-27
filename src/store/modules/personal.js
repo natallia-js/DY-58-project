@@ -910,8 +910,10 @@ export const personal = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ДСП');
         context.state.errorLoadingCurrShift = errMessage;
+
+      } finally {
+        context.state.loadingCurrShift = false;
       }
-      context.state.loadingCurrShift = false;
     },
 
     /**
@@ -1041,8 +1043,10 @@ export const personal = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ДНЦ');
         context.state.errorLoadingCurrShift = errMessage;
+
+      } finally {
+        context.state.loadingCurrShift = false;
       }
-      context.state.loadingCurrShift = false;
     },
 
     /**
@@ -1172,8 +1176,10 @@ export const personal = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки персонала участка ЭЦД');
         context.state.errorLoadingCurrShift = errMessage;
+
+      } finally {
+        context.state.loadingCurrShift = false;
       }
-      context.state.loadingCurrShift = false;
     },
 
 

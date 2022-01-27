@@ -438,8 +438,10 @@ export const currWorkPoligonStructure = {
         };
       } catch (error) {
         context.state.errorLoadingCurrWorkPoligonStructure = error;
+
+      } finally {
+        context.state.loadingCurrWorkPoligonStructure = false;
       }
-      context.state.loadingCurrWorkPoligonStructure = false;
     },
 
     /**
@@ -462,8 +464,10 @@ export const currWorkPoligonStructure = {
         };
       } catch (error) {
         context.state.errorLoadingCurrWorkPoligonStructure = error;
+
+      } finally {
+        context.state.loadingCurrWorkPoligonStructure = false;
       }
-      context.state.loadingCurrWorkPoligonStructure = false;
     },
 
     /**
@@ -486,8 +490,10 @@ export const currWorkPoligonStructure = {
         };
       } catch (error) {
         context.state.errorLoadingCurrWorkPoligonStructure = error;
+
+      } finally {
+        context.state.loadingCurrWorkPoligonStructure = false;
       }
-      context.state.loadingCurrWorkPoligonStructure = false;
     },
 
     /**

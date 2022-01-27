@@ -49,7 +49,10 @@ export const workOrders = {
     editDispatchedOrderResult: null,
     editDispatchedOrdersBeingProcessed: 0,
 
-    delStationWorkPlaceReceiverResult: null,
+    // массив id распоряжений, для которых идет процесс удаления получателей распоряжений на рабочих местах станций
+    ordersBeingDeletedStationWorkPlaceReceivers: [],
+    // массив результатов удаления получателей распоряжений на рабочих местах станций (привязан к id распоряжений)
+    delStationWorkPlaceReceiverResults: [],
   },
 
   getters: {
