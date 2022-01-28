@@ -303,13 +303,13 @@ export const confirmOrder = {
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
-      const confirmDateTime = new Date();
+      const confirmDateTime = new Date();console.log('confirmWorkPoligons',confirmWorkPoligons)
       try {
         const responseData = await confirmOrdersForOthers({
           confirmWorkPoligons,
           orderId,
           confirmDateTime,
-        });
+        });console.log('responseData.confirmWorkPoligons',responseData.confirmWorkPoligons)
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons });
 

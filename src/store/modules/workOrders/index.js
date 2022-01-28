@@ -9,6 +9,7 @@ import { dispatchOrder } from './dispatchOrder';
 import { editOrder } from './editOrder';
 import { delWorkOrdersChains } from './delWorkOrdersChains';
 import { contextMenus } from './contextMenus';
+import { checkIfOrderActionCanBePerformed } from './checkIfOrderActionCanBePerformed';
 
 
 export const workOrders = {
@@ -67,6 +68,7 @@ export const workOrders = {
     ...contextMenus.getters,
     ...dispatchOrder.getters,
     ...editOrder.getters,
+    ...checkIfOrderActionCanBePerformed.getters,
   },
 
   mutations: {

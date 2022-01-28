@@ -46,6 +46,7 @@
               'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)
             }]"
           >
+            <!-- столбцы данных -->
             <span v-if="![
               getWorkMessTblColumnsTitles.expander,
               getWorkMessTblColumnsTitles.state,
@@ -53,6 +54,7 @@
             >
               {{ slotProps.data[col.field] }}
             </span>
+            <!-- столбец статуса -->
             <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
               <p v-if="slotProps.data[col.field].notDelivered > 0">
                 <span class="p-mr-2">Не доставлено:</span>
@@ -63,18 +65,14 @@
                 <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
               </p>
             </div>
+            <!-- столбец состояния и действий -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.state">
-              <!-- Вместо кнопок действий пользователя над распоряжением отображаем статус ожидания,
-              если идет один из следующих процессов, связанных с текущим распоряжением:
-              1. подтверждение за получателей на глобальных полигонах управления
-              2. подтверждение за получателей на станционных рабочих местах
-              3. удаление цепочки распоряжений, частью которой является данное распоряжение -->
-              <i
-                v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
-                  isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id) ||
-                  getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)"
+              <!-- вместо кнопок действий пользователя над распоряжением отображаем статус ожидания,
+              если распоряжение "занято" и над ним нельзя выполнять каких-либо действий -->
+              <i v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
                 class="pi pi-spin pi-check-circle"
               ></i>
+              <!-- кнопки допустимых действий над распоряжением -->
               <div v-else>
                 <div class="p-mb-1">
                   <Button
@@ -84,16 +82,15 @@
                     @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
-                <div class="p-mb-1">
+                <div v-if="canOrdersChainBeDeleted(slotProps.data)" class="p-mb-1">
                   <Button
-                    v-if="canUserDelConfirmedOrdersChains"
                     icon="pi pi-times"
                     class="p-button-secondary p-button-sm dy58-order-action-button"
                     v-tooltip.bottom="slotProps.data.chainMembersNumber > 1 ? 'Не показывать цепочку' : 'Не показывать'"
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
-                <div>
+                <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id)">
                   <TieredMenu
                     :ref="`createOrderMenu${slotProps.data.id}`"
                     :model="createRelativeOrderContextMenuItems(slotProps.data.id)"
@@ -101,7 +98,6 @@
                     :id="`overlay_tmenu${slotProps.data.id}`"
                   />
                   <Button
-                    v-if="canUserDispatchOrders && isOrderActive(slotProps.data.id)"
                     icon="pi pi-file"
                     class="p-button-success p-button-sm dy58-order-action-button"
                     v-tooltip.bottom="'Создать'"
@@ -118,15 +114,21 @@
 
       <template #expansion="slotProps">
         <div class="p-grid" style="width:100%;background:var(--dy58-expand-row-bg-color);margin:0;">
+
+          <!-- Текст распоряжения -->
+
           <div class="p-col">
             <div v-if="!slotProps.data.sendOriginal"><b>КОПИЯ</b></div>
             <div class="dy58-order-pattern-border p-p-1" v-html="slotProps.data.orderText"></div>
             <div><b>Из:</b> {{ slotProps.data.place }}</div>
             <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
           </div>
+
+          <!-- Адресаты распоряжения -->
+
           <div class="p-col">
 
-            <!-- Если таблица адресатов распоряжения на глобальных рабочих полигонах пуста, не отображаем ее -->
+            <!-- Если таблица основных адресатов распоряжения на глобальных рабочих полигонах пуста, не отображаем ее -->
 
             <div v-if="slotProps.data.receivers && slotProps.data.receivers.length">
               <p>Адресаты:</p>
@@ -140,6 +142,7 @@
                   bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
                 >
                   <template #body="slotProps2">
+                    <!-- правило отображения данных всех столбцов, кроме столбца с датой подтверждения распоряжения -->
                     <div v-if="col2.field !== getWorkMessReceiversTblColumnsTitles.confirmDateTime"
                       style="width:100%"
                       :class="[
@@ -149,16 +152,15 @@
                     >
                       {{ slotProps2.data[col2.field] }}
                     </div>
+                    <!-- правило отображения информации в столбце с датой подтверждения распоряжения -->
                     <div v-else>
+                      <!-- если дата подтверждения указана, то отображаем ее -->
                       <span v-if="slotProps2.data[col2.field]">
                         {{ getDateTimeString(slotProps2.data[col2.field]) }}
                       </span>
+                      <!-- в противном случае отображаем кнопку подтверждения (если подтверждение возможно) -->
                       <Button
-                        v-else-if="canUserConfirmOrderForOthers &&
-                          !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                          !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
-                          !isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id) &&
-                          orderCanBeConfirmedFor(slotProps.data)"
+                        v-else-if="canOrderBeConfirmedFor(slotProps.data)"
                         label="Подтвердить"
                         class="p-button-primary p-button-text"
                         @click="confirmOrderForOthers(slotProps.data.id, [{
@@ -172,16 +174,17 @@
                   </template>
                 </Column>
               </DataTable>
-              <div v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
-                isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
+              <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
+              ввиду его "занятости", отображаем состояние прогресса -->
+              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
                 style="text-align:right"
               >
                 <i class="pi pi-spin pi-spinner"></i>
               </div>
-              <div v-else-if="canUserConfirmOrderForOthers &&
-                  !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                  orderCanBeConfirmedFor(slotProps.data) &&
-                  getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).length"
+              <!-- Отображаем кнопку подтверждения распоряжения за всех, если есть хотя бы одна неподтвержденная
+              запись в таблице -->
+              <div v-else-if="canOrderBeConfirmedFor(slotProps.data) &&
+                getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).length"
                 style="text-align:right"
               >
                 <Button
@@ -199,6 +202,9 @@
               <br />
             </div>
 
+            <!-- Блок получателей распоряжения на станции отображаем только в том случае, если текущий
+            пользователь может подтверждать распоряжения за адресатов на станции -->
+
             <div v-if="canUserConfirmOrdersForOthersOnStationWorkPlaces">
               <p>Получатели на станции:</p>
               <DataTable :value="slotProps.data.stationReceivers">
@@ -211,6 +217,7 @@
                   bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
                 >
                   <template #body="slotProps3">
+                    <!-- правило отображения данных всех столбцов, кроме столбца с датой подтверждения распоряжения -->
                     <div v-if="col3.field !== getWorkMessStationReceiversTblColumnsTitles.confirmDateTime"
                       style="width:100%"
                       :class="[
@@ -220,17 +227,14 @@
                     >
                       {{ slotProps3.data[col3.field] }}
                     </div>
+                    <!-- правило отображения информации в столбце с датой подтверждения распоряжения -->
                     <div v-else>
+                      <!-- если дата подтверждения указана, то отображаем ее -->
                       <div v-if="slotProps3.data[col3.field]">
                         {{ getDateTimeString(slotProps3.data[col3.field]) }}
                       </div>
-                      <div
-                        v-else-if="canUserConfirmOrderForOthers &&
-                          !getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                          orderCanBeConfirmedForOnStation(slotProps.data) &&
-                          !isOrderBeingConfirmedForOthers(slotProps.data.id) &&
-                          !isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
-                        >
+                      <!-- в противном случае отображаем кнопку подтверждения (если подтверждение возможно) -->
+                      <div v-else-if="canOrderBeConfirmedForOnStation(slotProps.data)">
                         <Button
                           label="Подтвердить"
                           class="p-button-primary p-button-text"
@@ -243,7 +247,13 @@
                           }])"
                         />
                       </div>
-                      <div v-if="orderStationWorkPlaceReceiverCanBeDeleted(slotProps.data, slotProps3.data.type, slotProps3.data.id, slotProps3.data.workPlaceId)">
+                      <!-- отображаем кнопку удаления записи (если удаление возможно) -->
+                      <div v-if="canOrderBeDeletedStationWorkPlaceReceiver({
+                        order: slotProps.data,
+                        workPlaceType: slotProps3.data.type,
+                        workPlaceId: slotProps3.data.id,
+                        workPoligonId: slotProps3.data.workPlaceId
+                      })">
                         <Button
                           label="Удалить"
                           class="p-button-primary p-button-text"
@@ -254,15 +264,17 @@
                   </template>
                 </Column>
               </DataTable>
-              <div v-if="isOrderBeingConfirmedForOthers(slotProps.data.id) ||
-                isOrderBeingDeletedStationWorkPlaceReceiver(slotProps.data.id)"
+              <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
+              на станции ввиду его "занятости", отображаем состояние прогресса -->
+              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
                 style="text-align:right"
               >
                 <i class="pi pi-spin pi-spinner"></i>
               </div>
-              <div v-else-if="!getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId) &&
-                  orderCanBeConfirmedForOnStation(slotProps.data) &&
-                  getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).length"
+              <!-- Отображаем кнопку подтверждения распоряжения за всех на станции, если есть хотя бы
+              одна неподтвержденная запись в таблице -->
+              <div v-else-if="canOrderBeConfirmedForOnStation(slotProps.data) &&
+                getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).length"
                 style="text-align:right"
               >
                 <Button
@@ -332,9 +344,7 @@
         getWorkMessTblColumns.value.find((el) => el.field === getWorkMessTblColumnsTitles.value.expander));
 
       const canUserDelConfirmedOrdersChains = computed(() => store.getters.canUserDelConfirmedOrdersChains);
-
       const getDeleteOrdersChainAction = computed(() => store.getters.getDeleteOrdersChainAction);
-
       const getCreateRelativeOrderContextMenu = computed(() => store.getters.getCreateRelativeOrderContextMenu);
 
       const workOrdersTableContextMenuItems = computed(() => {
@@ -362,75 +372,6 @@
           });
         }
         return items;
-      });
-
-      const getUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
-
-      /**
-       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
-       * (т.е. за те полигоны, которые присутствовали в секции "Кому" при издании распоряжения).
-       * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-       * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: их рабочие
-       * полигоны - разные: рабочий полигон = рабочее место).
-       * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
-       * за других.
-       */
-      const orderCanBeConfirmedFor = computed(() => {
-        return (order) =>
-          (
-            order && order.senderWorkPoligon && getUserWorkPoligon.value &&
-            (order.senderWorkPoligon.type === getUserWorkPoligon.value.type) &&
-            (String(order.senderWorkPoligon.id) === String(getUserWorkPoligon.value.code)) &&
-            (
-              (!order.senderWorkPoligon.workPlaceId && !getUserWorkPoligon.value.subCode) ||
-              (order.senderWorkPoligon.workPlaceId && getUserWorkPoligon.value.subCode && String(order.senderWorkPoligon.workPlaceId) === String(getUserWorkPoligon.value.subCode))
-            )
-          ) ? true : false;
-      });
-
-      /**
-       * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
-       * в рамках станции (т.е. подтвердить за конкретные рабочие места).
-       * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-       * котором работает пользователь (в случае ДСП и оператора ДСП одной станции: их рабочие
-       * полигоны - разные: рабочий полигон = рабочее место) либо если распоряжение адресовалось
-       * текущей станции в момент его издания (в этом случае за других может подтвердить распоряжение
-       * как ДСП, так и Оператор при ДСП).
-       * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
-       * за других в рамках станции.
-       */
-      const orderCanBeConfirmedForOnStation = computed(() => {
-        return (order) =>
-          (
-            orderCanBeConfirmedFor.value(order) ||
-            (
-              order.receivers && getUserWorkPoligon.value && order.receivers.find((el) =>
-                (el.type === getUserWorkPoligon.value.type) &&
-                (String(el.id) === String(getUserWorkPoligon.value.code))
-              )
-            )
-          ) ? true : false;
-       });
-
-      /**
-       * Возвращает true, если возможно удаление адресата распоряжения из таблицы адресатов на рабочих
-       * местах станции, false - в противном случае. Такое удаление для конкретной записи таблицы возможно
-       * лишь в том случае, если распоряжение было издано на данном рабочем месте либо если удаляет запись
-       * лицо с того рабочего места, которому распоряжение адресовалось.
-       */
-      const orderStationWorkPlaceReceiverCanBeDeleted = computed(() => {
-        return (order, workPoligonType, workPoligonId, workPlaceId) =>
-          (
-            orderCanBeConfirmedFor.value(order) ||
-            (
-              getUserWorkPoligon.value && (getUserWorkPoligon.value.type === workPoligonType) &&
-              (String(getUserWorkPoligon.value.code) === String(workPoligonId)) &&
-              (
-                (!getUserWorkPoligon.value.subCode && !workPlaceId) ||
-                (getUserWorkPoligon.value.subCode && workPlaceId && String(getUserWorkPoligon.value.subCode) === String(workPlaceId))
-              )
-            )
-          ) ? true : false;
       });
 
       const createRelativeOrderContextMenuItems = (orderId) => {
@@ -550,21 +491,19 @@
         getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
         getWorkMessReceiversTblColumns: computed(() => store.getters.getWorkMessReceiversTblColumns),
         getWorkMessStationReceiversTblColumns: computed(() => store.getters.getWorkMessStationReceiversTblColumns),
+        canUserPerformAnyActionOnOrder: computed(() => store.getters.canUserPerformAnyActionOnOrder),
+        canOrdersChainBeDeleted: computed(() => store.getters.canOrdersChainBeDeleted),
+        canDispatchOrdersConnectedToGivenOrder: computed(() => store.getters.canDispatchOrdersConnectedToGivenOrder),
+        canOrderBeConfirmedFor: computed(() => store.getters.canOrderBeConfirmedFor),
+        canOrderBeConfirmedForOnStation: computed(() => store.getters.canOrderBeConfirmedForOnStation),
+        canOrderBeDeletedStationWorkPlaceReceiver: computed(() => store.getters.canOrderBeDeletedStationWorkPlaceReceiver),
         getOrdersChainsBeingDeleted: computed(() => store.getters.getOrdersChainsBeingDeleted),
-        isOrderBeingConfirmedForOthers: computed(() => store.getters.isOrderBeingConfirmedForOthers),
-        canUserConfirmOrderForOthers: computed(() => store.getters.canUserConfirmOrderForOthers),
-        canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
-        isOrderActive: computed(() => store.getters.isOrderActive),
         canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
-        isOrderBeingDeletedStationWorkPlaceReceiver: computed(() => store.getters.isOrderBeingDeletedStationWorkPlaceReceiver),
         getWorkMessTblColumnsTitles,
         canUserDelConfirmedOrdersChains,
         getWorkMessTblColumnsExceptExpander,
         getExpanderColumnObject,
         workOrdersTableContextMenuItems,
-        orderCanBeConfirmedFor,
-        orderCanBeConfirmedForOnStation,
-        orderStationWorkPlaceReceiverCanBeDeleted,
         createRelativeOrderContextMenuItems,
         showOrderInfo,
         hideOrderInfo,
