@@ -20,12 +20,17 @@ export const leftMenuItems = {
         {
           label: 'Не доставлено экземпляров',
           itemClass: 'dy58-subitem dy58-important-item',
-          dangerInfo: getters.getNotDeliveredOrdersNumber,
+          dangerInfo: getters.getNotDeliveredNotConfirmedOrdersNumber,
+        },
+        {
+          label: 'Не доставлено, подтверждено экземпляров',
+          itemClass: 'dy58-subitem',
+          dangerInfo: getters.getNotDeliveredButConfirmedOrdersNumber,
         },
         {
           label: 'Не подтверждено экземпляров',
           itemClass: 'dy58-subitem dy58-important-item',
-          dangerInfo: getters.getNotConfirmedOrdersNumber,
+          dangerInfo: getters.getDeliveredButNotConfirmedOrdersNumber,
         },
       ];
     },

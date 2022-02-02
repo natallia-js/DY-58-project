@@ -52,6 +52,15 @@
             aria:haspopup="true"
             aria-controls="new-number-overlay_panel"
           />
+          <Button
+            v-if="!editExistingTakeDutyOrder"
+            icon="pi pi-refresh"
+            class="p-button-outlined dy58-addon-button"
+            v-tooltip.bottom="'Получить последний номер у сервера'"
+            @click="changeOrderNumber"
+            aria:haspopup="true"
+            aria-controls="new-number-overlay_panel"
+          />
         </div>
         <small
           v-if="(v$.number.$invalid && submitted) || v$.number.$pending.$response"

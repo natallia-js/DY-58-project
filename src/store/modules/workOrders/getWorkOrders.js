@@ -326,14 +326,24 @@ export const getWorkOrders = {
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
             orderReceiveStatus: {
-              notDelivered:
-                (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime).length : 0) +
-                (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime).length : 0) +
-                (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime).length : 0),
-              notConfirmed:
+              notDeliveredNotConfirmed:
+                (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
+                (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
+                (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
+              notDeliveredButConfirmed:
+                (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime && dsp.confirmDateTime).length : 0) +
+                (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime && dnc.confirmDateTime).length : 0) +
+                (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime && ecd.confirmDateTime).length : 0),
+              deliveredButNotConfirmed:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
                 (item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
                 (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
+              notDeliveredNotConfirmedOnStation:
+                item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => !el.deliverDateTime && !el.confirmDateTime).length : 0,
+              notDeliveredButConfirmedOnStation:
+                item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => !el.deliverDateTime && el.confirmDateTime).length : 0,
+              deliveredButNotConfirmedOnStation:
+                item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => el.deliverDateTime && !el.confirmDateTime).length : 0,
             },
             orderChainId: item.orderChainId,
             chainMembersNumber: getters.getRawWorkingOrders.filter((el) => el.orderChainId === item.orderChainId).length,
@@ -396,70 +406,108 @@ export const getWorkOrders = {
 
     /**
      * Для данного распоряжения позволяет получить количество не доставленных до
-     * получателей его экземпляров.
+     * получателей его экземпляров и не подтвержденных никем (из секции "Кому").
      */
-    getOrderNotDeliveredInstancesNumber() {
+     getNotDeliveredNotConfirmedOrderInstancesNumber() {
       return (order) => {
         if (!order) {
           return 0;
         }
-        let notDeliveredInstances = 0;
+        let instancesNumber = 0;
         if (order.dspToSend) {
-          notDeliveredInstances += order.dspToSend.filter((item) => !item.deliverDateTime).length;
+          instancesNumber += order.dspToSend.filter((item) => !item.deliverDateTime && !item.confirmDateTime).length;
         }
         if (order.dncToSend) {
-          notDeliveredInstances += order.dncToSend.filter((item) => !item.deliverDateTime).length;
+          instancesNumber += order.dncToSend.filter((item) => !item.deliverDateTime && !item.confirmDateTime).length;
         }
         if (order.ecdToSend) {
-          notDeliveredInstances += order.ecdToSend.filter((item) => !item.deliverDateTime).length;
+          instancesNumber += order.ecdToSend.filter((item) => !item.deliverDateTime && !item.confirmDateTime).length;
         }
-        return notDeliveredInstances;
+        return instancesNumber;
       };
     },
 
     /**
-     * Для данного распоряжения позволяет получить количество не подтвержденных
-     * получателями его экземпляров.
+     * Для данного распоряжения позволяет получить количество не доставленных, но подтвержденных
+     * (кем-то) его экземпляров (из секции "Кому").
      */
-    getOrderNotConfirmedInstancesNumber() {
+     getNotDeliveredButConfirmedOrderInstancesNumber() {
       return (order) => {
         if (!order) {
           return 0;
         }
-        let notConfirmedInstances = 0;
+        let instancesNumber = 0;
         if (order.dspToSend) {
-          notConfirmedInstances += order.dspToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+          instancesNumber += order.dspToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
         }
         if (order.dncToSend) {
-          notConfirmedInstances += order.dncToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+          instancesNumber += order.dncToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
         }
         if (order.ecdToSend) {
-          notConfirmedInstances += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+          instancesNumber += order.ecdToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
         }
-        return notConfirmedInstances;
+        return instancesNumber;
       };
     },
 
     /**
-     * Позволяет получить количество экземпляров не доставленных и находящихся в работе распоряжений.
+     * Для данного распоряжения позволяет получить количество доставленных, но не подтвержденных
+     * никем его экземпляров (из секции "Кому").
      */
-    getNotDeliveredOrdersNumber(state, getters) {
+    getDeliveredButNotConfirmedOrderInstancesNumber() {
+      return (order) => {
+        if (!order) {
+          return 0;
+        }
+        let instancesNumber = 0;
+        if (order.dspToSend) {
+          instancesNumber += order.dspToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        if (order.dncToSend) {
+          instancesNumber += order.dncToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        if (order.ecdToSend) {
+          instancesNumber += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        return instancesNumber;
+      };
+    },
+
+    /**
+     * Позволяет получить количество экземпляров не доставленных и не подтвержденных распоряжений,
+     * находящихся в работе.
+     */
+    getNotDeliveredNotConfirmedOrdersNumber(state, getters) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       let notDeliveredInstances = 0;
       workingOrders.forEach((order) => {
-        notDeliveredInstances += getters.getOrderNotDeliveredInstancesNumber(order);
+        notDeliveredInstances += getters.getNotDeliveredNotConfirmedOrderInstancesNumber(order);
       });
       return notDeliveredInstances;
     },
 
     /**
-     * Позволяет получить количество экземпляров не подтвержденных и находящихся в работе распоряжений.
+     * Позволяет получить количество экземпляров не доставленных, но подтвержденных и находящихся
+     * в работе распоряжений.
      */
-    getNotConfirmedOrdersNumber(state, getters) {
+     getNotDeliveredButConfirmedOrdersNumber(state, getters) {
+      const workingOrders = state.data.filter((item) => item.confirmDateTime);
+      let instancesNumber = 0;
+      workingOrders.forEach((order) => {
+        instancesNumber += getters.getNotDeliveredButConfirmedOrderInstancesNumber(order);
+      });
+      return instancesNumber;
+    },
+
+    /**
+     * Позволяет получить количество экземпляров доставленных, но не подтвержденных и находящихся
+     * в работе распоряжений.
+     */
+    getDeliveredButNotConfirmedOrdersNumber(state, getters) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       let notConfirmedInstances = 0;
       workingOrders.forEach((order) => {
-        notConfirmedInstances += getters.getOrderNotConfirmedInstancesNumber(order);
+        notConfirmedInstances += getters.getDeliveredButNotConfirmedOrderInstancesNumber(order);
       });
       return notConfirmedInstances;
     },

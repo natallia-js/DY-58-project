@@ -56,13 +56,17 @@
             </span>
             <!-- столбец статуса -->
             <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
-              <p v-if="slotProps.data[col.field].notDelivered > 0">
+              <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
                 <span class="p-mr-2">Не доставлено:</span>
-                <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDelivered"></Badge>
+                <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}//${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
               </p>
-              <p v-if="slotProps.data[col.field].notConfirmed > 0">
+              <p v-if="slotProps.data[col.field].notDeliveredButConfirmed > 0">
+                <span class="p-mr-2">Не доставлено, подтверждено:</span>
+                <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDeliveredButConfirmed"></Badge>
+              </p>
+              <p v-if="slotProps.data[col.field].deliveredButNotConfirmed > 0">
                 <span class="p-mr-2">Не подтверждено:</span>
-                <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].notConfirmed"></Badge>
+                <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].deliveredButNotConfirmed"></Badge>
               </p>
             </div>
             <!-- столбец состояния и действий -->
@@ -235,11 +239,12 @@
                       </div>
                       <!-- в противном случае отображаем кнопки подтверждения и удаления (если данные операции возможны);
                       удалить адресата возможно только в том случае, если он не успел подтвердить данное распоряжение -->
-                      <div v-else>
+                      <div v-else class="p-d-flex p-flex-row p-flex-wrap">
                         <Button
                           v-if="canOrderBeConfirmedForOnStation(slotProps.data)"
-                          label="Подтвердить"
-                          class="p-button-primary p-button-text"
+                          icon="pi pi-check"
+                          class="p-button-info p-button-sm dy58-order-action-button p-m-1"
+                          v-tooltip="'Подтвердить'"
                           @click="confirmOrderForOthers(slotProps.data.id, [{
                             workPoligonType: slotProps3.data.type,
                             workPoligonId: slotProps3.data.id,
@@ -250,8 +255,9 @@
                         />
                         <Button
                           v-if="canOrderBeDeletedStationWorkPlaceReceiver(slotProps.data)"
-                          label="Удалить"
-                          class="p-button-primary p-button-text"
+                          icon="pi pi-times"
+                          class="p-button-secondary p-button-sm dy58-order-action-button p-m-1"
+                          v-tooltip="'Удалить'"
                           @click="deleteOrderStationWorkPoligon($event, slotProps.data.id, slotProps3.data.workPlaceId)"
                         />
                       </div>
