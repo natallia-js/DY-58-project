@@ -198,60 +198,131 @@ export const confirmOrder = {
     },
 
     /**
-     * Для заданного распоряжения позволяет установить дату его подтверждения (когда данное распоряжение
-     * находится в списке входящих уведомлений).
+     * Для заданного распоряжения позволяет установить дату его подтверждения (данное распоряжение
+     * находится в списке входящих уведомлений и после подтверждения должно перейти в список
+     * распоряжений, находящихся в работе).
+     * Выставить дату подтверждения необходимо в 1-3 местах:
+     * 1) если подтверждение происходит на станции самим ДСП, то подтверждать необходимо в 3 местах:
+     *    само рабочее распоряжение (для перемещения его в распоряжения в работе), секция "Кому" распоряжения
+     *    (если ДСП там есть в адресатах: его может там не быть, если распоряжение создано Оператором
+     *    при ДСП этой же станции) и список адресатов на станции
+     * 2) если подтверждает распоряжение Оператор при ДСП, то подтверждать необходимо в 2 местах:
+     *    само рабочее распоряжение, список адресатов на станции
+     * 3) для ДНЦ и ЭЦД подтверждать необходимо в 2 местах: само рабочее распоряжение, секция "Кому" распоряжения
      */
-    [SET_ORDER_CONFIRMED] (state, { orderId, confirmDateTime }) {
-      state.data = state.data.map((el) => {
-        if (el._id === orderId) {
-          return {
-            ...el,
+    [SET_ORDER_CONFIRMED] (state, { orderId, confirmDateTime, userPost, userFIO, userWorkPoligon }) {
+      const order = state.data.find((el) => el._id === orderId);
+      if (!order || !confirmDateTime || !userWorkPoligon) {
+        return;
+      }
+      // подтверждаем само распоряжение (переносим его в рабочие распоряжения)
+      order.confirmDateTime = confirmDateTime;
+
+      // сюда поместим ссылку на массив, в котором будем искать элемент для установки даты подтверждения
+      // (из секции "Кому" распоряжения)
+      let sectorsToFindData;
+
+      switch (userWorkPoligon.type) {
+        case WORK_POLIGON_TYPES.STATION:
+          // секция "Кому"
+          if (!userWorkPoligon.subCode) {
+            sectorsToFindData = order.dspToSend;
+          }
+          // список адресатов на станции
+          if (order.stationWorkPlacesToSend) {
+            const index = order.stationWorkPlacesToSend.findIndex((el) =>
+              el.type === userWorkPoligon.type &&
+              String(el.id) === String(userWorkPoligon.code) &&
+              (
+                (!el.workPlaceId && !userWorkPoligon.subCode) ||
+                (el.workPlaceId && userWorkPoligon.subCode && String(el.workPlaceId) === String(userWorkPoligon.subCode))
+              )
+            );
+            if (index >= 0) {
+              order.stationWorkPlacesToSend.splice(index, 1, {
+                ...order.stationWorkPlacesToSend[index],
+                confirmDateTime,
+                post: userPost || null,
+                fio: userFIO || null,
+              });
+            }
+          }
+          break;
+        case WORK_POLIGON_TYPES.DNC_SECTOR:
+          // секция "Кому"
+          sectorsToFindData = order.dncToSend;
+          break;
+        case WORK_POLIGON_TYPES.ECD_SECTOR:
+          // секция "Кому"
+          sectorsToFindData = order.ecdToSend;
+          break;
+      }
+      if (sectorsToFindData) {
+        const index = sectorsToFindData.findIndex((el) =>
+          el.type === userWorkPoligon.type &&
+          String(el.id) === String(userWorkPoligon.code)
+        );
+        if (index >= 0) {
+          sectorsToFindData.splice(index, 1, {
+            ...sectorsToFindData[index],
             confirmDateTime,
-          };
+            post: userPost || null,
+            fio: userFIO || null,
+          });
         }
-        return el;
-      });
+      }
     },
 
     /**
      * Для заданного распоряжения позволяет установить информацию о его подтверждении
-     * за другие полигоны управления.
+     * за другие полигоны управления. При этом на данных полигонах управления подтвержденные
+     * распоряжения автоматически перейдут из секции входящих уведомлений в секцию рабочих распоряжений.
      */
-    [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, { orderId, workPoligons }) {
-      if (!orderId || !workPoligons || !workPoligons.length) {
-        return;
-      }
+    [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, props) {
+      const { orderId, actualGlobalConfirmWorkPoligonsInfo, actualLocalConfirmWorkPoligonsInfo } = props;
       const order = state.data.find((el) => el._id === orderId);
       if (!order) {
         return;
       }
-      workPoligons.forEach((poligon) => {
-        let foundPoligon;
-        let foundWorkPlace;
-        switch (poligon.workPoligonType) {
-          case WORK_POLIGON_TYPES.STATION:
-            foundPoligon = order.dspToSend.find((dsp) => String(dsp.id) === String(poligon.workPoligonId) && !dsp.confirmDateTime);
-            foundWorkPlace = order.stationWorkPlacesToSend.find((swp) =>
-              String(swp.id) === String(poligon.workPoligonId) && String(swp.workPlaceId) === String(poligon.workPlaceId) && !swp.confirmDateTime);
-            break;
-          case WORK_POLIGON_TYPES.DNC_SECTOR:
-            foundPoligon = order.dncToSend.find((dnc) => String(dnc.id) === String(poligon.workPoligonId) && !dnc.confirmDateTime);
-            break;
-          case WORK_POLIGON_TYPES.ECD_SECTOR:
-            foundPoligon = order.ecdToSend.find((ecd) => String(ecd.id) === String(poligon.workPoligonId) && !ecd.confirmDateTime);
-            break;
-        }
-        if (foundPoligon) {
-          foundPoligon.confirmDateTime = poligon.confirmDateTime ? new Date(poligon.confirmDateTime) : null,
-          foundPoligon.post = poligon.post;
-          foundPoligon.fio = poligon.fio;
-        }
-        if (foundWorkPlace) {
-          foundWorkPlace.confirmDateTime = poligon.confirmDateTime ? new Date(poligon.confirmDateTime) : null,
-          foundWorkPlace.post = poligon.post;
-          foundWorkPlace.fio = poligon.fio;
-        }
-      });
+      // подтверждение в секции "Кому" распоряжения
+      if (actualGlobalConfirmWorkPoligonsInfo) {
+        actualGlobalConfirmWorkPoligonsInfo.forEach((poligon) => {
+          let foundPoligon;
+          switch (poligon.workPoligonType) {
+            case WORK_POLIGON_TYPES.STATION:
+              foundPoligon = order.dspToSend ? order.dspToSend.find((dsp) => String(dsp.id) === String(poligon.workPoligonId)) : null;
+              break;
+            case WORK_POLIGON_TYPES.DNC_SECTOR:
+              foundPoligon = order.dncToSend ? order.dncToSend.find((dnc) => String(dnc.id) === String(poligon.workPoligonId)) : null;
+              break;
+            case WORK_POLIGON_TYPES.ECD_SECTOR:
+              foundPoligon = order.ecdToSend ? order.ecdToSend.find((ecd) => String(ecd.id) === String(poligon.workPoligonId)) : null;
+              break;
+          }
+          if (foundPoligon) {
+            foundPoligon.confirmDateTime = poligon.confirmDateTime,
+            foundPoligon.post = poligon.post;
+            foundPoligon.fio = poligon.fio;
+          }
+        });
+      }
+      // подтверждение на станции
+      if (actualLocalConfirmWorkPoligonsInfo && order.stationWorkPlacesToSend) {
+        actualLocalConfirmWorkPoligonsInfo.forEach((poligon) => {
+          const foundWorkPlace = order.stationWorkPlacesToSend.find((swp) =>
+            String(swp.id) === String(poligon.workPoligonId) &&
+            (
+              (!swp.workPlaceId && !poligon.workPlaceId) ||
+              (swp.workPlaceId && poligon.workPlaceId && String(swp.workPlaceId) === String(poligon.workPlaceId))
+            )
+          );
+          if (foundWorkPlace) {
+            foundWorkPlace.confirmDateTime = poligon.confirmDateTime,
+            foundWorkPlace.post = poligon.post;
+            foundWorkPlace.fio = poligon.fio;
+          }
+        });
+      }
     },
   },
 
@@ -274,7 +345,13 @@ export const confirmOrder = {
       try {
         const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
-        context.commit(SET_ORDER_CONFIRMED, { orderId: responseData.id, confirmDateTime: responseData.confirmDateTime });
+        context.commit(SET_ORDER_CONFIRMED, {
+          orderId: responseData.id,
+          confirmDateTime: new Date(responseData.confirmDateTime),
+          userPost: responseData.userPost,
+          userFIO: responseData.userFIO,
+          userWorkPoligon: context.getters.getUserWorkPoligon,
+        });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
@@ -303,15 +380,29 @@ export const confirmOrder = {
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
-      const confirmDateTime = new Date();console.log('confirmWorkPoligons',confirmWorkPoligons)
+      const confirmDateTime = new Date();
       try {
         const responseData = await confirmOrdersForOthers({
           confirmWorkPoligons,
           orderId,
           confirmDateTime,
-        });console.log('responseData.confirmWorkPoligons',responseData.confirmWorkPoligons)
+        });
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
-        context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, { orderId: responseData.orderId, workPoligons: responseData.confirmWorkPoligons });
+        context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, {
+          orderId: responseData.orderId,
+          // полигоны, за которые подтверждение прошло в секции "Кому" распоряжения
+          actualGlobalConfirmWorkPoligonsInfo: responseData.actualGlobalConfirmWorkPoligonsInfo ?
+            responseData.actualGlobalConfirmWorkPoligonsInfo.map((el) => ({
+              ...el,
+              confirmDateTime: el.confirmDateTime ? new Date(el.confirmDateTime) : null,
+            })) : null,
+          // рабочие места на станции, за которые прошло подтверждение
+          actualLocalConfirmWorkPoligonsInfo: responseData.actualLocalConfirmWorkPoligonsInfo ?
+            responseData.actualLocalConfirmWorkPoligonsInfo.map((el) => ({
+              ...el,
+              confirmDateTime: el.confirmDateTime ? new Date(el.confirmDateTime) : null,
+            })) : null,
+        });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');

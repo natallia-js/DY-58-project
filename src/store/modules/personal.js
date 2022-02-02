@@ -158,11 +158,11 @@ export const personal = {
     },
 
     /**
-     * Возвращает информацию обо всех ДСП и Операторах ДСП станций, связанных с текущим полигом управления.
+     * Возвращает информацию обо всех ДСП (не Операторах ДСП станций!), связанных с текущим полигом управления.
      * Данным лицам и может адресоваться информация, отправляемая текущим пользователем.
-     * Если полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
+     * Если текущий олигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
      * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как ДСП, так и оператор при
-     * ДСП одной и той же станции. Т.е. возможно дублирование информации.
+     * ДСП одной и той же станции. Будет выбрана только информация по ДСП.
      */
     getDSPShiftForSendingData(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
@@ -192,9 +192,7 @@ export const personal = {
             fioId: item.lastUserChoiceId,
             fioOnline: item.lastUserChoiceOnline,
             people: item.people
-              .filter((el) =>
-                el.appsCredentials === APP_CREDENTIALS.DSP_FULL ||
-                el.appsCredentials === APP_CREDENTIALS.DSP_Operator)
+              .filter((el) => el.appsCredentials === APP_CREDENTIALS.DSP_FULL)
               .map((el) => {
                 return {
                   id: el._id,
@@ -244,7 +242,7 @@ export const personal = {
     /**
      * Возвращает массив ДСП (Операторов при ДСП) текущего рабочего места полигона управления "Станция".
      * Т.е. возвращаются не все пользователи ДСП и Операторы при ДСП станции, а только те, кто зарегистрирован
-     * для работы на данном рабочем месте (место самого ДСП станции либо место на станции - если речь идет
+     * для работы на текущем рабочем месте (место самого ДСП станции либо рабочее место на станции - если речь идет
      * об Операторе при ДСП).
      */
     getCurrStationWorkPlaceUsers: (state, getters) => {
@@ -278,7 +276,8 @@ export const personal = {
 
     /**
      * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего
-     * полигона управления "Станция". В выборку не включаются рабочие места текущего пользователя.
+     * полигона управления "Станция".
+     * В выборку не включаются пользователи рабочего места текущего пользователя.
      * Например, на некоторой станции есть рабочее место ДСП, рабочее место оператора при ДСП №1 и
      * рабочее место оператора при ДСП №2. Если зашел пользователь с рабочего места оператора при ДСП №1,
      * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места оператора при ДСП №2.
@@ -390,6 +389,9 @@ export const personal = {
       }
       if (state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => clearSendItem(el));
+      }
+      if (state.sectorPersonal.otherShift) {
+        state.sectorPersonal.otherShift = [];
       }
     },
 
@@ -579,14 +581,15 @@ export const personal = {
           if (!sectorData.people || !sectorData.people.length) {
             return;
           }
-
+          // ищем online-пользователей текущего рассматриваемого полигона управления
           let newSectorUsersInfo;
           if (sectorType === WORK_POLIGON_TYPES.STATION) {
             newSectorUsersInfo = onlineUsers.filter((item) => item.type === sectorType && String(item.id) === String(sectorData.stationId));
           } else {
             newSectorUsersInfo = onlineUsers.find((item) => item.type === sectorType && String(item.id) === String(sectorData.sectorId));
           }
-
+          // для каждого пользователя рассматриваемого полигона управления проверяем online-статус и меняем,
+          // при необходимости
           sectorData.people.forEach((user) => {
             let userOnlineStatus;
             if (sectorType === WORK_POLIGON_TYPES.STATION) {
@@ -602,9 +605,17 @@ export const personal = {
               user.online = userOnlineStatus;
             }
           });
-
+          // если у полигона управления не определен default online-пользователь, то в зависимости от типа полигона
+          // управления выбираем первого интересующего online-пользователя и закрепляем его за данным полигоном управления
           if (!sectorData.lastUserChoiceId) {
-            const onlineUser = (sectorData && sectorData.people) ? sectorData.people.find((user) => user.online) : null;
+            const onlineUser = !(sectorData && sectorData.people) ? null :
+              sectorData.people.find((user) => user.online &&
+                (
+                  (sectorType === WORK_POLIGON_TYPES.STATION && user.appsCredentials === APP_CREDENTIALS.DSP_FULL) ||
+                  (sectorType === WORK_POLIGON_TYPES.DNC_SECTOR && user.appsCredentials === APP_CREDENTIALS.DNC_FULL) ||
+                  (sectorType === WORK_POLIGON_TYPES.ECD_SECTOR && user.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+                )
+              );
             if (onlineUser) {
               sectorData.lastUserChoicePost = onlineUser.post;
               sectorData.lastUserChoiceId = onlineUser._id;
@@ -662,7 +673,7 @@ export const personal = {
         }
       }
       setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds === APP_CREDENTIALS.DNC_FULL);
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds === APP_CREDENTIALS.DSP_FULL || creds === APP_CREDENTIALS.DSP_Operator);
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds === APP_CREDENTIALS.DSP_FULL);
       setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds === APP_CREDENTIALS.ECD_FULL);
     },
 

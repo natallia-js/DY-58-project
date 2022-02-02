@@ -58,7 +58,7 @@ export const useSectorsToSendOrder = (state, store) => {
       else if (!currentValue.fio && defaultPost) post = defaultPost;
       else post = '';
       return accumulator + `${currentValue[placeFieldName]}` +
-        `${post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
+        ` ${post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
         `${index === sendOriginalTo.length - 1 ? '' : ', '}`;
     };
 

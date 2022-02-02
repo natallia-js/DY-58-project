@@ -10,17 +10,19 @@ export const authUser = async ({ login, password }) => {
   return response.data;
 };
 
-export const startWorkWithoutTakingDuty = async ({ workPoligonType, workPoligonId, workSubPoligonId }) => {
+export const startWorkWithoutTakingDuty = async (props) => {
+  const { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials } = props;
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.startWorkWithoutTakingDuty,
-    { workPoligonType, workPoligonId, workSubPoligonId },
+    { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
 };
 
-export const takeDutyUser = async ({ workPoligonType, workPoligonId, workSubPoligonId }) => {
+export const takeDutyUser = async (props) => {
+  const { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials } = props;
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.takeDuty,
-    { workPoligonType, workPoligonId, workSubPoligonId },
+    { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

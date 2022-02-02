@@ -179,12 +179,14 @@
               workPoligonType: desiredWorkPoligon.type,
               workPoligonId: desiredWorkPoligon.code,
               workSubPoligonId: desiredWorkPoligon.subCode,
+              specialCredentials: [state.selectedCredential.cred],
             });
           } else {
             responseData = await startWorkWithoutTakingDuty({
               workPoligonType: desiredWorkPoligon.type,
               workPoligonId: desiredWorkPoligon.code,
               workSubPoligonId: desiredWorkPoligon.subCode,
+              specialCredentials: [state.selectedCredential.cred],
             });
           }
           store.commit(SET_USER_TOKEN, { token: responseData.token, saveInLocalStorage: true });

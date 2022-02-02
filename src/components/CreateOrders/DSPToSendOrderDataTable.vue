@@ -49,7 +49,9 @@
                   slotProps.data.people
                     // Добавляем дополнительное поле для его отображения в диалоговом окне
                     .map((item) => ({ ...item, postFio: `${item.post} ${item.fio}` }))
-                    // Удаляем повторяющиеся элементы
+                    // Удаляем повторяющиеся элементы (в принципе, их не должно быть, т.к. по одному пользователю
+                    // рассматривается лишь 1 рабочее место; но если у 2 пользователей одинаковые должности и ФИО,
+                    // то дубликатов действительно не будет)
                     .filter((item, index, array) => array.findIndex((el) => el.postFio === item.postFio) === index),
                   slotProps.data.fioId
                     ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline }

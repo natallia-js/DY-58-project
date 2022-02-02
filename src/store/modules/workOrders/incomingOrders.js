@@ -29,17 +29,17 @@ export const incomingOrders = {
     },
 
     /**
-     * Возвращает массив входящих уведомлений, отсортированный по дате создания уведомлений
-     * (распоряжений) и адаптированный к отображению в табличном виде.
+     * Возвращает массив входящих уведомлений, отсортированный по дате создания (в порядке убывания)
+     * уведомлений (распоряжений) и адаптированный к отображению в табличном виде.
      */
     getIncomingOrders(_state, getters) {
       const now = new Date();
       return getters.getRawIncomingOrders
         .sort((a, b) => {
-          if (a.createDateTime < b.createDateTime) {
+          if (a.createDateTime > b.createDateTime) {
             return -1;
           }
-          if (a.createDateTime > b.createDateTime) {
+          if (a.createDateTime < b.createDateTime) {
             return 1;
           }
           return 0;

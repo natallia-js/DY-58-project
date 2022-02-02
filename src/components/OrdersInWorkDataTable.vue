@@ -233,9 +233,11 @@
                       <div v-if="slotProps3.data[col3.field]">
                         {{ getDateTimeString(slotProps3.data[col3.field]) }}
                       </div>
-                      <!-- в противном случае отображаем кнопку подтверждения (если подтверждение возможно) -->
-                      <div v-else-if="canOrderBeConfirmedForOnStation(slotProps.data)">
+                      <!-- в противном случае отображаем кнопки подтверждения и удаления (если данные операции возможны);
+                      удалить адресата возможно только в том случае, если он не успел подтвердить данное распоряжение -->
+                      <div v-else>
                         <Button
+                          v-if="canOrderBeConfirmedForOnStation(slotProps.data)"
                           label="Подтвердить"
                           class="p-button-primary p-button-text"
                           @click="confirmOrderForOthers(slotProps.data.id, [{
@@ -246,15 +248,8 @@
                             fio: slotProps3.data.fio,
                           }])"
                         />
-                      </div>
-                      <!-- отображаем кнопку удаления записи (если удаление возможно) -->
-                      <div v-if="canOrderBeDeletedStationWorkPlaceReceiver({
-                        order: slotProps.data,
-                        workPlaceType: slotProps3.data.type,
-                        workPlaceId: slotProps3.data.id,
-                        workPoligonId: slotProps3.data.workPlaceId
-                      })">
                         <Button
+                          v-if="canOrderBeDeletedStationWorkPlaceReceiver(slotProps.data)"
                           label="Удалить"
                           class="p-button-primary p-button-text"
                           @click="deleteOrderStationWorkPoligon($event, slotProps.data.id, slotProps3.data.workPlaceId)"

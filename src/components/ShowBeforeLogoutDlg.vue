@@ -62,7 +62,7 @@
         }
       },
 
-      isLogoutProcessUnderway: function (val, prevVal) {console.log('here')
+      isLogoutProcessUnderway: function (val, prevVal) {
         if (!val && prevVal && !this.getLogoutError) {
           this.$router.push({ name: 'AuthPage' });
           this.handleCloseDialog();

@@ -1,8 +1,10 @@
 import {
+  SET_ORDERS_DELIVERED,
   CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT,
   SET_REPORT_ON_ORDERS_DELIVERY_RESULT,
   SET_REPORTING_ON_ORDER_DELIVERY_STATUS,
 } from '@/store/mutation-types';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { reportServerOnOrdersDelivery } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -52,6 +54,83 @@ export const reportOnOrdersDelivery = {
         state.reportingOnOrdersDelivery = status;
       }
     },
+
+    /**
+     * Для заданного распоряжения позволяет установить дату его доставки на рабочее место.
+     * Выставить дату доставки необходимо в 1-3 местах:
+     * 1) если подтверждение доставки происходит на станции (рабочее место ДСП), то подтверждать
+     *    необходимо в 3 местах:
+     *    само рабочее распоряжение, секция "Кому" распоряжения (если ДСП там есть в адресатах:
+     *    его может там не быть, если распоряжение создано Оператором при ДСП этой же станции)
+     *    и список адресатов на станции
+     * 2) если подтверждает доставку распоряжения Оператор при ДСП, то подтверждать необходимо в 2 местах:
+     *    само рабочее распоряжение, список адресатов на станции
+     * 3) для ДНЦ и ЭЦД подтверждать доставку необходимо в 2 местах: само рабочее распоряжение,
+     *    секция "Кому" распоряжения
+     */
+    [SET_ORDERS_DELIVERED] (state, { orderIds, deliverDateTime, userWorkPoligon }) {
+      if (!orderIds || !deliverDateTime || !userWorkPoligon) {
+        return;
+      }
+      for (let orderId of orderIds) {
+        const order = state.data.find((el) => el._id === orderId);
+        if (!order) {
+          continue;
+        }
+        // подтверждаем доставку самого рабочего распоряжения
+        order.deliverDateTime = deliverDateTime;
+
+        // сюда поместим ссылку на массив, в котором будем искать элемент для установки даты подтверждения
+        // доставки (из секции "Кому" распоряжения)
+        let sectorsToFindData;
+
+        switch (userWorkPoligon.type) {
+          case WORK_POLIGON_TYPES.STATION:
+            // секция "Кому"
+            if (!userWorkPoligon.subCode) {
+              sectorsToFindData = order.dspToSend;
+            }
+            // список адресатов на станции
+            if (order.stationWorkPlacesToSend) {
+              const index = order.stationWorkPlacesToSend.findIndex((el) =>
+                el.type === userWorkPoligon.type &&
+                String(el.id) === String(userWorkPoligon.code) &&
+                (
+                  (!el.workPlaceId && !userWorkPoligon.subCode) ||
+                  (el.workPlaceId && userWorkPoligon.subCode && String(el.workPlaceId) === String(userWorkPoligon.subCode))
+                )
+              );
+              if (index >= 0) {
+                order.stationWorkPlacesToSend.splice(index, 1, {
+                  ...order.stationWorkPlacesToSend[index],
+                  deliverDateTime,
+                });
+              }
+            }
+            break;
+          case WORK_POLIGON_TYPES.DNC_SECTOR:
+            // секция "Кому"
+            sectorsToFindData = order.dncToSend;
+            break;
+          case WORK_POLIGON_TYPES.ECD_SECTOR:
+            // секция "Кому"
+            sectorsToFindData = order.ecdToSend;
+            break;
+        }
+        if (sectorsToFindData) {
+          const index = sectorsToFindData.findIndex((el) =>
+            el.type === userWorkPoligon.type &&
+            String(el.id) === String(userWorkPoligon.code)
+          );
+          if (index >= 0) {
+            sectorsToFindData.splice(index, 1, {
+              ...sectorsToFindData[index],
+              deliverDateTime,
+            });
+          }
+        }
+      }
+    },
   },
 
   actions: {
@@ -79,6 +158,11 @@ export const reportOnOrdersDelivery = {
           deliverDateTime: new Date(),
         });
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: false, message: responseData.message });
+        context.commit(SET_ORDERS_DELIVERED, {
+          orderIds: responseData.orderIds,
+          deliverDateTime: new Date(responseData.deliverDateTime),
+          userWorkPoligon: context.getters.getUserWorkPoligon,
+        });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих распоряжений');

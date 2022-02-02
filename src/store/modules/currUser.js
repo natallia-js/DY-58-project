@@ -489,12 +489,14 @@ export const currUser = {
               workPoligonType: userWorkPoligon.type,
               workPoligonId: userWorkPoligon.code,
               workSubPoligonId: userWorkPoligon.subCode,
+              specialCredentials: [userCredential],
             });
           } else {
             responseData = await startWorkWithoutTakingDuty({
               workPoligonType: userWorkPoligon.type,
               workPoligonId: userWorkPoligon.code,
               workSubPoligonId: userWorkPoligon.subCode,
+              specialCredentials: [userCredential],
             });
           }
           userToken = responseData.token;
@@ -506,11 +508,11 @@ export const currUser = {
           userId,
           userToken,
           userInfo,
-          lastTakeDutyTime: _lastTakeDutyTime,
-          lastPassDutyTime: _lastPassDutyTime,
           userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
           userWorkPoligons: workPoligons,
-          lastCredential: userCredential,
+          lastTakeDutyTime: _lastTakeDutyTime,
+          lastPassDutyTime: _lastPassDutyTime,
+          lastCredential: userCredential, // полномочие ДСП, Оператора при ДСП, ДНЦ либо ЭЦД
           lastWorkPoligon: userWorkPoligon,
         }));
 

@@ -82,6 +82,7 @@ export const DEL_WORK_ORDERS = 'delWorkOrders';
 export const NOTIFIED_ABOUT_NEW_INCOMING_ORDERS = 'notifiedAboutNewIncomingOrders';
 
 // Report On Orders Delivery
+export const SET_ORDERS_DELIVERED = 'setOrdersDelivered';
 export const CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT = 'clearReportOnOrdersDeliveryResult';
 export const SET_REPORT_ON_ORDERS_DELIVERY_RESULT = 'setReportOnOrdersDeliveryResult';
 export const SET_REPORTING_ON_ORDER_DELIVERY_STATUS = 'setReportingOnOrderDeliveryStatus';

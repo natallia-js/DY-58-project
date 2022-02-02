@@ -177,6 +177,7 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
   actions: {
     /**
      * Делает запрос на сервер с целью редактирования существующего распоряжения.
+     * В настоящее время отредактировать можно только запись о принятии дежурства на станции.
      */
      async editDispatchedOrder(context, params) {
       const { type, id, timeSpan, orderText } = params;

@@ -279,35 +279,16 @@ export const getWorkOrders = {
 
     /**
      * Возвращает список всех рабочих распоряжений со сформированным единым списком получателей распоряжения.
-     * Распоряжения сортируются следующим образом.
-     * Вначале идут распоряжения, у которых присутствует статус "не доставлено" и/или "не подтверждено",
-     * отсортированные по времени их создания, за ними следуют все остальные распоряжения, также
-     * отсортированные по времени их создания.
+     * Распоряжения сортируются в порядке убывания времени их начала действия.
      * Данная функция может использоваться для отображения списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
-      const isOrderNotDeliveredOrNotConfirmed = (order) => {
-        return getters.getOrderNotDeliveredInstancesNumber(order) > 0 ||
-               getters.getOrderNotConfirmedInstancesNumber(order) > 0;
-      };
-
       return getters.getRawWorkingOrders
         .sort((a, b) => {
-          if (a.createDateTime < b.createDateTime) {
+          if (a.timeSpan.start > b.timeSpan.start) {
             return -1;
           }
-          if (a.createDateTime > b.createDateTime) {
-            return 1;
-          }
-          return 0;
-        })
-        .sort((a, b) => {
-          const status_a = isOrderNotDeliveredOrNotConfirmed(a);
-          const status_b = isOrderNotDeliveredOrNotConfirmed(b);
-          if (status_a && !status_b) {
-            return -1;
-          }
-          if (!status_a && status_b) {
+          if (a.timeSpan.start < b.timeSpan.start) {
             return 1;
           }
           return 0;
