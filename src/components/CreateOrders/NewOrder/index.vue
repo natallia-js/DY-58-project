@@ -36,44 +36,12 @@
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
 
         <div class="p-field p-col-4 p-d-flex p-flex-column p-m-0">
-          <OverlayPanel
-            ref="newNumberOverlayPanel"
-            appendTo="body"
-            :showCloseIcon="true"
-            id="new-number-overlay_panel"
-            style="width:200px"
-            :breakpoints="{'960px':'75vw'}"
-          >
-            <div class="p-d-flex p-flex-column">
-              <label for="newNumber" :class="{'p-error':v$.number.$invalid && submitted,'p-mb-2':true}">
-                <span class="p-text-bold"><span style="color:red">*</span> Новый номер</span>
-              </label>
-              <InputText
-                id="newNumber"
-                v-model="v$.number.$model"
-                :class="{'p-invalid':v$.number.$invalid && submitted}"
-              />
-            </div>
-          </OverlayPanel>
-          <label for="number" :class="{'p-error':v$.number.$invalid && submitted}">
-            <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
-          </label>
-          <div class="p-inputgroup">
-            <InputText
-              id="number"
-              disabled
-              v-model="v$.number.$model"
-              :class="{'p-invalid':v$.number.$invalid && submitted}"
-            />
-            <Button
-              icon="pi pi-times-circle"
-              class="p-button-outlined dy58-addon-button"
-              v-tooltip.bottom="'Нарушить текущую нумерацию'"
-              @click="changeOrderNumber"
-              aria:haspopup="true"
-              aria-controls="new-number-overlay_panel"
-            />
-          </div>
+          <order-number
+            :canEditOrderNumber="true"
+            :wrongOrderNumber="v$.number.$invalid && submitted"
+            :value="v$.number.$model"
+            @input="v$.number.$model = $event"
+          />
           <small
             v-if="(v$.number.$invalid && submitted) || v$.number.$pending.$response"
             class="p-error"
@@ -341,6 +309,7 @@
   import DNCToSendOrderDataTable from '@/components/CreateOrders/DNCToSendOrderDataTable';
   import ECDToSendOrderDataTable from '@/components/CreateOrders/ECDToSendOrderDataTable';
   import OtherToSendOrderDataTable from '@/components/CreateOrders/OtherToSendOrderDataTable';
+  import OrderNumber from '@/components/CreateOrders/OrderNumber';
   import PreviewNewOrderDlg from '@/components/CreateOrders/PreviewNewOrderDlg';
   import OrderPlaceChooser from '@/components/CreateOrders/OrderPlaceChooser';
   import OrderTimeSpanChooser from '@/components/CreateOrders/OrderTimeSpanChooser';
@@ -379,6 +348,7 @@
       ECDToSendOrderDataTable,
       OtherToSendOrderDataTable,
       PreviewNewOrderDlg,
+      OrderNumber,
     },
 
     setup(props) {

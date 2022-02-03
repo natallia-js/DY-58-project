@@ -1,6 +1,10 @@
 export const leftMenuItems = {
   getters: {
     getCommonLeftMenuItems(_state, getters) {
+      const isDSP_or_DSPoperator = getters.isDSP_or_DSPoperator;
+      const getNotDeliveredNotConfirmedOrdersNumber = getters.getNotDeliveredNotConfirmedOrdersNumber;
+      const getDeliveredButNotConfirmedOrdersNumber = getters.getDeliveredButNotConfirmedOrdersNumber;
+
       return [
         {
           label: 'Входящие за смену',
@@ -20,17 +24,16 @@ export const leftMenuItems = {
         {
           label: 'Не доставлено экземпляров',
           itemClass: 'dy58-subitem dy58-important-item',
-          dangerInfo: getters.getNotDeliveredNotConfirmedOrdersNumber,
-        },
-        {
-          label: 'Не доставлено, подтверждено экземпляров',
-          itemClass: 'dy58-subitem',
-          dangerInfo: getters.getNotDeliveredButConfirmedOrdersNumber,
+          dangerInfo: !isDSP_or_DSPoperator ?
+            `${getNotDeliveredNotConfirmedOrdersNumber[0] === 0 ? '' : getNotDeliveredNotConfirmedOrdersNumber[0]}` :
+            `${getNotDeliveredNotConfirmedOrdersNumber[0] === 0 && getNotDeliveredNotConfirmedOrdersNumber[1] === 0 ? '' : getNotDeliveredNotConfirmedOrdersNumber[0] + '/' + getNotDeliveredNotConfirmedOrdersNumber[1]}`,
         },
         {
           label: 'Не подтверждено экземпляров',
           itemClass: 'dy58-subitem dy58-important-item',
-          dangerInfo: getters.getDeliveredButNotConfirmedOrdersNumber,
+          dangerInfo: !isDSP_or_DSPoperator ?
+            `${getDeliveredButNotConfirmedOrdersNumber[0] === 0 ? '' : getDeliveredButNotConfirmedOrdersNumber[0]}` :
+            `${getDeliveredButNotConfirmedOrdersNumber[0] === 0 && getDeliveredButNotConfirmedOrdersNumber[1] === 0 ? '' : getDeliveredButNotConfirmedOrdersNumber[0] + '/' + getDeliveredButNotConfirmedOrdersNumber[1]}`,
         },
       ];
     },

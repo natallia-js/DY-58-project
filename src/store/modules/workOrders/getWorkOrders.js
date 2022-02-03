@@ -330,18 +330,12 @@ export const getWorkOrders = {
                 (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
                 (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
                 (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
-              notDeliveredButConfirmed:
-                (item.dspToSend ? item.dspToSend.filter((dsp) => !dsp.deliverDateTime && dsp.confirmDateTime).length : 0) +
-                (item.dncToSend ? item.dncToSend.filter((dnc) => !dnc.deliverDateTime && dnc.confirmDateTime).length : 0) +
-                (item.ecdToSend ? item.ecdToSend.filter((ecd) => !ecd.deliverDateTime && ecd.confirmDateTime).length : 0),
               deliveredButNotConfirmed:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
                 (item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
                 (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
               notDeliveredNotConfirmedOnStation:
                 item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => !el.deliverDateTime && !el.confirmDateTime).length : 0,
-              notDeliveredButConfirmedOnStation:
-                item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => !el.deliverDateTime && el.confirmDateTime).length : 0,
               deliveredButNotConfirmedOnStation:
                 item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => el.deliverDateTime && !el.confirmDateTime).length : 0,
             },
@@ -405,13 +399,15 @@ export const getWorkOrders = {
     },
 
     /**
-     * Для данного распоряжения позволяет получить количество не доставленных до
-     * получателей его экземпляров и не подтвержденных никем (из секции "Кому").
+     * Для данного распоряжения позволяет получить количество не доставленных до получателей
+     * его экземпляров и не подтвержденных никем (из секции "Кому"), а также (в случае ДСП
+     * или оператора при ДСП) количество не доставленных до получателей его экземпляров и не
+     * подтвержденных никем на рабочих местах станции.
      */
      getNotDeliveredNotConfirmedOrderInstancesNumber() {
       return (order) => {
         if (!order) {
-          return 0;
+          return [0, 0];
         }
         let instancesNumber = 0;
         if (order.dspToSend) {
@@ -423,41 +419,20 @@ export const getWorkOrders = {
         if (order.ecdToSend) {
           instancesNumber += order.ecdToSend.filter((item) => !item.deliverDateTime && !item.confirmDateTime).length;
         }
-        return instancesNumber;
-      };
-    },
-
-    /**
-     * Для данного распоряжения позволяет получить количество не доставленных, но подтвержденных
-     * (кем-то) его экземпляров (из секции "Кому").
-     */
-     getNotDeliveredButConfirmedOrderInstancesNumber() {
-      return (order) => {
-        if (!order) {
-          return 0;
-        }
-        let instancesNumber = 0;
-        if (order.dspToSend) {
-          instancesNumber += order.dspToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
-        }
-        if (order.dncToSend) {
-          instancesNumber += order.dncToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
-        }
-        if (order.ecdToSend) {
-          instancesNumber += order.ecdToSend.filter((item) => !item.deliverDateTime && item.confirmDateTime).length;
-        }
-        return instancesNumber;
+        const instancesNumberOnStation = order.stationWorkPlacesToSend.filter((item) => !item.deliverDateTime && !item.confirmDateTime).length;
+        return [instancesNumber, instancesNumberOnStation];
       };
     },
 
     /**
      * Для данного распоряжения позволяет получить количество доставленных, но не подтвержденных
-     * никем его экземпляров (из секции "Кому").
+     * никем его экземпляров (из секции "Кому"), а также количество таких же экземпляров в
+     * рамках рабочих мест станции (в случае ДСП или Оператора при ДСП).
      */
     getDeliveredButNotConfirmedOrderInstancesNumber() {
       return (order) => {
         if (!order) {
-          return 0;
+          return [0, 0];
         }
         let instancesNumber = 0;
         if (order.dspToSend) {
@@ -469,47 +444,41 @@ export const getWorkOrders = {
         if (order.ecdToSend) {
           instancesNumber += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
         }
-        return instancesNumber;
+        const instancesNumberOnStation = order.stationWorkPlacesToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        return [instancesNumber, instancesNumberOnStation];
       };
     },
 
     /**
      * Позволяет получить количество экземпляров не доставленных и не подтвержденных распоряжений,
-     * находящихся в работе.
+     * находящихся в работе (в том числе на станции).
      */
     getNotDeliveredNotConfirmedOrdersNumber(state, getters) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       let notDeliveredInstances = 0;
+      let notDeliveredInstancesOnStation = 0;
       workingOrders.forEach((order) => {
-        notDeliveredInstances += getters.getNotDeliveredNotConfirmedOrderInstancesNumber(order);
+        const data = getters.getNotDeliveredNotConfirmedOrderInstancesNumber(order);
+        notDeliveredInstances += data[0];
+        notDeliveredInstancesOnStation += data[1];
       });
-      return notDeliveredInstances;
-    },
-
-    /**
-     * Позволяет получить количество экземпляров не доставленных, но подтвержденных и находящихся
-     * в работе распоряжений.
-     */
-     getNotDeliveredButConfirmedOrdersNumber(state, getters) {
-      const workingOrders = state.data.filter((item) => item.confirmDateTime);
-      let instancesNumber = 0;
-      workingOrders.forEach((order) => {
-        instancesNumber += getters.getNotDeliveredButConfirmedOrderInstancesNumber(order);
-      });
-      return instancesNumber;
+      return [notDeliveredInstances, notDeliveredInstancesOnStation];
     },
 
     /**
      * Позволяет получить количество экземпляров доставленных, но не подтвержденных и находящихся
-     * в работе распоряжений.
+     * в работе распоряжений (в том числе на станции).
      */
     getDeliveredButNotConfirmedOrdersNumber(state, getters) {
       const workingOrders = state.data.filter((item) => item.confirmDateTime);
       let notConfirmedInstances = 0;
+      let notConfirmedInstancesOnStation = 0;
       workingOrders.forEach((order) => {
-        notConfirmedInstances += getters.getDeliveredButNotConfirmedOrderInstancesNumber(order);
+        const data = getters.getDeliveredButNotConfirmedOrderInstancesNumber(order);
+        notConfirmedInstances += data[0];
+        notConfirmedInstancesOnStation += data[1];
       });
-      return notConfirmedInstances;
+      return [notConfirmedInstances, notConfirmedInstancesOnStation];
     },
 
     getOrdersInChain(state) {

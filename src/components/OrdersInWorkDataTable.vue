@@ -43,7 +43,10 @@
           <div
             style="width:100%;height:100%"
             :class="[{
-              'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId)
+              'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId),
+              'dy58-order-being-deleted': getUserWorkPoligon && slotProps.data.senderWorkPoligon &&
+                getUserWorkPoligon.type === slotProps.data.senderWorkPoligon.type &&
+                String(getUserWorkPoligon.code) === String(slotProps.data.senderWorkPoligon.id)
             }]"
           >
             <!-- столбцы данных -->
@@ -56,18 +59,26 @@
             </span>
             <!-- столбец статуса -->
             <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
-              <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
-                <span class="p-mr-2">Не доставлено:</span>
-                <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}//${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
-              </p>
-              <p v-if="slotProps.data[col.field].notDeliveredButConfirmed > 0">
-                <span class="p-mr-2">Не доставлено, подтверждено:</span>
-                <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDeliveredButConfirmed"></Badge>
-              </p>
-              <p v-if="slotProps.data[col.field].deliveredButNotConfirmed > 0">
-                <span class="p-mr-2">Не подтверждено:</span>
-                <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].deliveredButNotConfirmed"></Badge>
-              </p>
+              <div v-if="isDSP_or_DSPoperator">
+                <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
+                  <span class="p-mr-2">Не доставлено:</span>
+                  <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}/${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
+                </p>
+                <p v-if="slotProps.data[col.field].deliveredButNotConfirmed > 0 || slotProps.data[col.field].deliveredButNotConfirmedOnStation > 0">
+                  <span class="p-mr-2">Не подтверждено:</span>
+                  <Badge class="dy58-not-confirmed-order" :value="`${slotProps.data[col.field].deliveredButNotConfirmed}/${slotProps.data[col.field].deliveredButNotConfirmedOnStation}`"></Badge>
+                </p>
+              </div>
+              <div v-else>
+                <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0">
+                  <span class="p-mr-2">Не доставлено:</span>
+                  <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDeliveredNotConfirmed"></Badge>
+                </p>
+                <p v-if="slotProps.data[col.field].deliveredButNotConfirmed > 0">
+                  <span class="p-mr-2">Не подтверждено:</span>
+                  <Badge class="dy58-not-confirmed-order" :value="slotProps.data[col.field].deliveredButNotConfirmed"></Badge>
+                </p>
+              </div>
             </div>
             <!-- столбец состояния и действий -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.state">
@@ -150,7 +161,7 @@
                     <div v-if="col2.field !== getWorkMessReceiversTblColumnsTitles.confirmDateTime"
                       style="width:100%"
                       :class="[
-                        {'dy58-not-delivered-order': !slotProps2.data.deliverDateTime},
+                        {'dy58-not-delivered-order': !slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
                         {'dy58-not-confirmed-order': slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
                       ]"
                     >
@@ -167,7 +178,7 @@
                         v-else-if="canOrderBeConfirmedFor(slotProps.data)"
                         label="Подтвердить"
                         class="p-button-primary p-button-text"
-                        @click="confirmOrderForOthers(slotProps.data.id, [{
+                        @click="confirmOrderForOthers($event, slotProps.data.id, [{
                           workPoligonType: slotProps2.data.type,
                           workPoligonId: slotProps2.data.id,
                           post: slotProps2.data.post,
@@ -194,7 +205,7 @@
                 <Button
                   label="Подтвердить все"
                   class="p-button-primary p-button-text"
-                  @click="confirmOrderForOthers(slotProps.data.id,
+                  @click="confirmOrderForOthers($event, slotProps.data.id,
                     getOrderUnconfirmedWorkPoligons(slotProps.data.receivers).map((item) => ({
                       workPoligonType: item.type,
                       workPoligonId: item.id,
@@ -206,10 +217,11 @@
               <br />
             </div>
 
-            <!-- Блок получателей распоряжения на станции отображаем только в том случае, если текущий
-            пользователь может подтверждать распоряжения за адресатов на станции -->
+            <!-- Блок получателей распоряжения на станции будет отображен только в том случае, если присутствует
+            хотя бы одна запись в таблице получателей на станции. Это автоматически означает, что данная информация
+            будет отображаться только ДСП и Оператору при ДСП -->
 
-            <div v-if="canUserConfirmOrdersForOthersOnStationWorkPlaces">
+            <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length">
               <p>Получатели на станции:</p>
               <DataTable :value="slotProps.data.stationReceivers">
                 <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
@@ -225,7 +237,7 @@
                     <div v-if="col3.field !== getWorkMessStationReceiversTblColumnsTitles.confirmDateTime"
                       style="width:100%"
                       :class="[
-                        {'dy58-not-delivered-order': !slotProps3.data.deliverDateTime},
+                        {'dy58-not-delivered-order': !slotProps3.data.deliverDateTime && !slotProps3.data.confirmDateTime},
                         {'dy58-not-confirmed-order': slotProps3.data.deliverDateTime && !slotProps3.data.confirmDateTime},
                       ]"
                     >
@@ -245,7 +257,7 @@
                           icon="pi pi-check"
                           class="p-button-info p-button-sm dy58-order-action-button p-m-1"
                           v-tooltip="'Подтвердить'"
-                          @click="confirmOrderForOthers(slotProps.data.id, [{
+                          @click="confirmOrderForOthers($event, slotProps.data.id, [{
                             workPoligonType: slotProps3.data.type,
                             workPoligonId: slotProps3.data.id,
                             workPlaceId: slotProps3.data.workPlaceId,
@@ -281,7 +293,7 @@
                 <Button
                   label="Подтвердить все"
                   class="p-button-primary p-button-text"
-                  @click="confirmOrderForOthers(slotProps.data.id,
+                  @click="confirmOrderForOthers($event, slotProps.data.id,
                     getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).map((item) => ({
                       workPoligonType: item.type,
                       workPoligonId: item.id,
@@ -405,9 +417,17 @@
        * Значение параметра confirmWorkPoligons - массив объектов с информацией о рабочих полигонах / рабочих
        * местах на станции, за которые необходимо подтвердить распоряжение.
        */
-      const confirmOrderForOthers = (orderId, confirmWorkPoligons) => {
+      const confirmOrderForOthers = (event, orderId, confirmWorkPoligons) => {
         if (confirmWorkPoligons && confirmWorkPoligons.length) {
-          store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
+          confirm.require({
+            target: event.currentTarget,
+            group: 'confirmDelStationReceiver',
+            message: `Подтвердить ${confirmWorkPoligons.length === 1 ? '' : 'неподтвержденные записи'}?`,
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+              store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
+            },
+          });
         }
       };
 
@@ -487,6 +507,8 @@
       return {
         state,
         menu,
+        getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
+        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         getWorkingOrders: computed(() => store.getters.getWorkingOrders),
         getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
         getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
