@@ -4,12 +4,13 @@ import {
   ADD_ORDERS_BEING_DISPATCHED_NUMBER,
   SUB_ORDERS_BEING_DISPATCHED_NUMBER,
   SET_DISPATCH_ORDER_RESULT,
-  //ADD_ORDER,
+  ADD_ORDER,
   SET_LAST_ORDERS_NUMBER,
 } from '@/store/mutation-types';
 import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
+import { getWorkOrderObject } from './getWorkOrderObject';
 
 
 /**
@@ -48,9 +49,9 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
       };
     },
 
-    /*[ADD_ORDER] (state, newOrder) {
-      state.data.push(newOrder);
-    },*/
+    [ADD_ORDER] (state, newOrder) {
+      state.data.push(getWorkOrderObject(newOrder));
+    },
   },
 
   actions: {
@@ -138,7 +139,7 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
           }
         );
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
-        //context.commit(ADD_ORDER, responseData.order);
+        context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_LAST_ORDERS_NUMBER, { ordersType: type, number, createDateTime });
 
       } catch (error) {

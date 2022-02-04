@@ -1,5 +1,5 @@
 <template>
-  <div class="p-mb-1">
+  <div class="p-mb-2">
     <RadioButton
       id="value1"
       name="selectDateTimeMode"
@@ -8,14 +8,14 @@
     />
     <label for="value1">&#160;этот месяц</label>
   </div>
-  <div class="p-mb-1">
+  <div class="p-mb-2">
     <RadioButton
       id="value2"
       name="selectDateTimeMode"
       :value="DATETIME_SELECT_MODE.GIVEN_PERIOD"
       v-model="state.selectDateTimeMode"
     />
-    <label for="value2">&#160;указанный промежуток времени:</label>
+    <label for="value2">&#160;промежуток времени:</label>
   </div>
   <order-time-span-chooser
     tillCancellationLabel="по настоящее время"

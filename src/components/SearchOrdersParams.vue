@@ -1,28 +1,35 @@
 <template>
-  <div class="dy58-search-params-panel">
-    <form @submit.prevent="handleSubmit()" class="p-grid">
-      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
-        <label class="p-text-bold">
-          Получить данные за:
-        </label>
-        <find-orders-time-span-chooser
-          :value="v$.timeSpan.$model"
-          @input="v$.timeSpan.$model = $event"
-        />
-        <small
-          v-if="(v$.timeSpan.$invalid && submitted) || v$.timeSpan.$pending.$response"
-          class="p-error"
-        >
-          Пожалуйста, корректно определите время поиска информации
-        </small>
-        <Button
-          type="submit"
-          label="Найти"
-          style="maxWidth:100px"
-        />
+<Accordion>
+    <AccordionTab>
+      <template #header>
+        Определить параметры поиска информации
+      </template>
+      <div class="dy58-search-params-panel">
+        <form @submit.prevent="handleSubmit()" class="p-grid">
+          <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+            <label class="p-text-bold">
+              Получить данные за:
+            </label>
+            <find-orders-time-span-chooser
+              :value="v$.timeSpan.$model"
+              @input="v$.timeSpan.$model = $event"
+            />
+            <small
+              v-if="(v$.timeSpan.$invalid && submitted) || v$.timeSpan.$pending.$response"
+              class="p-error"
+            >
+              Пожалуйста, корректно определите время поиска информации
+            </small>
+            <Button
+              type="submit"
+              label="Найти"
+              style="maxWidth:100px"
+            />
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
+    </AccordionTab>
+  </Accordion>
 </template>
 
 <script>

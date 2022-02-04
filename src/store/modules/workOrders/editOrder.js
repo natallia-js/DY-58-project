@@ -11,6 +11,7 @@ import {
   DEL_ORDER_STATION_RECEIVER,
   SET_ORDER_FINISHED_BEING_DELETED_STATION_WORK_PLACE_RECEIVER,
   SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
+  EDIT_ORDER_TEXT,
 } from '@/store/mutation-types';
 import {
   editDispatchedOrderOnServer,
@@ -18,6 +19,7 @@ import {
 } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
+import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
 
 
 /**
@@ -172,6 +174,17 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
         ))
       );
     },
+
+    [EDIT_ORDER_TEXT] (state, order) {
+      const objectToEdit = state.data.find((el) => String(el._id) === String(order._id));
+      if (!objectToEdit) {
+        return;
+      }
+      const dataToApply = getWorkOrderGeneralInfoObject(order);
+      for (let field in dataToApply) {
+        objectToEdit[field] = dataToApply[field];
+      }
+    },
   },
 
   actions: {
@@ -203,7 +216,7 @@ import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingT
           }
         );
         context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
-        //context.commit(EDIT_ORDER, responseData.order);
+        context.commit(EDIT_ORDER_TEXT, responseData.order);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования распоряжения на сервере');

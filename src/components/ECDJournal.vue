@@ -8,6 +8,10 @@
     dataKey="id"
     :scrollable="true" scrollHeight="flex"
     :loading="searchInProgress"
+    :paginator="true" :rows="10"
+    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+    :rowsPerPageOptions="[10,20,50]"
+    responsiveLayout="scroll"
   >
     <Column v-for="col of getECDJournalTblColumns"
       :field="col.field"
@@ -33,6 +37,7 @@
   import { useStore } from 'vuex';
   import { getOrdersFromServer } from '@/serverRequests/orders.requests';
   import { formOrderText } from '@/additional/formOrderText';
+  //import { getUserPostFIOString } from '@/store/modules/personal';
 
   export default {
     name: 'dy58-ecd-journal',
@@ -50,16 +55,19 @@
       const errMessage = ref(null);
       const searchInProgress = ref(false);
 
+      //const userWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
+
       const prepareDataForDisplay = (responseData) => {
         if (data.value.length) {
           data.value = [];
         }
         responseData.forEach((order, index) => {
+          const orderCreator = order.creator;
           data.value.push({
             id: order._id,
             seqNum: index + 1,
-            toWhom: 'toWhom',
-            orderAssertDateTime: 'orderAssertDateTime', // дата, время утверждения
+            toWhom: '',
+            orderAssertDateTime: '', // дата, время утверждения
             orderNum: order.number,
             orderContent: formOrderText({
               orderTextArray: order.orderText.orderText,
@@ -68,10 +76,10 @@
               ecdToSend: order.ecdToSend,
               otherToSend: order.otherToSend,
             }),
-            orderAcceptor: 'orderAcceptor',
-            orderSender: 'orderSender',
-            orderNotificationDateTime: 'orderNotificationDateTime', // время уведомления (на приказ/запрещение)
-            notificationNumber: 'notificationNumber', // номер уведомления
+            orderAcceptor: '',
+            orderSender: `${orderCreator.post} ${orderCreator.fio}`,
+            orderNotificationDateTime: '', // время уведомления (на приказ/запрещение)
+            notificationNumber: '', // номер уведомления
           });
         });
       };

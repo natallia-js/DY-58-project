@@ -33,7 +33,7 @@
       <side-menu />
       <AppSettings />
     </div>
-    <div class="p-col-9" style="flex:1">
+    <div class="p-col-9" style="flex:1;padding:0">
       <div class="p-d-flex p-flex-column">
         <div>
           <!-- Таблица входящих уведомлений -->

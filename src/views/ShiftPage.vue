@@ -3,7 +3,7 @@
     <h2 class="p-text-center p-mt-3 p-mb-3">Персонал рабочего полигона</h2>
     <p>
       <i>Примечание:</i>
-      <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети, а
+      <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети (online), а
       <span class="dy58-error"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе
     </p>
     <div v-if="getLoadingCurrSectorsShiftStatus">

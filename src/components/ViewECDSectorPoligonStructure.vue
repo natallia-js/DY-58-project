@@ -7,7 +7,7 @@
           <Fieldset
             v-for="trainSector of sectorObj.TECDTrainSectors"
             :key="trainSector.ECDTS_ID"
-            :legend="`поездной участок ${trainSector.ECDTS_Title}`"
+            :legend="trainSector.ECDTS_Title"
             :toggleable="true"
           >
             <Fieldset legend="станции" :toggleable="true">
@@ -15,7 +15,7 @@
                 <Fieldset
                   v-for="station of trainSector.TStations"
                   :key="station.St_ID"
-                  :legend="`станция ${station.St_Title} (${station.St_UNMC})`"
+                  :legend="`${station.St_Title} (${station.St_UNMC})`"
                   :toggleable="true"
                 >
                   <p class="p-mb-2">
@@ -56,7 +56,7 @@
                 <Fieldset
                   v-for="block of trainSector.TBlocks"
                   :key="block.Bl_ID"
-                  :legend="`перегон ${block.Bl_Title}`"
+                  :legend="block.Bl_Title"
                   :toggleable="true"
                 >
                   <p class="p-mb-2">

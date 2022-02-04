@@ -34,7 +34,8 @@ export const SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER = 'setDelS
 export const SET_ORDER_BEING_DELETED_STATION_WORK_PLACE_RECEIVER = 'setOrderBeingDeletedStationWorkPlaceReceiver';
 export const SET_ORDER_FINISHED_BEING_DELETED_STATION_WORK_PLACE_RECEIVER = 'setOrderFinishedBeingDeletedStationWorkPlaceReceiver';
 export const DEL_ORDER_STATION_RECEIVER = 'delOrderStationReceiver';
-//export const ADD_ORDER = 'addOrder';
+export const ADD_ORDER = 'addOrder';
+export const EDIT_ORDER_TEXT = 'editOrderText';
 
 // Last Orders Params
 export const DEL_CURR_LAST_ORDERS_PARAMS = 'delCurrLastOrdersParams';

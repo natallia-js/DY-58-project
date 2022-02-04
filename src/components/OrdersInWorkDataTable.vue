@@ -185,8 +185,9 @@
                       <!-- в противном случае отображаем кнопку подтверждения (если подтверждение возможно) -->
                       <Button
                         v-else-if="canOrderBeConfirmedFor(slotProps.data)"
-                        label="Подтвердить"
-                        class="p-button-primary p-button-text"
+                        icon="pi pi-check"
+                        class="p-button-info p-button-sm dy58-order-action-button"
+                        v-tooltip="'Подтвердить'"
                         @click="confirmOrderForOthers($event, slotProps.data.id, [{
                           workPoligonType: slotProps2.data.type,
                           workPoligonId: slotProps2.data.id,
