@@ -44,13 +44,22 @@
             style="width:100%;height:100%"
             :class="[{
               'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.data.orderChainId),
-              'dy58-order-being-deleted': getUserWorkPoligon && slotProps.data.senderWorkPoligon &&
-                getUserWorkPoligon.type === slotProps.data.senderWorkPoligon.type &&
-                String(getUserWorkPoligon.code) === String(slotProps.data.senderWorkPoligon.id)
             }]"
           >
+            <div
+              v-if="[getWorkMessTblColumnsTitles.seqNum, getWorkMessTblColumnsTitles.orderNum].includes(col.field)"
+              style="text-align:center"
+              :class="[{
+                'dy58-order-dispatched-on-this-global-poligon':
+                  getUserWorkPoligon && slotProps.data.senderWorkPoligon &&
+                  getUserWorkPoligon.type === slotProps.data.senderWorkPoligon.type &&
+                  String(getUserWorkPoligon.code) === String(slotProps.data.senderWorkPoligon.id)
+              }]"
+            >
+              {{ slotProps.data[col.field] }}
+            </div>
             <!-- столбцы данных -->
-            <span v-if="![
+            <span v-else-if="![
               getWorkMessTblColumnsTitles.expander,
               getWorkMessTblColumnsTitles.state,
               getWorkMessTblColumnsTitles.orderReceiveStatus].includes(col.field)"
@@ -58,7 +67,7 @@
               {{ slotProps.data[col.field] }}
             </span>
             <!-- столбец статуса -->
-            <div v-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
+            <div v-else-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
               <div v-if="isDSP_or_DSPoperator">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
                   <span class="p-mr-2">Не доставлено:</span>

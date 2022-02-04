@@ -15,7 +15,7 @@
     </div>
     <div class="p-col-5">
       <div class="p-inputgroup">
-        <Button label="до" class="dy58-addon-button" />
+        <Button label="по" class="dy58-addon-button" />
         <Calendar
           :showTime="true"
           hourFormat="24"
@@ -32,7 +32,7 @@
         :binary="true"
         v-model="state.tillCancellation"
       />
-      <label for="tillCancellation"> До {{ isDNC ? 'отмены' : 'уведомления' }}</label>
+      <label for="tillCancellation">&#160;{{ tillCancellationLabel }}</label>
     </div>
   </div>
 </template>
@@ -47,6 +47,13 @@
     name: 'dy58-order-timespan-chooser',
 
     emits: ['input'],
+
+    props: {
+      tillCancellationLabel: {
+        type: String,
+        required: true,
+      },
+    },
 
     setup(_props, { emit }) {
       const store = useStore();

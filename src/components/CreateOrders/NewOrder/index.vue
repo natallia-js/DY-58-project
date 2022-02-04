@@ -175,11 +175,12 @@
           v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) && state.defineOrderTimeSpan.value"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
-          <label for="timeSpan" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
+          <label for="time-span" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
             <span class="p-text-bold"><span style="color:red">*</span> Время действия</span>
           </label>
           <order-time-span-chooser
-            id="timeSpan"
+            id="time-span"
+            :tillCancellationLabel="`До ${isDNC ? 'отмены' : 'уведомления'}`"
             :value="v$.timeSpan.$model"
             @input="v$.timeSpan.$model = $event"
           />

@@ -46,6 +46,20 @@ const WorkMessStationReceiversTblColumnsTitles = Object.freeze({
   confirmDateTime: 'confirmDateTime',
 });
 
+// Условные наименования столбцов таблицы журнала ЭЦД
+// (названия столбцов должны соответствовать названию полей массива данных для корректного
+// отображения информации)
+const ECDJournalTblColumnsTitles = Object.freeze({
+  seqNum: 'seqNum',
+  toWhom: 'toWhom',
+  orderAssertDateTime: 'orderAssertDateTime', // дата, время утверждения
+  orderNum: 'orderNum',
+  orderContent: 'orderContent',
+  orderAcceptor: 'orderAcceptor',
+  orderSender: 'orderSender',
+  orderNotificationDateTime: 'orderNotificationDateTime', // время уведомления (на приказ/запрещение)
+  notificationNumber: 'notificationNumber', // номер уведомления
+});
 
 /**
  * Данный модуль предназначен для работы с данными о столбцах таблиц в зависимости от должности
@@ -110,6 +124,13 @@ export const tablesColumns = {
     },
 
     /**
+     * Возвращает информацию об условных наименованиях столбцов таблицы журнала ЭЦД.
+     */
+    getECDJournalTblColumnsTitles() {
+      return ECDJournalTblColumnsTitles;
+    },
+
+    /**
      * Возвращает информацию о столбцах таблицы рабочих распоряжений.
      */
     getWorkMessTblColumns() {
@@ -154,6 +175,23 @@ export const tablesColumns = {
         { field: WorkMessStationReceiversTblColumnsTitles.post, title: 'Должность', width: '25%', },
         { field: WorkMessStationReceiversTblColumnsTitles.fio, title: 'ФИО', width: '25%', },
         { field: WorkMessStationReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '25%', },
+      ];
+    },
+
+    /**
+     * Возвращает информацию об столбцах таблицы журнала ЭЦД.
+     */
+    getECDJournalTblColumns() {
+      return [
+        { field: ECDJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '5%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderAssertDateTime, title: 'Время утверждения приказа', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderNum, title: 'Номер приказа/запрещения', width: '5%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '35%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderSender, title: 'Кто передал', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderNotificationDateTime, title: 'Время уведомления', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.notificationNumber, title: 'Номер уведомления', width: '5%', align: 'left', },
       ];
     },
   },

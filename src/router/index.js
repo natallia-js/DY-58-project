@@ -5,7 +5,7 @@ import ConfirmAuthDataPage from '@/views/ConfirmAuthDataPage';
 import MainPage from '@/views/MainPage';
 import NewOrderPage from '@/views/NewOrderPage';
 import OrderPatternsPage from '@/views/OrderPatternsPage';
-import CurrJournalPage from '@/views/CurrJournalPage';
+import OrdersJournalPage from '@/views/OrdersJournalPage';
 import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
@@ -52,9 +52,9 @@ const routes = [
     },
   },
   {
-    path: '/currJournalPage',
-    name: 'CurrJournalPage',
-    component: CurrJournalPage,
+    path: '/ordersJournalPage',
+    name: 'OrdersJournalPage',
+    component: OrdersJournalPage,
     meta: {
       requiresFullAuth: true,
     },

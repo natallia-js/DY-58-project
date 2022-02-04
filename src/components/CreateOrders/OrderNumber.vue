@@ -76,10 +76,6 @@
         type: Number,
         required: true,
       },
-      /*orderType: {
-        type: String,
-        required: true,
-      },*/
     },
 
     setup(props, { emit }) {
@@ -91,7 +87,7 @@
 
       watch(() => props.value, (newVal) => state.number = newVal);
 
-      watch(() => state.number, (newVal, prevVal) => { console.log(newVal, prevVal);emit('input', newVal) });
+      watch(() => state.number, (newVal) => { emit('input', newVal) });
 
       const newNumberOverlayPanel = ref();
       const changeOrderNumber = (event) => {
@@ -102,8 +98,6 @@
       // с целью получения последних сведений о номерах распоряжений.
       const refreshOrderNumber = () => {
         store.dispatch('loadLastOrdersParams');
-        //state.number = store.getters.getNextOrdersNumber(props.orderType);
-        //emit('input', state.number)
       };
 
       return {

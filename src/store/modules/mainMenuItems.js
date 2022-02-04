@@ -10,7 +10,7 @@ export const MainMenuItemsKeys = Object.freeze({
   mainPage: 0,
   sectorStructure: 1,
   currShift: 2,
-  currJournal: 3,
+  ordersJournal: 3,
   createOrder: 4,
   orderPatterns: 5,
   help: 6,
@@ -24,7 +24,7 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.mainPage, label: 'Главная страница', to: '/mainPage' },
       { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: '/sectorStructure' },
       { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
-      { key: MainMenuItemsKeys.currJournal, label: 'Журнал', to: '/currJournalPage' },
+      { key: MainMenuItemsKeys.ordersJournal, label: 'Журнал', to: '/ordersJournalPage' },
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', command: () => {
         router.push({ name: 'NewOrderPage', params: { orderType: null, prevOrderId: null } });
       } },

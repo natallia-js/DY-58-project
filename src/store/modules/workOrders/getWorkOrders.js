@@ -249,6 +249,7 @@ export const getWorkOrders = {
           type: order.type,
           sendOriginal: order.sendOriginal,
           place: order.senderWorkPoligon.title,
+          senderWorkPoligon: order.senderWorkPoligon,
           post: order.creator.post,
           fio: order.creator.fio + (order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''),
           orderNum: order.number,
@@ -318,11 +319,7 @@ export const getWorkOrders = {
               otherToSend: item.otherToSend,
             }),
             place: item.senderWorkPoligon.title,
-            senderWorkPoligon: {
-              id: item.senderWorkPoligon.id,
-              type: item.senderWorkPoligon.type,
-              workPlaceId: item.senderWorkPoligon.workPlaceId,
-            },
+            senderWorkPoligon: item.senderWorkPoligon,
             post: item.creator.post,
             fio: item.creator.fio + (item.createdOnBehalfOf ? ` (от имени ${item.createdOnBehalfOf})` : ''),
             orderReceiveStatus: {

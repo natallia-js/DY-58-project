@@ -54,6 +54,7 @@
 </script>
 
 <style lang="scss" scoped>
+  /* Нужно для того, чтобы выпадающее меню о выходе из системы было поверх всего, а не под таблицей */
   .p-menubar :deep(.p-submenu-list) {
     z-index: 999999;
   }

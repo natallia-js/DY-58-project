@@ -17,10 +17,16 @@
       <template #default="slotProps">
         <span
           :class="[{
-            'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId)
+            'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId),
           }]"
         >
-          <b> {{ slotProps.node.specialTrainCategories &&
+          <b :class="[{
+            'dy58-order-dispatched-on-this-global-poligon':
+              getUserWorkPoligon && slotProps.node.senderWorkPoligon &&
+              getUserWorkPoligon.type === slotProps.node.senderWorkPoligon.type &&
+              String(getUserWorkPoligon.code) === String(slotProps.node.senderWorkPoligon.id)
+          }]">
+            {{ slotProps.node.specialTrainCategories &&
             slotProps.node.specialTrainCategories.includes(specialOrderDSPTakeDutySign) ?
             specialOrderSubpatternTypes.RECORD : slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}
           </b>,
@@ -94,6 +100,7 @@
         'getActiveOrders',
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
+        'getUserWorkPoligon',
       ]),
 
       createRelativeOrderContextMenuItems() {
