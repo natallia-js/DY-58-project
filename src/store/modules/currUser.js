@@ -373,6 +373,7 @@ export const currUser = {
 
     [START_LOGOUT_PROCESS] (state) {
       state.logoutProcessIsUnderway = true;
+      state.logoutError = null;
     },
 
     [LOGOUT_FINISHED_WITH_ERROR] (state, error) {

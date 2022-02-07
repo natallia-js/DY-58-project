@@ -128,9 +128,9 @@ export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId
   return response.data;
 };
 
-export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd }) => {
+export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeDocsCriteria }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrders,
-    { datetimeStart, datetimeEnd },
+    { datetimeStart, datetimeEnd, includeDocsCriteria },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

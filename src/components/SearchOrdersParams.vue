@@ -6,7 +6,7 @@
       </template>
       <div class="dy58-search-params-panel">
         <form @submit.prevent="handleSubmit()" class="p-grid">
-          <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+          <div class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">
               Получить данные за:
             </label>
@@ -20,6 +20,20 @@
             >
               Пожалуйста, корректно определите время поиска информации
             </small>
+          </div>
+          <div class="p-field p-col-6 p-d-flex p-flex-column">
+            <label class="p-text-bold">Включать:</label>
+            <div>
+              <Checkbox
+                id="include-only-outgoing-docs"
+                name="includeDocsCriteria"
+                :value="INCLUDE_DOCUMENTS_CRITERIA.ONLY_OUTGOUING"
+                v-model="state.includeDocsCriteria"
+              />
+              <label for="include-only-outgoing-docs">&#160;только исходящие документы</label>
+            </div>
+          </div>
+          <div class="p-col-6">
             <Button
               type="submit"
               label="Найти"
@@ -39,6 +53,10 @@
   import FindOrdersTimeSpanChooser from '@/components/FindOrdersTimeSpanChooser';
   import isValidDateTime from '@/additional/isValidDateTime';
 
+  const INCLUDE_DOCUMENTS_CRITERIA = {
+    ONLY_OUTGOUING: 'ONLY_OUTGOUING',
+  };
+
   export default {
     name: 'dy58-search-orders-params',
 
@@ -54,6 +72,7 @@
           start: null,
           end: null,
         },
+        includeDocsCriteria: [],
       });
 
       const endDateNoLessStartDate = (value) => {
@@ -75,11 +94,12 @@
 
       const handleSubmit = () => {
         submitted.value = true;
-        emit('input', { timeSpan: state.timeSpan });
+        emit('input', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
       };
 
       return {
         state,
+        INCLUDE_DOCUMENTS_CRITERIA,
         v$,
         submitted,
         handleSubmit,

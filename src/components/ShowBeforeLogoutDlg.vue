@@ -9,12 +9,13 @@
     <div v-if="!isLogoutProcessUnderway">
       <span v-if="!getlogoutWithDutyPass">Вы уверены, что хотите выйти из системы?</span>
       <span v-else>Вы уверены, что хотите выйти из системы со сдачей дежурства?</span>
+      <br/>
+      <div v-if="getLogoutError" style="color:red;fontSize:1rem;fontWeight:500">
+        {{ getLogoutError }}
+      </div>
     </div>
-    <div v-else-if="isLogoutProcessUnderway">
+    <div v-else>
       <span>Идет процесс выхода из системы...</span>
-    </div>
-    <div v-else-if="getLogoutError" style="color:red;fontSize:1rem;fontWeight:500">
-      {{ getLogoutError }}
     </div>
     <template #footer>
       <Button v-if="!isLogoutProcessUnderway" label="Выйти" @click="handleConfirmLogout" />
