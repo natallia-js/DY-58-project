@@ -44,6 +44,9 @@ export const workOrders = {
     // массив результатов подтверждения распоряжений за другие полигоны (с привязкой к id распоряжений)
     confirmOrdersForOthersResults: [],
 
+    // ошибка, произошедшая в результате попытки утвердить распоряжение
+    assertOrderError: null,
+
     dispatchOrderResult: null,
     dispatchOrdersBeingProcessed: 0,
 

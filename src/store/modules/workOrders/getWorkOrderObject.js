@@ -76,6 +76,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         fio: item.fio,
         placeTitle: item.placeTitle,
         sendOriginal: Boolean(item.sendOriginal),
+        confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
       };
     }),
     // Если текущий рабочий полигон - не станция, то это поле останется пустым.
@@ -125,6 +126,7 @@ export function getWorkOrderGeneralInfoObject(order) {
     } : null,
     orderChainId: order.orderChain.chainId,
     specialTrainCategories: order.specialTrainCategories,
+    assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
   };
 }
 
@@ -139,6 +141,6 @@ export function getWorkOrderObject(order) {
       type: order.senderWorkPoligon.type,
       title: order.senderWorkPoligon.title,
     } : null,
-    sendOriginal: order.sendOriginal,
+    sendOriginal: Boolean(order.sendOriginal),
   };
 }

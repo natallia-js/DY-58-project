@@ -27,6 +27,9 @@
       <br />
       <span v-if="order" v-html="order.orderText"></span>
     </p>
+    <p>
+      <span class="p-text-bold">Время утверждения:</span> &#160; {{ (order && order.assertDateTime) ? order.assertDateTime : '?' }}
+    </p>
     <template #footer>
       <Button
         v-if="canUserConfirmOrder && orderNeedsToBeConfirmed && !orderIsBeingConfirmed"

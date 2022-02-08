@@ -154,6 +154,12 @@
         store.commit(CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
       });
 
+      watch(() => store.getters.getAssertOrderError, (newVal) => {
+        if (newVal) {
+          showErrMessage(newVal);
+        }
+      });
+
       /**
        * Скрытие диалогового окна создания распоряжения о принятии дежурства ДСП.
        */

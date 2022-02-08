@@ -13,6 +13,10 @@ export const CLEAR_ALL_CONFIRM_ORDERS_RESULTS_SEEN_BY_USER = 'clearAllConfirmOrd
 export const CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER = 'clearAllConfirmOrdersForOthersResultsSeenByUser';
 export const SET_ORDER_CONFIRMED = 'setOrderConfirmed';
 export const SET_ORDER_CONFIRMED_FOR_OTHERS = 'setOrderConfirmedForOthers';
+export const SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS = 'setOrderConfirmedForOtherReceivers';
+export const SET_ORDER_ASSERT_DATE_TIME = 'setOrderAssertDateTime';
+export const CLEAR_ASSERT_ORDER_ERROR = 'clearAssertOrderError';
+export const SET_ASSERT_ORDER_ERROR = 'setAssertOrderError';
 
 // Main Menu Items
 export const DETERMINE_LOGOUT_ITEM_ACTION = 'determineLogoutItemAction';

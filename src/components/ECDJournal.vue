@@ -42,7 +42,7 @@
   import { computed, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { getOrdersFromServer } from '@/serverRequests/orders.requests';
-  import { formOrderText, formAcceptorsStrings, getAssertOrderDateTime } from '@/additional/formOrderText';
+  import { formOrderText, formAcceptorsStrings } from '@/additional/formOrderText';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   //import { getUserPostFIOString } from '@/store/modules/personal';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
@@ -115,11 +115,6 @@
             parentNode.notificationNumber = order.number;
           } else {
             const orderCreator = order.creator;
-            const assertDateTime = getAssertOrderDateTime({
-              dncToSend: order.dncToSend,
-              dspToSend: order.dspToSend,
-              ecdToSend: order.ecdToSend,
-            });console.log('assertDateTime',assertDateTime,order)
             data.value.push({
               id: order._id,
               type: order.type,
@@ -127,7 +122,7 @@
               toWhom: '', // кому адресовано распоряжение (строки "Кому" и "Копия" возьмем из orderContent - см.ниже)
               // дата-время утверждения (распоряжение считается утвержденным, если
               // все адресаты его оригинала подтвердили данное распоряжение)
-              orderAssertDateTime: assertDateTime ? getLocaleDateTimeString(assertDateTime, false) : '',
+              orderAssertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
               orderNum: order.number,
               orderContent: formOrderText({
                 orderTextArray: order.orderText.orderText,

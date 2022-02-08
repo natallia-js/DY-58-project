@@ -34,6 +34,14 @@ export const confirmOrdersForOthers = async ({ confirmWorkPoligons, orderId, con
   return response.data;
 };
 
+export const confirmOrderForOtherReceivers = async ({ orderId, confirmDateTime }) => {
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrderForOtherReceivers,
+    { orderId, confirmDateTime },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
 export const delConfirmedOrdersFromChain = async ({ chainId }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
     { chainId },
@@ -131,6 +139,14 @@ export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId
 export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeDocsCriteria }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrders,
     { datetimeStart, datetimeEnd, includeDocsCriteria },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
+export const checkIfOrderIsAsserted = async (id) => {
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.checkIfOrderIsAsserted,
+    { id },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

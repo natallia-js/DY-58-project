@@ -14,8 +14,17 @@ import {
   CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
   SET_ORDER_CONFIRMED,
   SET_ORDER_CONFIRMED_FOR_OTHERS,
+  SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS,
+  SET_ORDER_ASSERT_DATE_TIME,
+  CLEAR_ASSERT_ORDER_ERROR,
+  SET_ASSERT_ORDER_ERROR,
 } from '@/store/mutation-types';
-import { confirmOrderForMyself, confirmOrdersForOthers } from '@/serverRequests/orders.requests';
+import {
+  confirmOrderForMyself,
+  confirmOrdersForOthers,
+  confirmOrderForOtherReceivers,
+  checkIfOrderIsAsserted,
+} from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
@@ -69,8 +78,12 @@ export const confirmOrder = {
      * Возвращает количество тех результатов подтверждения распоряжений (за другие полигоны),
      * которые не были отображены пользователю.
      */
-     getConfirmOrdersForOthersResultsUnseenByUserNumber(_state, getters) {
+    getConfirmOrdersForOthersResultsUnseenByUserNumber(_state, getters) {
       return getters.getConfirmOrdersForOthersResultsUnseenByUser.length;
+    },
+
+    getAssertOrderError(state) {
+      return state.assertOrderError;
     },
   },
 
@@ -324,6 +337,39 @@ export const confirmOrder = {
         });
       }
     },
+
+    /**
+     * Для заданного распоряжения позволяет установить информацию о его подтверждении
+     * за "иные" полигоны управления.
+     */
+    [SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS] (state, { orderId, confirmDateTime }) {
+      const order = state.data.find((el) => el._id === orderId);
+      if (!order || !order.otherToSend || !order.otherToSend.length) {
+        return;
+      }
+      order.otherToSend.forEach((el) => {
+        el.confirmDateTime = confirmDateTime;
+      });
+    },
+
+    /**
+     * Для заданного распоряжения позволяет установить дату-время его утверждения.
+     */
+    [SET_ORDER_ASSERT_DATE_TIME] (state, { orderId, assertDateTime }) {
+      const order = state.data.find((el) => el._id === orderId);
+      if (!order) {
+        return;
+      }
+      order.assertDateTime = assertDateTime;
+    },
+
+    [CLEAR_ASSERT_ORDER_ERROR] (state) {
+      state.assertOrderError = null;
+    },
+
+    [SET_ASSERT_ORDER_ERROR] (state, errMessage) {
+      state.assertOrderError = errMessage;
+    },
   },
 
   actions: {
@@ -342,6 +388,7 @@ export const confirmOrder = {
       context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED, orderId);
       const confirmDateTime = new Date();
+      let confirmed = false;
       try {
         const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
@@ -352,6 +399,7 @@ export const confirmOrder = {
           userFIO: responseData.userFIO,
           userWorkPoligon: context.getters.getUserWorkPoligon,
         });
+        confirmed = true;
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
@@ -359,6 +407,10 @@ export const confirmOrder = {
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
+      }
+
+      if (confirmed) {
+        context.dispatch('checkIfOrderIsAsserted', orderId);
       }
     },
 
@@ -381,6 +433,7 @@ export const confirmOrder = {
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
       const confirmDateTime = new Date();
+      let confirmed = false;
       try {
         const responseData = await confirmOrdersForOthers({
           confirmWorkPoligons,
@@ -403,6 +456,7 @@ export const confirmOrder = {
               confirmDateTime: el.confirmDateTime ? new Date(el.confirmDateTime) : null,
             })) : null,
         });
+        confirmed = true;
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
@@ -410,6 +464,65 @@ export const confirmOrder = {
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
+      }
+
+      if (confirmed) {
+        context.dispatch('checkIfOrderIsAsserted', orderId);
+      }
+    },
+
+    /**
+     * Позволяет для данного рабочего распоряжения выставить статус "подтверждено" на сервере
+     * за все "иные" рабочие полигоны.
+     */
+    async confirmOrderForOtherReceivers(context, orderId) {
+      if (!orderId) {
+        return;
+      }
+      if (!context.getters.canUserConfirmOrderForOthers) {
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        return;
+      }
+      context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
+      context.commit(SET_ORDER_BEING_CONFIRMED_FOR_OTHERS, orderId);
+      const confirmDateTime = new Date();
+      let confirmed = false;
+      try {
+        const responseData = await confirmOrderForOtherReceivers({ orderId, confirmDateTime });
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS, { orderId: responseData.orderId, confirmDateTime });
+        confirmed = true;
+
+      } catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
+      }
+
+      if (confirmed) {
+        context.dispatch('checkIfOrderIsAsserted', orderId);
+      }
+    },
+
+    /**
+     * Позволяет проверить, утверждено ли на настоящий момент распоряжение, и, если нет, то
+     * установить дату его утверждения, если это возможно.
+     */
+    async checkIfOrderIsAsserted(context, orderId) {
+      if (!orderId) {
+        return;
+      }
+      context.commit(CLEAR_ASSERT_ORDER_ERROR);
+      try {
+        const responseData = await checkIfOrderIsAsserted(orderId);
+        if (responseData.assertDateTime) {
+          context.commit(SET_ORDER_ASSERT_DATE_TIME, { orderId, assertDateTime: new Date(responseData.assertDateTime) });
+        }
+      } catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка проверки утверждения распоряжения');
+        context.commit(SET_ASSERT_ORDER_ERROR, errMessage);
       }
     },
   },

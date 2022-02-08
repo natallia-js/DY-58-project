@@ -56,7 +56,12 @@
                   String(getUserWorkPoligon.code) === String(slotProps.data.senderWorkPoligon.id)
               }]"
             >
-              {{ slotProps.data[col.field] }}
+              <span v-if="col.field === getWorkMessTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
+                {{ slotProps.data[col.field] }}<br/><span style="color:red">копия</span>
+              </span>
+              <span v-else>
+                {{ slotProps.data[col.field] }}
+              </span>
             </div>
             <!-- столбцы данных -->
             <span v-else-if="![
@@ -142,10 +147,12 @@
           <!-- Текст распоряжения -->
 
           <div class="p-col">
-            <div v-if="!slotProps.data.sendOriginal"><b>КОПИЯ</b></div>
-            <div class="dy58-order-pattern-border p-p-1" v-html="slotProps.data.orderText"></div>
+            <div class="p-mb-2" v-html="slotProps.data.orderText"></div>
             <div><b>Из:</b> {{ slotProps.data.place }}</div>
             <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
+            <div v-if="slotProps.data.assertDateTime">
+              <b>Время утверждения:</b> {{ slotProps.data.assertDateTime }}
+            </div>
           </div>
 
           <!-- Адресаты распоряжения -->
@@ -174,7 +181,12 @@
                         {'dy58-not-confirmed-order': slotProps2.data.deliverDateTime && !slotProps2.data.confirmDateTime},
                       ]"
                     >
-                      {{ slotProps2.data[col2.field] }}
+                      <span v-if="col2.field === getWorkMessReceiversTblColumnsTitles.place && !slotProps2.data.sendOriginal">
+                        {{ slotProps2.data[col2.field] }} (<span style="color:red">копия</span>)
+                      </span>
+                      <span v-else>
+                        {{ slotProps2.data[col2.field] }}
+                      </span>
                     </div>
                     <!-- правило отображения информации в столбце с датой подтверждения распоряжения -->
                     <div v-else>
@@ -199,6 +211,7 @@
                   </template>
                 </Column>
               </DataTable>
+
               <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
               ввиду его "занятости", отображаем состояние прогресса -->
               <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
@@ -224,6 +237,18 @@
                     })))"
                 />
               </div>
+              <br />
+            </div>
+
+            <div v-if="getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length">
+              <div>
+                Не подтверждено иными адресатами: {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}
+              </div>
+              <Button
+                label="Подтвердить"
+                class="p-button-primary p-button-text"
+                @click="confirmOrderForOtherReceivers($event, slotProps.data.id)"
+              />
               <br />
             </div>
 
@@ -419,7 +444,7 @@
         menu.value.show(event.originalEvent);
       };
 
-      const getDateTimeString = (datetime, showSeconds) => {
+      const getDateTimeString = (datetime, showSeconds = false) => {
         return getLocaleDateTimeString(datetime, showSeconds);
       };
 
@@ -442,11 +467,34 @@
       };
 
       /**
+       * Для подтверждения распоряжения за "Иных" адресатов.
+       */
+      const confirmOrderForOtherReceivers = (event, orderId) => {
+        confirm.require({
+          target: event.currentTarget,
+          group: 'confirmDelStationReceiver',
+          message: 'Подтвердить за иных адресатов?',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            store.dispatch('confirmOrderForOtherReceivers', orderId);
+          },
+        });
+      };
+
+      /**
        * Для заданного списка исходных (указанных явно пользователем при создании) адресатов распоряжения
        * возвращает массив таких адресатов, для которых не было подтверждения получения данного распоряжения.
        */
       const getOrderUnconfirmedWorkPoligons = (receivers) => {
         return receivers ? receivers.filter((el) => !el.confirmDateTime) : [];
+      };
+
+      /**
+       * Для заданного списка исходных (указанных явно пользователем при создании) иных адресатов распоряжения
+       * возвращает массив таких адресатов, для которых не было подтверждения получения данного распоряжения.
+       */
+      const getOrderOtherUnconfirmedWorkPoligons = (otherReceivers) => {
+        return otherReceivers ? otherReceivers.filter((el) => !el.confirmDateTime) : [];
       };
 
       /**
@@ -517,6 +565,7 @@
       return {
         state,
         menu,
+        isECD: computed(() => store.getters.isECD),
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         getWorkingOrders: computed(() => store.getters.getWorkingOrders),
@@ -544,7 +593,9 @@
         handleWorkOrdersTableRightClick,
         getDateTimeString,
         confirmOrderForOthers,
+        confirmOrderForOtherReceivers,
         getOrderUnconfirmedWorkPoligons,
+        getOrderOtherUnconfirmedWorkPoligons,
         getOrderUnconfirmedStationWorkPoligons,
         deleteOrderStationWorkPoligon,
       };

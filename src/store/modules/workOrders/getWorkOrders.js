@@ -82,7 +82,7 @@ export const getWorkOrders = {
      */
     getWorkingOrdersToDisplayAsTree(_state, getters) {
       // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке (по возрастанию
-      // времени их издания). Это обязательно!!!
+      // времени их издания). Это обязательно в момент формирования дерева!!!
       const workingOrders = getters.getRawWorkingOrders.sort((a, b) => {
         if (a.createDateTime < b.createDateTime) {
           return -1;
@@ -119,6 +119,7 @@ export const getWorkOrders = {
           orderNum: order.number,
           time: getLocaleDateTimeString(order.createDateTime, false),
           timeSpan: getTimeSpanString(order.timeSpan, getters.isECD),
+          startTime: order.timeSpan.start,
           orderTitle: order.orderText.orderTitle,
           orderText: formOrderText({
             orderTextArray: order.orderText.orderText,
@@ -138,6 +139,16 @@ export const getWorkOrders = {
         } else {
           parentNode.children.push(orderNodeData);
         }
+      });
+      // Верхний уровень сортирую в обратном хронологическом порядке времени начала их действия
+      groupedWorkingOrders.sort((a, b) => {
+        if (a.startTime > b.startTime) {
+          return -1;
+        }
+        if (a.startTime < b.startTime) {
+          return 1;
+        }
+        return 0;
       });
       return groupedWorkingOrders;
     },
@@ -194,7 +205,8 @@ export const getWorkOrders = {
               deliveredButNotConfirmed:
                 (item.dspToSend ? item.dspToSend.filter((dsp) => dsp.deliverDateTime && !dsp.confirmDateTime).length : 0) +
                 (item.dncToSend ? item.dncToSend.filter((dnc) => dnc.deliverDateTime && !dnc.confirmDateTime).length : 0) +
-                (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0),
+                (item.ecdToSend ? item.ecdToSend.filter((ecd) => ecd.deliverDateTime && !ecd.confirmDateTime).length : 0) +
+                (item.otherToSend ? item.otherToSend.filter((other) => !other.confirmDateTime).length : 0),
               notDeliveredNotConfirmedOnStation:
                 item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => !el.deliverDateTime && !el.confirmDateTime).length : 0,
               deliveredButNotConfirmedOnStation:
@@ -205,35 +217,20 @@ export const getWorkOrders = {
             receivers: [
               ...(!item.dspToSend ? [] : item.dspToSend.map((dsp) => {
                 return {
-                  id: dsp.id,
-                  type: dsp.type,
+                  ...dsp,
                   place: dsp.placeTitle,
-                  post: dsp.post,
-                  fio: dsp.fio,
-                  deliverDateTime: dsp.deliverDateTime,
-                  confirmDateTime: dsp.confirmDateTime,
                 };
               })),
               ...(!item.dncToSend ? [] : item.dncToSend.map((dnc) => {
                 return {
-                  id: dnc.id,
-                  type: dnc.type,
+                  ...dnc,
                   place: dnc.placeTitle,
-                  post: dnc.post,
-                  fio: dnc.fio,
-                  deliverDateTime: dnc.deliverDateTime,
-                  confirmDateTime: dnc.confirmDateTime,
                 };
               })),
               ...(!item.ecdToSend ? [] : item.ecdToSend.map((ecd) => {
                 return {
-                  id: ecd.id,
-                  type: ecd.type,
+                  ...ecd,
                   place: ecd.placeTitle,
-                  post: ecd.post,
-                  fio: ecd.fio,
-                  deliverDateTime: ecd.deliverDateTime,
-                  confirmDateTime: ecd.confirmDateTime,
                 };
               })),
             ],
@@ -255,6 +252,8 @@ export const getWorkOrders = {
                 confirmDateTime: item.confirmDateTime,
               };
             }),
+            otherReceivers: item.otherToSend || [],
+            assertDateTime: item.assertDateTime ? getLocaleDateTimeString(item.assertDateTime, false) : null,
           };
         });
     },
@@ -304,6 +303,9 @@ export const getWorkOrders = {
         }
         if (order.ecdToSend) {
           instancesNumber += order.ecdToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
+        }
+        if (order.otherToSend) {
+          instancesNumber += order.otherToSend.filter((item) => !item.confirmDateTime).length;
         }
         const instancesNumberOnStation = order.stationWorkPlacesToSend.filter((item) => item.deliverDateTime && !item.confirmDateTime).length;
         return [instancesNumber, instancesNumberOnStation];
