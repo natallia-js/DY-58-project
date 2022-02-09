@@ -54,7 +54,7 @@
 
         <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
           <label for="createDateTimeString" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
-            <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Дата и время создания</span>
           </label>
           <InputText
             id="createDateTimeString"
@@ -78,7 +78,7 @@
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
             <span v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-text-bold">
-              <span style="color:red">*</span> На приказ/запрещение
+              <span class="dy58-required-field">*</span> На приказ/запрещение
             </span>
             <span v-else class="p-text-bold">На распоряжение</span>
           </label>
@@ -136,7 +136,7 @@
             <span class="p-text-bold">
               <span
                 v-if="![ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
-                style="color:red">
+                class="dy58-required-field">
                 *
               </span> Место действия
             </span>
@@ -176,7 +176,7 @@
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="time-span" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
-            <span class="p-text-bold"><span style="color:red">*</span> Время действия</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Время действия</span>
           </label>
           <order-time-span-chooser
             id="time-span"
@@ -208,7 +208,7 @@
 
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderText" :class="{'p-error':v$.orderText.$invalid && submitted}">
-            <span class="p-text-bold"><span style="color:red">*</span> Текст распоряжения</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Текст распоряжения</span>
           </label>
           <order-text
             id="orderText"

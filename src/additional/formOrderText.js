@@ -13,7 +13,7 @@ import { OrderPatternElementType, OrderPatternElementType_Future } from '@/const
 // Тип входного параметра - логический, если информация из БД.
 // Если распоряжение не из БД, а только создается, то значение входного параметра
 // может быть одним из заданного множества возможных значений.
-const sendOriginal = (dataToCheck) => {
+export const sendOriginal = (dataToCheck) => {
   if (typeof dataToCheck === 'boolean') {
     return dataToCheck;
   }
@@ -102,7 +102,7 @@ export function formOrderText(props) {
         substring += '</tbody></table></div>';
         break;
       case OrderPatternElementType.LINEBREAK:
-        substring = '<br />';
+        substring = '<br/>';
         break;
       case OrderPatternElementType_Future.OBJECT:
         if (currVal.value) {
@@ -136,10 +136,7 @@ export function formOrderText(props) {
 
   const formSubstring = (defPost) => {
     return (obj) => {
-      let post;
-      if (obj.post) post = ' ' + obj.post;
-      else if (!obj.fio && defPost) post = defPost;
-      else post = '';
+      const post = obj.post ? obj.post : (!obj.fio && defPost) ? defPost : '';
       return `${obj.placeTitle} ${post}${includeFIO && obj.fio ? ' ' + obj.fio : ''}`;
     };
   };
@@ -162,10 +159,10 @@ export function formOrderText(props) {
 
   if (asString) {
     if (originalToString) {
-      orderText += '<br /><b>Кому:</b> ' + originalToString;
+      orderText += '<br/><b>Кому:</b> ' + originalToString;
     }
     if (copyToString) {
-      orderText += '<br /><b>Копия:</b> ' + copyToString;
+      orderText += '<br/><b>Копия:</b> ' + copyToString;
     }
     return orderText;
   }
@@ -180,7 +177,9 @@ export function formOrderText(props) {
 
 /**
  * Формирует и возвращает строку с должностями и ФИО лиц, которые получили и подтвердили
- * оригинал распоряжения.
+ * распоряжение. Рассматривается подтверждение как оригиналов, так и копий распоряжения.
+ * Напротив каждой ФИО указывается дата подтверждения.
+ * Если информации о ФИО нет, то указывается место, где распоряжение принято (место, куда оно направлялось).
  * @param {Array} dncToSend - массив объектов - ДНЦ, которым отправлялось распоряжение
  * @param {Array} dspToSend - массив объектов - ДСП, которым отправлялось распоряжение
  * @param {Array} ecdToSend - массив объектов - ЭЦД, которым отправлялось распоряжение
@@ -190,21 +189,24 @@ export function formAcceptorsStrings(props) {
   const { dncToSend, dspToSend, ecdToSend, otherToSend } = props;
 
   let originalToString = '';
+  let copyToString = '';
 
   const formAcceptorStrings = (array, substringFunction) => {
     const to = toSubstring(array.filter((el) => sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction);
     if (to.length) {
       originalToString += !originalToString ? to : `, ${to}`;
     }
+    const copyTo = toSubstring(array.filter((el) => !sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction);
+    if (copyTo.length) {
+      copyToString += !copyToString ? copyTo : `, ${copyTo}`;
+    }
   };
 
   const formSubstring = (defPost) => {
     return (obj) => {
-      let post;
-      if (obj.post) post = ' ' + obj.post;
-      else if (!obj.fio && defPost) post = defPost;
-      else post = '';
-      return `${post}${obj.fio ? ' ' + obj.fio : ''}`;
+      const post = obj.post ? obj.post : (!obj.fio && defPost) ? defPost : '';
+      const fioOrPlace = obj.fio || obj.placeTitle;
+      return `${post}${fioOrPlace ? ' ' + fioOrPlace : ''} (${getLocaleDateTimeString(obj.confirmDateTime, false)})`;
     };
   };
 
@@ -224,5 +226,12 @@ export function formAcceptorsStrings(props) {
     formAcceptorStrings(otherToSend, formSubstring(null));
   }
 
-  return originalToString;
+  let res = originalToString.length > 0 ? originalToString : '';
+  if (copyToString.length > 0) {
+    if (res.length > 0) {
+      res += '<br/>';
+    }
+    res += `<b>Копия:</b> ${copyToString}`;
+  }
+  return res;
 }

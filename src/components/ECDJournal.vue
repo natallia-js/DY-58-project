@@ -23,13 +23,15 @@
     >
       <template #body="slotProps">
         <div
-          v-if="col.field === getECDJournalTblColumnsTitles.orderContent"
-          v-html="slotProps.data.orderContent.text"
+          v-if="[
+            getECDJournalTblColumnsTitles.orderContent,
+            getECDJournalTblColumnsTitles.toWhom,
+            getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
+          v-html="slotProps.data[col.field]"
         ></div>
-        <div
-          v-else-if="col.field === getECDJournalTblColumnsTitles.toWhom"
-          v-html="getToWhomString(slotProps.data.orderContent.toWhom, slotProps.data.orderContent.toWhomCopy)"
-        ></div>
+        <div v-else-if="col.field === getECDJournalTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
+          {{ slotProps.data[col.field] }}<br/>(копия)
+        </div>
         <div v-else>
           {{ slotProps.data[col.field] }}
         </div>
@@ -42,9 +44,8 @@
   import { computed, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { getOrdersFromServer } from '@/serverRequests/orders.requests';
-  import { formOrderText, formAcceptorsStrings } from '@/additional/formOrderText';
+  import { formOrderText, formAcceptorsStrings, sendOriginal } from '@/additional/formOrderText';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-  //import { getUserPostFIOString } from '@/store/modules/personal';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
   export default {
@@ -102,62 +103,111 @@
               order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
             ecdToSend: !order.ecdToSend ? [] :
               order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+            otherToSend: !order.otherToSend ? [] :
+              order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
           }))
           .forEach((order, index) => {
-          let parentNode;
-          if (order.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) {
-            parentNode = findParentNode(order.orderChain.chainId);
-          }
-          if (parentNode) {
-            // время уведомления (на приказ/запрещение)
-            parentNode.orderNotificationDateTime = getLocaleDateTimeString(order.timeSpan.start, false);
-            // номер уведомления
-            parentNode.notificationNumber = order.number;
-          } else {
-            const orderCreator = order.creator;
-            data.value.push({
-              id: order._id,
-              type: order.type,
-              seqNum: index + 1,
-              toWhom: '', // кому адресовано распоряжение (строки "Кому" и "Копия" возьмем из orderContent - см.ниже)
-              // дата-время утверждения (распоряжение считается утвержденным, если
-              // все адресаты его оригинала подтвердили данное распоряжение)
-              orderAssertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
-              orderNum: order.number,
-              orderContent: formOrderText({
-                orderTextArray: order.orderText.orderText,
-                dncToSend: order.dncToSend,
-                dspToSend: order.dspToSend,
-                ecdToSend: order.ecdToSend,
-                otherToSend: order.otherToSend,
-                asString: false,
-                includeFIO: false,
-              }),
-              orderAcceptor: formAcceptorsStrings({
-                dncToSend: order.dncToSend,
-                dspToSend: order.dspToSend,
-                ecdToSend: order.ecdToSend,
-                otherToSend: order.otherToSend,
-              }),
-              orderSender: `${orderCreator.post} ${orderCreator.fio}`,
-              orderNotificationDateTime: '', // время уведомления (на приказ/запрещение) - из связанного распоряжения
-              notificationNumber: '', // номер уведомления - из связанного распоряжения
-              orderChainId: order.orderChain.chainId,
-            });
-          }
-        });
+            let parentNode;
+            if (order.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) {
+              parentNode = findParentNode(order.orderChain.chainId);
+            }
+            if (parentNode) {
+              // время уведомления (на приказ/запрещение)
+              parentNode.orderNotificationDateTime = getLocaleDateTimeString(order.timeSpan.start, false);
+              // номер уведомления
+              parentNode.notificationNumber = order.number;
+            } else {
+              data.value.push({
+                id: order._id,
+                // нужно для группировки распоряжений
+                type: order.type,
+                seqNum: index + 1,
+                // кому адресовано распоряжение (соответствующие строки "Кому" и "Копия" формируем на
+                // основании сведений, содержащихся в "Иных" адресатах - только для исходящих документов ЭЦД!
+                // для входящих документов данное поле будет оставаться пустым)
+                toWhom: formToWhomString(order),
+                // дата-время утверждения распоряжения
+                orderAssertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
+                orderNum: order.number,
+                orderContent: formOrderText({
+                  orderTextArray: order.orderText.orderText,
+                  dncToSend: order.dncToSend,
+                  dspToSend: order.dspToSend,
+                  ecdToSend: order.ecdToSend,
+                  otherToSend: order.otherToSend,
+                }),
+                orderAcceptor: formAcceptorsStrings({
+                  dncToSend: order.dncToSend,
+                  dspToSend: order.dspToSend,
+                  ecdToSend: order.ecdToSend,
+                  otherToSend: order.otherToSend,
+                }),
+                orderSender: `${order.creator.post} ${order.creator.fio}`,
+                // время уведомления (на приказ/запрещение) - из связанного распоряжения
+                orderNotificationDateTime: '',
+                // номер уведомления - из связанного распоряжения
+                notificationNumber: '',
+                // нужно для группировки распоряжений
+                orderChainId: order.orderChain.chainId,
+                // для работы с издателем распоряжения
+                workPoligon: order.workPoligon,
+                // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
+                // полигоне, распоряжение - всегда оригинал; для распоряжения, пришедшего из вне, необходимо
+                // сделать дополнительные проверки
+                sendOriginal: Boolean(
+                  orderDispatchedOnThisWorkPoligon(order) ||
+                  (
+                    order.ecdToSend && userWorkPoligon.value &&
+                    order.ecdToSend.find((el) =>
+                      String(el.id) === String(userWorkPoligon.value.code) &&
+                      sendOriginal(el.sendOriginal))
+                  )
+                ),
+              });
+            }
+          });
       };
 
-      const getToWhomString = (toWhom, toWhomCopy) => {
-        let res = '';
-        if (toWhom) {
-          res += toWhom;
+      const userWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
+
+      const orderDispatchedOnThisWorkPoligon = (order) => {
+        return order && order.workPoligon && userWorkPoligon.value &&
+          order.workPoligon.type === userWorkPoligon.value.type &&
+          String(order.workPoligon.id) === String(userWorkPoligon.value.code);
+      };
+
+      const formToWhomString = (order) => {
+        // Смотрим, кто издатель распоряжения. Если не текущий полигон (т.е. участок ЭЦД), то не
+        // формируем строку "Кому"
+        if (!orderDispatchedOnThisWorkPoligon(order)) {
+          return '';
         }
-        if (toWhomCopy) {
-          if (res) {
+        const otherReceivers = order.otherToSend;
+        if (!otherReceivers || !otherReceivers.length) {
+          return;
+        }
+        let toWhom = '';
+        let toWhomCopy = '';
+        const getToWhomData = (el) => {
+          return `${el.placeTitle}${el.post ? ' ' + el.post : ''}`;
+        };
+        otherReceivers.forEach((el) => {
+          const subString = getToWhomData(el);
+          if (!subString || !subString.length) {
+            return;
+          }
+          if (sendOriginal(el.sendOriginal)) {
+            toWhom += toWhom.length > 0 ? `, ${subString}` : subString;
+          } else {
+            toWhomCopy += toWhomCopy.length > 0 ? `, ${subString}` : subString;
+          }
+        });
+        let res = toWhom.length > 0 ? toWhom : '';
+        if (toWhomCopy.length > 0) {
+          if (res.length > 0) {
             res += '<br/>';
           }
-          res += toWhomCopy;
+          res += `<b>Копия:</b> ${toWhomCopy}`;
         }
         return res;
       };
@@ -190,7 +240,7 @@
         searchInProgress,
         getECDJournalTblColumnsTitles: computed(() => store.getters.getECDJournalTblColumnsTitles),
         getECDJournalTblColumns: computed(() => store.getters.getECDJournalTblColumns),
-        getToWhomString,
+        formToWhomString,
       };
     },
   }

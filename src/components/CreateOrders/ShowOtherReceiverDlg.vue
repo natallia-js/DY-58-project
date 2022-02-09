@@ -10,7 +10,7 @@
       <!-- МЕСТО ОТПРАВКИ РАСПОРЯЖЕНИЯ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
         <label for="placeTitle" :class="{'p-error':vv$.placeTitle.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Куда</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Куда</span>
         </label>
         <allow-clear-input-text
           id="placeTitle"

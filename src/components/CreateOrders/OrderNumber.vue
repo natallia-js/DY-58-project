@@ -10,7 +10,7 @@
   >
     <div class="p-d-flex p-flex-column">
       <label for="new-number" :class="{'p-error':wrongOrderNumber,'p-mb-2':true}">
-        <span class="p-text-bold"><span style="color:red">*</span> Новый номер</span>
+        <span class="p-text-bold"><span class="dy58-required-field">*</span> Новый номер</span>
       </label>
       <InputText
         id="new-number"
@@ -21,7 +21,7 @@
   </OverlayPanel>
 
   <label for="number" :class="{'p-error':wrongOrderNumber}">
-    <span class="p-text-bold"><span style="color:red">*</span> Номер</span>
+    <span class="p-text-bold"><span class="dy58-required-field">*</span> Номер</span>
   </label>
   <div class="p-inputgroup">
     <InputText

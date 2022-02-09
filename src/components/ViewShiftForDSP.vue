@@ -9,7 +9,7 @@
         <p
           v-for="user of currentStationShift"
           :key="user._id"
-          :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error': !user.appsCredentials }]"
+          :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
         >
           {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
           ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}

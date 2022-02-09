@@ -10,7 +10,7 @@
       <span v-if="!getlogoutWithDutyPass">Вы уверены, что хотите выйти из системы?</span>
       <span v-else>Вы уверены, что хотите выйти из системы со сдачей дежурства?</span>
       <br/>
-      <div v-if="getLogoutError" style="color:red;fontSize:1rem;fontWeight:500">
+      <div v-if="getLogoutError" class="dy58-bold-error-message">
         {{ getLogoutError }}
       </div>
     </div>

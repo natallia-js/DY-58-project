@@ -22,11 +22,11 @@
           <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
           Входящие {{ isDSP_or_DSPoperator ? 'документы' : 'уведомления' }}
           <Badge :value="getIncomingOrdersNumber"></Badge>
-          <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
+          <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">
             {{ getErrorLoadingWorkOrders }}
           </p>
           <p v-if="getReportOnOrdersDeliveryResult && getReportOnOrdersDeliveryResult.error"
-            style="color:red;fontSize:1rem;fontWeight:500">
+            class="dy58-bold-error-message">
             {{ getReportOnOrdersDeliveryResult.message }}
           </p>
         </div>

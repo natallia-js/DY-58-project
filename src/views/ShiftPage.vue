@@ -4,7 +4,7 @@
     <p>
       <i>Примечание:</i>
       <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети (online), а
-      <span class="dy58-error"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе
+      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе
     </p>
     <div v-if="getLoadingCurrSectorsShiftStatus">
       <ProgressSpinner />
@@ -20,7 +20,7 @@
         v-if="getUserWorkPoligon && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR"
       />
     </div>
-    <div v-else class="dy58-error p-mt-2 p-mb-2">
+    <div v-else class="dy58-error-message p-mt-2 p-mb-2">
       {{ getErrorLoadingCurrSectorsShift }}
     </div>
   </div>

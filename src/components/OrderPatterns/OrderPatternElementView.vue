@@ -142,7 +142,7 @@
       class="p-fluid"
     >
       <div class="p-field">
-        <label for="chooseStation"><span style="color:red">*</span> Станция</label>
+        <label for="chooseStation"><span class="dy58-required-field">*</span> Станция</label>
         <Dropdown
           id="chooseStation"
           v-model="drTableRec.station"

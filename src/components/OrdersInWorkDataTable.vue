@@ -57,7 +57,7 @@
               }]"
             >
               <span v-if="col.field === getWorkMessTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
-                {{ slotProps.data[col.field] }}<br/><span style="color:red">копия</span>
+                {{ slotProps.data[col.field] }}<br/><span class="dy58-order-copy">копия</span>
               </span>
               <span v-else>
                 {{ slotProps.data[col.field] }}
@@ -182,7 +182,7 @@
                       ]"
                     >
                       <span v-if="col2.field === getWorkMessReceiversTblColumnsTitles.place && !slotProps2.data.sendOriginal">
-                        {{ slotProps2.data[col2.field] }} (<span style="color:red">копия</span>)
+                        {{ slotProps2.data[col2.field] }}<br/>(<span class="dy58-order-copy">копия</span>)
                       </span>
                       <span v-else>
                         {{ slotProps2.data[col2.field] }}

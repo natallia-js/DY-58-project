@@ -7,7 +7,7 @@
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="userName" :class="{'p-error': v$.userName.$invalid && state.submitted}">
-            <span style="color:red">*</span> Имя пользователя
+            <span class="dy58-required-field">*</span> Имя пользователя
           </label>
           <InputText
             id="userName"
@@ -24,7 +24,7 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="password" :class="{'p-error':v$.password.$invalid && state.submitted}">
-            <span style="color:red">*</span> Пароль
+            <span class="dy58-required-field">*</span> Пароль
           </label>
           <InputText
             id="password"

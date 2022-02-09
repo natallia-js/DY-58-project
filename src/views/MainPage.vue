@@ -61,7 +61,7 @@
             <div class="dy58-table-comment">
               (изменение времени запроса информации будет применено при очередном обновлении данных)
             </div>
-            <p v-if="getErrorLoadingWorkOrders" style="color:red;fontSize:1rem;fontWeight:500">
+            <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">
               {{ getErrorLoadingWorkOrders }}
             </p>
           </div>

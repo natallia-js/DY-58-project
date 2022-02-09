@@ -29,7 +29,7 @@
             {{ slotProps.node.specialTrainCategories &&
             slotProps.node.specialTrainCategories.includes(specialOrderDSPTakeDutySign) ?
             specialOrderSubpatternTypes.RECORD : slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}
-            <span v-if="!slotProps.node.sendOriginal" style="color:red;font-weight:400">(копия)</span>
+            <span v-if="!slotProps.node.sendOriginal" class="dy58-order-copy">(копия)</span>
           </b>,
           {{ slotProps.node.orderTitle || '?' }},
           от {{ slotProps.node.time }}

@@ -31,7 +31,7 @@
 
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="create-date-time-string" :class="{'p-error':v$.createDateTimeString.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Дата и время создания</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Дата и время создания</span>
         </label>
         <InputText
           id="create-date-time-string"
@@ -51,7 +51,7 @@
 
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="pass-duty-user-post-fio" :class="{'p-error':v$.passDutyUserPostFIO.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Дежурство сдал</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Дежурство сдал</span>
         </label>
         <Dropdown
           id="pass-duty-user-post-fio"
@@ -71,7 +71,7 @@
       </div>
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="pass-duty-date-time" :class="{'p-error':v$.passDutyDateTime.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Время сдачи дежурства</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Время сдачи дежурства</span>
         </label>
         <Calendar
           id="pass-duty-date-time"
@@ -95,7 +95,7 @@
 
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="take-duty-user-post-fio" :class="{'p-error':v$.takeDutyUserPostFIO.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Дежурство принял</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Дежурство принял</span>
         </label>
         <Dropdown
           id="take-duty-user-post-fio"
@@ -115,7 +115,7 @@
       </div>
       <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label for="take-duty-date-time" :class="{'p-error':v$.takeDutyDateTime.$invalid && submitted}">
-          <span class="p-text-bold"><span style="color:red">*</span> Время приема дежурства</span>
+          <span class="p-text-bold"><span class="dy58-required-field">*</span> Время приема дежурства</span>
         </label>
         <Calendar
           id="take-duty-date-time"
