@@ -144,6 +144,15 @@ export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeD
   return response.data;
 };
 
+export const getECDOrdersFromServer = async (props) => {
+  const { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, page, docsCount } = props;
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getECDOrders,
+    { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, page, docsCount },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
 export const checkIfOrderIsAsserted = async (id) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.checkIfOrderIsAsserted,
     { id },

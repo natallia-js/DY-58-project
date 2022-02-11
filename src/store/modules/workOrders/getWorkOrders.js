@@ -1,10 +1,5 @@
-import {
-  SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
-  SPECIAL_ORDER_SUBPATTERN_TYPES,
-} from '@/constants/orderPatterns';
 import { getLocaleDateTimeString, getTimeSpanString } from '@/additional/dateTimeConvertions';
-import { formOrderText } from '@/additional/formOrderText';
-import { upperCaseFirst } from '@/additional/stringFunctions';
+import { formOrderText, getExtendedOrderTitle } from '@/additional/formOrderText';
 import {
   SET_START_DATE_TO_GET_DATA,
   SET_START_DATE_TO_GET_DATA_NO_CHECK,
@@ -180,10 +175,7 @@ export const getWorkOrders = {
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
             orderNum: item.number,
-            extendedOrderTitle:
-              item.specialTrainCategories && item.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
-                `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${item.orderText.orderTitle}` :
-                `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
+            extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({

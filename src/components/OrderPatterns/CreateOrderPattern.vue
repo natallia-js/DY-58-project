@@ -85,12 +85,12 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
-            <span class="p-text-bold">Особая категория поезда</span>
+            <span class="p-text-bold">Особые отметки</span>
           </label>
           <MultiSelect
             v-model="state.selectedSpecialTrainCategories"
             :options="specialTrainCategories"
-            placeholder="Выберите признаки особой категории поезда"
+            placeholder="Выберите особытие отметки распоряжения"
             style="width:100%"
           />
         </div>

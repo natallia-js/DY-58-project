@@ -192,14 +192,14 @@
           </small>
         </div>
 
-        <!-- ОТМЕТКИ ОБ ОСОБОЙ КАТЕГОРИИ ПОЕЗДА -->
+        <!-- ОСОБЫЕ ОТМЕТКИ РАСПОРЯЖЕНИЯ -->
 
         <div
           v-if="state.specialTrainCategories && state.specialTrainCategories.length"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label>
-            <span class="p-text-bold">Особая категория поезда</span>
+            <span class="p-text-bold">Особые отметки распоряжения</span>
           </label>
           {{ state.specialTrainCategories.join(', ') }}
         </div>

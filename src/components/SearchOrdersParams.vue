@@ -47,7 +47,7 @@
 </template>
 
 <script>
-  import { reactive, ref } from 'vue';
+  import { onMounted, reactive, ref } from 'vue';
   import { required  } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
   import FindOrdersTimeSpanChooser from '@/components/FindOrdersTimeSpanChooser';
@@ -96,6 +96,12 @@
         submitted.value = true;
         emit('input', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
       };
+
+      onMounted(() => {
+        // Хотим, чтобы сразу по загрузке страницы отображались те распоряжения, которые были изданы
+        // в текущем месяце
+        handleSubmit();
+      });
 
       return {
         state,

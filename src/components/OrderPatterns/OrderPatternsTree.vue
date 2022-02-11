@@ -107,12 +107,12 @@
             @input="handleEditOrderPatternTitle"
           />
         </div>
-        <div class="p-text-bold p-mb-2">Особая категория поезда</div>
+        <div class="p-text-bold p-mb-2">Особые отметки</div>
         <div class="p-mb-2">
           <MultiSelect
             v-model="editedPattern.specialTrainCategories"
             :options="getSpecialTrainCategories"
-            placeholder="Выберите признаки особой категории поезда"
+            placeholder="Выберите особые отметки распоряжения"
             style="width:100%"
             @change="handleEditOrderSpecialTrainCategories"
           />

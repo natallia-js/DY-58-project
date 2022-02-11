@@ -77,7 +77,9 @@
       });
 
       watch(() => state.timeSpan, (newVal) => {
-        emit('input', { start: newVal.start, end: newVal.tillCancellation ? null : newVal.end });
+        if (state.selectDateTimeMode === DATETIME_SELECT_MODE.GIVEN_PERIOD) {
+          emit('input', { start: newVal.start, end: newVal.tillCancellation ? null : newVal.end });
+        }
       });
 
       return {

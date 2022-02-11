@@ -5,7 +5,14 @@ import {
 } from '@/additional/dateTimeConvertions';
 import { CurrShiftGetOrderStatus, ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 import { DRTrainTableColumns } from '@/constants/orderPatterns';
-import { OrderPatternElementType, OrderPatternElementType_Future } from '@/constants/orderPatterns';
+import {
+  OrderPatternElementType,
+  OrderPatternElementType_Future,
+  SPECIAL_TELECONTROL_ORDER_SIGN,
+  SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
+  SPECIAL_ORDER_SUBPATTERN_TYPES,
+} from '@/constants/orderPatterns';
+import { upperCaseFirst } from '@/additional/stringFunctions';
 
 
 // Данная функция позволяет проверить, что отправлять: оригинал или копию.
@@ -184,9 +191,10 @@ export function formOrderText(props) {
  * @param {Array} dspToSend - массив объектов - ДСП, которым отправлялось распоряжение
  * @param {Array} ecdToSend - массив объектов - ЭЦД, которым отправлялось распоряжение
  * @param {Array} otherToSend - массив объектов - иные лица, которым отправлялось распоряжение
+ * @param {Boolean} isTYOrder - если true, то в итоговой строке необходима особая отметка по телеуправлению
  */
 export function formAcceptorsStrings(props) {
-  const { dncToSend, dspToSend, ecdToSend, otherToSend } = props;
+  const { dncToSend, dspToSend, ecdToSend, otherToSend, isTYOrder } = props;
 
   let originalToString = '';
   let copyToString = '';
@@ -226,7 +234,13 @@ export function formAcceptorsStrings(props) {
     formAcceptorStrings(otherToSend, formSubstring(null));
   }
 
-  let res = originalToString.length > 0 ? originalToString : '';
+  let res = isTYOrder ? SPECIAL_TELECONTROL_ORDER_SIGN : '';
+  if (originalToString.length > 0) {
+    if (res.length > 0) {
+      res += '<br/>';
+    }
+    res += originalToString;
+  }
   if (copyToString.length > 0) {
     if (res.length > 0) {
       res += '<br/>';
@@ -234,4 +248,17 @@ export function formAcceptorsStrings(props) {
     res += `<b>Копия:</b> ${copyToString}`;
   }
   return res;
+}
+
+
+/**
+ * Позволяет получить "расширенное" наименование распоряжения в виде: <Тип распоряжения>. <Наименование распоряжения>
+ */
+export function getExtendedOrderTitle(order) {
+  if (!order || !order.orderText || !order.type) {
+    return '';
+  }
+  return order.specialTrainCategories && order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
+  `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${order.orderText.orderTitle}` :
+  `${upperCaseFirst(order.type)}. ${order.orderText.orderTitle}`;
 }

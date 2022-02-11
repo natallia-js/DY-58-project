@@ -48,11 +48,12 @@ const WorkMessStationReceiversTblColumnsTitles = Object.freeze({
 
 // Условные наименования столбцов таблицы журнала ЭЦД
 // (названия столбцов должны соответствовать названию полей массива данных для корректного
-// отображения информации)
+// отображения информации; кроме того, они должны совпадать с наименованиями соответствующих полей в БД,
+// т.к. по ним идут запросы на сортировку и фильтрацию данных в таблице)
 const ECDJournalTblColumnsTitles = Object.freeze({
   seqNum: 'seqNum',
   toWhom: 'toWhom',
-  orderAssertDateTime: 'orderAssertDateTime', // дата, время утверждения
+  assertDateTime: 'assertDateTime', // дата, время утверждения
   orderNum: 'orderNum',
   orderContent: 'orderContent',
   orderAcceptor: 'orderAcceptor',
@@ -185,7 +186,7 @@ export const tablesColumns = {
       return [
         { field: ECDJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '10%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.orderAssertDateTime, title: 'Время утверждения приказа', width: '10%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения приказа', width: '10%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderNum, title: 'Номер приказа', width: '4%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '30%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О.', width: '18%', align: 'left', },
