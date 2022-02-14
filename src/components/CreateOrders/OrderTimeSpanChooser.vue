@@ -49,19 +49,23 @@
     emits: ['input'],
 
     props: {
+      tickTillCancellation: {
+        type: Boolean,
+        required: false,
+      },
       tillCancellationLabel: {
         type: String,
         required: true,
       },
     },
 
-    setup(_props, { emit }) {
+    setup(props, { emit }) {
       const store = useStore();
 
       const state = reactive({
         startDateTime: null,
         endDateTime: null,
-        tillCancellation: false,
+        tillCancellation: Boolean(props.tickTillCancellation),
       });
 
       watch(() => state.startDateTime, (value) => {

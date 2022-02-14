@@ -22,7 +22,7 @@
     filterDisplay="menu"
     :globalFilterFields="[
       getECDJournalTblColumnsTitles.toWhom,
-      getECDJournalTblColumnsTitles.orderNum,
+      getECDJournalTblColumnsTitles.number,
       getECDJournalTblColumnsTitles.orderContent,
       getECDJournalTblColumnsTitles.orderAcceptor,
       getECDJournalTblColumnsTitles.orderSender,
@@ -62,7 +62,7 @@
             getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
           v-html="slotProps.data[col.field]"
         ></div>
-        <div v-else-if="col.field === getECDJournalTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
+        <div v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
           {{ slotProps.data[col.field] }}<br/>(копия)
         </div>
         <div v-else>
@@ -72,7 +72,7 @@
 
       <template #filter="{filterModel,filterCallback}" v-if="[
         getECDJournalTblColumnsTitles.toWhom,
-        getECDJournalTblColumnsTitles.orderNum,
+        getECDJournalTblColumnsTitles.number,
         getECDJournalTblColumnsTitles.orderContent,
         getECDJournalTblColumnsTitles.orderAcceptor,
         getECDJournalTblColumnsTitles.orderSender,
@@ -85,11 +85,23 @@
           placeholder="Введите значение для поиска в столбце"
           @keydown.enter="filterCallback()"
         />
+        <small v-if="[getECDJournalTblColumnsTitles.toWhom, getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)">
+          поиск ведется по информации об адресатах
+        </small>
+        <small v-else-if="[getECDJournalTblColumnsTitles.number, getECDJournalTblColumnsTitles.notificationNumber].includes(col.field)">
+          поиск ведется по числовому значению либо его части
+        </small>
+        <small v-else-if="getECDJournalTblColumnsTitles.orderContent === col.field">
+          поиск ведется только по элементам текста документа (наименование документа и его адресаты не рассматриваются)
+        </small>
+        <small v-else-if="getECDJournalTblColumnsTitles.orderSender === col.field">
+          поиск ведется по информации об издателе документа
+        </small>
       </template>
 
       <template #filterclear="{filterCallback}" v-if="[
         getECDJournalTblColumnsTitles.toWhom,
-        getECDJournalTblColumnsTitles.orderNum,
+        getECDJournalTblColumnsTitles.number,
         getECDJournalTblColumnsTitles.orderContent,
         getECDJournalTblColumnsTitles.orderAcceptor,
         getECDJournalTblColumnsTitles.orderSender,
@@ -98,6 +110,7 @@
         <Button
           type="button"
           icon="pi pi-times"
+          label="Сброс"
           @click="filterCallback()"
           class="p-button-secondary">
         </Button>
@@ -105,7 +118,7 @@
 
       <template #filterapply="{filterCallback}" v-if="[
         getECDJournalTblColumnsTitles.toWhom,
-        getECDJournalTblColumnsTitles.orderNum,
+        getECDJournalTblColumnsTitles.number,
         getECDJournalTblColumnsTitles.orderContent,
         getECDJournalTblColumnsTitles.orderAcceptor,
         getECDJournalTblColumnsTitles.orderSender,
@@ -114,6 +127,7 @@
         <Button
           type="button"
           icon="pi pi-check"
+          label="Поиск"
           @click="filterCallback()"
           class="p-button-success">
         </Button>
@@ -134,7 +148,7 @@
   } from '@/additional/formOrderText';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-  import { ORDER_PATTERN_TYPES, SPECIAL_TELECONTROL_ORDER_SIGN } from '@/constants/orderPatterns';
+  import { SPECIAL_TELECONTROL_ORDER_SIGN } from '@/constants/orderPatterns';
   import { FilterMatchMode } from 'primevue/api';
 
   const DEF_ROWS_PER_PAGE = 10;
@@ -158,11 +172,12 @@
       const totalRecords = ref(0);
       const currentPage = ref(1);
       const sortFields = ref(null);
+      const filterFields = ref(null);
       const rowsPerPage = ref(DEF_ROWS_PER_PAGE);
       const getECDJournalTblColumnsTitles = computed(() => store.getters.getECDJournalTblColumnsTitles);
       const filters = ref({
         [getECDJournalTblColumnsTitles.value.toWhom]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.orderNum]: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        [getECDJournalTblColumnsTitles.value.number]: { value: null, matchMode: FilterMatchMode.CONTAINS },
         [getECDJournalTblColumnsTitles.value.orderContent]: { value: null, matchMode: FilterMatchMode.CONTAINS },
         [getECDJournalTblColumnsTitles.value.orderAcceptor]: { value: null, matchMode: FilterMatchMode.CONTAINS },
         [getECDJournalTblColumnsTitles.value.orderSender]: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -181,37 +196,17 @@
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
       };
 
-      // Позволяет сформировать дерево распоряжений на основании имеющейся информации по распоряжениям,
-      // которые нужно отобразить в таблице.
-      // Для итоговой таблицы распоряжений ЭЦД нужно иметь связанную информацию "Приказ/запрещение ЭЦД -
-      // уведомление ЭЦД". Никакие другие взаимосвязи документов нам не нужны. Все остальное должно идти
-      // в прямом хронологическом порядке.
-      // Предполагаем, что распрояжения, поданные на вход, уже отсортированы по дате их издания в прямом
-      // хронологическом порядке.
-      const prepareDataForDisplay = (sortedResponseData) => {
+      // Позволяет сформировать массив данных для отображения в таблице.
+      const prepareDataForDisplay = (responseData) => {
         if (data.value.length) {
           data.value = [];
         }
-        if (!sortedResponseData) {
+        if (!responseData) {
           return;
         }
-        const findParentNode = (chainId) => {
-          for (let group of data.value) {
-            if (((group.type === ORDER_PATTERN_TYPES.ECD_ORDER) || (group.type === ORDER_PATTERN_TYPES.ECD_PROHIBITION)) &&
-              (group.orderChainId === chainId)) {
-              return group;
-            }
-          }
-          return null;
-        };
-        sortedResponseData
+        data.value = responseData
           .map((order) => ({
             ...order,
-            timeSpan: order.timeSpan ? {
-              start: order.timeSpan.start ? new Date(order.timeSpan.start) : null,
-              end: order.timeSpan.end ? new Date(order.timeSpan.end) : null,
-              tillCancellation: Boolean(order.timeSpan.tillCancellation),
-            } : null,
             dncToSend: !order.dncToSend ? [] :
               order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
             dspToSend: !order.dspToSend ? [] :
@@ -221,72 +216,55 @@
             otherToSend: !order.otherToSend ? [] :
               order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
           }))
-          .forEach((order, index) => {
-            let parentNode;
-            if (order.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) {
-              parentNode = findParentNode(order.orderChain.chainId);
-            }
-            if (parentNode) {
-              // время уведомления (на приказ/запрещение)
-              parentNode.orderNotificationDateTime = getLocaleDateTimeString(order.timeSpan.start, false);
-              // номер уведомления
-              parentNode.notificationNumber = order.number;
-            } else {
-              data.value.push({
-                // dataKey в таблице
-                id: order._id,
-                // нужно для группировки распоряжений
-                type: order.type,
-                seqNum: getOrderSeqNumber(index),
-                // кому адресовано распоряжение (соответствующие строки "Кому" и "Копия" формируем на
-                // основании сведений, содержащихся в "Иных" адресатах - только для документов, изданных ЭЦД!
-                // для документов, изданных не-ЭЦД, данное поле будет оставаться пустым)
-                toWhom: formToWhomString(order),
-                // дата-время утверждения распоряжения
-                assertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
-                orderNum: order.number,
-                orderContent: getExtendedOrderTitle(order) + '<br/>' +
-                  formOrderText({
-                    orderTextArray: order.orderText.orderText,
-                    dncToSend: order.dncToSend,
-                    dspToSend: order.dspToSend,
-                    ecdToSend: order.ecdToSend,
-                    otherToSend: order.otherToSend,
-                  }),
-                orderAcceptor: formAcceptorsStrings({
-                  dncToSend: order.dncToSend,
-                  dspToSend: order.dspToSend,
-                  ecdToSend: order.ecdToSend,
-                  otherToSend: order.otherToSend,
-                  // для ряда приказов ЭЦД указывается особая отметка ТУ (для приказов, формируемых на
-                  // отключение/включение коммутационного аппарата по телеуправлению); эту отметку необходимо
-                  // отобразить в журнале в графе "Кто принял"
-                  isTYOrder: order.specialTrainCategories && order.specialTrainCategories.includes(SPECIAL_TELECONTROL_ORDER_SIGN),
-                }),
-                orderSender: `${order.creator.post} ${order.creator.fio}`,
-                // время уведомления (на приказ/запрещение) - из связанного распоряжения
-                orderNotificationDateTime: '',
-                // номер уведомления - из связанного распоряжения
-                notificationNumber: '',
-                // нужно для группировки распоряжений
-                orderChainId: order.orderChain.chainId,
-                // для работы с издателем распоряжения
-                workPoligon: order.workPoligon,
-                // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
-                // полигоне, распоряжение - всегда оригинал; для распоряжения, пришедшего из вне, необходимо
-                // сделать дополнительные проверки
-                sendOriginal: Boolean(
-                  orderDispatchedOnThisWorkPoligon(order) ||
-                  (
-                    order.ecdToSend && userWorkPoligon.value &&
-                    order.ecdToSend.find((el) =>
-                      String(el.id) === String(userWorkPoligon.value.code) &&
-                      sendOriginal(el.sendOriginal))
-                  )
-                ),
-              });
-            }
-          });
+          .map((order, index) => ({
+            // dataKey в таблице
+            id: order._id,
+            seqNum: getOrderSeqNumber(index),
+            // кому адресовано распоряжение (соответствующие строки "Кому" и "Копия" формируем на
+            // основании сведений, содержащихся в "Иных" адресатах - только для документов, изданных ЭЦД!
+            // для документов, изданных не-ЭЦД, данное поле будет оставаться пустым)
+            toWhom: formToWhomString(order),
+            // дата-время утверждения распоряжения
+            assertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
+            number: order.number,
+            orderContent: getExtendedOrderTitle(order) + '<br/>' +
+              formOrderText({
+                orderTextArray: order.orderText.orderText,
+                dncToSend: order.dncToSend,
+                dspToSend: order.dspToSend,
+                ecdToSend: order.ecdToSend,
+                otherToSend: order.otherToSend,
+              }),
+            orderAcceptor: formAcceptorsStrings({
+              dncToSend: order.dncToSend,
+              dspToSend: order.dspToSend,
+              ecdToSend: order.ecdToSend,
+              otherToSend: order.otherToSend,
+              // для ряда приказов ЭЦД указывается особая отметка ТУ (для приказов, формируемых на
+              // отключение/включение коммутационного аппарата по телеуправлению); эту отметку необходимо
+              // отобразить в журнале в графе "Кто принял"
+              isTYOrder: order.specialTrainCategories && order.specialTrainCategories.includes(SPECIAL_TELECONTROL_ORDER_SIGN),
+            }),
+            orderSender: `${order.creator.post} ${order.creator.fio}`,
+            // время уведомления (на приказ/запрещение) - из связанного распоряжения
+            orderNotificationDateTime: order.orderNotificationDateTime ? getLocaleDateTimeString(new Date(order.orderNotificationDateTime), false) : '',
+            // номер уведомления - из связанного распоряжения
+            notificationNumber: order.notificationNumber,
+            // для работы с издателем распоряжения
+            workPoligon: order.workPoligon,
+            // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
+            // полигоне, распоряжение - всегда оригинал; для распоряжения, пришедшего из вне, необходимо
+            // сделать дополнительные проверки
+            sendOriginal: Boolean(
+              orderDispatchedOnThisWorkPoligon(order) ||
+              (
+                order.ecdToSend && userWorkPoligon.value &&
+                order.ecdToSend.find((el) =>
+                  String(el.id) === String(userWorkPoligon.value.code) &&
+                  sendOriginal(el.sendOriginal))
+              )
+            ),
+          }));
       };
 
       const formToWhomString = (order) => {
@@ -332,6 +310,7 @@
           datetimeEnd: props.searchParams.timeSpan.end,
           includeDocsCriteria: props.searchParams.includeDocsCriteria,
           sortFields: sortFields.value,
+          filterFields: filterFields.value,
           page: currentPage.value,
           docsCount: rowsPerPage.value,
         })
@@ -373,9 +352,16 @@
         loadLazyData();
       };
 
-      const onFilter = () => {console.log(filters.value)
-        //lazyParams.value.filters = filters.value ;
-        //loadLazyData();
+      const onFilter = () => {
+        // таблица при попытке что-то отфильтровать производит автоматически переход на 1 страницу
+        currentPage.value = 1;
+        filterFields.value = [];
+        for (let filter in filters.value) {
+          if (filters.value[filter].value) {
+            filterFields.value.push({ field: filter, value: filters.value[filter].value });
+          }
+        }
+        loadLazyData();
       };
 
       watch(() => props.searchParams, (newVal) => {
@@ -395,7 +381,6 @@
         searchInProgress,
         getECDJournalTblColumnsTitles,
         getECDJournalTblColumns: computed(() => store.getters.getECDJournalTblColumns),
-        formToWhomString,
         onPage,
         onSort,
         onFilter,
@@ -407,19 +392,54 @@
 
 <style lang="scss" scoped>
   :deep(.p-column-header-content) {
-    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    /*flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: flex-start;*/
   }
 
   :deep(.p-column-filter-menu) {
     margin-left: 0;
-    padding: 0.5rem !important;
+    padding: 0 !important;
+    justify-content: center;
+    align-items: center;
+    position: absolute !important;
+    top: 0;
+    right: 0;
+    bottom: 0;
   }
 
+  /*:deep(.p-column-filter-menu-button, .p-column-filter-clear-button) {
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }*/
+
   .p-datatable :deep(.p-sortable-column-icon) {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-left: 0 !important;
-    padding: 0.5rem !important;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  :deep(.p-column-filter-menu-button) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  :deep(.pi-filter) {
+    font-size: 0.75rem;
+  }
+  :deep(.p-sortable-column-icon) {
+    font-size: 0.75rem;
   }
 </style>

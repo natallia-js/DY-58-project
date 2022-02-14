@@ -70,11 +70,17 @@ export const DRTrainTableColumns = [
   { field: 'departureTime', header: 'Время отправления', width: '25%' },
 ];
 
-// отметка особой категории распоряжений о телеуправлении
+// отметка особой категории распоряжений ЭЦД о телеуправлении
 export const SPECIAL_TELECONTROL_ORDER_SIGN = 'ТУ';
 
+// отметка особой категории распоряжений ДНЦ о закрытии перегона
+export const SPECIAL_CLOSE_BLOCK_ORDER_SIGN = 'ЗП';
+// отметка особой категории распоряжений ДНЦ об открытии перегона
+export const SPECIAL_OPEN_BLOCK_ORDER_SIGN = 'ОП';
+
 export const SPECIAL_TRAIN_CATEGORIES = [
-  'ВМ', 'Д', 'ДР', 'Н', 'ПВ', 'ПВПД', 'ПД', 'Т', 'ТД', SPECIAL_TELECONTROL_ORDER_SIGN,
+  'ВМ', 'Д', 'ДР', SPECIAL_CLOSE_BLOCK_ORDER_SIGN, 'Н', SPECIAL_OPEN_BLOCK_ORDER_SIGN,
+  'ПВ', 'ПВПД', 'ПД', 'Т', 'ТД', SPECIAL_TELECONTROL_ORDER_SIGN,
 ];
 
 // отметка особой категории распоряжений о принятии дежурства ДСП

@@ -113,7 +113,7 @@ export const getWorkOrders = {
           fio: order.creator.fio + (order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''),
           orderNum: order.number,
           time: getLocaleDateTimeString(order.createDateTime, false),
-          timeSpan: getTimeSpanString(order.timeSpan, getters.isECD),
+          timeSpan: getTimeSpanString(order.type, order.timeSpan, getters.isECD),
           startTime: order.timeSpan.start,
           orderTitle: order.orderText.orderTitle,
           orderText: formOrderText({
@@ -173,7 +173,7 @@ export const getWorkOrders = {
             state: '',
             seqNum: index + 1,
             time: getLocaleDateTimeString(item.createDateTime, false),
-            timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
+            timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD),
             orderNum: item.number,
             extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,

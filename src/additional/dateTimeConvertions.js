@@ -1,3 +1,6 @@
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+
+
 /**
  * Позволяет для данного объекта Date получить его строковое представление в формате dd.mm.yyyy.
  *
@@ -45,21 +48,26 @@ export function getLocaleDateTimeString(date, showSeconds) {
 }
 
 /**
- * Позволяет для данного объекта timeSpan получить его строковое представление.
+ * Позволяет для данного объекта timeSpan получить его строковое представление в зависимости от
+ * типа соответствующего распоряжения.
  *
+ * @param {String} orderType - тип распоряжения
  * @param {Object} timeSpan - объект с полями start, end, tillCancellation
  * @param {boolean} isECD - true (строку необходимо сформировать для ЭЦД) или
  * false (строку необходимо сформировать не для ЭЦД)
  * @returns строковое представление объекта timeSpan
  */
-export function getTimeSpanString(timeSpan, isECD) {
+export function getTimeSpanString(orderType, timeSpan, isECD) {
   if (!timeSpan || !timeSpan.start) {
     return '';
   }
-  if (timeSpan.start && timeSpan.end && getLocaleDateTimeString(timeSpan.start, false) === getLocaleDateTimeString(timeSpan.end, false)) {
-    return getLocaleDateTimeString(timeSpan.start, false);
+  const startDateString = getLocaleDateTimeString(timeSpan.start, false);
+  const endDateString = getLocaleDateTimeString(timeSpan.end, false);
+  if ((timeSpan.start && timeSpan.end && startDateString === endDateString) ||
+    ([ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION, ORDER_PATTERN_TYPES.ECD_NOTIFICATION].includes(orderType))) {
+    return startDateString;
   }
-  const startString = `с ${getLocaleDateTimeString(timeSpan.start, false)}`;
-  const endString = timeSpan.end ? ` по ${getLocaleDateTimeString(timeSpan.end, false)}` : (!isECD ? ' до отмены' : ' до уведомления');
+  const startString = `с ${startDateString}`;
+  const endString = timeSpan.end ? ` по ${endDateString}` : (!isECD ? ' до отмены' : ' до уведомления');
   return startString + endString;
 }

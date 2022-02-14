@@ -54,7 +54,7 @@ const ECDJournalTblColumnsTitles = Object.freeze({
   seqNum: 'seqNum',
   toWhom: 'toWhom',
   assertDateTime: 'assertDateTime', // дата, время утверждения
-  orderNum: 'orderNum',
+  number: 'number',
   orderContent: 'orderContent',
   orderAcceptor: 'orderAcceptor',
   orderSender: 'orderSender',
@@ -185,14 +185,14 @@ export const tablesColumns = {
     getECDJournalTblColumns() {
       return [
         { field: ECDJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '10%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения приказа', width: '10%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.orderNum, title: 'Номер приказа', width: '4%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '9%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения приказа', width: '9%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.number, title: 'Номер приказа', width: '6%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '30%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О.', width: '18%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.orderSender, title: 'Кто передал Фамилия И.О.', width: '10%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.orderNotificationDateTime, title: 'Время уведомления', width: '10%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.notificationNumber, title: 'Номер уведомления', width: '4%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderSender, title: 'Кто передал Фамилия И.О.', width: '9%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderNotificationDateTime, title: 'Время уведомления', width: '9%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.notificationNumber, title: 'Номер уведомления', width: '6%', align: 'left', },
       ];
     },
   },

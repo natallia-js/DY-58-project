@@ -23,7 +23,7 @@
           </div>
           <div class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">Включать:</label>
-            <div>
+            <div class="p-mb-2">
               <Checkbox
                 id="include-only-outgoing-docs"
                 name="includeDocsCriteria"
@@ -31,6 +31,15 @@
                 v-model="state.includeDocsCriteria"
               />
               <label for="include-only-outgoing-docs">&#160;только исходящие документы</label>
+            </div>
+            <div>
+              <Checkbox
+                id="include-active-docs"
+                name="includeDocsCriteria"
+                :value="INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_ACTIVE"
+                v-model="state.includeDocsCriteria"
+              />
+              <label for="include-active-docs">&#160;действующие цепочки документов</label>
             </div>
           </div>
           <div class="p-col-6">
@@ -55,6 +64,7 @@
 
   const INCLUDE_DOCUMENTS_CRITERIA = {
     ONLY_OUTGOUING: 'ONLY_OUTGOUING',
+    INCLUDE_ACTIVE: 'INCLUDE_ACTIVE',
   };
 
   export default {
@@ -72,7 +82,7 @@
           start: null,
           end: null,
         },
-        includeDocsCriteria: [],
+        includeDocsCriteria: [INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_ACTIVE],
       });
 
       const endDateNoLessStartDate = (value) => {

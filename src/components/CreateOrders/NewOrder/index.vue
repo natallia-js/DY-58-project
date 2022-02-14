@@ -180,6 +180,7 @@
           </label>
           <order-time-span-chooser
             id="time-span"
+            :tickTillCancellation="[ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
             :tillCancellationLabel="`До ${isDNC ? 'отмены' : 'уведомления'}`"
             :value="v$.timeSpan.$model"
             @input="v$.timeSpan.$model = $event"
@@ -384,7 +385,7 @@
           end: null,
           tillCancellation: null,
         },
-        defineOrderTimeSpan: defineOrderTimeSpanOptions[0],
+        defineOrderTimeSpan: [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
         specialTrainCategories: null,
         orderText: {

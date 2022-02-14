@@ -52,7 +52,7 @@ export const incomingOrders = {
             state: (now - item.createDateTime) >= RECENTLY ? WorkMessStates.cameLongAgo : WorkMessStates.cameRecently,
             seqNum: index + 1,
             time: getLocaleDateTimeString(item.createDateTime, false),
-            timeSpan: getTimeSpanString(item.timeSpan, getters.isECD),
+            timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD),
             orderNum: item.number,
             extendedOrderTitle: `${upperCaseFirst(item.type)}. ${item.orderText.orderTitle}`,
             orderTitle: item.orderText.orderTitle,

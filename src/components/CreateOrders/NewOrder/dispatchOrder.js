@@ -1,5 +1,6 @@
 import { computed, watch } from 'vue';
 import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 
 /**
  * Данный модуль предназначен для сбора данных о распоряжении и для его издания.
@@ -76,9 +77,18 @@ export const useDispatchOrder = (inputVals) => {
       place: getIssuedOrderPlaceObject.value,
       timeSpan: getIssuedOrderTimeSpanObject.value,
       orderText: state.orderText,
-      dncToSend: dncSectorsToSendOrderNoDupl.value,
-      dspToSend: dspSectorsToSendOrderNoDupl.value,
-      ecdToSend: ecdSectorsToSendOrderNoDupl.value,
+      dncToSend: dncSectorsToSendOrderNoDupl.value ? dncSectorsToSendOrderNoDupl.value.map((el) => {
+          if (el.post) return el;
+          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DNC };
+        }) : [],
+      dspToSend: dspSectorsToSendOrderNoDupl.value ? dspSectorsToSendOrderNoDupl.value.map((el) => {
+          if (el.post) return el;
+          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DSP };
+        }) : [],
+      ecdToSend: ecdSectorsToSendOrderNoDupl.value ? ecdSectorsToSendOrderNoDupl.value.map((el) => {
+          if (el.post) return el;
+          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.ECD };
+        }) : [],
       otherToSend: state.otherSectorsToSendOrder,
       orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
       createdOnBehalfOf: state.createdOnBehalfOf,

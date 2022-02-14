@@ -2425,7 +2425,8 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   box-shadow: none;
-  min-width: 12.5rem;
+  min-width: 20rem;
+  max-width: 25rem;
 }
 .p-column-filter-overlay .p-column-filter-row-items {
   padding: 0.5rem 0;
@@ -2467,7 +2468,7 @@
   border-top-left-radius: 4px;
 }
 .p-column-filter-overlay-menu .p-column-filter-constraint {
-  padding: 1.25rem;
+  padding: 0.5rem;
   border-bottom: 1px solid #dee2e6;
 }
 .p-column-filter-overlay-menu .p-column-filter-constraint .p-column-filter-matchmode-dropdown {
@@ -2483,7 +2484,7 @@
   padding: 0.5rem 1.25rem;
 }
 .p-column-filter-overlay-menu .p-column-filter-buttonbar {
-  padding: 1.25rem;
+  padding: 0.5rem;
 }
 
 .fc .fc-view-harness th {
