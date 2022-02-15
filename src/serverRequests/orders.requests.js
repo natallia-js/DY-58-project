@@ -145,7 +145,15 @@ export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeD
 };
 
 export const getECDOrdersFromServer = async (props) => {
-  const { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, filterFields, page, docsCount } = props;
+  const {
+    datetimeStart,
+    datetimeEnd,
+    includeDocsCriteria,
+    sortFields,
+    filterFields,
+    page = null,
+    docsCount = null,
+  } = props;
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getECDOrders,
     { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, filterFields, page, docsCount },
     { headers: getRequestAuthorizationHeader() }

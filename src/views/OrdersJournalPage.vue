@@ -2,10 +2,12 @@
   <div>
     <search-orders-params
       @input="searchParams = $event"
+      @print="printParams = $event"
     />
     <div v-if="isECD">
       <ECDJournal
         :searchParams="searchParams"
+        :printParams="printParams"
       />
     </div>
     <div v-else>
@@ -37,10 +39,12 @@
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.ordersJournal);
 
       const searchParams = ref(null);
+      const printParams = ref(null);
 
       return {
         isECD: computed(() => store.getters.isECD),
         searchParams,
+        printParams,
       };
     },
   }

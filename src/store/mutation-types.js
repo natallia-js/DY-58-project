@@ -172,3 +172,6 @@ export const NEXT_RETRY_NUM = 'nextRetryNum';
 export const RETRY_ON_CLOSE_WS_CONNECTION = 'retryOnCloseWSConnection';
 export const DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION = 'doNotRetryOnCloseWSConnection';
 export const DEL_ALL_WS_SERVER_MESSAGES = 'delAllWSServerMessages';
+
+// Common
+export const SET_PRINT_PREVIEW = 'setPrintPreview';

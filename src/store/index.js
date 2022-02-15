@@ -12,6 +12,7 @@ import { workOrders } from './modules/workOrders/index';
 import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
 import { checkUserAuthority } from './modules/checkUserAuthority';
 import { sounds } from './modules/sounds';
+import { common } from './modules/common';
 
 export const store = createStore({
   modules: {
@@ -28,5 +29,6 @@ export const store = createStore({
     orderPatternsElementsRefs,
     checkUserAuthority,
     sounds,
+    common,
   },
 });

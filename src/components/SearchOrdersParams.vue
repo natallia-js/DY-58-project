@@ -1,5 +1,5 @@
 <template>
-<Accordion>
+  <Accordion>
     <AccordionTab>
       <template #header>
         Определить параметры поиска информации
@@ -18,7 +18,7 @@
               v-if="(v$.timeSpan.$invalid && submitted) || v$.timeSpan.$pending.$response"
               class="p-error"
             >
-              Пожалуйста, корректно определите время поиска информации
+              Пожалуйста, корректно определите временной интервал поиска информации
             </small>
           </div>
           <div class="p-field p-col-6 p-d-flex p-flex-column">
@@ -47,6 +47,12 @@
               type="submit"
               label="Найти"
               style="maxWidth:100px"
+              class="p-mr-3"
+            />
+            <Button
+              label="Печать"
+              style="maxWidth:100px"
+              @click="handlePrint"
             />
           </div>
         </form>
@@ -74,7 +80,7 @@
       FindOrdersTimeSpanChooser,
     },
 
-    emits: ['input'],
+    emits: ['input', 'print'],
 
     setup(_props, { emit }) {
       const state = reactive({
@@ -90,9 +96,22 @@
           !state.timeSpan.start ? true : (isValidDateTime(value) && value >= state.timeSpan.start);
       };
 
+      const restrictedTimeInterval = (value) => {
+        const daysBetweenTwoDates = (date1, date2) => {
+          return Math.ceil(Math.abs(date2.getTime() - date1.getTime()) / (1000 * 3600 * 24));
+        };
+        let days = 0;
+        if (!value) {
+          days = daysBetweenTwoDates(new Date(), state.timeSpan.start);
+        } else {
+          days = daysBetweenTwoDates(state.timeSpan.end, state.timeSpan.start);
+        }
+        return days < 90;
+      };
+
       const timeSpanRules = {
         start: { required, isValidDateTime },
-        end: { endDateNoLessStartDate },
+        end: { endDateNoLessStartDate, restrictedTimeInterval },
       };
 
       const rules = reactive({
@@ -113,12 +132,23 @@
         handleSubmit();
       });
 
+      const handlePrint = () => {
+        submitted.value = true;
+        v$.value.$touch();
+        v$.value.$validate();
+        let isFormValid = !v$.value.$invalid;
+        if (isFormValid) {
+          emit('print', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
+        }
+      };
+
       return {
         state,
         INCLUDE_DOCUMENTS_CRITERIA,
         v$,
         submitted,
         handleSubmit,
+        handlePrint,
       };
     },
   }

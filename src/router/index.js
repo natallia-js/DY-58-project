@@ -6,6 +6,7 @@ import MainPage from '@/views/MainPage';
 import NewOrderPage from '@/views/NewOrderPage';
 import OrderPatternsPage from '@/views/OrderPatternsPage';
 import OrdersJournalPage from '@/views/OrdersJournalPage';
+import PrintECDJournalPreviewPage from '@/views/PrintECDJournalPreviewPage';
 import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
@@ -55,6 +56,14 @@ const routes = [
     path: '/ordersJournalPage',
     name: 'OrdersJournalPage',
     component: OrdersJournalPage,
+    meta: {
+      requiresFullAuth: true,
+    },
+  },
+  {
+    path: '/printECDJournalPreviewPage/:datetimeStart/:datetimeEnd/:includeDocsCriteria/:sortFields/:filterFields',
+    name: 'PrintECDJournalPreviewPage',
+    component: PrintECDJournalPreviewPage,
     meta: {
       requiresFullAuth: true,
     },

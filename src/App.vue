@@ -4,9 +4,9 @@
     @close="hideBeforeLogoutDlg"
   >
   </ShowBeforeLogoutDlg>
-  <nav-bar v-if="canUserWorkWithSystem" />
+  <nav-bar v-if="canUserWorkWithSystem && !isPrintPreview" />
   <router-view />
-  <footer-bar v-if="canUserWorkWithSystem" />
+  <footer-bar v-if="canUserWorkWithSystem && !isPrintPreview" />
 </template>
 
 
@@ -180,6 +180,7 @@
 
       return {
         state,
+        isPrintPreview: computed(() => store.getters.isPrintPreview),
         canUserWorkWithSystem,
         hideBeforeLogoutDlg,
       };

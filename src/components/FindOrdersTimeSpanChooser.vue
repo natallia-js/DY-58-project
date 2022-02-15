@@ -20,7 +20,7 @@
   <order-time-span-chooser
     tillCancellationLabel="по настоящее время"
     :value="state.timeSpan"
-    @input="state.timeSpan = $event"
+    @input="handleChangeTimeSpan"
   />
 </template>
 
@@ -82,9 +82,17 @@
         }
       });
 
+      const handleChangeTimeSpan = (event) => {
+        state.timeSpan = event;
+        if (state.selectDateTimeMode !== DATETIME_SELECT_MODE.GIVEN_PERIOD) {
+          state.selectDateTimeMode = DATETIME_SELECT_MODE.GIVEN_PERIOD;
+        }
+      };
+
       return {
         state,
         DATETIME_SELECT_MODE,
+        handleChangeTimeSpan,
       };
     },
   }
