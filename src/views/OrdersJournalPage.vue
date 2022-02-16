@@ -4,7 +4,7 @@
       @input="searchParams = $event"
       @print="printParams = $event"
     />
-    <div v-if="isECD">
+    <div v-if="isECD" class="p-ml-1 p-mr-1">
       <ECDJournal
         :searchParams="searchParams"
         :printParams="printParams"

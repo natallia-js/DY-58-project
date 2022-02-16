@@ -31,9 +31,9 @@ const formToWhomString = (order) => {
       return;
     }
     if (sendOriginal(el.sendOriginal)) {
-      toWhom += toWhom.length > 0 ? `, ${subString}` : subString;
+      toWhom += toWhom.length > 0 ? `,<br/>${subString}` : subString;
     } else {
-      toWhomCopy += toWhomCopy.length > 0 ? `, ${subString}` : subString;
+      toWhomCopy += toWhomCopy.length > 0 ? `,<br/>${subString}` : subString;
     }
   });
   let res = toWhom.length > 0 ? toWhom : '';
@@ -41,7 +41,7 @@ const formToWhomString = (order) => {
     if (res.length > 0) {
       res += '<br/>';
     }
-    res += `<b>Копия:</b> ${toWhomCopy}`;
+    res += `<b>Копия:</b><br/>${toWhomCopy}`;
   }
   return res;
 };

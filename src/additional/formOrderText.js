@@ -31,10 +31,11 @@ export const sendOriginal = (dataToCheck) => {
 };
 
 
-const toSubstring = (array, substringFunction) => {
+const toSubstring = (array, substringFunction, separateRows = false) => {
   if (array.length) {
+    const divider = separateRows ? ',<br/>' : ', ';
     return array.reduce((accumulator, currentValue, index) =>
-      accumulator + substringFunction(currentValue) + `${index === array.length - 1 ? '' : ', '}`, '');
+      accumulator + substringFunction(currentValue) + `${index === array.length - 1 ? '' : divider}`, '');
   }
   return '';
 };
@@ -165,13 +166,11 @@ export function formOrderText(props) {
   }
 
   if (asString) {
-    if (originalToString) {
-      orderText += '<br/><b>Кому:</b> ' + originalToString;
-    }
+    let addresses = originalToString ? `<b>Кому:</b> ${originalToString}<br/>` : '';
     if (copyToString) {
-      orderText += '<br/><b>Копия:</b> ' + copyToString;
+      addresses += `<b>Копия:</b> ${copyToString}<br/>`;
     }
-    return orderText;
+    return `${addresses}${orderText}`;
   }
 
   return {
@@ -200,13 +199,13 @@ export function formAcceptorsStrings(props) {
   let copyToString = '';
 
   const formAcceptorStrings = (array, substringFunction) => {
-    const to = toSubstring(array.filter((el) => sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction);
+    const to = toSubstring(array.filter((el) => sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction, true);
     if (to.length) {
-      originalToString += !originalToString ? to : `, ${to}`;
+      originalToString += !originalToString ? to : `,<br/>${to}`;
     }
-    const copyTo = toSubstring(array.filter((el) => !sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction);
+    const copyTo = toSubstring(array.filter((el) => !sendOriginal(el.sendOriginal) && el.confirmDateTime), substringFunction, true);
     if (copyTo.length) {
-      copyToString += !copyToString ? copyTo : `, ${copyTo}`;
+      copyToString += !copyToString ? copyTo : `,<br/>${copyTo}`;
     }
   };
 
@@ -245,7 +244,7 @@ export function formAcceptorsStrings(props) {
     if (res.length > 0) {
       res += '<br/>';
     }
-    res += `<b>Копия:</b> ${copyToString}`;
+    res += `Копия:<br/>${copyToString}`;
   }
   return res;
 }

@@ -6,9 +6,9 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <p style="textAlign:center" class="p-text-bold p-text-uppercase p-mb-2">{{ type ? type : '?' }}</p>
-    <p><span class="p-text-bold">Номер:</span> &#160; {{ number ? number : '?' }}</p>
-    <p><span class="p-text-bold">Время издания:</span> &#160; {{ getCurrDateTimeString }}</p>
+    <p class="p-text-center p-text-bold p-text-capitalize p-mb-2">
+      {{ getCurrDateTimeString }} &#160; {{ type }} &#160; {{ number ? '№ ' + number : '№ ?' }}
+    </p>
     <p v-if="prevRelatedOrder"><span class="p-text-bold">На распоряжение:</span> &#160;
       №{{ prevRelatedOrder.number }} от {{ prevRelatedOrderCreateDateTime }} -
       {{ prevRelatedOrder.orderText ? prevRelatedOrder.orderText.orderTitle : '?' }}
@@ -20,16 +20,15 @@
     <p v-if="specialTrainCategories && specialTrainCategories.length">
       <span class="p-text-bold">Особые отметки:</span> &#160; {{ specialTrainCategories.join(', ') }}
     </p>
-    <p><span class="p-text-bold">Наименование:</span> &#160;
+    <p>
+      <span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
-    <p>
-      <span class="p-text-bold">Текст:</span>
-      <br />
-      <span v-html="getOrderText"></span>
-    </p>
-    <p><span class="p-text-bold">Издатель:</span> &#160;
-      {{ getUserPostFIO }}<span v-if="createdOnBehalfOf"> (от имени {{ createdOnBehalfOf }})</span>
+    <p><span v-html="getOrderText"></span></p>
+    <p><span class="p-text-bold">Передал:</span> &#160;
+      {{ getUserPost }} &#160; {{ getUserFIO }} &#160;
+      <span v-if="createdOnBehalfOf">(от имени {{ createdOnBehalfOf }}) &#160; </span>
+      {{ getUserWorkPoligonName }}
     </p>
     <template #footer>
       <Button label="Издать" @click="dispatchOrder" />
@@ -113,7 +112,9 @@
       ...mapGetters([
         'getCurrDateTimeString',
         'getSectorStationOrBlockTitleById',
-        'getUserPostFIO',
+        'getUserPost',
+        'getUserFIO',
+        'getUserWorkPoligonName',
         'isECD',
       ]),
 

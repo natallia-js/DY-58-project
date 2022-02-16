@@ -9,26 +9,32 @@
     <p style="textAlign:center" class="p-text-bold p-text-uppercase p-mb-2">
       {{ (order && order.sendOriginal) ? 'Оригинал' : 'Копия' }}
     </p>
-    <p><span class="p-text-bold">Отправитель:</span> &#160;
-      {{ (order && order.place) ? order.place : '?' }} &#160;
-      {{ (order && order.post) ? order.post : '?' }} &#160;
-      {{ (order && order.fio) ? order.fio : '?' }}
+    <p class="p-text-bold">
+      {{ (order && order.time) ? order.time : '?' }} &#160;
+      {{ (order && order.type) ? order.type : '?' }} &#160;
+      {{ (order && order.orderNum) ? '№ ' + order.orderNum : '№ ?' }}
     </p>
-    <p><span class="p-text-bold">Тип:</span> &#160; {{ (order && order.type) ? order.type : '?' }}</p>
-    <p><span class="p-text-bold">Номер:</span> &#160; {{ (order && order.orderNum) ? order.orderNum : '?' }}</p>
-    <p><span class="p-text-bold">Время издания:</span> &#160; {{ (order && order.time) ? order.time : '?' }}</p>
-    <p><span class="p-text-bold">Время действия:</span> &#160; {{ (order && order.timeSpan) ? order.timeSpan : '?' }}</p>
+    <p>
+      <span class="p-text-bold">Наименование:</span> &#160;
+      {{ (order && order.orderTitle) ? order.orderTitle : '?' }}
+    </p>
+    <p>
+      <span class="p-text-bold">Время действия:</span> &#160;
+      {{ (order && order.timeSpan) ? order.timeSpan : '?' }}
+    </p>
     <p v-if="order && order.specialTrainCategories && order.specialTrainCategories.length">
       <span class="p-text-bold">Особые отметки:</span> &#160; {{ order.specialTrainCategories.join(', ') }}
     </p>
-    <p><span class="p-text-bold">Наименование:</span> &#160; {{ (order && order.orderTitle) ? order.orderTitle : '?' }}</p>
     <p>
-      <span class="p-text-bold">Текст:</span>
-      <br />
       <span v-if="order" v-html="order.orderText"></span>
     </p>
+    <p><span class="p-text-bold">Передал:</span> &#160;
+      {{ (order && order.post) ? order.post : '?' }} &#160;
+      {{ (order && order.fio) ? order.fio : '?' }} &#160;
+      {{ (order && order.place) ? order.place : '?' }}
+    </p>
     <p>
-      <span class="p-text-bold">Время утверждения:</span> &#160; {{ (order && order.assertDateTime) ? order.assertDateTime : '?' }}
+      <span class="p-text-bold">Утверждение:</span> &#160; {{ (order && order.assertDateTime) ? order.assertDateTime : '?' }}
     </p>
     <template #footer>
       <Button

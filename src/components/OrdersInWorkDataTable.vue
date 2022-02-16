@@ -147,11 +147,10 @@
           <!-- Текст распоряжения -->
 
           <div class="p-col">
-            <div class="p-mb-2" v-html="slotProps.data.orderText"></div>
-            <div><b>Из:</b> {{ slotProps.data.place }}</div>
-            <div><b>Автор:</b> {{ `${slotProps.data.post} ${slotProps.data.fio}` }}</div>
+            <div v-html="slotProps.data.orderText"></div>
+            <div><b>Передал:</b> {{ `${slotProps.data.post} ${slotProps.data.fio} ${slotProps.data.place}` }}</div>
             <div v-if="slotProps.data.assertDateTime">
-              <b>Время утверждения:</b> {{ slotProps.data.assertDateTime }}
+              <b>Утверждение:</b> {{ slotProps.data.assertDateTime }}
             </div>
           </div>
 

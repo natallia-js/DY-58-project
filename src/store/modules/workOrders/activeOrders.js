@@ -1,7 +1,103 @@
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constants/orderPatterns';
+import {
+  ORDER_PATTERN_TYPES,
+  SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
+} from '@/constants/orderPatterns';
+import { APP_CREDENTIALS } from '@/constants/appCredentials';
 import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
 import { getUserFIOString } from '@/store/modules/personal';
+
+
+/**
+ * Определяет допустимые связи между документами (при их создании) для разных категорий пользователей системы.
+ * initialDocType - тип документа (исходный документ), на основании которого можно создать новый документ
+ * initialDocSpecialMarks - специальные отметки, которые должны быть у исходного документа
+ * userCredentials - полномочия текущего пользователя
+ * possibleNewDocTypes - типы документов, которые текущий пользователь может создать на основании исходного документа
+ * ! исходный документ должен быть действующим
+ * Допустимые взаимосвязи документов:
+ *   Издатель        Исходный документ             Связанный документ
+ *     ДНЦ             Распоряжение        Распоряжение, Заявка, Уведомление
+ *     ДСП             Распоряжение        Заявка, Уведомление
+ *     ЭЦД             Распоряжение        Запрещение
+ *     ДНЦ             Заявка (ДСП)        Распоряжение, Заявка, Уведомление
+ *     ДСП             Заявка (ДСП)        Заявка, Уведомление
+ *     ЭЦД             Заявка (ДСП)        -
+ *     ДНЦ             Уведомление (ДСП)   Распоряжение
+ *     ДСП             Уведомление (ДСП)   -
+ *     ЭЦД             Уведомление (ДСП)   Уведомление ЭЦД об отмене запрещения ЭЦД
+ *     ДНЦ             Приказ ЭЦД          -
+ *     ДСП             Приказ ЭЦД          -
+ *     ЭЦД             Приказ ЭЦД          Уведомление ЭЦД об отмене приказа ЭЦД
+ *     ДНЦ             Запрещение ЭЦД      -
+ *     ДСП             Запрещение ЭЦД      -
+ *     ЭЦД             Запрещение ЭЦД      Уведомление ЭЦД об отмене запрещения ЭЦД
+ */
+const possibleDocsConnections = [
+  {
+    initialDocType: ORDER_PATTERN_TYPES.ORDER,
+    initialDocSpecialMarks: [SPECIAL_CLOSE_BLOCK_ORDER_SIGN],
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.DNC_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.ECD_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_PROHIBITION],
+      },
+    ],
+  },
+  {
+    initialDocType: ORDER_PATTERN_TYPES.REQUEST,
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.DNC_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+    ],
+  },
+  {
+    initialDocType: ORDER_PATTERN_TYPES.NOTIFICATION,
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.DNC_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.ECD_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_NOTIFICATION],
+      },
+    ],
+  },
+  {
+    initialDocType: ORDER_PATTERN_TYPES.ECD_ORDER,
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.ECD_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_NOTIFICATION],
+      },
+    ],
+  },
+  {
+    initialDocType: ORDER_PATTERN_TYPES.ECD_PROHIBITION,
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.ECD_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_NOTIFICATION],
+      },
+    ],
+  },
+];
 
 
 /**
@@ -83,36 +179,105 @@ export const activeOrders = {
     },
 
     /**
-     * Возвращает действующие рабочие распоряжения в рамках своих цепочек распоряжений.
+     * Для данного типа базового документа (распоряжения) с заданными особыми отметками возвращает
+     * типы документов, которые текущий пользователь может издать на основании базового документа.
+     */
+    getPossibleNewOrderTypesForBaseOrder(_state, getters) {
+      return (baseOrderType, specialOrderMarks = null) => {
+        const possibleDocs = possibleDocsConnections.find((el) => el.initialDocType === baseOrderType);
+        if (!possibleDocs) {
+          return [];
+        }
+        if (possibleDocs.initialDocSpecialMarks && possibleDocs.initialDocSpecialMarks.length) {
+          if (!specialOrderMarks || !specialOrderMarks.length) {
+            return [];
+          }
+          if (specialOrderMarks.find((mark) => !possibleDocs.initialDocSpecialMarks.includes(mark))) {
+            return [];
+          }
+        }
+        const currentUserCredentials = getters.getUserCredential;
+        const userInfo = possibleDocs.newDocsInfo.find((el) => el.userCredentials.includes(currentUserCredentials));
+        if (!userInfo) {
+          return [];
+        }
+        return userInfo.possibleNewDocTypes;
+      };
+    },
+
+    /**
+     * Для данного типа создаваемого документа (распоряжения) возвращает типы базовых документов (ранее
+     * изданных) с их особыми отметками (при наличии), с которыми текущий пользователь может связать
+     * создаваемый документ.
+     */
+    getPossibleBaseOrderTypesForNewOrder(_state, getters) {
+      return (newOrderType) => {
+        const currentUserCredentials = getters.getUserCredential;
+        return possibleDocsConnections.filter((el) =>
+          el.newDocsInfo.find((dt) =>
+            dt.userCredentials.includes(currentUserCredentials) &&
+            dt.possibleNewDocTypes.includes(newOrderType))
+        ).map((el) => ({
+          initialDocType: el.initialDocType,
+          initialDocSpecialMarks: el.initialDocSpecialMarks,
+        }));
+      };
+    },
+
+    /**
+     * Возвращает действующие рабочие распоряжения (в рамках своих цепочек распоряжений),
+     * на базе которых можно создать новое распоряжение заданного типа.
      * Результат метода предназначен для отображения в компоненте TreeSelect.
      */
     getActiveOrdersToDisplayInTreeSelect(_state, getters) {
-      const orders = getters.getActiveOrders;
-      const groupedOrders = [{
-        key: null,
-        label: '-',
-        data: null,
-      }];
-      orders.forEach((order) => {
-        const typeGroup = groupedOrders.find((group) => group.key === order.type);
-        const childItem = {
-          key: order._id,
-          label: `№ ${order.number} от ${getLocaleDateTimeString(order.createDateTime, false)} - ${order.orderText.orderTitle}`,
-          data: order,
-        };
-        if (!typeGroup) {
-          groupedOrders.push({
-            key: order.type,
-            label: order.type,
-            data: order.type,
-            selectable: false,
-            children: [childItem],
-          });
-        } else {
-          typeGroup.children.push(childItem);
+      return (newOrderType) => {
+        // Возможные типы базовых документов для создаваемого документа
+        const possibleBaseOrderTypes = getters.getPossibleBaseOrderTypesForNewOrder(newOrderType);
+        const groupedOrders = [{
+          key: null,
+          label: '-',
+          data: null,
+        }];
+        if (!possibleBaseOrderTypes.length) {
+          return groupedOrders;
         }
-      });
-      return groupedOrders;
+        // Действующие распоряжения
+        const orders = getters.getActiveOrders;
+        orders.forEach((order) => {
+          // действующее распоряжение может рассматриваться как базовое для создаваемого документа?
+          const possibleBaseOrderInfo = possibleBaseOrderTypes.find((el) => el.initialDocType === order.type);
+          if (!possibleBaseOrderInfo) {
+            return;
+          }
+          // особые отметки действующего распоряжения позволяют его рассматривать как базовое для создаваемого документа?
+          if (possibleBaseOrderInfo.initialDocSpecialMarks && possibleBaseOrderInfo.initialDocSpecialMarks.length) {
+            if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
+              return;
+            }
+            if (possibleBaseOrderInfo.initialDocSpecialMarks.find((mark) => !order.specialTrainCategories.includes(mark))) {
+              return;
+            }
+          }
+          const typeGroup = groupedOrders.find((group) => group.key === order.type);
+          const childItem = {
+            key: order._id,
+            label: `№ ${order.number} от ${getLocaleDateTimeString(order.createDateTime, false)} - ${order.orderText.orderTitle}`,
+            data: order,
+          };
+          if (!typeGroup) {
+            groupedOrders.push({
+              key: order.type,
+              label: order.type,
+              data: order.type,
+              selectable: false,
+              children: [childItem],
+            });
+          } else {
+            typeGroup.children.push(childItem);
+          }
+        });
+        return groupedOrders;
+      };
     },
 
     /**

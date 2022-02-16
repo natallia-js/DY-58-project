@@ -1,4 +1,3 @@
-import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 import router from '@/router';
 import { store } from '@/store';
 
@@ -46,79 +45,32 @@ export const contextMenus = {
 
         // Пукты меню о создании на основании выбранного распоряжения другого распоряжения
         // создаются лишь в том случае, если выбранное распоряжение является в своей цепочке действующим
-        if (!getters.getActiveOrders.find((order) => order._id === orderId)) {
+        const order = getters.getActiveOrders.find((order) => order._id === orderId);
+        if (!order) {
           return items;
         }
 
-        // У ДНЦ и ДСП предыдущее распоряжение в цепочке может быть любого типа,
-        // следующее за ним распоряжение - одного из типов распоряжений, которые может
-        // издавать работник, имеющий данную должность
-        if (getters.isDNC) {
+        const possibleNewOrderTypes = getters.getPossibleNewOrderTypesForBaseOrder(order.type, order.specialTrainCategories);
+        if (!possibleNewOrderTypes || !possibleNewOrderTypes.length) {
+          return items;
+        }
+        possibleNewOrderTypes.forEach((newOrderType) => {
           items.push(
             {
-              label: `Создать ${ORDER_PATTERN_TYPES.ORDER.toUpperCase()}`,
+              label: `Создать ${newOrderType.toUpperCase()}`,
               icon: 'pi pi-file',
               command: () => {
                 router.push({
                   name: 'NewOrderPage',
                   params: {
-                    orderType: ORDER_PATTERN_TYPES.ORDER,
+                    orderType: newOrderType,
                     prevOrderId: orderId,
                   },
                 });
               },
             }
           );
-        }
-        if (getters.isDNC || getters.isDSP_or_DSPoperator) {
-          items.push(
-            {
-              label: `Создать ${ORDER_PATTERN_TYPES.REQUEST.toUpperCase()}`,
-              icon: 'pi pi-file',
-              command: () => {
-                router.push({
-                  name: 'NewOrderPage',
-                  params: {
-                    orderType: ORDER_PATTERN_TYPES.REQUEST,
-                    prevOrderId: orderId,
-                  },
-                });
-              },
-            },
-            {
-              label: `Создать ${ORDER_PATTERN_TYPES.NOTIFICATION.toUpperCase()}`,
-              icon: 'pi pi-file',
-              command: () => {
-                router.push({
-                  name: 'NewOrderPage',
-                  params: {
-                    orderType: ORDER_PATTERN_TYPES.NOTIFICATION,
-                    prevOrderId: orderId,
-                  },
-                });
-              },
-            }
-          );
-        }
-        // У ЭЦД предыдущее распоряжение в цепочке может быть любого типа, но следующее за ним -
-        // только уведомление / отмена запрещения. Приказ и запрещение могут лишь начинать цепочку.
-        if (getters.isECD) {
-          items.push(
-            {
-              label: `Создать ${ORDER_PATTERN_TYPES.ECD_NOTIFICATION.toUpperCase()}`,
-              icon: 'pi pi-file',
-              command: () => {
-                router.push({
-                  name: 'NewOrderPage',
-                  params: {
-                    orderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION,
-                    prevOrderId: orderId,
-                  },
-                });
-              },
-            }
-          );
-        }
+        });
         return items;
       };
     },

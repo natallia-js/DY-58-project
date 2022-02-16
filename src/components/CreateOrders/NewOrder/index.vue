@@ -588,7 +588,7 @@
         getOrderInputTypes: OrderInputTypes,
         handleSubmit,
         dispatchOrder: dispatchOrderObject.dispatchOrder,
-        getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect),
+        getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect(props.orderType)),
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
