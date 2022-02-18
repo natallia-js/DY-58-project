@@ -25,7 +25,7 @@ export const workOrders = {
     reportingOnOrdersDelivery: false,
     reportOnOrdersDeliveryResult: null,
 
-    incomingOrdersPerShift: null,
+    incomingOrdersPerShift: [],
     gettingIncomingOrdersPerShift: false,
     gettingIncomingOrdersPerShiftResult: null,
 

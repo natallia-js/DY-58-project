@@ -146,9 +146,8 @@ export const checkIfOrderActionCanBePerformed = {
      * Проверка возможности удалить цепочку распоряжений текущим пользователем.
      */
     canOrdersChainBeDeleted(_state, getters) {
-      return (order) => (
-        order &&
-        getters.canUserPerformAnyActionOnOrder(order.id) &&
+      return (orderId) => (
+        getters.canUserPerformAnyActionOnOrder(orderId) &&
         getters.canUserDelConfirmedOrdersChains
       ) ? true : false;
     },

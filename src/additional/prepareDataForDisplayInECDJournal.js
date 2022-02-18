@@ -104,9 +104,9 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
       }),
       orderSender: `${order.creator.post} ${order.creator.fio}`,
       // время уведомления (на приказ/запрещение) - из связанного распоряжения
-      orderNotificationDateTime: order.orderNotificationDateTime ? getLocaleDateTimeString(new Date(order.orderNotificationDateTime), false) : '',
+      orderNotificationDateTime: order.connectedOrder ? getLocaleDateTimeString(new Date(order.connectedOrder.startDate), false) : '',
       // номер уведомления - из связанного распоряжения
-      notificationNumber: order.notificationNumber,
+      notificationNumber: order.connectedOrder ? order.connectedOrder.number : '',
       // для работы с издателем распоряжения
       workPoligon: order.workPoligon,
       // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем

@@ -61,7 +61,7 @@ const routes = [
     },
   },
   {
-    path: '/printECDJournalPreviewPage/:datetimeStart/:datetimeEnd/:includeDocsCriteria/:sortFields/:filterFields',
+    path: '/printECDJournalPreviewPage',
     name: 'PrintECDJournalPreviewPage',
     component: PrintECDJournalPreviewPage,
     meta: {

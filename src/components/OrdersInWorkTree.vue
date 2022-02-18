@@ -42,29 +42,32 @@
           @click="() => showOrderInfo()"
         />
         <Button
-          v-if="canUserDelConfirmedOrdersChains && chosenOrder && (chosenOrder.key === slotProps.node.key) &&
-            slotProps.node.topLevelNode"
+          v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) &&
+            slotProps.node.topLevelNode && canOrdersChainBeDeleted(slotProps.node.key)"
           icon="pi pi-times"
           class="p-button-secondary p-button-sm p-mr-1 dy58-order-action-button"
           v-tooltip.bottom="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"
           @click="() => deleteOrdersChain(slotProps.node.orderChainId)"
         />
-        <TieredMenu
-          ref="createOrderMenu"
-          :model="createRelativeOrderContextMenuItems"
-          :popup="true"
-          id="overlay_tmenu"
-        />
-        <Button
-          v-if="canUserDispatchOrders && chosenOrder && (chosenOrder.key === slotProps.node.key) &&
-            getActiveOrders.find((order) => order._id === chosenOrder.key)"
-          icon="pi pi-file"
-          class="p-button-success p-button-sm dy58-order-action-button"
-          v-tooltip.bottom="'Создать'"
-          @click="toggleCreateOrderMenu"
-          aria-haspopup="true"
-          aria-controls="overlay_tmenu"
-        />
+        <template v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) &&
+          canDispatchOrdersConnectedToGivenOrder(slotProps.node.key) &&
+          createRelativeOrderContextMenuItems && createRelativeOrderContextMenuItems.length"
+        >
+          <TieredMenu
+            ref="createOrderMenu"
+            :model="createRelativeOrderContextMenuItems"
+            :popup="true"
+            id="overlay_tmenu"
+          />
+          <Button
+            icon="pi pi-file"
+            class="p-button-success p-button-sm dy58-order-action-button"
+            v-tooltip.bottom="'Создать'"
+            @click="toggleCreateOrderMenu"
+            aria-haspopup="true"
+            aria-controls="overlay_tmenu"
+          />
+        </template>
       </template>
     </Tree>
   </div>
@@ -94,7 +97,6 @@
 
     computed: {
       ...mapGetters([
-        'canUserDelConfirmedOrdersChains',
         'canUserDispatchOrders',
         'getWorkingOrdersToDisplayAsTree',
         'getOrdersChainsBeingDeleted',
@@ -102,6 +104,8 @@
         'getCreateRelativeOrderContextMenu',
         'getDeleteOrdersChainAction',
         'getUserWorkPoligon',
+        'canOrdersChainBeDeleted',
+        'canDispatchOrdersConnectedToGivenOrder',
       ]),
 
       createRelativeOrderContextMenuItems() {

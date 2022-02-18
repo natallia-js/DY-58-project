@@ -67,6 +67,10 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     tillCancellation: { cancelOrEndDate },
   };
 
+  const prevRelatedOrderIsRequired = (value) => {
+    return value && !value.null;
+  };
+
   const rules = reactive({
     number: { required, isNumber },
     createDateTime: { required, isValidDateTime },
@@ -92,12 +96,15 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       rules.prevRelatedOrder = {};
       break;
     case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
-      rules.prevRelatedOrder = { required };
+      rules.prevRelatedOrder = { prevRelatedOrderIsRequired };
       rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
-    case ORDER_PATTERN_TYPES.NOTIFICATION:
       rules.prevRelatedOrder = {};
+      rules.createdOnBehalfOf = {};
+      break;
+    case ORDER_PATTERN_TYPES.NOTIFICATION:
+      rules.prevRelatedOrder = { prevRelatedOrderIsRequired };
       rules.createdOnBehalfOf = {};
       break;
     default:

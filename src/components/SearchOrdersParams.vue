@@ -45,14 +45,15 @@
           <div class="p-col-6">
             <Button
               type="submit"
+              icon="pi pi-search"
               label="Найти"
-              style="maxWidth:100px"
               class="p-mr-3"
             />
             <Button
+              icon="pi pi-print"
               label="Печать"
-              style="maxWidth:100px"
               @click="handlePrint"
+              class="p-mr-3"
             />
           </div>
         </form>

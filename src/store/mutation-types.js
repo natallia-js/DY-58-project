@@ -59,7 +59,7 @@ export const DEL_ORDER_PATTERNS_ELEMENTS_REFS = 'delOrderPatternsElementsRefs';
 
 // Incoming Orders Per Shift
 export const SET_INCOMING_ORDERS_PER_SHIFT = 'setIncomingOrdersPerShift';
-export const DEL_INCOMING_ORDERS_PER_SHIFT = 'delIncomingOrdersPerShift';
+export const RESET_INCOMING_ORDERS_PER_SHIFT = 'resetIncomingOrdersPerShift';
 export const CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT = 'clearGettingIncomingOrdersPerShiftResult';
 export const SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT = 'setGettingIncomingOrdersPerShiftResult';
 export const SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS = 'setGettingIncomingOrdersPerShiftStatus';

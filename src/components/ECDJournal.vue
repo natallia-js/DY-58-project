@@ -1,6 +1,11 @@
 <template>
   <div v-if="errMessage">{{ errMessage }}</div>
   <div v-else>
+    <div v-if="selectedRecords && selectedRecords.length">
+      Выделено: {{ selectedRecords.length }}
+      {{ selectedRecords.length > 4 ? 'записей' : (selectedRecords.length > 1) ? 'записи' : 'запись' }}
+      из {{ totalRecords }}
+    </div>
     <DataTable
       :value="data"
       dataKey="id"
@@ -18,6 +23,7 @@
       currentPageReportTemplate="Документы с {first} по {last} из {totalRecords}"
       responsiveLayout="scroll"
       v-model:filters="filters"
+      v-model:selection="selectedRecords"
       filterDisplay="menu"
       :globalFilterFields="[
         getECDJournalTblColumnsTitles.toWhom,
@@ -39,6 +45,15 @@
       <template #loading>
         <div style="marginLeft:auto;marginRight:auto">Идет загрузка данных. Подождите...</div>
       </template>
+
+      <Column
+        selectionMode="multiple"
+        headerStyle="minWidth:3em"
+        bodyStyle="minWidth:3em"
+        headerClass="dy58-table-header-cell-class"
+        bodyClass="dy58-table-content-cell-class"
+      >
+      </Column>
 
       <Column v-for="col of getECDJournalTblColumns"
         :field="col.field"
@@ -178,6 +193,7 @@
         [getECDJournalTblColumnsTitles.value.orderSender]: { value: null, matchMode: FilterMatchMode.CONTAINS },
         [getECDJournalTblColumnsTitles.value.notificationNumber]: { value: null, matchMode: FilterMatchMode.CONTAINS },
       });
+      const selectedRecords = ref();
 
       const getOrderSeqNumber = (index) => {
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
@@ -213,33 +229,6 @@
           .finally(() => {
             searchInProgress.value = false;
           });
-      };
-
-      const printPreview = () => {console.log('props.printParams',props.printParams)
-        const route = router.resolve({
-          name: 'PrintECDJournalPreviewPage',
-          params: {
-            datetimeStart: JSON.stringify(props.printParams.timeSpan.start),
-            datetimeEnd: JSON.stringify(props.printParams.timeSpan.end),
-            includeDocsCriteria: JSON.stringify(props.printParams.includeDocsCriteria),
-            sortFields: JSON.stringify(sortFields.value),
-            filterFields: JSON.stringify(filterFields.value),
-          },
-        });
-        window.open(route.href, '_blank');
-/*
-        router.push({
-          name: 'PrintECDJournalPreviewPage',
-          params: {
-            requestParams: {
-              datetimeStart: props.printParams.timeSpan.start,
-              datetimeEnd: props.printParams.timeSpan.end,
-              includeDocsCriteria: props.printParams.includeDocsCriteria,
-              sortFields: sortFields.value,
-              filterFields: filterFields.value,
-            },
-          },
-        });*/
       };
 
       const onPage = (event) => {
@@ -287,14 +276,37 @@
       });
 
       watch(() => props.printParams, (newVal) => {
-        if (newVal) {
-          printPreview();
+        if (!newVal) {
+          return;
         }
+        // open print preview window
+        const params = selectedRecords.value ?
+          {
+            selectedRecords: selectedRecords.value,
+          } :
+          {
+            selectedRecords: selectedRecords.value,
+            datetimeStart: props.printParams.timeSpan.start,
+            datetimeEnd: props.printParams.timeSpan.end,
+            includeDocsCriteria: props.printParams.includeDocsCriteria,
+            sortFields: sortFields.value,
+            filterFields: filterFields.value,
+          };
+        const route = router.resolve({
+          name: 'PrintECDJournalPreviewPage',
+          params: null,
+        });
+        const newWindow = window.open(route.href, '_blank');
+        newWindow.addEventListener('ready', () => {
+          const event = new CustomEvent('data', { detail: JSON.stringify(params) });
+          newWindow.dispatchEvent(event);
+        });
       });
 
       return {
         data,
         totalRecords,
+        selectedRecords,
         filters,
         rowsPerPage,
         errMessage,

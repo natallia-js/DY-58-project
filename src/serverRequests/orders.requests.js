@@ -10,8 +10,8 @@ export const getLastOrdersParams = async () => {
   return response.data;
 };
 
-export const getOrdersCreatedFromGivenDate = async ({ datetime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersCreatedFromGivenDate,
+export const getOrdersAddressedToThisPoligonFromGivenDate = async ({ datetime }) => {
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersAddressedToThisPoligonFromGivenDate,
     { datetime },
     { headers: getRequestAuthorizationHeader() }
   );

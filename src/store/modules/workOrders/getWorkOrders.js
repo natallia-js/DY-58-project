@@ -113,7 +113,7 @@ export const getWorkOrders = {
           fio: order.creator.fio + (order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''),
           orderNum: order.number,
           time: getLocaleDateTimeString(order.createDateTime, false),
-          timeSpan: getTimeSpanString(order.type, order.timeSpan, getters.isECD),
+          timeSpan: getTimeSpanString(order.type, order.timeSpan, getters.isECD, order.specialTrainCategories),
           startTime: order.timeSpan.start,
           orderTitle: order.orderText.orderTitle,
           orderText: formOrderText({
@@ -173,7 +173,7 @@ export const getWorkOrders = {
             state: '',
             seqNum: index + 1,
             time: getLocaleDateTimeString(item.createDateTime, false),
-            timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD),
+            timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD, item.specialTrainCategories),
             orderNum: item.number,
             extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,
@@ -447,22 +447,27 @@ export const getWorkOrders = {
     /**
      * Обновляет, при необходимости, счетчик входящих распоряжений (за смену).
      */
-    [UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT] (state, { isUserOnDuty, lastTakeDutyTime, userId }) {
-      if (!isUserOnDuty) {
+    [UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT] (state, { isUserOnDuty, lastTakeDutyTime, currentWorkPoligon }) {
+      if (!isUserOnDuty || !currentWorkPoligon) {
         return;
       }
       if (!state.data || !state.data.length) {
         return;
       }
-      if (!state.incomingOrdersPerShift) {
-        state.incomingOrdersPerShift = [];
+      // В общем списке всех распоряжений, полученных с сервера, считаем количество тех распоряжений,
+      // которые были адресованы данному рабочему полигону (это те распоряжения, которые были изданы
+      // не на данном рабочем полигоне)
+      const newOrdersIds = state.data.filter((order) =>
+        !state.incomingOrdersPerShift.includes(order._id) &&
+        (
+          order.workPoligon.type !== currentWorkPoligon.type ||
+          (String(order.workPoligon.id) !== String(currentWorkPoligon.code))
+        ) &&
+        (order.createDateTime >= lastTakeDutyTime)
+      ).map((el) => el._id);
+      if (newOrdersIds.length) {
+        state.incomingOrdersPerShift.push(...newOrdersIds);
       }
-      state.data.forEach((order) => {
-        if ((order.creator.id !== userId) && (order.createDateTime >= lastTakeDutyTime) &&
-          !state.incomingOrdersPerShift.includes(order._id)) {
-          state.incomingOrdersPerShift.push(order._id);
-        }
-      });
     },
 
     [DEL_WORK_ORDERS] (state) {
@@ -490,7 +495,7 @@ export const getWorkOrders = {
         context.commit(UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT, {
           isUserOnDuty: context.getters.isUserOnDuty,
           lastTakeDutyTime: context.getters.getLastTakeDutyTime,
-          userId: context.getters.getUserId,
+          currentWorkPoligon: context.getters.getUserWorkPoligon,
         });
         context.dispatch('reportOnOrdersDelivery', responseData);
 

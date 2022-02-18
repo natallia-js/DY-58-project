@@ -31,7 +31,9 @@
         @click="() => { state.editExistingTakeDutyOrder = true; state.showCreateDSPTakeDutyOrderDlg = true; }"
       />
       <side-menu />
-      <AppSettings />
+      <div class="dy58-settings-panel">
+        <AppSettings />
+      </div>
     </div>
     <div class="p-col-9" style="flex:1;padding:0">
       <div class="p-d-flex p-flex-column">

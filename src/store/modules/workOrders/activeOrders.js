@@ -325,10 +325,12 @@ export const activeOrders = {
       };
     },
 
+    /**
+     * Возвращает true, если распоряжение с заданным id является действующим, false - в противном случае.
+     */
     isOrderActive(_state, getters) {
-      return (orderId) => {
-        getters.getActiveOrders.find((order) => String(order._id) === String(orderId));
-      };
+      return (orderId) =>
+        Boolean(getters.getActiveOrders.find((order) => String(order._id) === String(orderId)));
     },
 
     /**

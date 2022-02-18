@@ -73,14 +73,16 @@
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
 
         <div
-          v-if="(orderType !== ORDER_PATTERN_TYPES.ECD_ORDER) && (orderType !== ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
+          v-if="orderType !== ORDER_PATTERN_TYPES.ECD_ORDER"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
             <span v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-text-bold">
               <span class="dy58-required-field">*</span> На приказ/запрещение
             </span>
-            <span v-else class="p-text-bold">На распоряжение</span>
+            <span v-else class="p-text-bold">
+              <span v-if="orderType === ORDER_PATTERN_TYPES.NOTIFICATION" class="dy58-required-field">*</span> На распоряжение
+            </span>
           </label>
           <TreeSelect
             placeholder="Выберите действующее распоряжение"
@@ -277,7 +279,13 @@
             @input="v$.dncSectorsToSendOrder.$model = $event"
           />
         </AccordionTab>
-        <AccordionTab v-if="orderType === ORDER_PATTERN_TYPES.ORDER || orderType === ORDER_PATTERN_TYPES.NOTIFICATION">
+        <AccordionTab v-if="[
+          ORDER_PATTERN_TYPES.ORDER,
+          ORDER_PATTERN_TYPES.NOTIFICATION,
+          ORDER_PATTERN_TYPES.ECD_ORDER,
+          ORDER_PATTERN_TYPES.ECD_PROHIBITION,
+          ORDER_PATTERN_TYPES.ECD_NOTIFICATION,
+        ].includes(orderType)">
           <template #header>
             <span><b>ЭЦД:</b> <span v-html="selectedECDString"></span></span>
           </template>

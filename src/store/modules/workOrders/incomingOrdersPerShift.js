@@ -1,11 +1,11 @@
 import {
   SET_INCOMING_ORDERS_PER_SHIFT,
-  DEL_INCOMING_ORDERS_PER_SHIFT,
+  RESET_INCOMING_ORDERS_PER_SHIFT,
   CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS,
 } from '@/store/mutation-types';
-import { getOrdersCreatedFromGivenDate } from '@/serverRequests/orders.requests';
+import { getOrdersAddressedToThisPoligonFromGivenDate } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
@@ -15,12 +15,9 @@ import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBl
 export const incomingOrdersPerShift = {
   getters: {
     /**
-     * Возвращает количество входящих распоряжений за смену либо null, если эта информация неизвестна.
+     * Возвращает количество входящих распоряжений за смену.
      */
     getNumberOfIncomingOrdersPerShift(state) {
-      if (!state.incomingOrdersPerShift) {
-        return null;
-      }
       return state.incomingOrdersPerShift.length;
     },
 
@@ -45,12 +42,12 @@ export const incomingOrdersPerShift = {
   },
 
   mutations: {
-    [SET_INCOMING_ORDERS_PER_SHIFT] (state, ordersIds) {
-      state.incomingOrdersPerShift = ordersIds;
+    [SET_INCOMING_ORDERS_PER_SHIFT] (state, orderIds) {
+      state.incomingOrdersPerShift = orderIds;
     },
 
-    [DEL_INCOMING_ORDERS_PER_SHIFT] (state) {
-      state.incomingOrdersPerShift = null;
+    [RESET_INCOMING_ORDERS_PER_SHIFT] (state) {
+      state.incomingOrdersPerShift = [];
     },
 
     [CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT] (state) {
@@ -75,7 +72,7 @@ export const incomingOrdersPerShift = {
 
   actions: {
     /**
-     * Позволяет получить список id входящих распоряжений за смену.
+     * Позволяет получить id входящих распоряжений за смену.
      * Для оператора при ДСП извлекаются данные за заданный промежуток времени, которые приходили
      * соответствующему ДСП (по-другому никак: информация извлекается из общей таблицы распоряжений,
      * в которой фиксируются лишь получатели-станции и ДСП этих станций).
@@ -87,7 +84,7 @@ export const incomingOrdersPerShift = {
       context.commit(CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT);
       context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, true);
       try {
-        const responseData = await getOrdersCreatedFromGivenDate({
+        const responseData = await getOrdersAddressedToThisPoligonFromGivenDate({
           datetime: context.getters.getLastTakeDutyTime,
         });
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: false, message: null });

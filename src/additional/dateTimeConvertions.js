@@ -1,4 +1,4 @@
-import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constants/orderPatterns';
 
 
 /**
@@ -55,16 +55,18 @@ export function getLocaleDateTimeString(date, showSeconds) {
  * @param {Object} timeSpan - объект с полями start, end, tillCancellation
  * @param {boolean} isECD - true (строку необходимо сформировать для ЭЦД) или
  * false (строку необходимо сформировать не для ЭЦД)
+ * @param {Array} specialOrderCategories - массив строк, определяющих особые отметки распоряжения
  * @returns строковое представление объекта timeSpan
  */
-export function getTimeSpanString(orderType, timeSpan, isECD) {
+export function getTimeSpanString(orderType, timeSpan, isECD, specialOrderCategories = null) {
   if (!timeSpan || !timeSpan.start) {
     return '';
   }
   const startDateString = getLocaleDateTimeString(timeSpan.start, false);
   const endDateString = getLocaleDateTimeString(timeSpan.end, false);
   if ((timeSpan.start && timeSpan.end && startDateString === endDateString) ||
-    ([ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION, ORDER_PATTERN_TYPES.ECD_NOTIFICATION].includes(orderType))) {
+    ([ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION, ORDER_PATTERN_TYPES.ECD_NOTIFICATION].includes(orderType)) ||
+    (specialOrderCategories && specialOrderCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN))) {
     return startDateString;
   }
   const startString = `с ${startDateString}`;

@@ -11,8 +11,6 @@
     >
     </ShowIncomingOrderDlg>
 
-    <ContextMenu ref="menu" :model="workOrdersTableContextMenuItems" />
-
     <DataTable
       :value="getWorkingOrders"
       class="p-datatable-gridlines p-datatable-sm"
@@ -20,9 +18,6 @@
       dataKey="id"
       :scrollable="true" scrollHeight="flex"
       v-model:expandedRows="state.expandedRows"
-      contextmenu
-      v-model:contextMenuSelection="state.selectedWorkOrdersTableRecord"
-      @rowContextmenu="handleWorkOrdersTableRightClick"
     >
       <Column
         :expander="true"
@@ -111,7 +106,7 @@
                     @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
-                <div v-if="canOrdersChainBeDeleted(slotProps.data)" class="p-mb-1">
+                <div v-if="canOrdersChainBeDeleted(slotProps.data.id)" class="p-mb-1">
                   <Button
                     icon="pi pi-times"
                     class="p-button-secondary p-button-sm dy58-order-action-button"
@@ -119,7 +114,10 @@
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
-                <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id)">
+                <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id) &&
+                  createRelativeOrderContextMenuItems(slotProps.data.id) &&
+                  createRelativeOrderContextMenuItems(slotProps.data.id).length"
+                >
                   <TieredMenu
                     :ref="`createOrderMenu${slotProps.data.id}`"
                     :model="createRelativeOrderContextMenuItems(slotProps.data.id)"
@@ -348,7 +346,7 @@
 
 
 <script>
-  import { computed, reactive, ref, watch } from 'vue';
+  import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
@@ -371,12 +369,10 @@
     setup() {
       const store = useStore();
       const confirm = useConfirm();
-      const menu = ref();
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
         expandedRows: [],
-        selectedWorkOrdersTableRecord: null,
         showIncomingOrderDlg: false,
         chosenOrder: null,
       });
@@ -390,40 +386,12 @@
       const getExpanderColumnObject = computed(() =>
         getWorkMessTblColumns.value.find((el) => el.field === getWorkMessTblColumnsTitles.value.expander));
 
-      const canUserDelConfirmedOrdersChains = computed(() => store.getters.canUserDelConfirmedOrdersChains);
       const getDeleteOrdersChainAction = computed(() => store.getters.getDeleteOrdersChainAction);
       const getCreateRelativeOrderContextMenu = computed(() => store.getters.getCreateRelativeOrderContextMenu);
 
-      const workOrdersTableContextMenuItems = computed(() => {
-        const items = [];
-        if (state.selectedWorkOrdersTableRecord) {
-          if (canUserDelConfirmedOrdersChains.value) {
-            const ordersInChain = store.getters.getOrdersInChain(state.selectedWorkOrdersTableRecord.orderChainId);
-            items.push({
-              label: `Не показывать ${ordersInChain.length === 1 ? 'распоряжение' : 'цепочку распоряжений'}`,
-              icon: 'pi pi-times',
-              command: () => {
-                getDeleteOrdersChainAction.value(state.selectedWorkOrdersTableRecord.orderChainId, confirm);
-              },
-            });
-          }
-          const createRelativeOrderContextMenuItems =
-            getCreateRelativeOrderContextMenu.value(state.selectedWorkOrdersTableRecord.id);
-          if (createRelativeOrderContextMenuItems.length) {
-            items.push(...createRelativeOrderContextMenuItems);
-          }
-        }
-        if (!items.length) {
-          items.push({
-            label: 'У вас нет прав на выполнение действий над распоряжениями',
-          });
-        }
-        return items;
-      });
-
-      const createRelativeOrderContextMenuItems = (orderId) => {
-        return getCreateRelativeOrderContextMenu.value(orderId);
-      };
+      const createRelativeOrderContextMenuItems = computed(() =>
+        (orderId) => getCreateRelativeOrderContextMenu.value(orderId)
+      );
 
       const showOrderInfo = (order) => {
         state.chosenOrder = order;
@@ -437,10 +405,6 @@
 
       const deleteOrdersChain = (chainId) => {
         getDeleteOrdersChainAction.value(chainId, confirm);
-      };
-
-      const handleWorkOrdersTableRightClick = (event) => {
-        menu.value.show(event.originalEvent);
       };
 
       const getDateTimeString = (datetime, showSeconds = false) => {
@@ -563,7 +527,6 @@
 
       return {
         state,
-        menu,
         isECD: computed(() => store.getters.isECD),
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
@@ -581,15 +544,12 @@
         getOrdersChainsBeingDeleted: computed(() => store.getters.getOrdersChainsBeingDeleted),
         canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
         getWorkMessTblColumnsTitles,
-        canUserDelConfirmedOrdersChains,
         getWorkMessTblColumnsExceptExpander,
         getExpanderColumnObject,
-        workOrdersTableContextMenuItems,
         createRelativeOrderContextMenuItems,
         showOrderInfo,
         hideOrderInfo,
         deleteOrdersChain,
-        handleWorkOrdersTableRightClick,
         getDateTimeString,
         confirmOrderForOthers,
         confirmOrderForOtherReceivers,
