@@ -113,19 +113,28 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
 
   watch(() => state.showOnGID, (newVal) => {
     rules.orderPlace = newVal.value ? placeRules : {};
-    state.orderPlace = {
-      place: null,
-      value: null,
-    };
+    if (state.resetValueOnWatchChanges === true) {
+      state.orderPlace = {
+        place: null,
+        value: null,
+      };
+    }
   });
 
   watch(() => state.defineOrderTimeSpan, (newVal) => {
     rules.timeSpan = newVal.value ? timeSpanRules : {};
-    state.timeSpan = {
-      start: null,
-      end: null,
-      tillCancellation: null,
-    };
+    if (state.resetValueOnWatchChanges === true) {
+      state.timeSpan = {
+        start: null,
+        end: null,
+        tillCancellation: null,
+      };
+    } else {
+      // Это делаю именно здесь, не в 'watch(() => state.showOnGID...', т.к. это должно быть
+      // в одном месте, после того как будет обработана вся информация по черновику распоряжения.
+      // Только по окончании обработки данной информации разрешаем reset полей при выборе режимов ввода данных
+      state.resetValueOnWatchChanges = true;
+    }
   });
 
   return {

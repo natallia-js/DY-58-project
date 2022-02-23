@@ -31,7 +31,32 @@
         @click="() => { state.editExistingTakeDutyOrder = true; state.showCreateDSPTakeDutyOrderDlg = true; }"
       />
       <side-menu />
-      <div class="dy58-settings-panel">
+      <div v-if="isECD" class="p-mt-5">
+        <div class="p-mb-2" style="color:white">Черновики документов</div>
+        <Listbox
+          v-model="state.selectedOrderDraft"
+          :options="state.orderDrafts"
+          optionLabel="createDateTime"
+        >
+          <template #option="slotProps">
+            <div>
+              <Button
+                v-if="state.selectedOrderDraft && slotProps.option._id === state.selectedOrderDraft._id"
+                icon="pi pi-file"
+                class="p-button-success p-button-sm dy58-order-action-button p-mr-2"
+                v-tooltip="'Редактировать'"
+                @click="handleEditOrderDraft(slotProps.option._id, slotProps.option.type)"
+              />
+              <span>
+                <span class="p-text-capitalize">{{ slotProps.option.type }}.</span>
+                {{ slotProps.option.orderText.orderTitle || ''}}
+                ({{ getLocaleDateTimeString(slotProps.option.createDateTime) }})
+              </span>
+            </div>
+          </template>
+        </Listbox>
+      </div>
+      <div class="p-mt-5">
         <AppSettings />
       </div>
     </div>
@@ -87,6 +112,7 @@
 <script>
   import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
+  import router from '@/router';
   import IncomingNotificationsDataTable from '@/components/IncomingNotificationsDataTable';
   import OrdersInWorkDataTable from '@/components/OrdersInWorkDataTable';
   import OrdersInWorkTree from '@/components/OrdersInWorkTree';
@@ -101,6 +127,8 @@
     CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+
 
   export default {
     name: 'dy58-main-page',
@@ -122,6 +150,12 @@
         startDateToGetData: store.getters.getStartDateToGetData || new Date(),
         showCreateDSPTakeDutyOrderDlg: false,
         editExistingTakeDutyOrder: false,
+        selectedOrderDraft: null,
+        orderDrafts: store.getters.getAllOrderDrafts,
+      });
+
+      watch(() => store.getters.getAllOrderDrafts, (newVal) => {
+        state.orderDrafts = newVal;
       });
 
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
@@ -169,8 +203,24 @@
         state.showCreateDSPTakeDutyOrderDlg = false;
       };
 
+      /**
+       *
+       */
+      const handleEditOrderDraft = (orderDraftId, orderType) => {
+        router.push({
+          name: 'NewOrderPage',
+          params: {
+            orderType: orderType,
+            prevOrderId: null,
+            orderDraftType: orderType,
+            orderDraftId,
+          },
+        });
+      };
+
       return {
         state,
+        isECD: computed(() => store.getters.isECD),
         getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
         getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
@@ -178,7 +228,21 @@
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
         getExistingDSPTakeDutyOrder: computed(() => store.getters.getExistingDSPTakeDutyOrder),
         hidePreviewNewDSPCreateTakeDutyOrderDlg,
+        handleEditOrderDraft,
+        getLocaleDateTimeString,
       };
     },
   };
 </script>
+
+
+<style lang="scss" scoped>
+  :deep(.p-listbox-list) {
+    padding: 0 !important;
+  }
+
+  :deep(.p-listbox-item) {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+</style>

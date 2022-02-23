@@ -6,7 +6,7 @@ import {
 } from '@/constants/orderPatterns';
 
 
-function getOrderTextElementTypedValue(element) {
+export function getOrderTextElementTypedValue(element) {
   if (!element) {
     return;
   }
@@ -14,7 +14,7 @@ function getOrderTextElementTypedValue(element) {
     case OrderPatternElementType.DATE:
     case OrderPatternElementType.TIME:
     case OrderPatternElementType.DATETIME:
-      return new Date(element.value);
+      return element.value ? new Date(element.value) : '';
     case OrderPatternElementType.DR_TRAIN_TABLE:
     case OrderPatternElementType_Future.OBJECT:
     case OrderPatternElementType_Future.OBJECTS_LIST:

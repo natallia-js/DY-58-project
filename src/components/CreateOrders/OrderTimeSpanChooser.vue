@@ -57,6 +57,9 @@
         type: String,
         required: true,
       },
+      value: {
+        type: Object,
+      },
     },
 
     setup(props, { emit }) {
@@ -66,6 +69,40 @@
         startDateTime: null,
         endDateTime: null,
         tillCancellation: Boolean(props.tickTillCancellation),
+      });
+
+      watch(() => props.value, (newVal) => {
+        if (!newVal) {
+          state.startDateTime = null;
+          state.endDateTime = null;
+          state.tickTillCancellation = Boolean(props.tickTillCancellation);
+          emit('input', {
+            start: null,
+            end: null,
+            tillCancellation: Boolean(props.tickTillCancellation),
+          });
+        } else {
+          let changed = false;
+          if (state.startDateTime !== newVal.start) {
+            state.startDateTime = newVal.start;
+            changed = true;
+          }
+          if (state.endDateTime !== newVal.end) {
+            state.endDateTime = newVal.end;
+            changed = true;
+          }
+          if (state.tillCancellation !== newVal.tillCancellation) {
+            state.tillCancellation = newVal.tillCancellation;
+            changed = true;
+          }
+          if (changed) {
+            emit('input', {
+              start: newVal.start,
+              end: newVal.end,
+              tillCancellation: newVal.tillCancellation,
+            });
+          }
+        }
       });
 
       watch(() => state.startDateTime, (value) => {

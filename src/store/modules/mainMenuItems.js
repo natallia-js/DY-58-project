@@ -26,7 +26,7 @@ export const mainMenuItems = {
       { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
       { key: MainMenuItemsKeys.ordersJournal, label: 'Журнал', to: '/ordersJournalPage' },
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', command: () => {
-        router.push({ name: 'NewOrderPage', params: { orderType: null, prevOrderId: null } });
+        router.push({ name: 'NewOrderPage', params: { orderType: null, prevOrderId: null, orderDraftType: null, orderDraftId: null } });
       } },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },

@@ -13,6 +13,7 @@ import { orderPatternsElementsRefs } from './modules/orderPatternsElementsRefs';
 import { checkUserAuthority } from './modules/checkUserAuthority';
 import { sounds } from './modules/sounds';
 import { common } from './modules/common';
+import { orderDrafts } from './modules/orderDrafts';
 
 export const store = createStore({
   modules: {
@@ -30,5 +31,6 @@ export const store = createStore({
     checkUserAuthority,
     sounds,
     common,
+    orderDrafts,
   },
 });

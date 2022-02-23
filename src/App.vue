@@ -33,6 +33,7 @@
     DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION,
     DEL_WORK_ORDERS,
     DEL_ALL_WS_SERVER_MESSAGES,
+    DEL_ORDERS_DRAFTS,
   } from '@/store/mutation-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
@@ -116,6 +117,7 @@
           store.commit(DEL_CURR_SECTORS_SHIFT);
           store.commit(DEL_CURR_LAST_ORDERS_PARAMS);
           store.commit(DEL_WORK_ORDERS);
+          store.commit(DEL_ORDERS_DRAFTS);
         }
       });
 
@@ -158,12 +160,14 @@
        * При смене структуры рабочего полигона пользователя подгружаем информацию о:
        * - персонале данного рабочего полигона,
        * - параметрах последних распоряжений, изданных в рамках данного полигона,
+       * - черновиках распоряжений, изданных в рамках рабочего полигона,
        * - запускаем периодическую подгрузку входящих уведомлений и рабочих распоряжений
        */
       watch(() => store.getters.getUserWorkPoligonData, (workPoligonDataNew) => {
         if (workPoligonDataNew) {
           store.dispatch('loadCurrSectorsShift');
           store.dispatch('loadLastOrdersParams');
+          store.dispatch('loadOrderDrafts');
           store.dispatch('loadWorkOrders');
         }
       });

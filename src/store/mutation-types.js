@@ -175,3 +175,14 @@ export const DEL_ALL_WS_SERVER_MESSAGES = 'delAllWSServerMessages';
 
 // Common
 export const SET_PRINT_PREVIEW = 'setPrintPreview';
+
+// Order Drafts
+export const SET_LOADING_ORDER_DRAFTS_RESULT = 'setLoadingOrderDraftsResult';
+export const CLEAR_LOADING_ORDER_DRAFTS_RESULT = 'clearLoadingOrderDraftsResult';
+export const SET_LOADING_ORDER_DRAFTS_STATUS = 'setLoadingOrderDraftsStatus';
+export const SET_ORDER_DRAFTS_ARRAY = 'setOrderDraftsArray';
+export const SET_SAVE_ORDER_DRAFT_RESULT = 'setSaveOrderDraftResult';
+export const CLEAR_SAVE_ORDER_DRAFT_RESULT = 'clearSaveOrderDraftResult';
+export const ADD_ORDER_DRAFT = 'addOrderDraft';
+export const DEL_ORDERS_DRAFTS = 'delOrdersDrafts';
+export const EDIT_ORDER_DRAFT = 'editOrderDraft';

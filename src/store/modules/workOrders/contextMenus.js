@@ -65,6 +65,8 @@ export const contextMenus = {
                   params: {
                     orderType: newOrderType,
                     prevOrderId: orderId,
+                    orderDraftType: null,
+                    orderDraftId: null,
                   },
                 });
               },

@@ -45,7 +45,8 @@
 
 
 <script>
-  import { reactive } from 'vue';
+  import { reactive, watch } from 'vue';
+  import { useStore } from 'vuex';
   import { ORDER_PLACE_VALUES } from '@/constants/orders';
 
   export default {
@@ -60,13 +61,61 @@
       spans: {
         type: Array,
       },
+      value: {
+        type: Object,
+      },
     },
 
-    setup(_props, { emit }) {
+    setup(props, { emit }) {
+      const store = useStore();
+
       const state = reactive({
         stationValue: '',
         spanValue: '',
         orderPlaceEnterMode: '',
+      });
+
+      watch(() => props.value, (newVal) => {
+        if (!newVal) {
+          state.stationValue = '';
+          state.spanValue = '';
+          state.orderPlaceEnterMode = '';
+          emit('input', { place: '', value: '' });
+        } else {
+          if (newVal.place === ORDER_PLACE_VALUES.station) {
+            let changed = false;
+            if (state.orderPlaceEnterMode !== ORDER_PLACE_VALUES.station) {
+              state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;
+              changed = true;
+            }
+            if (state.stationValue !== newVal.value) {
+              // присваиваем id станции только если станция с таким id существует
+              if (store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: newVal.value })) {
+                state.stationValue = newVal.value;
+                changed = true;
+              }
+            }
+            if (changed) {
+              emit('input', { place: ORDER_PLACE_VALUES.station, value: newVal.value });
+            }
+          } else if (newVal.place === ORDER_PLACE_VALUES.span) {
+            let changed = false;
+            if (state.orderPlaceEnterMode != ORDER_PLACE_VALUES.span) {
+              state.orderPlaceEnterMode = ORDER_PLACE_VALUES.span;
+              changed = true;
+            }
+            if (state.spanValue !== newVal.value) {
+              // присваиваем id перегона только если перегон с таким id существует
+              if (store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.span, id: newVal.value })) {
+                state.spanValue = newVal.value;
+                changed = true;
+              }
+            }
+            if (changed) {
+              emit('input', { place: ORDER_PLACE_VALUES.span, value: newVal.value });
+            }
+          }
+        }
       });
 
       const handleFocusStationDropdown = () => {

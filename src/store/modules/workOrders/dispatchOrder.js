@@ -58,7 +58,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
     /**
      * Делает запрос на сервер с целью сохранения издаваемого распоряжения и передачи его причастным.
      */
-     async dispatchOrder(context, params) {
+    async dispatchOrder(context, params) {
       const {
         type,
         number,
@@ -143,7 +143,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
         context.commit(SET_LAST_ORDERS_NUMBER, { ordersType: type, number, createDateTime });
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка отправки распоряжения на сервер');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения распоряжения на сервере');
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
 
       } finally {

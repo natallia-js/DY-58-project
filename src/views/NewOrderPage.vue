@@ -4,24 +4,32 @@
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
     </TabPanel>
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_ORDER"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
     </TabPanel>
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_PROHIBITION">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_PROHIBITION"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
     </TabPanel>
     <TabPanel v-if="isDNC || isDSP_or_DSPoperator" :header="ORDER_PATTERN_TYPES.REQUEST">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.REQUEST"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
     </TabPanel>
     <TabPanel
@@ -32,11 +40,15 @@
         v-if="isDNC || isDSP_or_DSPoperator"
         :orderType="ORDER_PATTERN_TYPES.NOTIFICATION"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
       <new-order
         v-if="isECD"
         :orderType="ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
         :prevOrderId="this.$route.params.prevOrderId"
+        :orderDraftType="this.$route.params.orderDraftType"
+        :orderDraftId="this.$route.params.orderDraftId"
       />
     </TabPanel>
   </TabView>
