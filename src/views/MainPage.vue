@@ -4,6 +4,8 @@
   <!-- Этот ConfirmDialog нужен для вложенных компонентов -->
   <ConfirmDialog style="max-width:700px"></ConfirmDialog>
 
+  <ConfirmPopup group="confirmDelOrderDraft"></ConfirmPopup>
+
   <CreateDSPTakeDutyOrderDlg
     :showDlg="state.showCreateDSPTakeDutyOrderDlg"
     :editExistingTakeDutyOrder="state.editExistingTakeDutyOrder"
@@ -37,22 +39,37 @@
           v-model="state.selectedOrderDraft"
           :options="state.orderDrafts"
           optionLabel="createDateTime"
+          optionGroupLabel="label"
+          optionGroupChildren="items"
         >
+          <template #optiongroup="slotProps">
+            <div class="p-text-capitalize">
+              {{ slotProps.option.label }}
+            </div>
+          </template>
           <template #option="slotProps">
-            <div>
+            <i v-if="getIdsOfDraftsBeingDeleted.includes(slotProps.option._id)"
+              class="pi pi-spin pi-check-circle p-mr-2"
+            ></i>
+            <span v-else-if="state.selectedOrderDraft && slotProps.option._id === state.selectedOrderDraft._id"
+              class="p-mr-2"
+            >
               <Button
-                v-if="state.selectedOrderDraft && slotProps.option._id === state.selectedOrderDraft._id"
                 icon="pi pi-file"
                 class="p-button-success p-button-sm dy58-order-action-button p-mr-2"
                 v-tooltip="'Редактировать'"
                 @click="handleEditOrderDraft(slotProps.option._id, slotProps.option.type)"
               />
-              <span>
-                <span class="p-text-capitalize">{{ slotProps.option.type }}.</span>
-                {{ slotProps.option.orderText.orderTitle || ''}}
-                ({{ getLocaleDateTimeString(slotProps.option.createDateTime) }})
-              </span>
-            </div>
+              <Button
+                icon="pi pi-times"
+                class="p-button-secondary p-button-sm dy58-order-action-button"
+                v-tooltip="'Удалить'"
+                @click="handleDelOrderDraft($event, slotProps.option._id, slotProps.option.type)"
+              />
+            </span>
+            <span>
+              {{ slotProps.option.displayTitle }}
+            </span>
           </template>
         </Listbox>
       </div>
@@ -112,6 +129,7 @@
 <script>
   import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
+  import { useConfirm } from 'primevue/useconfirm';
   import router from '@/router';
   import IncomingNotificationsDataTable from '@/components/IncomingNotificationsDataTable';
   import OrdersInWorkDataTable from '@/components/OrdersInWorkDataTable';
@@ -127,7 +145,6 @@
     CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
-  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
 
   export default {
@@ -144,6 +161,7 @@
 
     setup() {
       const store = useStore();
+      const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
@@ -151,11 +169,11 @@
         showCreateDSPTakeDutyOrderDlg: false,
         editExistingTakeDutyOrder: false,
         selectedOrderDraft: null,
-        orderDrafts: store.getters.getAllOrderDrafts,
+        orderDrafts: store.getters.getGroupedOrderDrafts,
       });
 
-      watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-        state.orderDrafts = newVal;
+      watch(() => store.getters.getAllOrderDrafts, () => {
+        state.orderDrafts = store.getters.getGroupedOrderDrafts;
       });
 
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.mainPage);
@@ -218,6 +236,41 @@
         });
       };
 
+      /**
+       *
+       */
+      const handleDelOrderDraft = (event, orderDraftId, orderType) => {
+        if (!orderDraftId) {
+          return;
+        }
+        confirm.require({
+          target: event.currentTarget,
+          group: 'confirmDelOrderDraft',
+          message: 'Удалить черновик распоряжения?',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            store.dispatch('delOrderDraft', {
+              id: orderDraftId,
+              type: orderType,
+            });
+          }
+        });
+      };
+
+      /**
+       * Для отображения результата операции удаления черновика распоряжения на сервере.
+       */
+      watch(() => store.getters.getDelOrderDraftResult, (newVal) => {
+        if (!newVal) {
+          return;
+        }
+        if (!newVal.error) {
+          showSuccessMessage(newVal.message);
+        } else {
+          showErrMessage(newVal.message);
+        }
+      });
+
       return {
         state,
         isECD: computed(() => store.getters.isECD),
@@ -227,9 +280,10 @@
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
         getExistingDSPTakeDutyOrder: computed(() => store.getters.getExistingDSPTakeDutyOrder),
+        getIdsOfDraftsBeingDeleted: computed(() => store.getters.getIdsOfDraftsBeingDeleted),
         hidePreviewNewDSPCreateTakeDutyOrderDlg,
         handleEditOrderDraft,
-        getLocaleDateTimeString,
+        handleDelOrderDraft,
       };
     },
   };
@@ -239,6 +293,10 @@
 <style lang="scss" scoped>
   :deep(.p-listbox-list) {
     padding: 0 !important;
+  }
+
+  :deep(.p-listbox-item-group) {
+    background: var(--surface-b) !important;
   }
 
   :deep(.p-listbox-item) {

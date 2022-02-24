@@ -167,7 +167,8 @@
         if (workPoligonDataNew) {
           store.dispatch('loadCurrSectorsShift');
           store.dispatch('loadLastOrdersParams');
-          store.dispatch('loadOrderDrafts');
+          if (store.getters.isECD)
+            store.dispatch('loadOrderDrafts');
           store.dispatch('loadWorkOrders');
         }
       });

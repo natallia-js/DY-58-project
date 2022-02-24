@@ -52,14 +52,14 @@ export const useSectorsToSendOrder = (state, store) => {
     let copyToString = '';
     const sendOriginalTo = personalArray.filter((el) => el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal);
 
-    const reducerFunction = (accumulator, currentValue, index) => {
+    const reducerFunction = (accumulator, currentValue, index, array) => {
       let post;
       if (currentValue.post) post = ' ' + currentValue.post;
       else if (!currentValue.fio && defaultPost) post = defaultPost;
       else post = '';
       return accumulator + `${currentValue[placeFieldName]}` +
         ` ${post}${!currentValue.fio ? '' : ' ' + currentValue.fio}` +
-        `${index === sendOriginalTo.length - 1 ? '' : ', '}`;
+        `${index === array.length - 1 ? '' : ', '}`;
     };
 
     if (sendOriginalTo.length) {

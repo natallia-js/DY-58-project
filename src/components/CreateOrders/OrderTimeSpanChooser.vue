@@ -28,11 +28,11 @@
     </div>
     <div class="p-col-2">
       <Checkbox
-        id="tillCancellation"
+        id="till-cancellation"
         :binary="true"
         v-model="state.tillCancellation"
       />
-      <label for="tillCancellation">&#160;{{ tillCancellationLabel }}</label>
+      <label for="till-cancellation">&#160;{{ tillCancellationLabel }}</label>
     </div>
   </div>
 </template>
@@ -73,35 +73,31 @@
 
       watch(() => props.value, (newVal) => {
         if (!newVal) {
-          state.startDateTime = null;
-          state.endDateTime = null;
-          state.tickTillCancellation = Boolean(props.tickTillCancellation);
+          return;
+        }
+        let changed = false;
+        let tmp;
+        tmp = newVal.start || null;
+        if (state.startDateTime !== tmp) {
+          state.startDateTime = tmp;
+          changed = true;
+        }
+        tmp = newVal.end || null;
+        if (state.endDateTime !== tmp) {
+          state.endDateTime = tmp;
+          changed = true;
+        }
+        tmp = Boolean(newVal.tillCancellation);
+        if (state.tillCancellation !== tmp) {
+          state.tillCancellation = tmp;
+          changed = true;
+        }
+        if (changed) {
           emit('input', {
-            start: null,
-            end: null,
-            tillCancellation: Boolean(props.tickTillCancellation),
+            start: state.startDateTime,
+            end: state.endDateTime,
+            tillCancellation: state.tillCancellation,
           });
-        } else {
-          let changed = false;
-          if (state.startDateTime !== newVal.start) {
-            state.startDateTime = newVal.start;
-            changed = true;
-          }
-          if (state.endDateTime !== newVal.end) {
-            state.endDateTime = newVal.end;
-            changed = true;
-          }
-          if (state.tillCancellation !== newVal.tillCancellation) {
-            state.tillCancellation = newVal.tillCancellation;
-            changed = true;
-          }
-          if (changed) {
-            emit('input', {
-              start: newVal.start,
-              end: newVal.end,
-              tillCancellation: newVal.tillCancellation,
-            });
-          }
         }
       });
 

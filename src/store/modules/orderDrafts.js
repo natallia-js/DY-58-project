@@ -4,17 +4,24 @@ import {
   SET_LOADING_ORDER_DRAFTS_STATUS,
   SET_ORDER_DRAFTS_ARRAY,
   SET_SAVE_ORDER_DRAFT_RESULT,
+  SET_DEL_ORDER_DRAFT_RESULT,
   CLEAR_SAVE_ORDER_DRAFT_RESULT,
+  CLEAR_DEL_ORDER_DRAFT_RESULT,
   ADD_ORDER_DRAFT,
   DEL_ORDERS_DRAFTS,
   EDIT_ORDER_DRAFT,
+  DEL_ORDER_DRAFT,
+  SET_DELETED_ORDER_DRAFT_ID,
+  DRAFT_FINISHED_BEING_DELETED,
 } from '@/store/mutation-types';
 import {
   getOrderDraftsFromServer,
   saveOrderDraftOnServer,
   editOrderDraftOnServer,
+  delOrderDraftOnServer,
 } from '@/serverRequests/orderDrafts.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 import { getOrderTextElementTypedValue } from '@/store/modules/workOrders/getWorkOrderObject';
 
 
@@ -24,6 +31,7 @@ function getOrderDraftObject(draft) {
   }
   return {
     ...draft,
+    displayTitle: `${draft.orderText.orderTitle || '?'} от ${getLocaleDateTimeString(new Date(draft.createDateTime))}`,
     createDateTime: new Date(draft.createDateTime),
     orderText: !draft.orderText ? null : {
       ...draft.orderText,
@@ -54,11 +62,37 @@ export const orderDrafts = {
     loadingOrderDrafts: false,
     loadingOrderDraftsResult: null,
     saveOrderDraftResult: null,
+    delOrderDraftResult: null,
+    beingDeletedDraftIds: [],
   },
 
   getters: {
     getAllOrderDrafts(state) {
       return state.data;
+    },
+
+    getGroupedOrderDrafts(state) {
+      const groupedDrafts = [];
+
+      state.data.forEach((draft) => {
+        const group = groupedDrafts.find((el) => el.label === draft.type);
+        if (!group) {
+          groupedDrafts.push({
+            label: draft.type,
+            items: [draft],
+          });
+        } else {
+          group.items.push(draft);
+        }
+      });
+
+      return groupedDrafts;
+    },
+
+    getOrderDraftsOfGivenType(state) {
+      return (orderType) => {
+        return state.data.filter((el) => el.type === orderType);
+      };
     },
 
     getOrderDraftById(state) {
@@ -67,6 +101,14 @@ export const orderDrafts = {
 
     getSaveOrderDraftResult(state) {
       return state.saveOrderDraftResult;
+    },
+
+    getDelOrderDraftResult(state) {
+      return state.delOrderDraftResult;
+    },
+
+    getIdsOfDraftsBeingDeleted(state) {
+      return state.beingDeletedDraftIds;
     },
   },
 
@@ -105,9 +147,23 @@ export const orderDrafts = {
       };
     },
 
+    [SET_DEL_ORDER_DRAFT_RESULT] (state, { error, orderType, message }) {
+      state.delOrderDraftResult = {
+        error,
+        orderType,
+        message,
+      };
+    },
+
     [CLEAR_SAVE_ORDER_DRAFT_RESULT] (state) {
       if (state.saveOrderDraftResult) {
         state.saveOrderDraftResult = null;
+      }
+    },
+
+    [CLEAR_DEL_ORDER_DRAFT_RESULT] (state) {
+      if (state.delOrderDraftResult) {
+        state.delOrderDraftResult = null;
       }
     },
 
@@ -123,11 +179,23 @@ export const orderDrafts = {
 
     [EDIT_ORDER_DRAFT] (state, draft) {
       if (draft) {
-        let foundDraft = state.data.find((el) => el._id === draft._id);
-        if (foundDraft) {
-          foundDraft = getOrderDraftObject(draft);
-        }
+        state.data = [
+          ...state.data.filter(element => element._id !== draft._id),
+          getOrderDraftObject(draft),
+        ];
       }
+    },
+
+    [DEL_ORDER_DRAFT] (state, id) {
+      state.data = state.data.filter((el) => el._id !== id);
+    },
+
+    [SET_DELETED_ORDER_DRAFT_ID] (state, id) {
+      state.beingDeletedDraftIds.push(id);
+    },
+
+    [DRAFT_FINISHED_BEING_DELETED] (state, id) {
+      state.beingDeletedDraftIds = state.beingDeletedDraftIds.filter((el) => el !== id);
     },
   },
 
@@ -267,6 +335,36 @@ export const orderDrafts = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения черновика распоряжения на сервере');
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+      }
+    },
+
+    /**
+     * Делает запрос на сервер с целью удаления существующего черновика распоряжения.
+     */
+     async delOrderDraft(context, { id, type }) {
+      if (!context.getters.canUserDispatchOrders) {
+        context.commit(SET_DEL_ORDER_DRAFT_RESULT, {
+          error: true,
+          orderType: type,
+          message: 'У вас нет права на удаление черновиков распоряжений',
+        });
+        return;
+      }
+
+      context.commit(CLEAR_DEL_ORDER_DRAFT_RESULT);
+      context.commit(SET_DELETED_ORDER_DRAFT_ID, id);
+
+      try {
+        const responseData = await delOrderDraftOnServer(id);
+        context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(DEL_ORDER_DRAFT, responseData.id);
+
+      } catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления черновика распоряжения на сервере');
+        context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+
+      } finally {
+        context.commit(DRAFT_FINISHED_BEING_DELETED, id);
       }
     },
   },

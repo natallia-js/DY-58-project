@@ -69,21 +69,21 @@
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
-                  @click="() => sendOriginalToDefinitStation(slotProps.data.id)"
+                  @click="sendOriginalToDefinitStation(slotProps.data.id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
-                  @click="() => sendCopyToDefinitStation(slotProps.data.id)"
+                  @click="sendCopyToDefinitStation(slotProps.data.id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
-                  @click="() => doNotSendToDefinitStation(slotProps.data.id)"
+                  @click="doNotSendToDefinitStation(slotProps.data.id)"
               >
                 &#9747;
               </a>

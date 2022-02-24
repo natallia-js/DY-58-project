@@ -75,46 +75,59 @@
         orderPlaceEnterMode: '',
       });
 
+      const clearState = () => {
+        state.stationValue = '';
+        state.spanValue = '';
+        state.orderPlaceEnterMode = '';
+      };
+
       watch(() => props.value, (newVal) => {
         if (!newVal) {
-          state.stationValue = '';
-          state.spanValue = '';
-          state.orderPlaceEnterMode = '';
-          emit('input', { place: '', value: '' });
-        } else {
-          if (newVal.place === ORDER_PLACE_VALUES.station) {
-            let changed = false;
-            if (state.orderPlaceEnterMode !== ORDER_PLACE_VALUES.station) {
-              state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;
-              changed = true;
-            }
-            if (state.stationValue !== newVal.value) {
+          return;
+        }
+        let changed = false;
+        if (newVal.place !== state.orderPlaceEnterMode) {
+          state.orderPlaceEnterMode = newVal.place || '';
+          changed = true;
+        }
+        let tmp;
+        switch (state.orderPlaceEnterMode) {
+          case ORDER_PLACE_VALUES.station:
+            tmp = newVal.value || '';
+            if (state.stationValue !== tmp) {
               // присваиваем id станции только если станция с таким id существует
-              if (store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: newVal.value })) {
-                state.stationValue = newVal.value;
-                changed = true;
+              if (tmp && store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: tmp })) {
+                state.stationValue = tmp;
+              } else {
+                state.stationValue = '';
               }
-            }
-            if (changed) {
-              emit('input', { place: ORDER_PLACE_VALUES.station, value: newVal.value });
-            }
-          } else if (newVal.place === ORDER_PLACE_VALUES.span) {
-            let changed = false;
-            if (state.orderPlaceEnterMode != ORDER_PLACE_VALUES.span) {
-              state.orderPlaceEnterMode = ORDER_PLACE_VALUES.span;
               changed = true;
             }
-            if (state.spanValue !== newVal.value) {
+            break;
+          case ORDER_PLACE_VALUES.span:
+            tmp = newVal.value || '';
+            if (state.spanValue !== tmp) {
               // присваиваем id перегона только если перегон с таким id существует
-              if (store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.span, id: newVal.value })) {
-                state.spanValue = newVal.value;
-                changed = true;
+              if (tmp && store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.span, id: tmp })) {
+                state.spanValue = tmp;
+              } else {
+                state.spanValue = '';
               }
+              changed = true;
             }
+            break;
+          default:
             if (changed) {
-              emit('input', { place: ORDER_PLACE_VALUES.span, value: newVal.value });
+              clearState();
             }
-          }
+            break;
+        }
+        if (changed) {
+          emit('input', {
+            place: state.orderPlaceEnterMode,
+            value: state.orderPlaceEnterMode === ORDER_PLACE_VALUES.station ? state.stationValue :
+              ORDER_PLACE_VALUES.span ? state.spanValue : '',
+          });
         }
       });
 

@@ -41,14 +41,8 @@
         <template #body="slotProps">
           <div v-if="col.field !== getOtherShiftTblColumnNames.notification"
               :class="[
-                {'dy58-send-original': [getOtherShiftTblColumnNames.placeTitle,
-                                        getOtherShiftTblColumnNames.post,
-                                        getOtherShiftTblColumnNames.fio].includes(col.field)
-                                        && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
-                {'dy58-send-copy': [getOtherShiftTblColumnNames.placeTitle,
-                                    getOtherShiftTblColumnNames.post,
-                                    getOtherShiftTblColumnNames.fio].includes(col.field)
-                                    && slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
+                {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
+                {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
               ]"
           >
             {{ slotProps.data[col.field] }}
@@ -58,21 +52,21 @@
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
-                  @click="() => sendOriginalToDefinitSector(slotProps.data._id)"
+                  @click="sendOriginalToDefinitSector(slotProps.data._id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
-                  @click="() => sendCopyToDefinitSector(slotProps.data._id)"
+                  @click="sendCopyToDefinitSector(slotProps.data._id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
-                  @click="() => doNotSendToDefinitSector(slotProps.data._id)"
+                  @click="doNotSendToDefinitSector(slotProps.data._id)"
               >
                 &#9747;
               </a>

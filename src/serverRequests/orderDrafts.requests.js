@@ -76,3 +76,11 @@ export const editOrderDraftOnServer = async (params) => {
   );
   return response.data;
 };
+
+export const delOrderDraftOnServer = async (id) => {
+  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delOrderDraft,
+    { id },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};

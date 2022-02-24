@@ -59,21 +59,21 @@
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendOriginal,}]"
-                  @click="() => sendOriginalToDefinitSector(slotProps.data.id)"
+                  @click="sendOriginalToDefinitSector(slotProps.data.id)"
               >
                 Оригинал
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.sendCopy,}]"
-                  @click="() => sendCopyToDefinitSector(slotProps.data.id)"
+                  @click="sendCopyToDefinitSector(slotProps.data.id)"
               >
                 Копия
               </a>
               <a :class="['dy58-send-status-btn',
                     {'dy58-do-not-send': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.doNotSend,
                      'dy58-def-btn-color': slotProps.data.sendOriginal !== getCurrShiftGetOrderStatus.doNotSend,}]"
-                  @click="() => doNotSendToDefinitSector(slotProps.data.id)"
+                  @click="doNotSendToDefinitSector(slotProps.data.id)"
               >
                 &#9747;
               </a>
@@ -121,12 +121,19 @@
     SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS,
     SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR,
     SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS,
+    //SET_USER_CHOSEN_STATUS,
   } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-dnc-to-send-order-data-table',
 
     emits: ['input'],
+
+    props: {
+      value: {
+        type: Object,
+      },
+    },
 
     data() {
       return {
@@ -175,6 +182,25 @@
     },
 
     watch: {
+      value(newVal) {console.log('dncTbl newVal', newVal)
+        if (!newVal) {
+          return;
+        }
+        /*this.doNotSendToAll();
+        newVal.forEach((el) => {
+          this.$store.commit(SET_USER_CHOSEN_STATUS, {
+            userId: el.fioId,
+            chooseUser: true,
+            workPoligonType: el.type,
+            workPoligonId: el.id,
+          });
+        });*/
+        /*this.$emit('input', this.getDNCShiftForSendingData
+          ? this.getDNCShiftForSendingData
+            .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
+            : []);*/
+      },
+
       getDNCShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)

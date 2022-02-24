@@ -72,6 +72,25 @@
           </small>
         </div>
 
+        <!-- ЧЕРНОВИКИ РАСПОРЯЖЕНИЙ ТЕКУЩЕГО ТИПА -->
+
+        <div
+          v-if="isECD && getOrderDraftsOfGivenType.length"
+          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
+        >
+          <label for="current-order-draft" class="p-text-bold">
+            Текущий черновик распоряжения
+          </label>
+          <Dropdown
+            id="current-order-draft"
+            v-model="state.currentOrderDraftId"
+            :options="getOrderDraftsOfGivenType"
+            optionLabel="displayTitle"
+            optionValue="_id"
+            placeholder="Выберите черновик распоряжения"
+          />
+        </div>
+
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
 
         <div
@@ -330,7 +349,6 @@
   import OrderText from '@/components/CreateOrders/OrderText';
   import { OrderInputTypes } from '@/constants/orderInputTypes';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
-  //import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import isValidDateTime from '@/additional/isValidDateTime';
   import { CLEAR_SHIFT_FOR_SENDING_DATA, CHOOSE_ONLY_ONLINE_PERSONAL } from '@/store/mutation-types';
@@ -339,6 +357,7 @@
   import { useSectorsToSendOrder } from './sectorsToSendOrder';
   import { useRelatedOrder } from './relatedOrder';
   import { useNewOrderValidationRules } from './validationRules';
+  import { useOrderDraft } from './orderDraft';
 
   export default {
     name: 'dy58-new-order-block',
@@ -407,7 +426,10 @@
           end: null,
           tillCancellation: null,
         },
-        defineOrderTimeSpan: [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0],
+        defineOrderTimeSpan: [
+          ORDER_PATTERN_TYPES.ECD_ORDER,
+          ORDER_PATTERN_TYPES.ECD_PROHIBITION
+        ].includes(props.orderType) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
         specialTrainCategories: null,
         orderText: {
@@ -428,32 +450,16 @@
         // запроса об издании распоряжения
         orderFieldsErrs: null,
         showPreviewNewOrderDlg: false,
+        // Данное поле нужно в момент, когда пользователь переходит на страницу с выбором черновика распоряжения:
+        // данный черновик необходимо подгрузить в момент загрузки страницы, и только 1 раз!
         orderDraftLoaded: false,
         // Очень важная переменная! Если ее убрать, то в findOrderDraft не смогут быть установлены
         // поля времени и места действия распоряжения из черновика, т.к. происходит их автоматический
         // сброс при изменении showOnGID и defineOrderTimeSpan
         resetValueOnWatchChanges: true,
+        // id текущего черновика распоряжения
+        currentOrderDraftId: null,
       });
-
-      const findOrderDraft = (draftId) => {
-        const draft = store.getters.getOrderDraftById(draftId);
-        if (!draft) {
-          return;
-        }
-        state.orderDraftLoaded = true;
-
-        state.resetValueOnWatchChanges = false;
-
-        // порядок присвоения важен!
-        state.showOnGID = draft.showOnGID;
-        state.orderPlace = draft.place;
-
-        // порядок присвоения важен!
-        state.defineOrderTimeSpan = draft.defineOrderTimeSpan;
-        state.timeSpan = draft.timeSpan;
-
-        state.orderText = draft.orderText;
-      };
 
       /**
        * После загрузки компонента отображаем online-пользователей станций и участков в секции "Кому",
@@ -466,15 +472,7 @@
         if (!props.orderDraftId || props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
           return;
         }
-        findOrderDraft(props.orderDraftId);
-      });
-
-      // Сюда попадаем при перезагрузке страницы, когда не сразу доступны черновики распоряжений
-      watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-        if (!props.orderDraftId || !newVal || props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
-          return;
-        }
-        findOrderDraft(props.orderDraftId);
+        orderDraftObject.findOrderDraft(props.orderDraftId);
       });
 
       useWatchCurrentDateTime(state, props, store);
@@ -504,6 +502,15 @@
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
         relatedOrderObject,
+      });
+
+      const orderDraftObject = useOrderDraft({
+        state,
+        props,
+        store,
+        confirm,
+        showSuccessMessage,
+        showErrMessage,
       });
 
       const {
@@ -632,59 +639,6 @@
         state.showPreviewNewOrderDlg = true;
       };
 
-      /**
-       * Позволяет сохранить черновик распоряжения.
-       */
-      const handleSaveOrderDraft = (event) => {
-        // Проверку корректности заполнения полей данных не производим при сохранении черновика
-        confirm.require({
-          target: event.currentTarget,
-          group: 'confirmSaveOrderDraft',
-          message: 'Сохранить черновик распоряжения?',
-          icon: 'pi pi-exclamation-triangle',
-          accept: () => {
-            store.dispatch('saveOrderDraft', {
-              type: props.orderType,
-              createDateTime: state.createDateTime,
-              place: state.orderPlace, //dispatchOrderObject.getIssuedOrderPlaceObject.value,
-              timeSpan: state.timeSpan, //dispatchOrderObject.getIssuedOrderPlaceObject.value,
-              defineOrderTimeSpan: state.defineOrderTimeSpan,
-              orderText: state.orderText,
-              dncToSend: state.dncSectorsToSendOrder || [], /*dncSectorsToSendOrderNoDupl.value ? dncSectorsToSendOrderNoDupl.value.map((el) => {
-                  if (el.post) return el;
-                  return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DNC };
-                }) : [], */
-              dspToSend: state.dspSectorsToSendOrder || [], /*dspSectorsToSendOrderNoDupl.value ? dspSectorsToSendOrderNoDupl.value.map((el) => {
-                  if (el.post) return el;
-                  return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DSP };
-                }) : [],*/
-              ecdToSend: state.ecdSectorsToSendOrder || [], /*ecdSectorsToSendOrderNoDupl.value ? ecdSectorsToSendOrderNoDupl.value.map((el) => {
-                  if (el.post) return el;
-                  return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.ECD };
-                }) : [],*/
-              otherToSend: state.otherSectorsToSendOrder || [],
-              createdOnBehalfOf: state.createdOnBehalfOf,
-              showOnGID: state.showOnGID, //.value,
-            });
-          },
-        });
-      };
-
-      /**
-       * Для отображения результата операции сохранения черновика распоряжения (отправки на сервер).
-       */
-      watch(() => store.getters.getSaveOrderDraftResult, (newVal) => {
-        if (!newVal || newVal.orderType !== props.orderType) {
-          return;
-        }
-        //state.waitingForServerResponse = false;
-        if (!newVal.error) {
-          showSuccessMessage(newVal.message);
-        } else {
-          showErrMessage(newVal.message);
-        }
-      });
-
       const newNumberOverlayPanel = ref();
       const changeOrderNumber = (event) => {
         newNumberOverlayPanel.value.toggle(event);
@@ -704,6 +658,7 @@
         handleSubmit,
         dispatchOrder: dispatchOrderObject.dispatchOrder,
         getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect(props.orderType)),
+        getOrderDraftsOfGivenType: computed(() => store.getters.getOrderDraftsOfGivenType(props.orderType)),
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
@@ -723,7 +678,7 @@
         getOrderPatternSpecialTrainCategoriesString,
         newNumberOverlayPanel,
         changeOrderNumber,
-        handleSaveOrderDraft,
+        handleSaveOrderDraft: orderDraftObject.handleSaveOrderDraft,
       };
     },
   };

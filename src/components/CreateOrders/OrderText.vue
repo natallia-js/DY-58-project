@@ -105,64 +105,66 @@
         orderText: '',
       });
 
+      const clearState = () => {
+        state.orderTextSource = '';
+        state.orderPattern = null;
+        state.orderPatternText = null;
+        state.orderTitle = '';
+        state.orderText = '';
+      };
+
       watch(() => props.value, (newVal) => {
         if (!newVal) {
-          state.orderTextSource = '';
-          state.orderPattern = null;
-          state.orderPatternText = null;
-          state.orderTitle = '';
-          state.orderText = '';
+          return;
+        }
+        let changed = false;
+        if (state.orderTextSource !== newVal.orderTextSource) {
+          state.orderTextSource = newVal.orderTextSource || null;
+          changed = true;
+        }
+        let tmp;
+        switch (state.orderTextSource) {
+          case ORDER_TEXT_SOURCE.pattern:
+            tmp = newVal.patternId || null;
+            if (state.orderPattern && !tmp) {
+              state.orderPattern = tmp;
+              changed = true;
+            } else if ((!state.orderPattern && tmp) ||
+              (state.orderPattern && tmp && Object.keys(state.orderPattern)[0] !== tmp)) {
+              state.orderPattern = { [tmp]: true };
+              changed = true;
+            }
+            tmp = newVal.orderText || null;
+            if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
+              state.orderPatternText = tmp;
+              changed = true;
+            }
+            break;
+          case ORDER_TEXT_SOURCE.nopattern:
+            tmp = newVal.orderTitle || '';
+            if (state.orderTitle !== tmp) {
+              state.orderTitle = tmp;
+              changed = true;
+            }
+            tmp = newVal.orderText && newVal.orderText[0] ? newVal.orderText[0].value : '';
+            if (state.orderText !== tmp) {
+              state.orderText = tmp;
+              changed = true;
+            }
+            break;
+          default:
+            if (changed) {
+              clearState();
+            }
+            break;
+        }
+        if (changed) {
           emit('input', {
             orderTextSource: state.orderTextSource,
             patternId: getSelectedOrderPattern.value._id,
             orderTitle: getSelectedOrderPattern.value.title,
             orderText: state.orderPatternText,
           });
-        } else {
-          let changed = false;
-          if (state.orderTextSource !== newVal.orderTextSource) {
-            state.orderTextSource = newVal.orderTextSource;
-            changed = true;
-          }
-          let tmp;
-          switch (state.orderTextSource) {
-            case ORDER_TEXT_SOURCE.pattern:
-              tmp = newVal.patternId || null;
-              if (state.orderPattern && !tmp) {
-                state.orderPattern = tmp;
-                changed = true;
-              } else if ((!state.orderPattern && tmp) ||
-                (state.orderPattern && tmp && Object.keys(state.orderPattern)[0] !== tmp)) {
-                state.orderPattern = { [tmp]: true };
-                changed = true;
-              }
-              tmp = newVal.orderText || null;
-              if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
-                state.orderPatternText = tmp;
-                changed = true;
-              }
-              break;
-            case ORDER_TEXT_SOURCE.nopattern:
-              tmp = newVal.orderTitle || '';
-              if (state.orderTitle !== tmp) {
-                state.orderTitle = tmp;
-                changed = true;
-              }
-              tmp = newVal.orderText && newVal.orderText[0] ? newVal.orderText[0].value : '';
-              if (state.orderText !== tmp) {
-                state.orderText = tmp;
-                changed = true;
-              }
-              break;
-          }
-          if (changed) {
-            emit('input', {
-              orderTextSource: state.orderTextSource,
-              patternId: getSelectedOrderPattern.value._id,
-              orderTitle: getSelectedOrderPattern.value.title,
-              orderText: state.orderPatternText,
-            });
-          }
         }
       });
 
