@@ -1,5 +1,8 @@
 import { watch } from 'vue';
-import { SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS } from '@/store/mutation-types';
+import {
+  SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
+  SET_OTHER_SHIFT_FOR_SENDING_DATA,
+} from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
 /**
@@ -15,24 +18,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     showErrMessage,
   } = inputVals;
 
-  // Способствует отображению на полях формы данных из черновика распоряжения
-  const applySelectedOrderDraft = () => {
-    state.resetValueOnWatchChanges = false;
-
-    const currentOrderDraft = store.getters.getOrderDraftById(state.currentOrderDraftId);
-    if (!currentOrderDraft) {
-      state.currentOrderDraftId = null;
-      return;
-    }
-
-    // порядок присвоения важен!
-    state.showOnGID = currentOrderDraft.showOnGID;
-    state.orderPlace = currentOrderDraft.place;
-
-    state.orderText = currentOrderDraft.orderText;
-
-    // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
-    // таблицы персонала работают с глобальным store
+  const applySelectedOrderDraftPersonal = (currentOrderDraft) => {
     store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
       poligonsType: WORK_POLIGON_TYPES.STATION,
       sectorsGetOrderStatuses: currentOrderDraft.dspToSend,
@@ -45,35 +31,75 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
       poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
       sectorsGetOrderStatuses: currentOrderDraft.ecdToSend,
     });
-    store.commit(SET_GET_ORDER_STATUSES_TO_OTHER_SECTORS, currentOrderDraft.otherToSend);
+  };
+
+  // Способствует отображению на полях формы данных из черновика распоряжения
+  const applySelectedOrderDraft = () => {
+    state.resetValueOnWatchChanges = false;
+
+    // Определяем объект текущего черновика распоряжения
+    const currentOrderDraft = store.getters.getOrderDraftById(state.currentOrderDraftId);
+    if (!currentOrderDraft) {
+      //state.currentOrderDraftId = null;
+      return;
+    }
+
+    // порядок присвоения важен!
+    state.showOnGID = currentOrderDraft.showOnGID;
+    state.orderPlace = currentOrderDraft.place;
+
+    state.orderText = currentOrderDraft.orderText;
+
+    // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
+    // таблицы персонала работают с глобальным store (информация о персонале может быть недоступна в момент
+    // перезагрузки страницы, в связи с чем этот код будет повторен при появлении информации)
+    applySelectedOrderDraftPersonal(currentOrderDraft);
+
+    store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, currentOrderDraft.otherToSend);
 
     // порядок присвоения важен!
     state.defineOrderTimeSpan = currentOrderDraft.defineOrderTimeSpan;
     state.timeSpan = currentOrderDraft.timeSpan;
   };
 
-  const findOrderDraft = (draftId) => {
+  /*const findOrderDraft = (draftId) => {
     const currentOrderDraft = store.getters.getOrderDraftById(draftId);
     if (currentOrderDraft) {
       state.currentOrderDraftId = draftId;
       state.orderDraftLoaded = true;
     }
-  };
+  };*/
+
+  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
+  watch(() => state.currentOrderDraftId, (newVal) => {console.log('watch state.currentOrderDraftId', newVal)
+    if (newVal) {
+      applySelectedOrderDraft();
+    }
+  }, { immediate: true });
 
   // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны черновики распоряжений
   // (id нужного черновика может быть, а вот подгрузки всех черновиков нужно подождать)
   watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-    if (!props.orderDraftId || !newVal || !newVal.length ||
+    /*if (!props.orderDraftId || !newVal || !newVal.length ||
       props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
       return;
     }
-    findOrderDraft(props.orderDraftId);
+    findOrderDraft(props.orderDraftId);*/
+    if (!state.currentOrderDraftId || !newVal || !newVal.length ||
+      props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
+      return;
+    }
+    state.orderDraftLoaded = true;  // ???
+    applySelectedOrderDraft();
   });
 
-  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
-  watch(() => state.currentOrderDraftId, () => {
-    if (state.currentOrderDraftId) {
-      applySelectedOrderDraft();
+  watch(() => store.getters.getSectorPersonal, (newVal) => {console.log('watch store.getters.getSectorPersonal',newVal,state.currentOrderDraftId)
+    if (newVal && state.currentOrderDraftId) {
+      const currentOrderDraft = store.getters.getOrderDraftById(state.currentOrderDraftId);
+      console.log('2currentOrderDraft',currentOrderDraft)
+      if (currentOrderDraft) {
+        applySelectedOrderDraftPersonal(currentOrderDraft);
+      }
     }
   });
 
@@ -177,7 +203,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   });
 
   return {
-    findOrderDraft,
+    //findOrderDraft,
     handleSaveOrderDraft,
   };
 };

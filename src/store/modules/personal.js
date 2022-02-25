@@ -28,8 +28,9 @@ import {
   ADD_OTHER_GET_ORDER_RECORD,
   EDIT_OTHER_GET_ORDER_RECORD,
   DEL_OTHER_GET_ORDER_RECORD,
-  DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
-  DEL_CURR_SECTORS_SHIFT
+  DEL_CURR_SECTORS_SHIFT,
+  SET_OTHER_SHIFT_FOR_SENDING_DATA,
+  DEL_UNSELECTED_STRUCTURAL_DIVISIONS,
 } from '@/store/mutation-types';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -367,7 +368,7 @@ export const personal = {
 
   mutations: {
     /**
-     * Чистит информацию о тех, кому необходимо адресовать распоряжение.
+     * Чистит информацию о тех, кому необходимо адресовать распоряжение (по всем массивам данных).
      */
     [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {
       if (!state.sectorPersonal) {
@@ -393,6 +394,16 @@ export const personal = {
       }
       if (state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift = [];
+      }
+    },
+
+    /**
+     * Переписывает информацию обо всех иных адресатах, которым необходимо адресовать распоряжение,
+     * с использованием указанного нового массива данных.
+     */
+    [SET_OTHER_SHIFT_FOR_SENDING_DATA] (state, newData) {
+      if (state.sectorPersonal) {
+        state.sectorPersonal.otherShift = newData || [];
       }
     },
 
@@ -708,7 +719,7 @@ export const personal = {
           let sectStat;
           if (sectorsGetOrderStatuses) {
             sectStat = sectorsGetOrderStatuses.find((el) => el.id === sector.sectorId || el.id === sector.stationId);
-          }
+          }console.log('sectStat',sectStat)
           if (!sectStat) {
             clearSendItem(sector, true);
           } else {
@@ -718,7 +729,7 @@ export const personal = {
             if (!sectStat.fioId || !sector.people || !sector.people.length) {
               clearSendItem(sector);
             } else {
-              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);
+              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);console.log('neededUser',neededUser)
               if (!neededUser) {
                 clearSendItem(sector);
               } else {
@@ -797,6 +808,23 @@ export const personal = {
     },
 
     /**
+     * Удаляются все записи, additionalId которых нет в selectedRecsAdditionalIds.
+     */
+    [DEL_UNSELECTED_STRUCTURAL_DIVISIONS] (state, selectedRecsAdditionalIds) {
+      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
+        return;
+      }
+      if (!selectedRecsAdditionalIds || !selectedRecsAdditionalIds.length) {
+        state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((el) => el.additionalId < 0);
+      } else {
+        state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((el) =>
+          el.additionalId < 0 ||
+          (el.additionalId > 0 && selectedRecsAdditionalIds.includes(el.additionalId))
+        );
+      }
+    },
+
+    /**
      *
      */
     [ADD_OTHER_GET_ORDER_RECORD] (state, props) {
@@ -808,14 +836,27 @@ export const personal = {
       if (!state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift = [];
       }
-      state.sectorPersonal.otherShift.push({
-        _id: objectId(),
+      const objectToAdd = {
         additionalId: additionalId || -1, // называть 'id' нельзя
         placeTitle,
         post,
         fio,
-        sendOriginal,
-      });
+      };
+      const theSameObject = state.sectorPersonal.otherShift.find((el) =>
+        JSON.stringify(objectToAdd) === JSON.stringify({
+          additionalId: el.additionalId,
+          placeTitle: el.placeTitle,
+          post: el.post,
+          fio: el.fio,
+        })
+      );
+      if (!theSameObject) {
+        state.sectorPersonal.otherShift.push({
+          _id: objectId(),
+          ...objectToAdd,
+          sendOriginal,
+        });
+      }
     },
 
     /**
@@ -845,16 +886,6 @@ export const personal = {
         return;
       }
       state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
-    },
-
-    /**
-     *
-     */
-    [DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID] (state, additionalId) {
-      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
-        return;
-      }
-      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item.additionalId !== additionalId);
     },
 
     [DEL_CURR_SECTORS_SHIFT] (state) {

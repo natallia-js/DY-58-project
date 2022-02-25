@@ -1,5 +1,5 @@
 <template>
-  <TabView v-if="canUserDispatchOrders" :activeIndex="activeIndex">
+  <TabView v-if="canUserDispatchOrders" :activeIndex="activeIndex" lazy>
     <TabPanel v-if="isDNC" :header="ORDER_PATTERN_TYPES.ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
@@ -67,6 +67,12 @@
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
+  const TABS_INDEXES = {
+    FIRST_TAB: 0,
+    SECOND_TAB: 1,
+    THIRD_TAB: 2,
+  };
+
   export default {
     name: 'dy58-new-order-page',
 
@@ -80,7 +86,7 @@
 
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.createOrder);
 
-      const activeIndex = ref(0);
+      const activeIndex = ref(TABS_INDEXES.FIRST_TAB);
 
       const isDNC = computed(() => store.getters.isDNC);
       const isECD = computed(() => store.getters.isECD);
@@ -93,25 +99,25 @@
         case ORDER_PATTERN_TYPES.REQUEST:
           // У ДСП ничего не делаем, т.к. индекс соответствующей закладки у ДСП = 0
           if (isDNC.value) {
-            activeIndex.value = 1;
+            activeIndex.value = TABS_INDEXES.SECOND_TAB;
           }
           break;
         case ORDER_PATTERN_TYPES.NOTIFICATION:
           if (isDSP_or_DSPoperator.value) {
-            activeIndex.value = 1;
+            activeIndex.value = TABS_INDEXES.SECOND_TAB;
           }
           else if (isDNC.value) {
-            activeIndex.value = 2;
+            activeIndex.value = TABS_INDEXES.THIRD_TAB;
           }
           break;
         case ORDER_PATTERN_TYPES.ECD_ORDER:
           // Ничего не делаем, т.к. индекс соответствующей закладки у ЭЦД = 0
           break;
         case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
-          activeIndex.value = 1;
+          activeIndex.value = TABS_INDEXES.SECOND_TAB;
           break;
         case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
-          activeIndex.value = 2;
+          activeIndex.value = TABS_INDEXES.THIRD_TAB;
           break;
       }
 
@@ -122,6 +128,7 @@
         isDNC,
         isECD,
         ORDER_PATTERN_TYPES,
+        TABS_INDEXES,
       };
     },
   }

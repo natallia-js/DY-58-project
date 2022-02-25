@@ -458,7 +458,7 @@
         // сброс при изменении showOnGID и defineOrderTimeSpan
         resetValueOnWatchChanges: true,
         // id текущего черновика распоряжения
-        currentOrderDraftId: null,
+        currentOrderDraftId: props.orderDraftId,
       });
 
       /**
@@ -469,10 +469,10 @@
         store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
         store.commit(CHOOSE_ONLY_ONLINE_PERSONAL);
 
-        if (!props.orderDraftId || props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
+        /*if (!props.orderDraftId || props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
           return;
         }
-        orderDraftObject.findOrderDraft(props.orderDraftId);
+        orderDraftObject.findOrderDraft(props.orderDraftId);*/
       });
 
       useWatchCurrentDateTime(state, props, store);

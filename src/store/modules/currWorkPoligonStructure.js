@@ -402,6 +402,12 @@ export const currWorkPoligonStructure = {
         };
       });
     },
+
+    getStructuralDivisionById(_state, getters) {
+      return (id) => {
+        return getters.getStructuralDivisions.find((el) => el.additionalId === id);
+      };
+    },
   },
 
   mutations: {

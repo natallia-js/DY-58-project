@@ -25,6 +25,7 @@
           v-model="selectedDivisions"
           :options="getStructuralDivisions"
           optionLabel="fullInfo"
+          optionValue="additionalId"
           placeholder="Выберите структурные подразделения"
           display="chip"
           style="width:100%"
@@ -113,7 +114,7 @@
     ADD_OTHER_GET_ORDER_RECORD,
     EDIT_OTHER_GET_ORDER_RECORD,
     DEL_OTHER_GET_ORDER_RECORD,
-    DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
+    DEL_UNSELECTED_STRUCTURAL_DIVISIONS,
   } from '@/store/mutation-types';
   import ShowOtherReceiverDlg from '@/components/CreateOrders/ShowOtherReceiverDlg';
 
@@ -136,7 +137,7 @@
         selectedUser: null,
         user: null,
         addNewRec: true, // true = add, false = edit
-        selectedDivisions: null,
+        selectedDivisions: null, // массив id выбранных (из существующих) структурных подразделений
       };
     },
 
@@ -149,6 +150,7 @@
         'getOtherShiftForSendingData',
         'isECD',
         'getStructuralDivisions',
+        'getStructuralDivisionById',
       ]),
 
       getOtherShiftTblColumnNames() {
@@ -176,6 +178,16 @@
 
     watch: {
       getOtherShiftForSendingData(newVal) {
+        if (newVal) {
+          const selectedDivisonsIds = newVal
+            .filter((el) => el.additionalId && el.additionalId > 0)
+            .map((el) => el.additionalId);
+          if (JSON.stringify(this.selectedDivisions) !== JSON.stringify(selectedDivisonsIds)) {
+            this.selectedDivisions = selectedDivisonsIds;
+          }
+        } else if (this.selectedDivisions || this.selectedDivisions.length) {
+          this.selectedDivisions = null;
+        }
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
@@ -183,23 +195,16 @@
 
       // Учитываем, что могло измениться как одно значение, так и сразу несколько
       // (когда устанавливается / снимается флаг выделения всех записей)
-      selectedDivisions(newVal, prevVal) {
-        // Проверяем, были ли добавлены записи
-        if (!prevVal || prevVal.length < newVal.length) {
-          for (let item of newVal) {
-            if (!prevVal || !prevVal.find((el) => el.additionalId === item.additionalId)) {
-              this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...item });
+      selectedDivisions(newVal) {
+        const selectedRecs = newVal ? newVal.map((id) => this.getStructuralDivisionById(id)) : [];
+        if (selectedRecs.length) {
+          selectedRecs.forEach((rec) => {
+            if (rec) {
+              this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, rec);
             }
-          }
+          });
         }
-        if (prevVal) {
-          // Проверяем, были ли удалены записи
-          for (let item of prevVal) {
-            if (!newVal || !newVal.find((el) => el.additionalId === item.additionalId)) {
-              this.$store.commit(DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID, item.additionalId);
-            }
-          }
-        }
+        this.$store.commit(DEL_UNSELECTED_STRUCTURAL_DIVISIONS, selectedRecs.map((el) => el.additionalId));
       },
     },
 
@@ -275,7 +280,7 @@
 
       handleDelRec() {
         if (this.selectedUser.additionalId > 0) {
-          this.selectedDivisions = this.selectedDivisions.filter((el) => el.additionalId !== this.selectedUser.additionalId);
+          this.selectedDivisions = this.selectedDivisions.filter((el) => el !== this.selectedUser.additionalId);
         }
         this.$store.commit(DEL_OTHER_GET_ORDER_RECORD, this.selectedUser._id);
         this.selectedUser = null;

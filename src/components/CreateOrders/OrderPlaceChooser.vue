@@ -81,7 +81,7 @@
         state.orderPlaceEnterMode = '';
       };
 
-      watch(() => props.value, (newVal) => {console.log('order place new val')
+      watch(() => props.value, (newVal) => {
         if (!newVal) {
           return;
         }
@@ -129,7 +129,7 @@
               ORDER_PLACE_VALUES.span ? state.spanValue : '',
           });
         }
-      });
+      }, { immediate: true });
 
       const handleFocusStationDropdown = () => {
         state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;

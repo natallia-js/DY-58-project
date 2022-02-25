@@ -99,7 +99,7 @@
             tillCancellation: state.tillCancellation,
           });
         }
-      });
+      }, { immediate: true });
 
       watch(() => state.startDateTime, (value) => {
         if (value && isValidDateTime(value)) {

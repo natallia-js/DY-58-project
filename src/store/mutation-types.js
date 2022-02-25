@@ -162,8 +162,9 @@ export const SET_USER_CHOSEN_STATUS = 'setUserChosenStatus';
 export const ADD_OTHER_GET_ORDER_RECORD = 'addOtherGetOrderRecord';
 export const EDIT_OTHER_GET_ORDER_RECORD = 'editOtherGetOrderRecord';
 export const DEL_OTHER_GET_ORDER_RECORD = 'delOtherGetOrderRecord';
-export const DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID = 'delOtherGetOrderRecordByAdditionalId';
 export const DEL_CURR_SECTORS_SHIFT = 'delCurrSectorsShift';
+export const SET_OTHER_SHIFT_FOR_SENDING_DATA = 'setOtherShiftForSendingData';
+export const DEL_UNSELECTED_STRUCTURAL_DIVISIONS = 'delUnselectedStructuralDivisions';
 
 // WebSocket
 export const SET_SERVER_MESSAGE = 'setServerMessage';
