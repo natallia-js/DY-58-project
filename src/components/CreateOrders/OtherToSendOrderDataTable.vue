@@ -7,6 +7,7 @@
       @input="handleInputFromOtherReceiverDlg"
       @close="handleHideOtherReceiverDlg"
     ></ShowOtherReceiverDlg>
+
     <DataTable
       :value="getOtherShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
@@ -120,6 +121,13 @@
     name: 'dy58-ecd-to-send-order-data-table',
 
     emits: ['input'],
+
+    props: {
+      // Присутствует формально, не используется в данном модуле
+      value: {
+        type: Object,
+      },
+    },
 
     data() {
       return {

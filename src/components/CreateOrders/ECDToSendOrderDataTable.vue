@@ -128,6 +128,13 @@
 
     emits: ['input'],
 
+    props: {
+      // Присутствует формально, не используется в данном модуле
+      value: {
+        type: Object,
+      },
+    },
+
     data() {
       return {
         showChoosePersonDlg: false,

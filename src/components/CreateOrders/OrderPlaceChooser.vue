@@ -81,7 +81,7 @@
         state.orderPlaceEnterMode = '';
       };
 
-      watch(() => props.value, (newVal) => {
+      watch(() => props.value, (newVal) => {console.log('order place new val')
         if (!newVal) {
           return;
         }

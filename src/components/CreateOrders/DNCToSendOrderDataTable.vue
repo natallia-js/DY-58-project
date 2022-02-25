@@ -121,7 +121,6 @@
     SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS,
     SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR,
     SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS,
-    //SET_USER_CHOSEN_STATUS,
   } from '@/store/mutation-types';
 
   export default {
@@ -130,6 +129,7 @@
     emits: ['input'],
 
     props: {
+      // Присутствует формально, не используется в данном модуле
       value: {
         type: Object,
       },
@@ -182,25 +182,6 @@
     },
 
     watch: {
-      value(newVal) {console.log('dncTbl newVal', newVal)
-        if (!newVal) {
-          return;
-        }
-        /*this.doNotSendToAll();
-        newVal.forEach((el) => {
-          this.$store.commit(SET_USER_CHOSEN_STATUS, {
-            userId: el.fioId,
-            chooseUser: true,
-            workPoligonType: el.type,
-            workPoligonId: el.id,
-          });
-        });*/
-        /*this.$emit('input', this.getDNCShiftForSendingData
-          ? this.getDNCShiftForSendingData
-            .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
-            : []);*/
-      },
-
       getDNCShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)

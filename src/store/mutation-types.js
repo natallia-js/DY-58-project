@@ -145,6 +145,7 @@ export const ADD_NEW_ORDER_PATERN = 'addNewOrderPattern';
 export const CLEAR_SHIFT_FOR_SENDING_DATA = 'clearShiftForSendingData';
 export const SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS = 'setGetOrderStatusToAllDNCSectors';
 export const SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR = 'setGetOrderStatusToDefinitDNCSector';
+export const SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS = 'setGetOrderStatusesToOnlyDefinitSectors';
 export const SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS = 'setGetOrderStatusToAllLeftDNCSectors';
 export const SET_GET_ORDER_STATUS_TO_ALL_DSP = 'setGetOrderStatusToAllDSP';
 export const SET_GET_ORDER_STATUS_TO_DEFINIT_DSP = 'setGetOrderStatusToDefinitDSP';

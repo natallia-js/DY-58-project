@@ -98,7 +98,10 @@ export const useSectorsToSendOrder = (state, store) => {
     formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle', null));
 
   // При изменении значения параметра места действия распоряжения меняем список "Кому" по станциям
-  watch(() => state.orderPlace, (newVal) => {
+  watch(() => state.orderPlace, (newVal) => { console.log(newVal, state.resetValueOnWatchChanges)
+    if (!state.resetValueOnWatchChanges) {
+      return;
+    }
     // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
     store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
     let blockObject;

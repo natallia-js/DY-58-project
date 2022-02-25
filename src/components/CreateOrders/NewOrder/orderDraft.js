@@ -1,5 +1,6 @@
 import { watch } from 'vue';
-import { SET_USER_CHOSEN_STATUS } from '@/store/mutation-types';
+import { SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS } from '@/store/mutation-types';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
 /**
  * Данный модуль предназначен для работы с черновиком распоряжения.
@@ -28,22 +29,27 @@ import { SET_USER_CHOSEN_STATUS } from '@/store/mutation-types';
     state.showOnGID = currentOrderDraft.showOnGID;
     state.orderPlace = currentOrderDraft.place;
 
+    state.orderText = currentOrderDraft.orderText;
+
+    // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
+    // таблицы персонала работают с глобальным store
+    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+      poligonsType: WORK_POLIGON_TYPES.STATION,
+      sectorsGetOrderStatuses: currentOrderDraft.dspToSend,
+    });
+    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+      poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
+      sectorsGetOrderStatuses: currentOrderDraft.dncToSend,
+    });
+    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+      poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
+      sectorsGetOrderStatuses: currentOrderDraft.ecdToSend,
+    });
+    store.commit(SET_GET_ORDER_STATUSES_TO_OTHER_SECTORS, currentOrderDraft.otherToSend);
+
     // порядок присвоения важен!
     state.defineOrderTimeSpan = currentOrderDraft.defineOrderTimeSpan;
     state.timeSpan = currentOrderDraft.timeSpan;
-
-    state.orderText = currentOrderDraft.orderText;
-
-    //state.dncSectorsToSendOrder = currentOrderDraft.dncToSend;
-
-    currentOrderDraft.dncToSend.forEach((el) => {console.log(el)
-      store.commit(SET_USER_CHOSEN_STATUS, {
-        userId: el.fioId,
-        chooseUser: true,
-        workPoligonType: el.type,
-        workPoligonId: el.id,
-      });
-    });
   };
 
   const findOrderDraft = (draftId) => {
@@ -100,16 +106,19 @@ import { SET_USER_CHOSEN_STATUS } from '@/store/mutation-types';
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             dspToSend: state.dspSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             ecdToSend: state.ecdSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             otherToSend: state.otherSectorsToSendOrder || [],
             createdOnBehalfOf: state.createdOnBehalfOf,
@@ -128,16 +137,19 @@ import { SET_USER_CHOSEN_STATUS } from '@/store/mutation-types';
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             dspToSend: state.dspSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             ecdToSend: state.ecdSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,
               fioId: el.fioId,
+              sendOriginal: el.sendOriginal,
             })) || [],
             otherToSend: state.otherSectorsToSendOrder || [],
             createdOnBehalfOf: state.createdOnBehalfOf,

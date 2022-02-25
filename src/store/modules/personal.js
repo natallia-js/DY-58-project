@@ -11,6 +11,7 @@ import {
   CLEAR_SHIFT_FOR_SENDING_DATA,
   SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR,
+  SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
   SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS,
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
@@ -675,6 +676,76 @@ export const personal = {
       setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds === APP_CREDENTIALS.DNC_FULL);
       setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds === APP_CREDENTIALS.DSP_FULL);
       setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds === APP_CREDENTIALS.ECD_FULL);
+    },
+
+    /**
+     * Позволяет установить статусы Оригинал/Копия/Ничего указанным участкам ДНЦ, для остальных участков
+     * ДНЦ производится обнуление установленного статуса. Кроме того, если указаны id пользователей, которых
+     * необходимо отметить в качестве выбранных, то метод делает это.
+     * Параметры:
+     *   poligonsType - тип полигонов, которые необходимо обработать
+     *   sectorsGetOrderStatuses - массив объектов с полями:
+     *     id - идентификатор участка
+     *     sendOriginal - отметка о получении оригинала/копии
+     *     fioId - идентификатор лица, которому отсылается документ
+     */
+     [SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS] (state, { poligonsType, sectorsGetOrderStatuses }) {
+      function setChosenPoligonStatuses(sectorsShift) {
+        if (!sectorsShift || !sectorsShift.length) {
+          return;
+        }
+        const clearSendItem = (item, resetSendOriginal = false) => {
+          if (item.lastUserChoice || item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend) {
+            item.lastUserChoicePost = null;
+            item.lastUserChoice = null;
+            item.lastUserChoiceId = null;
+            item.lastUserChoiceOnline = false;
+            if (resetSendOriginal)
+              item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
+          }
+        };
+        sectorsShift.forEach((sector) => {
+          let sectStat;
+          if (sectorsGetOrderStatuses) {
+            sectStat = sectorsGetOrderStatuses.find((el) => el.id === sector.sectorId || el.id === sector.stationId);
+          }
+          if (!sectStat) {
+            clearSendItem(sector, true);
+          } else {
+            if (sector.sendOriginal !== sectStat.sendOriginal) {
+              sector.sendOriginal = sectStat.sendOriginal;
+            }
+            if (!sectStat.fioId || !sector.people || !sector.people.length) {
+              clearSendItem(sector);
+            } else {
+              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);
+              if (!neededUser) {
+                clearSendItem(sector);
+              } else {
+                sector.lastUserChoiceId = neededUser._id;
+                sector.lastUserChoicePost = neededUser.post,
+                sector.lastUserChoice = getUserFIOString({
+                  name: neededUser.name,
+                  fatherName: neededUser.fatherName,
+                  surname: neededUser.surname,
+                });
+                sector.lastUserChoiceOnline = neededUser.online;
+              }
+            }
+          }
+        });
+      }
+      switch (poligonsType) {
+        case WORK_POLIGON_TYPES.STATION:
+          setChosenPoligonStatuses(state.sectorPersonal.sectorStationsShift);
+          break;
+        case WORK_POLIGON_TYPES.DNC_SECTOR:
+          setChosenPoligonStatuses(state.sectorPersonal.DNCSectorsShift);
+          break;
+        case WORK_POLIGON_TYPES.ECD_SECTOR:
+          setChosenPoligonStatuses(state.sectorPersonal.ECDSectorsShift);
+          break;
+      }
     },
 
     /**

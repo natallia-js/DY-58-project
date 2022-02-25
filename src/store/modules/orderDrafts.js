@@ -52,6 +52,26 @@ function getOrderDraftObject(draft) {
       end: null,
       tillCancellation: false,
     },
+    dspToSend: draft.dspToSend ? draft.dspToSend.map((el) => ({
+      ...el,
+      id: +el.id,
+      sendOriginal: +el.sendOriginal,
+    })) : [],
+    dncToSend: draft.dncToSend ? draft.dncToSend.map((el) => ({
+      ...el,
+      id: +el.id,
+      sendOriginal: +el.sendOriginal,
+    })) : [],
+    ecdToSend: draft.ecdToSend ? draft.ecdToSend.map((el) => ({
+      ...el,
+      id: +el.id,
+      sendOriginal: +el.sendOriginal,
+    })) : [],
+    otherToSend: draft.otherToSend ? draft.otherToSend.map((el) => ({
+      ...el,
+      additionalId: el.additionalId ? +el.additionalId : null,
+      sendOriginal: +el.sendOriginal,
+    })) : [],
   };
 }
 
