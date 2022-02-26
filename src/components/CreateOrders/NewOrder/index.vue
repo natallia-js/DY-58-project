@@ -29,6 +29,7 @@
         optionLabel="label"
         disabled
       />
+      {{ JSON.stringify(state.currentOrderDraftId) }}
       <br />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения. Ожидаю ответ...
@@ -278,7 +279,15 @@
     <!-- АДРЕСАТЫ -->
 
     <div class="p-col-6">
-      <p class="p-text-bold p-mb-2">Кому адресовать</p>
+      <p class="p-mb-2">
+        <span class="p-text-bold p-mr-2">Кому адресовать</span>
+        <Button
+          icon="pi pi-times"
+          class="p-button-secondary p-button-sm dy58-order-action-button p-m-1"
+          v-tooltip="'Очистить список'"
+          @click="handleClearOrderAddressesLists"
+        />
+      </p>
       <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
       <Accordion :multiple="true">
         <AccordionTab v-if="orderType !== ORDER_PATTERN_TYPES.NOTIFICATION">
@@ -351,7 +360,6 @@
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import showMessage from '@/hooks/showMessage.hook';
   import isValidDateTime from '@/additional/isValidDateTime';
-  import { CLEAR_SHIFT_FOR_SENDING_DATA, CHOOSE_ONLY_ONLINE_PERSONAL } from '@/store/mutation-types';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useDispatchOrder } from './dispatchOrder';
   import { useSectorsToSendOrder } from './sectorsToSendOrder';
@@ -368,10 +376,6 @@
         required: true,
       },
       prevOrderId: {
-        type: String,
-        required: false,
-      },
-      orderDraftType: {
         type: String,
         required: false,
       },
@@ -461,18 +465,8 @@
         currentOrderDraftId: props.orderDraftId,
       });
 
-      /**
-       * После загрузки компонента отображаем online-пользователей станций и участков в секции "Кому",
-       * а также, при необходимости, производим подгрузку черновика распоряжения.
-       */
-      onMounted(() => {
-        store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
-        store.commit(CHOOSE_ONLY_ONLINE_PERSONAL);
-
-        /*if (!props.orderDraftId || props.orderDraftType !== props.orderType || state.orderDraftLoaded) {
-          return;
-        }
-        orderDraftObject.findOrderDraft(props.orderDraftId);*/
+      onMounted(() => { console.log('index onMounted')
+        state.currentOrderDraftId = props.orderDraftId;
       });
 
       useWatchCurrentDateTime(state, props, store);
@@ -485,6 +479,7 @@
         selectedDNCString,
         selectedECDString,
         selectedOtherAddresseesString,
+        handleClearOrderAddressesLists,
       } = useSectorsToSendOrder(state, store);
 
       const {
@@ -679,6 +674,7 @@
         newNumberOverlayPanel,
         changeOrderNumber,
         handleSaveOrderDraft: orderDraftObject.handleSaveOrderDraft,
+        handleClearOrderAddressesLists,
       };
     },
   };

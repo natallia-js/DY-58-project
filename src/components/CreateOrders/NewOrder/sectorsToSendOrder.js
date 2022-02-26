@@ -1,12 +1,13 @@
 import { computed, watch } from 'vue';
 import {
   CurrShiftGetOrderStatus,
-  ORDER_PLACE_VALUES,
+  //ORDER_PLACE_VALUES,
   ORDERS_RECEIVERS_DEFAULT_POSTS,
 } from '@/constants/orders';
 import {
-  SET_GET_ORDER_STATUS_TO_ALL_DSP,
-  SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+  //SET_GET_ORDER_STATUS_TO_ALL_DSP,
+  //SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+  CLEAR_SHIFT_FOR_SENDING_DATA,
 } from '@/store/mutation-types';
 
 
@@ -103,7 +104,7 @@ export const useSectorsToSendOrder = (state, store) => {
       return;
     }
     // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
-    store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+    /*store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
     let blockObject;
     switch (newVal.place) {
       case ORDER_PLACE_VALUES.station:
@@ -121,8 +122,15 @@ export const useSectorsToSendOrder = (state, store) => {
             { stationId: blockObject.Bl_StationID2, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
         }
         break;
-    }
+    }*/
   });
+
+  /**
+   * Чистит списки адресатов распоряжения.
+   */
+  const handleClearOrderAddressesLists = () => {
+    store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
+  };
 
   return {
     dspSectorsToSendOrderNoDupl,
@@ -132,5 +140,6 @@ export const useSectorsToSendOrder = (state, store) => {
     selectedDNCString,
     selectedECDString,
     selectedOtherAddresseesString,
+    handleClearOrderAddressesLists,
   };
 };

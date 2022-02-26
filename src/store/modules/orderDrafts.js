@@ -116,7 +116,7 @@ export const orderDrafts = {
     },
 
     getOrderDraftById(state) {
-      return (id) => state.data.find((el) => el._id === id);
+      return (id) => state.data.find((el) => el._id === id) || null;
     },
 
     getSaveOrderDraftResult(state) {

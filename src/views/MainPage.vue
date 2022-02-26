@@ -230,7 +230,6 @@
           params: {
             orderType: orderType,
             prevOrderId: null,
-            orderDraftType: orderType,
             orderDraftId,
           },
         });

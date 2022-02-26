@@ -370,7 +370,7 @@ export const personal = {
     /**
      * Чистит информацию о тех, кому необходимо адресовать распоряжение (по всем массивам данных).
      */
-    [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {
+    [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {console.log('CLEAR_SHIFT_FOR_SENDING_DATA')
       if (!state.sectorPersonal) {
         return;
       }
@@ -719,7 +719,7 @@ export const personal = {
           let sectStat;
           if (sectorsGetOrderStatuses) {
             sectStat = sectorsGetOrderStatuses.find((el) => el.id === sector.sectorId || el.id === sector.stationId);
-          }console.log('sectStat',sectStat)
+          }
           if (!sectStat) {
             clearSendItem(sector, true);
           } else {
@@ -729,7 +729,7 @@ export const personal = {
             if (!sectStat.fioId || !sector.people || !sector.people.length) {
               clearSendItem(sector);
             } else {
-              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);console.log('neededUser',neededUser)
+              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);
               if (!neededUser) {
                 clearSendItem(sector);
               } else {

@@ -4,32 +4,28 @@
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.ORDER ? this.$route.params.orderDraftId : null"
       />
     </TabPanel>
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_ORDER"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.ECD_ORDER ? this.$route.params.orderDraftId : null"
       />
     </TabPanel>
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_PROHIBITION">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_PROHIBITION"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.ECD_PROHIBITION ? this.$route.params.orderDraftId : null"
       />
     </TabPanel>
     <TabPanel v-if="isDNC || isDSP_or_DSPoperator" :header="ORDER_PATTERN_TYPES.REQUEST">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.REQUEST"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.REQUEST ? this.$route.params.orderDraftId : null"
       />
     </TabPanel>
     <TabPanel
@@ -40,15 +36,13 @@
         v-if="isDNC || isDSP_or_DSPoperator"
         :orderType="ORDER_PATTERN_TYPES.NOTIFICATION"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.NOTIFICATION ? this.$route.params.orderDraftId : null"
       />
       <new-order
         v-if="isECD"
         :orderType="ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
         :prevOrderId="this.$route.params.prevOrderId"
-        :orderDraftType="this.$route.params.orderDraftType"
-        :orderDraftId="this.$route.params.orderDraftId"
+        :orderDraftId="currentOrderDraft && currentOrderDraft.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION ? this.$route.params.orderDraftId : null"
       />
     </TabPanel>
   </TabView>
@@ -59,12 +53,16 @@
 
 
 <script>
-  import { computed, ref } from 'vue';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useRoute } from 'vue-router';
   import NewOrder from '@/components/CreateOrders/NewOrder/index';
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
-  import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
+  import {
+    CHOOSE_ONLY_ONLINE_PERSONAL,
+    CLEAR_SHIFT_FOR_SENDING_DATA,
+    SET_ACTIVE_MAIN_MENU_ITEM,
+  } from '@/store/mutation-types';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
   const TABS_INDEXES = {
@@ -121,6 +119,24 @@
           break;
       }
 
+      /**
+       * После загрузки компонента выбираем online-пользователей станций и участков
+       * (для автоматического отображения в списках выбора секции "Кому" создания распоряжения).
+       */
+      onMounted(() => {
+        store.commit(CHOOSE_ONLY_ONLINE_PERSONAL);
+      });
+
+      /**
+       * После выгрузки компонента чистим списки адресатов распоряжения (делаем это именно здесь,
+       * а не в onMounted, т.к. если это сделать в onMounted, то сотрутся все автоматически
+       * выбранные при загрузке черновика распоряжения адресаты).
+       * ).
+       */
+      onUnmounted(() => {
+        store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
+      });
+
       return {
         activeIndex,
         canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
@@ -129,6 +145,7 @@
         isECD,
         ORDER_PATTERN_TYPES,
         TABS_INDEXES,
+        currentOrderDraft: computed(() => route.params.orderDraftId ? store.getters.getOrderDraftById(route.params.orderDraftId) : null),
       };
     },
   }
