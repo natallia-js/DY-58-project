@@ -76,7 +76,6 @@
             return;
           }
           const params = JSON.parse(event.detail);
-          console.log(params.selectedRecords)
           if (params.selectedRecords && params.selectedRecords.length) {
             // будем отображать выбранные пользователем записи, предварительно их отсортировав по
             // номеру, под которым они отображались в исходной таблице и присвоив им новую нумерацию

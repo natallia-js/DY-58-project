@@ -137,7 +137,7 @@
         selectedUser: null,
         user: null,
         addNewRec: true, // true = add, false = edit
-        selectedDivisions: null, // массив id выбранных (из существующих) структурных подразделений
+        selectedDivisions: null, // массив id выбранных (из существующих в БД на сервере) структурных подразделений
       };
     },
 

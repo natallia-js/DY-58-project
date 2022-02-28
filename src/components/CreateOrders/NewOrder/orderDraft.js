@@ -19,13 +19,14 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   } = inputVals;
 
   // Объект текущего черновика распоряжения (объект либо null)
-  const currentOrderDraft = computed(() => state.currentOrderDraftId ? store.getters.getOrderDraftById(state.currentOrderDraftId) : null);
+  const currentOrderDraft = computed(() =>
+    state.currentOrderDraftId ? store.getters.getOrderDraftById(state.currentOrderDraftId) : null);
 
   // Способствует отображению персонала из выбранного черновика распоряжения
   const applySelectedOrderDraftPersonal = () => {
     if (!currentOrderDraft.value) {
       return;
-    } console.log('applySelectedOrderDraftPersonal')
+    }
     store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
       poligonsType: WORK_POLIGON_TYPES.STATION,
       sectorsGetOrderStatuses: currentOrderDraft.value.dspToSend,
@@ -38,13 +39,14 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
       poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
       sectorsGetOrderStatuses: currentOrderDraft.value.ecdToSend,
     });
+    store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, currentOrderDraft.value.otherToSend);
   };
 
   // Способствует отображению на полях формы данных из черновика распоряжения
   const applySelectedOrderDraft = () => {
     if (!currentOrderDraft.value) {
       return;
-    } console.log('applySelectedOrderDraft')
+    }
     // Для корректного изменения некоторых параметров состояния необходимо, чтобы производимые
     // изменения не влияли на другие параметры, поэтому запрещаем (временно) подобное влияние
     state.resetValueOnWatchChanges = false;
@@ -53,28 +55,18 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     state.showOnGID = currentOrderDraft.value.showOnGID;
     state.orderPlace = currentOrderDraft.value.place;
 
-    state.orderText = currentOrderDraft.value.orderText;
+    state.orderText = currentOrderDraft.value.orderText;console.log('currentOrderDraft.value.orderText',currentOrderDraft.value.orderText)
 
     // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
     // таблицы персонала работают с глобальным store (информация о персонале может быть недоступна в момент
     // перезагрузки страницы, в связи с чем этот код будет повторен при появлении информации)
     applySelectedOrderDraftPersonal();
 
-    store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, currentOrderDraft.value.otherToSend);
-
     // порядок присвоения важен! (после выполнения данного куска кода state.resetValueOnWatchChanges
     // примет значение true)
     state.defineOrderTimeSpan = currentOrderDraft.value.defineOrderTimeSpan;
     state.timeSpan = currentOrderDraft.value.timeSpan;
   };
-
-  /*const findOrderDraft = (draftId) => {
-    const currentOrderDraft = store.getters.getOrderDraftById(draftId);
-    if (currentOrderDraft) {
-      state.currentOrderDraftId = draftId;
-      state.orderDraftLoaded = true;
-    }
-  };*/
 
   watch(() => props.orderDraftId, () => state.currentOrderDraftId = props.orderDraftId);
 
@@ -86,26 +78,15 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны черновики распоряжений
   // (id нужного черновика может быть, а вот подгрузки всех черновиков нужно подождать)
   watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-    /*if (!props.orderDraftId || !newVal || !newVal.length || state.orderDraftLoaded) {
+    if (!state.currentOrderDraftId || !newVal || !newVal.length) {
       return;
     }
-    findOrderDraft(props.orderDraftId);*/
-    if (!state.currentOrderDraftId || !newVal || !newVal.length/* || state.orderDraftLoaded*/) {
-      return;
-    }
-    // state.orderDraftLoaded = true;  // ???
     const tmp = state.currentOrderDraftId;
     state.currentOrderDraftId = null;
     state.currentOrderDraftId = tmp;
-    //applySelectedOrderDraft();
   });
 
-  watch(() => store.getters.getSectorPersonal, (newVal) => {//console.log('watch store.getters.getSectorPersonal',newVal,state.currentOrderDraftId)
-    if (newVal && currentOrderDraft.value) {
-      //console.log('2currentOrderDraft',currentOrderDraft.value)
-        applySelectedOrderDraftPersonal();
-    }
-  });
+  watch(() => store.getters.getSectorPersonal, () => applySelectedOrderDraftPersonal());
 
   /**
    * Позволяет сохранить черновик распоряжения.
@@ -207,7 +188,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   });
 
   return {
-    //findOrderDraft,
     handleSaveOrderDraft,
   };
 };

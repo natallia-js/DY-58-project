@@ -113,13 +113,13 @@
         state.orderText = '';
       };
 
-      watch(() => props.value, (newVal) => {
+      watch(() => props.value, (newVal) => {console.log('new order text',newVal)
         if (!newVal) {
           return;
         }
         let changed = false;
         if (state.orderTextSource !== newVal.orderTextSource) {
-          state.orderTextSource = newVal.orderTextSource || null;
+          state.orderTextSource = newVal.orderTextSource || '';
           changed = true;
         }
         let tmp;
@@ -158,22 +158,22 @@
             }
             break;
         }
-        if (changed) {
-          emit('input', {
+        if (changed) {//console.log('changed', state.orderTextSource, getSelectedOrderPattern.value, state.orderPatternText)
+          /*emit('input', {
             orderTextSource: state.orderTextSource,
             patternId: getSelectedOrderPattern.value._id,
             orderTitle: getSelectedOrderPattern.value.title,
             orderText: state.orderPatternText,
-          });
+          });*/
         }
-      });
+      }, { immediate: true });
 
       // список шаблонов распоряжений для отображения
       const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
 
       // возвращает объект выбранного из списка шаблона распоряжения
       const getSelectedOrderPattern = computed(() =>
-        state.orderPattern ? store.getters.getOrderPatternById(Object.keys(state.orderPattern)[0]) : {}
+        state.orderPattern ? (store.getters.getOrderPatternById(Object.keys(state.orderPattern)[0]) || {}) : {}
       );
 
       // для отслеживания изменения объекта родительского распоряжения

@@ -123,11 +123,11 @@
             break;
         }
         if (changed) {
-          emit('input', {
+          /*emit('input', {
             place: state.orderPlaceEnterMode,
             value: state.orderPlaceEnterMode === ORDER_PLACE_VALUES.station ? state.stationValue :
               ORDER_PLACE_VALUES.span ? state.spanValue : '',
-          });
+          });*/
         }
       }, { immediate: true });
 

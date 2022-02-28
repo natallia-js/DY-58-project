@@ -93,11 +93,11 @@
           changed = true;
         }
         if (changed) {
-          emit('input', {
+          /*emit('input', {
             start: state.startDateTime,
             end: state.endDateTime,
             tillCancellation: state.tillCancellation,
-          });
+          });*/
         }
       }, { immediate: true });
 

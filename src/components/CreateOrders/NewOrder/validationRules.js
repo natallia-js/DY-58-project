@@ -113,7 +113,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
 
   watch(() => state.showOnGID, (newVal) => {
     rules.orderPlace = newVal.value ? placeRules : {};
-    if (state.resetValueOnWatchChanges === true) {console.log('null order place')
+    if (state.resetValueOnWatchChanges === true) {
       state.orderPlace = {
         place: null,
         value: null,
@@ -123,7 +123,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
 
   watch(() => state.defineOrderTimeSpan, (newVal) => {
     rules.timeSpan = newVal.value ? timeSpanRules : {};
-    if (state.resetValueOnWatchChanges === true) {console.log('null time span')
+    if (state.resetValueOnWatchChanges === true) {
       state.timeSpan = {
         start: null,
         end: null,
@@ -134,7 +134,6 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       // в одном месте, после того как будет обработана вся информация по черновику распоряжения.
       // Только по окончании обработки данной информации разрешаем reset полей при выборе режимов ввода данных
       state.resetValueOnWatchChanges = true;
-      console.log('state.resetValueOnWatchChanges',state.resetValueOnWatchChanges)
     }
   });
 

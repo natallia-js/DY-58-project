@@ -234,7 +234,6 @@ export const orderDrafts = {
       context.commit(SET_LOADING_ORDER_DRAFTS_STATUS, true);
       try {
         const responseData = await getOrderDraftsFromServer();
-        console.log('loadOrderDrafts',responseData)
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: false, message: null });
         context.commit(SET_ORDER_DRAFTS_ARRAY, responseData);
 

@@ -370,7 +370,7 @@ export const personal = {
     /**
      * Чистит информацию о тех, кому необходимо адресовать распоряжение (по всем массивам данных).
      */
-    [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {console.log('CLEAR_SHIFT_FOR_SENDING_DATA')
+    [CLEAR_SHIFT_FOR_SENDING_DATA] (state) {
       if (!state.sectorPersonal) {
         return;
       }

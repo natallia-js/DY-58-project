@@ -465,7 +465,7 @@
         currentOrderDraftId: props.orderDraftId,
       });
 
-      onMounted(() => { console.log('index onMounted')
+      onMounted(() => {
         state.currentOrderDraftId = props.orderDraftId;
       });
 
@@ -572,7 +572,7 @@
        * При смене шаблона распоряжения извлекает отметки об особой категории поезда,
        * закрепленные за данным шаблоном.
        */
-      watch(() => state.orderText.patternId, (newVal) => {
+      watch(() => state.orderText.patternId, (newVal) => {console.log('watch state.orderText.patternId',state.orderText.patternId)
         if (!newVal) {
           state.specialTrainCategories = null;
         }

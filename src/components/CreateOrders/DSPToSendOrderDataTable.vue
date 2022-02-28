@@ -188,7 +188,7 @@
       },
     },
 
-    mounted() {console.log('mounted')
+    mounted() {
       // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
       // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
       // состояние хранилища
@@ -199,7 +199,7 @@
     },
 
     watch: {
-      getDSPShiftForSendingData(newVal) {console.log('watch')
+      getDSPShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
