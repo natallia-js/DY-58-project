@@ -5,6 +5,7 @@ import {
 } from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
+
 /**
  * Данный модуль предназначен для работы с черновиком распоряжения.
  */
@@ -12,6 +13,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   const {
     state,
     props,
+    emit,
     store,
     confirm,
     showSuccessMessage,
@@ -54,8 +56,8 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     // порядок присвоения важен!
     state.showOnGID = currentOrderDraft.value.showOnGID;
     state.orderPlace = currentOrderDraft.value.place;
-
-    state.orderText = currentOrderDraft.value.orderText;console.log('currentOrderDraft.value.orderText',currentOrderDraft.value.orderText)
+console.log('currentOrderDraft.value.orderText',currentOrderDraft.value.orderText)
+    state.orderText = currentOrderDraft.value.orderText;
 
     // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
     // таблицы персонала работают с глобальным store (информация о персонале может быть недоступна в момент
@@ -68,12 +70,19 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     state.timeSpan = currentOrderDraft.value.timeSpan;
   };
 
-  watch(() => props.orderDraftId, () => state.currentOrderDraftId = props.orderDraftId);
+  watch(() => props.orderDraftId, () => {
+    state.currentOrderDraftId = props.orderDraftId;
+  });
 
   // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
-  watch(currentOrderDraft, () => {
+  watch(currentOrderDraft, (newVal) => {
     applySelectedOrderDraft();
-  }, { immediate: true });
+    emit('changeProps', {
+      orderType: props.orderType,
+      prevOrderId: props.prevOrderId,
+      orderDraftId: newVal ? newVal._id : null,
+    });
+  });
 
   // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны черновики распоряжений
   // (id нужного черновика может быть, а вот подгрузки всех черновиков нужно подождать)
@@ -81,12 +90,15 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     if (!state.currentOrderDraftId || !newVal || !newVal.length) {
       return;
     }
+    // Искусственно вызываем отображение данных выбранного черновика
     const tmp = state.currentOrderDraftId;
     state.currentOrderDraftId = null;
     state.currentOrderDraftId = tmp;
   });
 
-  watch(() => store.getters.getSectorPersonal, () => applySelectedOrderDraftPersonal());
+  watch(() => store.getters.getSectorPersonal, () => {
+    applySelectedOrderDraftPersonal();
+  });
 
   /**
    * Позволяет сохранить черновик распоряжения.
@@ -104,7 +116,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         state.waitingForServerResponse = true;
-        if (!state.currentOrderDraftId) {
+        if (!currentOrderDraft.value) {
           // Создание нового черновика
           store.dispatch('saveOrderDraft', {
             type: props.orderType,
@@ -138,7 +150,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
         } else {
           // Редактирование существующего черновика
           store.dispatch('editOrderDraft', {
-            id: state.currentOrderDraftId,
+            id: currentOrderDraft.value._id,
             type: props.orderType,
             place: state.orderPlace,
             timeSpan: state.timeSpan,
@@ -189,5 +201,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   return {
     handleSaveOrderDraft,
+    currentOrderDraft,
   };
 };

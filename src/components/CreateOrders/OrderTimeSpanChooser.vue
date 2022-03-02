@@ -75,31 +75,19 @@
         if (!newVal) {
           return;
         }
-        let changed = false;
-        let tmp;
-        tmp = newVal.start || null;
+        let tmp = newVal.start || null;
         if (state.startDateTime !== tmp) {
           state.startDateTime = tmp;
-          changed = true;
         }
         tmp = newVal.end || null;
         if (state.endDateTime !== tmp) {
           state.endDateTime = tmp;
-          changed = true;
         }
         tmp = Boolean(newVal.tillCancellation);
         if (state.tillCancellation !== tmp) {
           state.tillCancellation = tmp;
-          changed = true;
         }
-        if (changed) {
-          /*emit('input', {
-            start: state.startDateTime,
-            end: state.endDateTime,
-            tillCancellation: state.tillCancellation,
-          });*/
-        }
-      }, { immediate: true });
+      }/*, { immediate: true }*/); // call on page load
 
       watch(() => state.startDateTime, (value) => {
         if (value && isValidDateTime(value)) {

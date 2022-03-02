@@ -75,22 +75,16 @@
         orderPlaceEnterMode: '',
       });
 
-      const clearState = () => {
-        state.stationValue = '';
-        state.spanValue = '';
-        state.orderPlaceEnterMode = '';
-      };
-
       watch(() => props.value, (newVal) => {
         if (!newVal) {
           return;
         }
-        let changed = false;
-        if (newVal.place !== state.orderPlaceEnterMode) {
-          state.orderPlaceEnterMode = newVal.place || '';
-          changed = true;
+        let changedOrderPlaceEnterMode = false;
+        let tmp = newVal.place || '';
+        if (state.orderPlaceEnterMode !== tmp) {
+          state.orderPlaceEnterMode = tmp;
+          changedOrderPlaceEnterMode = true;
         }
-        let tmp;
         switch (state.orderPlaceEnterMode) {
           case ORDER_PLACE_VALUES.station:
             tmp = newVal.value || '';
@@ -101,7 +95,6 @@
               } else {
                 state.stationValue = '';
               }
-              changed = true;
             }
             break;
           case ORDER_PLACE_VALUES.span:
@@ -113,23 +106,17 @@
               } else {
                 state.spanValue = '';
               }
-              changed = true;
             }
             break;
           default:
-            if (changed) {
-              clearState();
+            if (changedOrderPlaceEnterMode) {
+              state.stationValue = '';
+              state.spanValue = '';
+              state.orderPlaceEnterMode = '';
             }
             break;
         }
-        if (changed) {
-          /*emit('input', {
-            place: state.orderPlaceEnterMode,
-            value: state.orderPlaceEnterMode === ORDER_PLACE_VALUES.station ? state.stationValue :
-              ORDER_PLACE_VALUES.span ? state.spanValue : '',
-          });*/
-        }
-      }, { immediate: true });
+      }/*, { immediate: true }*/); // call on page load
 
       const handleFocusStationDropdown = () => {
         state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;

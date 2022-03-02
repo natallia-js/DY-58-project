@@ -1,21 +1,28 @@
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+
 
 /**
  * Данный модуль предназначен для работы со связанным распоряжением по отношению к издаваемому
  * (распоряжением, находящимся в той цепочке распоряжений, что и издаваемое).
  */
-export const useRelatedOrder = (state, store) => {
+export const useRelatedOrder = (state, { props, store, emit }) => {
   const relatedOrderId = computed(() => {
     const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
     return chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;
   });
 
-  const relatedOrderObject = computed(() => {
-    if (!relatedOrderId.value) {
-      return null;
-    }
-    return store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value);
+  const relatedOrderObject = computed(() => relatedOrderId.value ?
+    store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value) : null
+  );
+
+  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
+  watch(relatedOrderObject, (newVal) => {
+    emit('changeProps', {
+      orderType: props.orderType,
+      prevOrderId: newVal ? newVal._id : null,
+      orderDraftId: props.orderDraftId,
+    });
   });
 
   const relatedOrderObjectStartDateTimeString = computed(() => {

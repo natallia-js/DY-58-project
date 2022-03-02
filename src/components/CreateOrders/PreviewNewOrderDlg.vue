@@ -31,6 +31,10 @@
       {{ getUserWorkPoligonName }}
     </p>
     <template #footer>
+      <div v-if="draftId" class="p-mb-2 p-mr-2">
+        <Checkbox id="if-del-order-draft" v-model="delOrderDraft" :binary="true" />
+        <label for="if-del-order-draft">&#160; Удалить черновик</label>
+      </div>
       <Button label="Издать" @click="dispatchOrder" />
       <Button label="Отмена" @click="closeDialog" />
     </template>
@@ -51,6 +55,7 @@
     data() {
       return {
         dlgVisible: false,
+        delOrderDraft: true,
       };
     },
 
@@ -106,6 +111,9 @@
       specialTrainCategories: {
         type: Array,
       },
+      draftId: {
+        type: String,
+      },
     },
 
     computed: {
@@ -145,13 +153,16 @@
 
     watch: {
       showDlg: function (val) {
-        this.dlgVisible = val;
+        if (this.dlgVisible !== val)
+          this.dlgVisible = val;
+        if (this.dlgVisible === true && this.delOrderDraft === false)
+          this.delOrderDraft = true;
       },
     },
 
     methods: {
       dispatchOrder() {
-        this.$emit('dispatch');
+        this.$emit('dispatch', { orderDraftIdToDelete: this.delOrderDraft ? this.draftId : null });
         this.closeDialog();
       },
 

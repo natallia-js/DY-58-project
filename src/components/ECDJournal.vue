@@ -154,10 +154,10 @@
 <script>
   import { computed, ref, watch } from 'vue';
   import { useStore } from 'vuex';
+  import { useRouter } from 'vue-router';
   import { getECDOrdersFromServer } from '@/serverRequests/orders.requests';
   import { FilterMatchMode } from 'primevue/api';
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
-  import router from '@/router';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -175,6 +175,7 @@
 
     setup(props) {
       const store = useStore();
+      const router = useRouter();
 
       const data = ref([]);
       const errMessage = ref(null);

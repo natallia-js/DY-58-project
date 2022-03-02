@@ -67,7 +67,7 @@ export const useDispatchOrder = (inputVals) => {
   /**
    * Издание распоряжения (отправка на сервер и передача всем причастным).
    */
-  const dispatchOrder = () => {
+  const dispatchOrder = ({ orderDraftIdToDelete }) => {
     state.waitingForServerResponse = true;
 
     store.dispatch('dispatchOrder', {
@@ -94,6 +94,7 @@ export const useDispatchOrder = (inputVals) => {
       createdOnBehalfOf: state.createdOnBehalfOf,
       showOnGID: state.showOnGID.value,
       specialTrainCategories: state.specialTrainCategories,
+      draftId: orderDraftIdToDelete,
     });
   };
 
@@ -107,6 +108,10 @@ export const useDispatchOrder = (inputVals) => {
     state.waitingForServerResponse = false;
     if (!newVal.error) {
       showSuccessMessage(newVal.message);
+      if (state.prevRelatedOrder) {
+        state.prevRelatedOrder = null;
+        state.cancelOrderDateTime = null;
+      }
     } else {
       showErrMessage(newVal.message);
     }

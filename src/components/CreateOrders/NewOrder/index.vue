@@ -15,6 +15,7 @@
     :otherToSend="state.otherSectorsToSendOrder"
     :createdOnBehalfOf="state.createdOnBehalfOf"
     :specialTrainCategories="state.specialTrainCategories"
+    :draftId="currentOrderDraft ? currentOrderDraft._id : null"
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg"
   />
@@ -29,7 +30,6 @@
         optionLabel="label"
         disabled
       />
-      {{ JSON.stringify(state.currentOrderDraftId) }}
       <br />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения. Ожидаю ответ...
@@ -144,25 +144,23 @@
 
         <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
 
-        <div v-if="orderType === ORDER_PATTERN_TYPES.ORDER" class="p-field p-col-12 p-m-0">
+        <div
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
+          class="p-field p-col-12 p-m-0"
+        >
           <SelectButton v-model="state.showOnGID" :options="showOnGIDOptions" optionLabel="name" />
         </div>
 
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="(orderType === ORDER_PATTERN_TYPES.ORDER && state.showOnGID.value) ||
-            (orderType === ORDER_PATTERN_TYPES.ECD_ORDER) ||
-            (orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)
+            && state.showOnGID.value"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="orderPlace" :class="{'p-error':v$.orderPlace.$invalid && submitted}">
             <span class="p-text-bold">
-              <span
-                v-if="![ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
-                class="dy58-required-field">
-                *
-              </span> Место действия
+              <span class="dy58-required-field">*</span> Место действия
             </span>
           </label>
           <order-place-chooser
@@ -343,7 +341,7 @@
 
 
 <script>
-  import { reactive, ref, computed, onMounted, watch } from 'vue';
+  import { reactive, ref, computed, watch, onMounted } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
   import { useConfirm } from 'primevue/useconfirm';
@@ -385,6 +383,8 @@
       },
     },
 
+    emits: ['changeProps'],
+
     components: {
       OrderPlaceChooser,
       OrderTimeSpanChooser,
@@ -397,10 +397,12 @@
       OrderNumber,
     },
 
-    setup(props) {
+    setup(props, { emit }) {
       const store = useStore();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
+
+      const isECD = computed(() => store.getters.isECD);
 
       // Уточнять время действия издаваемого распоряжения либо не уточнять
       const defineOrderTimeSpanOptions = ([
@@ -409,8 +411,8 @@
       ]);
       // Отображать издаваемое распоряжение на ГИД, или не отображать
       const showOnGIDOptions = ([
-        { name: 'Не отображать на ГИД', value: false },
-        { name: 'Отобразить на ГИД', value: true },
+        { name: !isECD.value ? 'Не отображать на ГИД' : 'Не указывать место действия', value: false },
+        { name: !isECD.value ? 'Отобразить на ГИД': 'Определить место действия', value: true },
       ]);
 
       const state = reactive({
@@ -419,7 +421,7 @@
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
         updateCreateDateTimeRegularly: true,
-        prevRelatedOrder: props.prevOrderId ? { [props.prevOrderId]: true } : null,
+        prevRelatedOrder: null,
         cancelOrderDateTime: null,
         orderPlace: {
           place: null,
@@ -454,19 +456,17 @@
         // запроса об издании распоряжения
         orderFieldsErrs: null,
         showPreviewNewOrderDlg: false,
-        // Данное поле нужно в момент, когда пользователь переходит на страницу с выбором черновика распоряжения:
-        // данный черновик необходимо подгрузить в момент загрузки страницы, и только 1 раз!
-        orderDraftLoaded: false,
-        // Очень важная переменная! Если ее убрать, то в findOrderDraft не смогут быть установлены
+        // Очень важная переменная! Если ее убрать, то в applySelectedOrderDraft не смогут быть установлены
         // поля времени и места действия распоряжения из черновика, т.к. происходит их автоматический
         // сброс при изменении showOnGID и defineOrderTimeSpan
         resetValueOnWatchChanges: true,
         // id текущего черновика распоряжения
-        currentOrderDraftId: props.orderDraftId,
+        currentOrderDraftId: null,
       });
 
       onMounted(() => {
         state.currentOrderDraftId = props.orderDraftId;
+        state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
       });
 
       useWatchCurrentDateTime(state, props, store);
@@ -485,7 +485,17 @@
       const {
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
-      } = useRelatedOrder(state, store);
+      } = useRelatedOrder(state, { props, store, emit });
+
+      const orderDraftObject = useOrderDraft({
+        state,
+        props,
+        emit,
+        store,
+        confirm,
+        showSuccessMessage,
+        showErrMessage,
+      });
 
       const dispatchOrderObject = useDispatchOrder({
         state,
@@ -497,15 +507,6 @@
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
         relatedOrderObject,
-      });
-
-      const orderDraftObject = useOrderDraft({
-        state,
-        props,
-        store,
-        confirm,
-        showSuccessMessage,
-        showErrMessage,
       });
 
       const {
@@ -572,7 +573,7 @@
        * При смене шаблона распоряжения извлекает отметки об особой категории поезда,
        * закрепленные за данным шаблоном.
        */
-      watch(() => state.orderText.patternId, (newVal) => {console.log('watch state.orderText.patternId',state.orderText.patternId)
+      watch(() => state.orderText.patternId, (newVal) => {
         if (!newVal) {
           state.specialTrainCategories = null;
         }
@@ -645,7 +646,7 @@
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,
         isDNC: computed(() => store.getters.isDNC),
-        isECD: computed(() => store.getters.isECD),
+        isECD,
         v$,
         submitted,
         getUserPostFIO: computed(() => store.getters.getUserPostFIO),
@@ -653,7 +654,7 @@
         handleSubmit,
         dispatchOrder: dispatchOrderObject.dispatchOrder,
         getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect(props.orderType)),
-        getOrderDraftsOfGivenType: computed(() => store.getters.getOrderDraftsOfGivenType(props.orderType)),
+        getOrderDraftsOfGivenType: computed(() => [{ _id: null, displayTitle: '-' }, ...store.getters.getOrderDraftsOfGivenType(props.orderType)]),
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
@@ -675,6 +676,7 @@
         changeOrderNumber,
         handleSaveOrderDraft: orderDraftObject.handleSaveOrderDraft,
         handleClearOrderAddressesLists,
+        currentOrderDraft: orderDraftObject.currentOrderDraft,
       };
     },
   };

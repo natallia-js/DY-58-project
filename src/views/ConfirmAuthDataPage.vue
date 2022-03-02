@@ -69,8 +69,7 @@
 
 <script>
   import { computed, onMounted, reactive, watch } from 'vue';
-  import router from '@/router';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import { useStore } from 'vuex';
   import { APP_CREDENTIALS_TRANSLATIONS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -92,6 +91,7 @@
     setup() {
       const store = useStore();
       const route = useRoute();
+      const router = useRouter();
       const { showErrMessage } = showMessage();
 
       const state = reactive({

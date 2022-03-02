@@ -105,68 +105,52 @@
         orderText: '',
       });
 
-      const clearState = () => {
-        state.orderTextSource = '';
-        state.orderPattern = null;
-        state.orderPatternText = null;
-        state.orderTitle = '';
-        state.orderText = '';
-      };
-
-      watch(() => props.value, (newVal) => {console.log('new order text',newVal)
+      watch(() => props.value, (newVal) => {
+        console.log('order text', newVal && newVal.orderText ? newVal.orderText[2] : null, state.orderPatternText ? state.orderPatternText[2].value : null)
         if (!newVal) {
           return;
         }
-        let changed = false;
-        if (state.orderTextSource !== newVal.orderTextSource) {
-          state.orderTextSource = newVal.orderTextSource || '';
-          changed = true;
+        let changedOrderTextSource = false;
+        let tmp = newVal.orderTextSource || '';
+        if (state.orderTextSource !== tmp) {
+          state.orderTextSource = tmp;
+          changedOrderTextSource = true;
         }
-        let tmp;
         switch (state.orderTextSource) {
           case ORDER_TEXT_SOURCE.pattern:
             tmp = newVal.patternId || null;
             if (state.orderPattern && !tmp) {
               state.orderPattern = tmp;
-              changed = true;
             } else if ((!state.orderPattern && tmp) ||
               (state.orderPattern && tmp && Object.keys(state.orderPattern)[0] !== tmp)) {
               state.orderPattern = { [tmp]: true };
-              changed = true;
             }
             tmp = newVal.orderText || null;
             if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
               state.orderPatternText = tmp;
-              changed = true;
             }
             break;
           case ORDER_TEXT_SOURCE.nopattern:
             tmp = newVal.orderTitle || '';
             if (state.orderTitle !== tmp) {
               state.orderTitle = tmp;
-              changed = true;
             }
             tmp = newVal.orderText && newVal.orderText[0] ? newVal.orderText[0].value : '';
             if (state.orderText !== tmp) {
               state.orderText = tmp;
-              changed = true;
             }
             break;
           default:
-            if (changed) {
-              clearState();
+            if (changedOrderTextSource) {
+              state.orderTextSource = '';
+              state.orderPattern = null;
+              state.orderPatternText = null;
+              state.orderTitle = '';
+              state.orderText = '';
             }
             break;
         }
-        if (changed) {//console.log('changed', state.orderTextSource, getSelectedOrderPattern.value, state.orderPatternText)
-          /*emit('input', {
-            orderTextSource: state.orderTextSource,
-            patternId: getSelectedOrderPattern.value._id,
-            orderTitle: getSelectedOrderPattern.value.title,
-            orderText: state.orderPatternText,
-          });*/
-        }
-      }, { immediate: true });
+      }/*, { immediate: true }*/); // call on page load
 
       // список шаблонов распоряжений для отображения
       const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
@@ -300,7 +284,7 @@
       };
 
       //
-      const handleChangeOrderPatternElementValue = (event) => {
+      const handleChangeOrderPatternElementValue = (event) => {console.log('handleChangeOrderPatternElementValue')
         const orderPatternElementIndex = state.orderPatternText.findIndex((el) => el._id === event.elementId);
         if (orderPatternElementIndex < 0) {
           return;

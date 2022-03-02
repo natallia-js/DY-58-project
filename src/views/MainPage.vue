@@ -129,8 +129,8 @@
 <script>
   import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
+  import { useRouter } from 'vue-router';
   import { useConfirm } from 'primevue/useconfirm';
-  import router from '@/router';
   import IncomingNotificationsDataTable from '@/components/IncomingNotificationsDataTable';
   import OrdersInWorkDataTable from '@/components/OrdersInWorkDataTable';
   import OrdersInWorkTree from '@/components/OrdersInWorkTree';
@@ -161,6 +161,7 @@
 
     setup() {
       const store = useStore();
+      const router = useRouter();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
 

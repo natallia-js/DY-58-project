@@ -62,7 +62,7 @@
   import { useStore } from 'vuex';
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
-  import router from '@/router';
+  import { useRouter } from 'vue-router';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import { authUser } from '@/serverRequests/auth.requests';
   import showMessage from '@/hooks/showMessage.hook';
@@ -73,6 +73,7 @@
 
     setup() {
       const store = useStore();
+      const router = useRouter();
       const { showErrMessage } = showMessage();
 
       const state = reactive({

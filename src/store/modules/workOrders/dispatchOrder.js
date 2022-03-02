@@ -6,6 +6,7 @@ import {
   SET_DISPATCH_ORDER_RESULT,
   ADD_ORDER,
   SET_LAST_ORDERS_NUMBER,
+  DEL_ORDER_DRAFT,
 } from '@/store/mutation-types';
 import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -41,9 +42,10 @@ import { getWorkOrderObject } from './getWorkOrderObject';
       state.dispatchOrdersBeingProcessed -= 1;
     },
 
-    [SET_DISPATCH_ORDER_RESULT] (state, { error, orderType, message }) {
+    [SET_DISPATCH_ORDER_RESULT] (state, { error, orderId, orderType, message }) {
       state.dispatchOrderResult = {
         error,
+        orderId,
         orderType,
         message,
       };
@@ -75,6 +77,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
         showOnGID,
         specialTrainCategories,
         idOfTheOrderToCancel = null,
+        draftId = null,
       } = params;
 
       if (!context.getters.canUserDispatchOrders) {
@@ -136,15 +139,33 @@ import { getWorkOrderObject } from './getWorkOrderObject';
             showOnGID,
             specialTrainCategories,
             idOfTheOrderToCancel,
+            draftId,
           }
         );
-        context.commit(SET_DISPATCH_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(SET_DISPATCH_ORDER_RESULT, {
+          error: false,
+          orderId: responseData.order._id,
+          orderType: responseData.order.type,
+          message: responseData.message,
+        });
         context.commit(ADD_ORDER, responseData.order);
-        context.commit(SET_LAST_ORDERS_NUMBER, { ordersType: type, number, createDateTime });
+        context.commit(SET_LAST_ORDERS_NUMBER, {
+          ordersType: responseData.order.type,
+          number: +responseData.order.number,
+          createDateTime: new Date(responseData.order.createDateTime),
+        });
+        if (responseData.draftId) {
+          context.commit(DEL_ORDER_DRAFT, responseData.draftId);
+        }
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения распоряжения на сервере');
-        context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_DISPATCH_ORDER_RESULT, {
+          error: true,
+          orderId: null,
+          orderType: type,
+          message: errMessage,
+        });
 
       } finally {
         context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER);
