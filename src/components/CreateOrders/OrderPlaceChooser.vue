@@ -116,7 +116,9 @@
             }
             break;
         }
-      }/*, { immediate: true }*/); // call on page load
+      // call on page load (здесь обязательно, т.к. после перезагрузки страницы не будет отображено
+      // место действия распоряжения, указанное в черновике)
+      }, { immediate: true });
 
       const handleFocusStationDropdown = () => {
         state.orderPlaceEnterMode = ORDER_PLACE_VALUES.station;

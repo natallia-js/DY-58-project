@@ -1,7 +1,14 @@
 <template>
   <div class="p-m-2">
-    <h2 class="p-text-center p-m-2">Журнал приказов и запрещений ЭЦД</h2>
-    <!--<h3 class="p-text-center p-m-2">c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}</h3>-->
+    <h2 class="p-text-center p-m-2">
+      Оперативный журнал ЭЦД
+    </h2>
+    <h3 class="p-text-center p-m-2">
+      Рабочий полигон {{ getUserWorkPoligonName }}
+    </h3>
+    <h3 v-if="startDisplayDate" class="p-text-center p-m-2">
+      период c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}
+    </h3>
     <DataTable
       :value="data"
       dataKey="id"
@@ -50,22 +57,22 @@
 <script>
   import { computed, onMounted, ref } from 'vue';
   import { useStore } from 'vuex';
-  //import { useRoute } from 'vue-router';
   import { getECDOrdersFromServer } from '@/serverRequests/orders.requests';
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
-  //import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
+  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
   export default {
     name: 'dy58-print-ecd-journal-preview-page',
 
     setup() {
       const store = useStore();
-      //const route = useRoute();
 
       const data = ref([]);
       const errMessage = ref(null);
       const searchInProgress = ref(false);
+      const startDisplayDate = ref(null);
+      const endDisplayDate = ref(null);
 
       onMounted(() => {
         // Не хотим отображения главного меню и футера
@@ -76,6 +83,10 @@
             return;
           }
           const params = JSON.parse(event.detail);
+
+          startDisplayDate.value = params.datetimeStart && params.datetimeStart !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeStart), false) : null;
+          endDisplayDate.value = params.datetimeEnd && params.datetimeEnd !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeEnd), false) : null;
+
           if (params.selectedRecords && params.selectedRecords.length) {
             // будем отображать выбранные пользователем записи, предварительно их отсортировав по
             // номеру, под которым они отображались в исходной таблице и присвоив им новую нумерацию
@@ -130,8 +141,9 @@
         searchInProgress,
         getECDJournalTblColumnsTitles: computed(() => store.getters.getECDJournalTblColumnsTitles),
         getECDJournalTblColumns: computed(() => store.getters.getECDJournalTblColumns),
-        startDisplayDate: null,//getLocaleDateTimeString(new Date(JSON.parse(route.params.datetimeStart)), false),
-        endDisplayDate: null,//JSON.parse(route.params.datetimeEnd) ? getLocaleDateTimeString(new Date(JSON.parse(route.params.datetimeEnd)), false) : null,
+        startDisplayDate,
+        endDisplayDate,
+        getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
       };
     },
   }

@@ -237,7 +237,7 @@
             id="orderText"
             :orderType="orderType"
             :value="v$.orderText.$model"
-            @input="v$.orderText.$model = $event"
+            @input="setOrderText($event)"
             :parentOrderText="relatedOrderObject ? relatedOrderObject.orderText : null"
           />
           <small
@@ -415,6 +415,24 @@
         { name: !isECD.value ? 'Отобразить на ГИД': 'Определить место действия', value: true },
       ]);
 
+      const defaultOrderText = {
+        orderTextSource: null,
+        patternId: null,
+        orderTitle: null,
+        orderText: null,
+      };
+
+      const defaultOrderPlace = {
+        place: null,
+        value: null,
+      };
+
+      const defaultTimeSpan = {
+        start: null,
+        end: null,
+        tillCancellation: null,
+      };
+
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
         number: store.getters.getNextOrdersNumber(props.orderType),
@@ -423,27 +441,15 @@
         updateCreateDateTimeRegularly: true,
         prevRelatedOrder: null,
         cancelOrderDateTime: null,
-        orderPlace: {
-          place: null,
-          value: null,
-        },
-        timeSpan: {
-          start: null,
-          end: null,
-          tillCancellation: null,
-        },
+        orderPlace: { ...defaultOrderPlace },
+        timeSpan: { ...defaultTimeSpan },
         defineOrderTimeSpan: [
           ORDER_PATTERN_TYPES.ECD_ORDER,
           ORDER_PATTERN_TYPES.ECD_PROHIBITION
         ].includes(props.orderType) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
         specialTrainCategories: null,
-        orderText: {
-          orderTextSource: null,
-          patternId: null,
-          orderTitle: null,
-          orderText: null,
-        },
+        orderText: { ...defaultOrderText },
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
         ecdSectorsToSendOrder: [],
@@ -495,6 +501,11 @@
         confirm,
         showSuccessMessage,
         showErrMessage,
+        defineOrderTimeSpanOptions,
+        showOnGIDOptions,
+        defaultOrderPlace,
+        defaultOrderText,
+        defaultTimeSpan,
       });
 
       const dispatchOrderObject = useDispatchOrder({
@@ -579,6 +590,15 @@
         }
         state.specialTrainCategories = store.getters.getOrderPatternSpecialTrainCategories(state.orderText.patternId)
       });
+
+      /**
+       * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
+       */
+      const setOrderText = (event) => {
+        state.orderText = event ?
+          { ...event, orderText: event.orderText ? event.orderText.map((el) => ({ ... el})) : null } :
+          { ...defaultOrderText };
+      };
 
       /**
        * Для выбранного шаблона распоряжения возвращает строку с особыми категориями поезда,
@@ -677,6 +697,7 @@
         handleSaveOrderDraft: orderDraftObject.handleSaveOrderDraft,
         handleClearOrderAddressesLists,
         currentOrderDraft: orderDraftObject.currentOrderDraft,
+        setOrderText,
       };
     },
   };

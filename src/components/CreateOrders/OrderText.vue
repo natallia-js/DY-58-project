@@ -99,14 +99,13 @@
         orderTextSource: '',
         // для шаблонного распоряжения
         orderPattern: null,
-        orderPatternText: null,
+        orderPatternText: null, // массив
         // для распоряжения без шаблона
         orderTitle: '',
         orderText: '',
       });
 
-      watch(() => props.value, (newVal) => {
-        console.log('order text', newVal && newVal.orderText ? newVal.orderText[2] : null, state.orderPatternText ? state.orderPatternText[2].value : null)
+      watch(() => props.value, (newVal) => {console.log('order text watch props value',newVal)
         if (!newVal) {
           return;
         }
@@ -125,9 +124,9 @@
               (state.orderPattern && tmp && Object.keys(state.orderPattern)[0] !== tmp)) {
               state.orderPattern = { [tmp]: true };
             }
-            tmp = newVal.orderText || null;
+            tmp = newVal.orderText && newVal.orderText.length ? newVal.orderText.map((el) => ({ ...el })) : null;
             if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
-              state.orderPatternText = tmp;
+              state.orderPatternText = tmp; console.log('set text', tmp)
             }
             break;
           case ORDER_TEXT_SOURCE.nopattern:
@@ -150,7 +149,7 @@
             }
             break;
         }
-      }/*, { immediate: true }*/); // call on page load
+      });
 
       // список шаблонов распоряжений для отображения
       const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
@@ -204,7 +203,7 @@
             orderTextSource: state.orderTextSource,
             patternId: getSelectedOrderPattern.value._id,
             orderTitle: getSelectedOrderPattern.value.title,
-            orderText: state.orderPatternText,//getSelectedOrderPattern.value.elements,
+            orderText: state.orderPatternText,
           });
         }
       });
@@ -240,15 +239,13 @@
 
       //
       const handleChooseOrderPattern = () => {
-        state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => {
-          return { ...element };
-        });
+        state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => ({ ...element }));
         fillChildOrderTextFieldsWithParentOrderTextFields();
         emit('input', {
           orderTextSource: state.orderTextSource,
           patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
-          orderText: state.orderPatternText,//getSelectedOrderPattern.value.elements,
+          orderText: state.orderPatternText,
         });
       };
 
@@ -284,18 +281,20 @@
       };
 
       //
-      const handleChangeOrderPatternElementValue = (event) => {console.log('handleChangeOrderPatternElementValue')
+      const handleChangeOrderPatternElementValue = (event) => {
         const orderPatternElementIndex = state.orderPatternText.findIndex((el) => el._id === event.elementId);
         if (orderPatternElementIndex < 0) {
           return;
         }
-        state.orderPatternText[orderPatternElementIndex].value = event.value;
-        emit('input', {
-          orderTextSource: state.orderTextSource,
-          patternId: getSelectedOrderPattern.value._id,
-          orderTitle: getSelectedOrderPattern.value.title,
-          orderText: state.orderPatternText,
-        });
+        if (state.orderPatternText[orderPatternElementIndex].value !== event.value) {
+          state.orderPatternText[orderPatternElementIndex].value = event.value;
+          emit('input', {
+            orderTextSource: state.orderTextSource,
+            patternId: getSelectedOrderPattern.value._id,
+            orderTitle: getSelectedOrderPattern.value.title,
+            orderText: state.orderPatternText,
+          });
+        }
       };
 
       //

@@ -18,6 +18,11 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     confirm,
     showSuccessMessage,
     showErrMessage,
+    defineOrderTimeSpanOptions,
+    showOnGIDOptions,
+    defaultOrderPlace,
+    defaultOrderText,
+    defaultTimeSpan,
   } = inputVals;
 
   // Объект текущего черновика распоряжения (объект либо null)
@@ -54,10 +59,16 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     state.resetValueOnWatchChanges = false;
 
     // порядок присвоения важен!
-    state.showOnGID = currentOrderDraft.value.showOnGID;
-    state.orderPlace = currentOrderDraft.value.place;
-console.log('currentOrderDraft.value.orderText',currentOrderDraft.value.orderText)
-    state.orderText = currentOrderDraft.value.orderText;
+    state.showOnGID = currentOrderDraft.value.showOnGID ?
+      { ...currentOrderDraft.value.showOnGID } : showOnGIDOptions[0];
+    state.orderPlace = currentOrderDraft.value.place ?
+      { ...currentOrderDraft.value.place } : { ...defaultOrderPlace };
+    state.orderText = currentOrderDraft.value.orderText ?
+      {
+        ...currentOrderDraft.value.orderText,
+        orderText: currentOrderDraft.value.orderText.orderText ?
+          currentOrderDraft.value.orderText.orderText.map((el) => ({ ... el})) : null,
+      } : { ...defaultOrderText };
 
     // далее установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
     // таблицы персонала работают с глобальным store (информация о персонале может быть недоступна в момент
@@ -66,8 +77,10 @@ console.log('currentOrderDraft.value.orderText',currentOrderDraft.value.orderTex
 
     // порядок присвоения важен! (после выполнения данного куска кода state.resetValueOnWatchChanges
     // примет значение true)
-    state.defineOrderTimeSpan = currentOrderDraft.value.defineOrderTimeSpan;
-    state.timeSpan = currentOrderDraft.value.timeSpan;
+    state.defineOrderTimeSpan = currentOrderDraft.value.defineOrderTimeSpan ?
+      { ...currentOrderDraft.value.defineOrderTimeSpan } : defineOrderTimeSpanOptions[0];
+    state.timeSpan = currentOrderDraft.value.timeSpan ?
+      { ...currentOrderDraft.value.timeSpan } : { ...defaultTimeSpan };
   };
 
   watch(() => props.orderDraftId, () => {

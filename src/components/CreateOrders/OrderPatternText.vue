@@ -90,13 +90,13 @@
       },
     },
 
-    mounted() {console.log('mounted order pattern text',this.value)
+    mounted() { console.log('mounted',this.value)
       this.analyzeNewOrderPattern(this.value);
     },
 
     watch: {
       value: {
-        handler(newVal) {console.log('watch order pattern text value', newVal)
+        handler(newVal) {console.log(newVal)
           this.analyzeNewOrderPattern(newVal);
         },
       },
