@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
+import { APP_CODE_NAME } from '@/constants/appCredentials';
 import { getRequestAuthorizationHeader } from './common';
 
 export const authUser = async ({ login, password }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.login,
-    { login, password },
+    { login, password, appplicationAbbreviation: APP_CODE_NAME },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;
