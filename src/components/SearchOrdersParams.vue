@@ -18,7 +18,7 @@
               v-if="(v$.timeSpan.$invalid && submitted) || v$.timeSpan.$pending.$response"
               class="p-error"
             >
-              Пожалуйста, корректно определите временной интервал поиска информации
+              Пожалуйста, корректно определите временной интервал поиска информации (не более трех месяцев)
             </small>
           </div>
           <div class="p-field p-col-6 p-d-flex p-flex-column">

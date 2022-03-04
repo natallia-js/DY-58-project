@@ -129,11 +129,6 @@ import { getWorkOrderObject } from './getWorkOrderObject';
               };
             }),
             workPoligonTitle: context.getters.getUserWorkPoligonName,
-            creator: {
-              id: context.getters.getUserId,
-              post: context.getters.getUserPost,
-              fio: context.getters.getUserFIO,
-            },
             createdOnBehalfOf,
             orderChainId,
             showOnGID,
