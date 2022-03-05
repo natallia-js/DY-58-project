@@ -46,9 +46,7 @@
               style="text-align:center"
               :class="[{
                 'dy58-order-dispatched-on-this-global-poligon':
-                  getUserWorkPoligon && slotProps.data.senderWorkPoligon &&
-                  getUserWorkPoligon.type === slotProps.data.senderWorkPoligon.type &&
-                  String(getUserWorkPoligon.code) === String(slotProps.data.senderWorkPoligon.id)
+                  isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon)
               }]"
             >
               <span v-if="col.field === getWorkMessTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
@@ -237,11 +235,14 @@
               <br />
             </div>
 
+            <!-- Блок с информацией о подтверждении распоряжения "Иными" адресатами-->
             <div v-if="getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length">
               <div>
                 Не подтверждено иными адресатами: {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}
               </div>
+              <!-- Подтвердить за "Иных" адресатов можно лишь рабочего полигона-издателя распоряжения -->
               <Button
+                v-if="isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon, true)"
                 label="Подтвердить"
                 class="p-button-primary p-button-text"
                 @click="confirmOrderForOtherReceivers($event, slotProps.data.id)"
@@ -460,6 +461,22 @@
         return otherReceivers ? otherReceivers.filter((el) => !el.confirmDateTime) : [];
       };
 
+      const currentUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
+
+      /**
+       * Возвращает true, если распоряжение были издано на текущем рабочем полигоне, false - в противном случае.
+       */
+      const isOrderDispatchedOnCurrentWorkPoligon = (orderSenderWorkPoligon, considerWorkPlace = false) => {
+        return currentUserWorkPoligon.value && orderSenderWorkPoligon &&
+          currentUserWorkPoligon.value.type === orderSenderWorkPoligon.type &&
+          String(currentUserWorkPoligon.value.code) === String(orderSenderWorkPoligon.id) &&
+          (
+            !considerWorkPlace ||
+            (!currentUserWorkPoligon.value.subCode && !orderSenderWorkPoligon.workPlaceId) ||
+            (String(currentUserWorkPoligon.value.subCode) === String(!orderSenderWorkPoligon.workPlaceId))
+          )
+      };
+
       /**
        * Для заданного списка адресатов распоряжения на станции возвращает массив таких адресатов,
        * для которых не было подтверждения получения данного распоряжения.
@@ -528,7 +545,6 @@
       return {
         state,
         isECD: computed(() => store.getters.isECD),
-        getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         getWorkingOrders: computed(() => store.getters.getWorkingOrders),
         getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
@@ -557,6 +573,7 @@
         getOrderOtherUnconfirmedWorkPoligons,
         getOrderUnconfirmedStationWorkPoligons,
         deleteOrderStationWorkPoligon,
+        isOrderDispatchedOnCurrentWorkPoligon,
       };
     },
   }
