@@ -12,7 +12,7 @@
     @close="hidePreviewNewDSPCreateTakeDutyOrderDlg"
   />
 
-  <div class="p-grid" style="margin:0">
+  <div class="p-grid" style="margin:0;">
     <div class="p-col-3 dy58-left-menu-panel">
       <!-- Данная кнопка - ТОЛЬКО ДЛЯ ДСП и ТОЛЬКО ЕСЛИ ОН НА ДЕЖУРСТВЕ. Проверяем:
       // если в списке рабочих распоряжений отсутствует распоряжение о принятии держурства,
@@ -77,7 +77,7 @@
         <AppSettings />
       </div>
     </div>
-    <div class="p-col-9" style="flex:1;padding:0">
+    <div class="p-col-9" style="flex:1;padding:0;">
       <div class="p-d-flex p-flex-column">
         <div>
           <!-- Таблица входящих уведомлений -->

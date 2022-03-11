@@ -83,7 +83,8 @@ export const orderPatternsElementsRefs = {
      * Подгружает информацию о возможных смысловых значениях элементов шаблонов распоряжений.
      */
     async loadOrderPatternsElementsRefs(context) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserGetOrderPatterns) {
+        context.commit(SET_LOADING_REFS_RESULT, { error: true, message: 'У вас нат права получать информацию о смысловых значениях элементов шаблонов распоряжений' });
         return;
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, true);

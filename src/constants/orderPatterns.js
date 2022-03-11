@@ -5,6 +5,7 @@ export const ORDER_PATTERN_TYPES = Object.freeze({
   ECD_ORDER: 'приказ',
   ECD_PROHIBITION: 'запрещение',
   ECD_NOTIFICATION: 'уведомление/отмена запрещения',
+  CONTROL: 'контроль',
 });
 
 export const SPECIAL_ORDER_SUBPATTERN_TYPES = Object.freeze({
@@ -87,3 +88,5 @@ export const SPECIAL_TRAIN_CATEGORIES = [
 export const SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN = 'ДСП_ПД';
 // наименование распоряжения о принятии дежурства ДСП
 export const SPECIAL_ORDER_DSP_TAKE_DUTY_TITLE = 'О приеме/сдаче дежурства';
+// наименование записи ревизора в Журналах
+export const SPECIAL_REVISOR_RECORD_TITLE = 'О проверке';

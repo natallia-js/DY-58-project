@@ -5,6 +5,7 @@ export const APP_CREDENTIALS = Object.freeze({
   DSP_FULL: 'DSP_FULL',
   DSP_Operator: 'DSP_Operator',
   ECD_FULL: 'ECD_FULL',
+  REVISOR: 'REVISOR',
 });
 
 export const APP_CREDENTIALS_TRANSLATIONS = Object.freeze({
@@ -12,6 +13,7 @@ export const APP_CREDENTIALS_TRANSLATIONS = Object.freeze({
   [APP_CREDENTIALS.DSP_FULL]: 'ДСП',
   [APP_CREDENTIALS.DSP_Operator]: 'Оператор ДСП',
   [APP_CREDENTIALS.ECD_FULL]: 'ЭЦД',
+  [APP_CREDENTIALS.REVISOR]: 'Ревизор',
 });
 
 export const USER_CREDENTIALS_LOCAL_STORAGE_NAME = 'dy58-user';

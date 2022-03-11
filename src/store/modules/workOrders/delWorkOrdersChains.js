@@ -115,6 +115,7 @@ export const delWorkOrdersChains = {
      */
     async delConfirmedOrdersFromChain(context, chainId) {
       if (!context.getters.canUserDelConfirmedOrdersChains) {
+        context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: 'У вас нет права удалять распоряжения / цепочки распоряжений' });
         return;
       }
       context.commit(CLEAR_DELETE_ORDERS_CHAIN_RESULT, chainId);

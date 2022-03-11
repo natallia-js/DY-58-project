@@ -120,7 +120,8 @@ export const lastOrdersParams = {
      * полигона управления.
      */
     async loadLastOrdersParams(context) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserGetLastOrdersParams) {
+        context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: 'У вас не права получать параметры последних изданных распоряжений' });
         return;
       }
       const currPoligonData = context.getters.getUserWorkPoligonData;

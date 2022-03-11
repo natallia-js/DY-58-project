@@ -81,7 +81,7 @@ export const mainMenuItems = {
             icon: 'pi pi-spin pi-spinner',
           };
         }
-        if (item.key === MainMenuItemsKeys.orderPatterns && getters.getErrorLoadingPatterns) {
+        if (item.key === MainMenuItemsKeys.orderPatterns && !getters.orderPatternsLoadedSuccessfully) {
           return {
             ...item,
             // На пункте меню "Шаблоны распоряжений" отображаем факт ошибки загрузки информации о шаблонах распоряжений
@@ -112,12 +112,11 @@ export const mainMenuItems = {
     },
 
     [SET_ACTIVE_MAIN_MENU_ITEM] (state, activeMainMenuItemKey) {
-      state.mainMenuItems.forEach((item) => {
+      state.mainMenuItems = state.mainMenuItems.map((item) => {
         if (item.key === activeMainMenuItemKey) {
-          item.class = 'dy58-active-main-menu-item';
-        } else {
-          item.class = '';
+          return { ...item, class: 'dy58-active-main-menu-item' };
         }
+        return { ...item, class: '' };
       });
     },
   },

@@ -139,9 +139,11 @@ export const reportOnOrdersDelivery = {
      * полигон управления, сообщает о том, что они доставлены.
      */
     async reportOnOrdersDelivery(context, orders) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserReportOnOrdersDelivery) {
+        context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: 'У вас нет права уведомлять о доставке распоряжений на рабочий полигон' });
         return;
       }
+
       // Сюда поместим идентификаторы тех распоряжений, о доставке которых необходимо сообщить серверу.
       const newDeliveredOrderIds = !orders ? [] :
         orders.filter((order) => !order.deliverDateTime).map((order) => order._id);

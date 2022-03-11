@@ -76,6 +76,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
     .map((order, index) => ({
       // dataKey в таблице
       id: order._id,
+      type: order.type,
       seqNum: getOrderSeqNumberFunction(index),
       // кому адресовано распоряжение (соответствующие строки "Кому" и "Копия" формируем на
       // основании сведений, содержащихся в "Иных" адресатах - только для документов, изданных ЭЦД!

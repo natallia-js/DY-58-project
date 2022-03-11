@@ -66,7 +66,7 @@
             </span>
             <!-- столбец статуса -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
-              <div v-if="isDSP_or_DSPoperator">
+              <div v-if="isDSP_or_DSPoperator || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
                   <span class="p-mr-2">Не доставлено:</span>
                   <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}/${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
@@ -76,7 +76,7 @@
                   <Badge class="dy58-not-confirmed-order" :value="`${slotProps.data[col.field].deliveredButNotConfirmed}/${slotProps.data[col.field].deliveredButNotConfirmedOnStation}`"></Badge>
                 </p>
               </div>
-              <div v-else>
+              <div v-else-if="isDNC || isECD || (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.ECD_SECTOR].includes(getUserWorkPoligon.type))">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0">
                   <span class="p-mr-2">Не доставлено:</span>
                   <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDeliveredNotConfirmed"></Badge>
@@ -240,9 +240,10 @@
               <div>
                 Не подтверждено иными адресатами: {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}
               </div>
-              <!-- Подтвердить за "Иных" адресатов можно лишь рабочего полигона-издателя распоряжения -->
+              <!-- Подтвердить за "Иных" адресатов можно лишь с рабочего полигона-издателя распоряжения,
+              сделать это могут лишь те лица, которые имеют право на издание распоряжений -->
               <Button
-                v-if="isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon, true)"
+                v-if="isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon, true) && canUserConfirmOrderForOthers"
                 label="Подтвердить"
                 class="p-button-primary p-button-text"
                 @click="confirmOrderForOtherReceivers($event, slotProps.data.id)"
@@ -359,6 +360,7 @@
     SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
     CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
@@ -544,8 +546,12 @@
 
       return {
         state,
+        isDNC: computed(() => store.getters.isDNC),
         isECD: computed(() => store.getters.isECD),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isRevisor: computed(() => store.getters.isRevisor),
+        WORK_POLIGON_TYPES,
+        getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         getWorkingOrders: computed(() => store.getters.getWorkingOrders),
         getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
         getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
@@ -563,6 +569,7 @@
         getWorkMessTblColumnsExceptExpander,
         getExpanderColumnObject,
         createRelativeOrderContextMenuItems,
+        canUserConfirmOrderForOthers: computed(() => store.getters.canUserConfirmOrderForOthers),
         showOrderInfo,
         hideOrderInfo,
         deleteOrdersChain,

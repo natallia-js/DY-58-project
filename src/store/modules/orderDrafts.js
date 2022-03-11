@@ -226,8 +226,8 @@ export const orderDrafts = {
      * черновики с других рабочих мест этой же станции).
      */
     async loadOrderDrafts(context) {
-      if (!context.getters.canUserWorkWithSystem) {
-        context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: 'Не могу загрузить черновики распоряжений: у вас нет прав на работу с системой' });
+      if (!context.getters.canUserGetOrderDrafts) {
+        context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: 'У вас нет прав на просмотр черновиков распоряжений' });
         return;
       }
       context.commit(CLEAR_LOADING_ORDER_DRAFTS_RESULT);
@@ -265,7 +265,7 @@ export const orderDrafts = {
         showOnGID,
       } = params;
 
-      if (!context.getters.canUserDispatchOrders) {
+      if (!context.getters.canUserWorkWithOrderDrafts) {
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, {
           error: true,
           orderType: type,
@@ -321,7 +321,7 @@ export const orderDrafts = {
         showOnGID,
       } = params;
 
-      if (!context.getters.canUserDispatchOrders) {
+      if (!context.getters.canUserWorkWithOrderDrafts) {
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, {
           error: true,
           orderType: type,
@@ -361,7 +361,7 @@ export const orderDrafts = {
      * Делает запрос на сервер с целью удаления существующего черновика распоряжения.
      */
      async delOrderDraft(context, { id, type }) {
-      if (!context.getters.canUserDispatchOrders) {
+      if (!context.getters.canUserWorkWithOrderDrafts) {
         context.commit(SET_DEL_ORDER_DRAFT_RESULT, {
           error: true,
           orderType: type,

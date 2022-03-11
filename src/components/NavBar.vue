@@ -1,6 +1,5 @@
 <template>
   <ShowUserDataDlg :showDlg="showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
-
   <Menubar :model="getMainMenuItems">
     <template #end>
       <Button
@@ -58,5 +57,13 @@
   /* Нужно для того, чтобы выпадающее меню о выходе из системы было поверх всего, а не под таблицей */
   .p-menubar :deep(.p-submenu-list) {
     z-index: 999999;
+  }
+
+  :deep(.p-menubar-root-list) {
+    align-items: stretch !important;
+  }
+
+  :deep(.p-menuitem-link) {
+    height: 100% !important;
   }
 </style>

@@ -1,21 +1,32 @@
 <template>
-  <div>
+  <div v-if="isDSP_or_DSPoperator || isDNC || isECD || isRevisor">
     <search-orders-params
+      :displayVerifyFunctions="isRevisor"
       @input="searchParams = $event"
       @print="printParams = $event"
+      @createCheckRecord="checkDocs = true"
     />
-    <div v-if="isECD" class="p-ml-1 p-mr-1">
+    <div
+      v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
+      class="p-ml-1 p-mr-1"
+    >
       <ECDJournal
         :searchParams="searchParams"
         :printParams="printParams"
+        :checkDocs="checkDocs"
+        @finishedCreatingCheckRecord="checkDocs = false"
       />
     </div>
-    <div v-else-if="isDSP_or_DSPoperator || isDNC" class="p-ml-1 p-mr-1">
+    <div
+      v-else-if="isDSP_or_DSPoperator || isDNC ||
+        (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
+      class="p-ml-1 p-mr-1"
+    >
       <DNCandDSPJournal/>
     </div>
-    <div v-else>
-       Для Вас не предусмотрен функционал работы с Журналом распоряжений
-    </div>
+  </div>
+  <div v-else class="dy58-user-action-forbidden-block">
+    Для вас не предусмотрен функционал работы с Журналом распоряжений
   </div>
 </template>
 
@@ -28,6 +39,7 @@
   import ECDJournal from '@/components/ECDJournal';
   import DNCandDSPJournal from '@/components/DNCandDSPJournal';
   import SearchOrdersParams from '@/components/SearchOrdersParams';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-curr-journal-page',
@@ -45,13 +57,18 @@
 
       const searchParams = ref(null);
       const printParams = ref(null);
+      const checkDocs = ref(false);
 
       return {
+        WORK_POLIGON_TYPES,
         isECD: computed(() => store.getters.isECD),
         isDNC: computed(() => store.getters.isDNC),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isRevisor: computed(() => store.getters.isRevisor),
+        getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         searchParams,
         printParams,
+        checkDocs,
       };
     },
   }

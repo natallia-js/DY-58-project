@@ -86,6 +86,7 @@ function checkUserAuthData(payload) {
   let workPoligonExists = false; // будет true, если хотя бы для одного из типов полномочий существует хотя бы один рабочий полигон
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
+    // ---> ДСП
     if (cred === APP_CREDENTIALS.DSP_FULL) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
@@ -96,6 +97,7 @@ function checkUserAuthData(payload) {
           workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && !wp.subPoligonId),
         }];
       }
+    // ---> Оператор при ДСП
     } else if (cred === APP_CREDENTIALS.DSP_Operator) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
@@ -106,16 +108,21 @@ function checkUserAuthData(payload) {
           workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId),
         }];
       }
+    // ---> ДНЦ
     } else if (cred === APP_CREDENTIALS.DNC_FULL) {
       // filter, а не find, несмотря на то что все равно будет найден максимум 1 элемент (нужен пустой
       // массив, если ничего не будет найдено)
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.DNC_SECTOR);
+    // ---> ЭЦД
     } else if (cred === APP_CREDENTIALS.ECD_FULL) {
       // filter, а не find, несмотря на то что все равно будет найден максимум 1 элемент (нужен пустой
       // массив, если ничего не будет найдено)
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.ECD_SECTOR);
+    // ---> Ревизор
+    } else if (cred === APP_CREDENTIALS.REVISOR) {
+      obj.poligons = [...workPoligons];
     }
-    if (obj.poligons.length) {
+    if (obj.poligons && obj.poligons.length) {
       workPoligonExists = true;
     }
     userCredsWithPoligons.push(obj);
@@ -227,6 +234,9 @@ export const currUser = {
     },
     isECD(state) {
       return state.credential === APP_CREDENTIALS.ECD_FULL;
+    },
+    isRevisor(state) {
+      return state.credential === APP_CREDENTIALS.REVISOR;
     },
     getStartLogout(state) {
       return state.startLogout;

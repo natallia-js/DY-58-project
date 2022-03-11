@@ -87,7 +87,7 @@
         if (state.tillCancellation !== tmp) {
           state.tillCancellation = tmp;
         }
-      }/*, { immediate: true }*/); // call on page load
+      });
 
       watch(() => state.startDateTime, (value) => {
         if (value && isValidDateTime(value)) {

@@ -40,7 +40,7 @@ export const orderPatterns = {
   state: {
     patterns: [],
     loadingOrderPatterns: false,
-    loadingOrderPatternsResult: null,
+    loadingOrderPatternsResult: { error: false, message: null },
     modifyOrderCategoryTitleResult: null,
     modifyOrderCategoryTitleRecsBeingProcessed: 0,
     delOrderPatternResult: null,
@@ -60,8 +60,12 @@ export const orderPatterns = {
       return state.loadingOrderPatterns;
     },
 
+    orderPatternsLoadedSuccessfully(state) {
+      return !state.loadingOrderPatternsResult.error;
+    },
+
     getErrorLoadingPatterns(state) {
-      return state.loadingOrderPatternsResult && state.loadingOrderPatternsResult.error;
+      return state.loadingOrderPatternsResult.error ? state.loadingOrderPatternsResult.message : null;
     },
 
     getCurrentUserOrderCategories(state, getters) {
@@ -258,14 +262,11 @@ export const orderPatterns = {
     },
 
     [CLEAR_LOADING_ORDER_PATTERNS_RESULT] (state) {
-      state.loadingOrderPatternsResult = null;
+      state.loadingOrderPatternsResult = { error: false, message: null };
     },
 
     [SET_LOADING_ORDER_PATTERNS_RESULT] (state, { error, message }) {
-      state.loadingOrderPatternsResult = {
-        error,
-        message,
-      };
+      state.loadingOrderPatternsResult = { error, message };
     },
 
     [CLEAR_MODIFY_ORDER_CATEGORY_TITLE_RESULT] (state) {
@@ -273,11 +274,7 @@ export const orderPatterns = {
     },
 
     [SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT] (state, { error, message, newTitle }) {
-      state.modifyOrderCategoryTitleResult = {
-        error,
-        message,
-        newTitle,
-      };
+      state.modifyOrderCategoryTitleResult = { error, message, newTitle };
     },
 
     [ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED] (state) {
@@ -386,7 +383,8 @@ export const orderPatterns = {
      *
      */
     async loadOrderPatterns(context) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserGetOrderPatterns) {
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: 'У вас нет права просматривать шаблоны распоряжений' });
         return;
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, true);
@@ -419,7 +417,12 @@ export const orderPatterns = {
      *
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserWorkWithOrderPatterns) {
+        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
+          error: true,
+          message: 'У вас нет права редактировать наименования категорий распоряжений',
+          newTitle: null,
+        });
         return;
       }
       context.commit(ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
@@ -454,7 +457,8 @@ export const orderPatterns = {
      *
      */
     async delOrderPattern(context, orderPatternId) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserWorkWithOrderPatterns) {
+        context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: 'У вас нет права удалять шаблоны распоряжений' });
         return;
       }
       context.commit(ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -477,7 +481,12 @@ export const orderPatterns = {
      *
      */
     async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserWorkWithOrderPatterns) {
+        context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
+          error: true,
+          message: 'У вас нет права на редактирование шаблонов распоряжений',
+          orderPattern: null,
+        });
         return;
       }
       context.commit(ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -510,7 +519,8 @@ export const orderPatterns = {
      *
      */
     async createOrderPattern(context, props) {
-      if (!context.getters.canUserWorkWithSystem) {
+      if (!context.getters.canUserWorkWithOrderPatterns) {
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: 'У вас нет права на создание шаблонов распоряжений' });
         return;
       }
       const { service, type, category, title, specialTrainCategories, elements } = props;

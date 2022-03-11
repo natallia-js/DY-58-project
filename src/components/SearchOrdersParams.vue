@@ -52,8 +52,14 @@
             <Button
               icon="pi pi-print"
               label="Печать"
-              @click="handlePrint"
               class="p-mr-3"
+              @click="handlePrint"
+            />
+            <Button
+              v-if="displayVerifyFunctions === true"
+              icon="pi pi-check-square"
+              label="Создать запись о проверке"
+              @click="handleCheck"
             />
           </div>
         </form>
@@ -81,7 +87,14 @@
       FindOrdersTimeSpanChooser,
     },
 
-    emits: ['input', 'print'],
+    emits: ['input', 'print', 'createCheckRecord'],
+
+    props: {
+      displayVerifyFunctions: {
+        type: Boolean,
+        required: false,
+      },
+    },
 
     setup(_props, { emit }) {
       const state = reactive({
@@ -143,6 +156,10 @@
         }
       };
 
+      const handleCheck = () => {
+        emit('createCheckRecord');
+      };
+
       return {
         state,
         INCLUDE_DOCUMENTS_CRITERIA,
@@ -150,6 +167,7 @@
         submitted,
         handleSubmit,
         handlePrint,
+        handleCheck,
       };
     },
   }

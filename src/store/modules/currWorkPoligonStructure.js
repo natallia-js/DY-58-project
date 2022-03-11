@@ -426,9 +426,6 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера информацию о полигоне управления "Станция".
      */
     async loadStationData(context, { stationId }) {
-      if (!context.getters.canUserWorkWithSystem) {
-        return;
-      }
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
@@ -454,9 +451,6 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера информацию о полигоне управления "Участок ДНЦ".
      */
     async loadDNCSectorData(context, { sectorId }) {
-      if (!context.getters.canUserWorkWithSystem) {
-        return;
-      }
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
@@ -480,9 +474,6 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера информацию о полигоне управления "Участок ЭЦД".
      */
     async loadECDSectorData(context, { sectorId }) {
-      if (!context.getters.canUserWorkWithSystem) {
-        return;
-      }
       context.state.errorLoadingCurrWorkPoligonStructure = null;
       context.state.loadingCurrWorkPoligonStructure = true;
       try {
@@ -507,6 +498,9 @@ export const currWorkPoligonStructure = {
      * с сервера информации о данном полигоне управления.
      */
     async loadCurrWorkPoligonData(context) {
+      if (!context.getters.canUserWorkWithSystem) {
+        return;
+      }
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
         return;

@@ -53,7 +53,7 @@
       />
     </TabPanel>
   </TabView>
-  <div v-else class="dy58-user-cannot-create-order-block">
+  <div v-else class="dy58-user-action-forbidden-block">
     Вы не на дежурстве либо у вас нет прав на издание распоряжений
   </div>
 </template>

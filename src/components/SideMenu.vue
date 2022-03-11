@@ -35,3 +35,10 @@
     },
   };
 </script>
+
+
+<style lang="scss" scoped>
+  .p-panelmenu :deep(.p-panelmenu-header-link) {
+    cursor: default;
+  }
+</style>

@@ -80,11 +80,11 @@ import { getWorkOrderObject } from './getWorkOrderObject';
         draftId = null,
       } = params;
 
-      if (!context.getters.canUserDispatchOrders) {
+      if (!context.getters.canUserDispatchOrders && !context.getters.canUserDispatchControlRecords) {
         context.commit(SET_DISPATCH_ORDER_RESULT, {
           error: true,
           orderType: type,
-          message: 'У вас нет права на издание распоряжений',
+          message: 'У вас нет права на издание распоряжений / создание контрольных записей',
         });
         return;
       }

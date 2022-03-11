@@ -90,13 +90,13 @@
       },
     },
 
-    mounted() { console.log('mounted',this.value)
+    mounted() {
       this.analyzeNewOrderPattern(this.value);
     },
 
     watch: {
       value: {
-        handler(newVal) {console.log(newVal)
+        handler(newVal) {
           this.analyzeNewOrderPattern(newVal);
         },
       },

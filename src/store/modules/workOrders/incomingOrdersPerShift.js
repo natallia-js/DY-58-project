@@ -78,7 +78,8 @@ export const incomingOrdersPerShift = {
      * в которой фиксируются лишь получатели-станции и ДСП этих станций).
      */
     async loadIncomingOrdersPerShift(context) {
-      if (!context.getters.canUserWorkWithSystem || !context.getters.isUserOnDuty) {
+      if (!context.getters.canUserGetIncomingOrdersPerShift) {
+        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: 'У вас нет права получать количество входящий распоряжений за смену' });
         return;
       }
       context.commit(CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT);

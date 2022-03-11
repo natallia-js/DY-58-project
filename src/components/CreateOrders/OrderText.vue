@@ -105,7 +105,7 @@
         orderText: '',
       });
 
-      watch(() => props.value, (newVal) => {console.log('order text watch props value',newVal)
+      watch(() => props.value, (newVal) => {
         if (!newVal) {
           return;
         }
@@ -126,7 +126,7 @@
             }
             tmp = newVal.orderText && newVal.orderText.length ? newVal.orderText.map((el) => ({ ...el })) : null;
             if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
-              state.orderPatternText = tmp; console.log('set text', tmp)
+              state.orderPatternText = tmp;
             }
             break;
           case ORDER_TEXT_SOURCE.nopattern:

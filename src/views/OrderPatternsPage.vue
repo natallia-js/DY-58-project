@@ -1,5 +1,8 @@
 <template>
-  <TabView>
+  <div v-if="!orderPatternsLoadedSuccessfully" class="dy58-user-action-forbidden-block">
+    {{ getErrorLoadingPatterns }}
+  </div>
+  <TabView v-else>
     <TabPanel header="Шаблоны по категориям">
       <order-patterns-tree />
     </TabPanel>
@@ -34,6 +37,8 @@
       return {
         isDNC: computed(() => store.getters.isDNC),
         isECD: computed(() => store.getters.isECD),
+        orderPatternsLoadedSuccessfully : computed(() => store.getters.orderPatternsLoadedSuccessfully),
+        getErrorLoadingPatterns: computed(() => store.getters.getErrorLoadingPatterns),
       };
     },
   }
