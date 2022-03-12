@@ -1,3 +1,5 @@
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+
 export const leftMenuItems = {
   getters: {
     getCommonLeftMenuItems(_state, getters) {
@@ -77,11 +79,11 @@ export const leftMenuItems = {
     },
 
     getLeftMenuItems(_state, getters) {
-      if (getters.isDSP_or_DSPoperator) {
+      if (getters.isDSP_or_DSPoperator || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
         return getters.getDSPLeftMenuItems;
-      } else if (getters.isDNC) {
+      } else if (getters.isDNC || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR)) {
         return getters.getDNCLeftMenuItems;
-      } else if (getters.isECD) {
+      } else if (getters.isECD || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)) {
         return getters.getECDLeftMenuItems;
       }
       return [];

@@ -1,28 +1,7 @@
 import { store } from '@/store';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import {
-  OrderPatternElementType,
-  OrderPatternElementType_Future,
-} from '@/constants/orderPatterns';
+import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
 
-
-export function getOrderTextElementTypedValue(element) {
-  if (!element) {
-    return;
-  }
-  switch (element.type) {
-    case OrderPatternElementType.DATE:
-    case OrderPatternElementType.TIME:
-    case OrderPatternElementType.DATETIME:
-      return element.value ? new Date(element.value) : '';
-    case OrderPatternElementType.DR_TRAIN_TABLE:
-    case OrderPatternElementType_Future.OBJECT:
-    case OrderPatternElementType_Future.OBJECTS_LIST:
-      return JSON.parse(element.value);
-    default:
-      return element.value;
-  }
-}
 
 export function getWorkOrderGeneralInfoObject(order) {
   return {

@@ -65,8 +65,8 @@ export const PossibleElementSizes = Object.freeze({
 });
 
 export const DRTrainTableColumns = [
-  { field: 'orderNumber', header: '№ п/п', width: '15%' },
-  { field: 'station', header: 'Станция', width: '35%' },
+  { field: 'orderNumber', header: '№ п/п', width: '10%' },
+  { field: 'station', header: 'Станция', width: '40%' },
   { field: 'arrivalTime', header: 'Время прибытия', width: '25%' },
   { field: 'departureTime', header: 'Время отправления', width: '25%' },
 ];

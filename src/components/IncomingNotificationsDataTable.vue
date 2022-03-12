@@ -121,10 +121,7 @@
       /**
        * Отображение результатов подтверждения распоряжений.
        */
-      watch(() => store.getters.getConfirmOrdersResultsUnseenByUserNumber, (newVal) => {
-        if (newVal === 0) {
-          return;
-        }
+      watch(() => store.getters.getConfirmOrdersResultsUnseenByUserNumber, () => {
         const seenOrderIdsResults = [];
         store.getters.getConfirmOrdersResultsUnseenByUser.forEach((result) => {
           if (result.error) {

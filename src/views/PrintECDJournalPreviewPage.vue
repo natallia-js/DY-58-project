@@ -29,7 +29,7 @@
         :field="col.field"
         :key="col.field"
         :header="col.title"
-        :style="{ minWidth: col.width, textAlign: col.align }"
+        :style="{ width: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-content-cell-class"
       >

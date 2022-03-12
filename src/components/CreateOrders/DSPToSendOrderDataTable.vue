@@ -132,7 +132,7 @@
   import {
     CurrStationsShiftTblColumnNames,
     CurrStationsShiftTblColumns,
-  } from '@/store/modules/personal';
+  } from '@/store/modules/personal/tablesColumns';
   import ShowChoosePersonDlg from '@/components/CreateOrders/ShowChoosePersonDlg';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,

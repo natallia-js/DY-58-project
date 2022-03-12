@@ -3,7 +3,7 @@ import { mainMenuItems } from './modules/mainMenuItems';
 import { leftMenuItems } from './modules/leftMenuItems';
 import { orderPatterns } from './modules/orderPatterns';
 import { currUser } from './modules/currUser';
-import { personal } from './modules/personal';
+import { personal } from './modules/personal/index';
 import { currDateTime } from './modules/currDateTime';
 import { currWorkPoligonStructure } from './modules/currWorkPoligonStructure';
 import { webSocket } from './modules/webSocket';

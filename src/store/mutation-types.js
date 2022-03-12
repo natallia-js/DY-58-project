@@ -15,8 +15,12 @@ export const SET_ORDER_CONFIRMED = 'setOrderConfirmed';
 export const SET_ORDER_CONFIRMED_FOR_OTHERS = 'setOrderConfirmedForOthers';
 export const SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS = 'setOrderConfirmedForOtherReceivers';
 export const SET_ORDER_ASSERT_DATE_TIME = 'setOrderAssertDateTime';
-export const CLEAR_ASSERT_ORDER_ERROR = 'clearAssertOrderError';
-export const SET_ASSERT_ORDER_ERROR = 'setAssertOrderError';
+export const CLEAR_CHECK_ASSERT_ORDER_RESULT = 'clearCheckAssertOrderResult';
+export const SET_ORDER_BEING_CHECKED_FOR_ASSERTION = 'setOrderBeingCheckedForAssertion';
+export const SET_CHECK_ASSERT_ORDER_RESULT = 'setCheckAssertOrderResult';
+export const SET_ORDER_FINISHED_BEING_CHECKED_FOR_ASSERTION = 'setOrderFinishedBeingCheckedForAssertion';
+export const SET_CHECK_ASSERT_ORDER_RESULT_SEEN_BY_USER = 'setCheckAssertOrderResultSeenByUser';
+export const CLEAR_ALL_CHECK_ASSERT_ORDERS_RESULTS_SEEN_BY_USER = 'clearAllCheckAssertOrdersResultsSeenByUser';
 
 // Main Menu Items
 export const DETERMINE_LOGOUT_ITEM_ACTION = 'determineLogoutItemAction';
@@ -165,6 +169,9 @@ export const DEL_OTHER_GET_ORDER_RECORD = 'delOtherGetOrderRecord';
 export const DEL_CURR_SECTORS_SHIFT = 'delCurrSectorsShift';
 export const SET_OTHER_SHIFT_FOR_SENDING_DATA = 'setOtherShiftForSendingData';
 export const DEL_UNSELECTED_STRUCTURAL_DIVISIONS = 'delUnselectedStructuralDivisions';
+export const SET_ERROR_LOADING_CURR_SHIFT = 'setErrorLoadingCurrShift';
+export const SET_LOADING_CURR_SECTOR_SHIFT_STATUS = 'setLoadingCurrSectorShiftStatus';
+export const SET_SECTOR_PERSONAL = 'setSectorPersonal';
 
 // WebSocket
 export const SET_SERVER_MESSAGE = 'setServerMessage';

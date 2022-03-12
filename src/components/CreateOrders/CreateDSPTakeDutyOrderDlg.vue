@@ -224,7 +224,7 @@
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-  import { getUserPostFIOString } from '@/store/modules/personal';
+  import { getUserPostFIOString } from '@/store/modules/personal/transformUserData';
   import OrderNumber from '@/components/CreateOrders/OrderNumber';
 
   export default {

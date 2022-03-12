@@ -2,9 +2,9 @@
   <div class="p-ml-4">
     <h2 class="p-text-center p-mt-3 p-mb-3">Персонал рабочего полигона</h2>
     <p>
-      <i>Примечание:</i>
+      <span class="p-text-italic">Примечание:</span>
       <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети (online), а
-      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе
+      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе (т.е. не имеет роли)
     </p>
     <div v-if="getLoadingCurrSectorsShiftStatus">
       <ProgressSpinner />

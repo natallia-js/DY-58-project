@@ -27,7 +27,7 @@ import {
   logoutWithDutyPass,
 } from '@/serverRequests/auth.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
-import { getUserFIOString, getUserPostFIOString } from '@/store/modules/personal';
+import { getUserFIOString, getUserPostFIOString } from '@/store/modules/personal/transformUserData';
 
 
 /**

@@ -22,7 +22,7 @@ import {
 } from '@/serverRequests/orderDrafts.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-import { getOrderTextElementTypedValue } from '@/store/modules/workOrders/getWorkOrderObject';
+import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
 
 
 function getOrderDraftObject(draft) {

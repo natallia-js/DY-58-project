@@ -192,10 +192,7 @@
        * Этот код именно здесь, т.к. удаление цепочек распоряжений может производиться из нескольких мест
        * (компонентов), размещенных на этой странице.
        */
-      watch(() => store.getters.getDeleteOrdersChainsResultsUnseenByUserNumber, (newVal) => {
-        if (newVal === 0) {
-          return;
-        }
+      watch(() => store.getters.getDeleteOrdersChainsResultsUnseenByUserNumber, () => {
         const seenChainIdsResults = [];
         store.getters.getDeleteOrdersChainsResultsUnseenByUser.forEach((result) => {
           if (result.error) {
@@ -207,12 +204,6 @@
         });
         store.commit(SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER, seenChainIdsResults);
         store.commit(CLEAR_ALL_DELETE_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
-      });
-
-      watch(() => store.getters.getAssertOrderError, (newVal) => {
-        if (newVal) {
-          showErrMessage(newVal);
-        }
       });
 
       /**

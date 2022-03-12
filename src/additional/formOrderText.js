@@ -4,8 +4,8 @@ import {
   getLocaleDateTimeString,
 } from '@/additional/dateTimeConvertions';
 import { CurrShiftGetOrderStatus, ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
-import { DRTrainTableColumns } from '@/constants/orderPatterns';
 import {
+  DRTrainTableColumns,
   OrderPatternElementType,
   OrderPatternElementType_Future,
   SPECIAL_TELECONTROL_ORDER_SIGN,
@@ -13,6 +13,25 @@ import {
   SPECIAL_ORDER_SUBPATTERN_TYPES,
 } from '@/constants/orderPatterns';
 import { upperCaseFirst } from '@/additional/stringFunctions';
+
+
+export function getOrderTextElementTypedValue(element) {
+  if (!element) {
+    return;
+  }
+  switch (element.type) {
+    case OrderPatternElementType.DATE:
+    case OrderPatternElementType.TIME:
+    case OrderPatternElementType.DATETIME:
+      return element.value ? new Date(element.value) : '';
+    case OrderPatternElementType.DR_TRAIN_TABLE:
+    case OrderPatternElementType_Future.OBJECT:
+    case OrderPatternElementType_Future.OBJECTS_LIST:
+      return JSON.parse(element.value);
+    default:
+      return element.value;
+  }
+}
 
 
 // Данная функция позволяет проверить, что отправлять: оригинал или копию.
@@ -89,9 +108,9 @@ export function formOrderText(props) {
         substring = getLocaleDateTimeString(currVal.value, false);
         break;
       case OrderPatternElementType.DR_TRAIN_TABLE:
-        substring = '<div><table style="width:100%;min-width:600px;text-align:left;border-collapse:collapse"><thead><tr>';
+        substring = '<div><table style="width:100%;text-align:left;border-collapse:collapse;"><thead><tr>';
         DRTrainTableColumns.forEach((column) => {
-          substring += `<th style="width:${column.width};font-weight:400;border:1px solid grey">${column.header}</th>`;
+          substring += `<th style="width:${column.width};font-weight:400;border:1px solid grey;padding:0 2px;">${column.header}</th>`;
         });
         substring += '</tr></thead><tbody>';
         if (currVal.value instanceof Array) {
@@ -99,9 +118,9 @@ export function formOrderText(props) {
             substring += '<tr>';
             DRTrainTableColumns.forEach((column) => {
               if (column.field === 'orderNumber') {
-                substring += `<td style="border:1px solid grey">${index + 1}</td>`;
+                substring += `<td style="border:1px solid grey;padding:0 2px;">${index + 1}</td>`;
               } else {
-                substring += `<td style="border:1px solid grey">${row[column.field] || ''}</td>`;
+                substring += `<td style="border:1px solid grey;padding:0 2px;">${row[column.field] || ''}</td>`;
               }
             });
             substring += '</tr>';

@@ -6,7 +6,7 @@ import {
 } from '@/constants/orderPatterns';
 import { APP_CREDENTIALS } from '@/constants/appCredentials';
 import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
-import { getUserFIOString } from '@/store/modules/personal';
+import { getUserFIOString } from '@/store/modules/personal/transformUserData';
 
 
 /**

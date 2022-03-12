@@ -16,8 +16,12 @@ import {
   SET_ORDER_CONFIRMED_FOR_OTHERS,
   SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS,
   SET_ORDER_ASSERT_DATE_TIME,
-  CLEAR_ASSERT_ORDER_ERROR,
-  SET_ASSERT_ORDER_ERROR,
+  CLEAR_CHECK_ASSERT_ORDER_RESULT,
+  SET_ORDER_BEING_CHECKED_FOR_ASSERTION,
+  SET_CHECK_ASSERT_ORDER_RESULT,
+  SET_ORDER_FINISHED_BEING_CHECKED_FOR_ASSERTION,
+  SET_CHECK_ASSERT_ORDER_RESULT_SEEN_BY_USER,
+  CLEAR_ALL_CHECK_ASSERT_ORDERS_RESULTS_SEEN_BY_USER,
 } from '@/store/mutation-types';
 import {
   confirmOrderForMyself,
@@ -48,6 +52,14 @@ export const confirmOrder = {
      */
     isOrderBeingConfirmedForOthers(state) {
       return (orderId) => state.ordersBeingConfirmedForOthers.includes(orderId);
+    },
+
+    /**
+     * Возвращает true, если входящее распоряжение с заданным id в данный момент времени проходит
+     * процедуру проверки возможности его утверждения, false - в противном случае.
+     */
+    isOrderBeingCheckedForAssertion(state) {
+      return (orderId) => state.ordersBeingCheckedForAssertion.includes(orderId);
     },
 
     /**
@@ -82,8 +94,33 @@ export const confirmOrder = {
       return getters.getConfirmOrdersForOthersResultsUnseenByUser.length;
     },
 
-    getAssertOrderError(state) {
-      return state.assertOrderError;
+    /**
+     * Возвращает те результаты попыток утверждения распоряжений,
+     * которые не были отображены пользователю.
+     */
+    getCheckAssertOrdersResultsUnseenByUser(state) {
+      return state.checkForAssertionResults.filter((res) => !res.wasShownToUser);
+    },
+
+    /**
+     * Возвращает количество тех результатов попыток утверждения распоряжений,
+     * которые не были отображены пользователю.
+     */
+    getCheckAssertOrdersResultsUnseenByUserNumber(_state, getters) {
+      return getters.getCheckAssertOrdersResultsUnseenByUser.length;
+    },
+
+    /**
+     * Возвращает дату и время утверждения распоряжения с заданным id.
+     */
+    getOrderAssertDateTime(state) {
+      return (orderId) => {
+        const order = state.data.find((el) => el._id === orderId);
+        if (order) {
+          return order.assertDateTime;
+        }
+        return null;
+      };
     },
   },
 
@@ -96,9 +133,12 @@ export const confirmOrder = {
       if (!orderInfo) {
         state.confirmOrdersResults.push({ orderId, error, message, wasShownToUser: false });
       } else {
-        orderInfo.error = error;
-        orderInfo.message = message;
-        orderInfo.wasShownToUser = false;
+        state.confirmOrdersResults = state.confirmOrdersResults.map((item) => {
+          if (item.orderId === orderId) {
+            return { ...item, error, message, wasShownToUser: false };
+          }
+          return item;
+        });
       }
     },
 
@@ -110,9 +150,29 @@ export const confirmOrder = {
       if (!orderInfo) {
         state.confirmOrdersForOthersResults.push({ orderId, error, message, wasShownToUser: false });
       } else {
-        orderInfo.error = error;
-        orderInfo.message = message;
-        orderInfo.wasShownToUser = false;
+        state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.map((item) => {
+          if (item.orderId === orderId) {
+            return { ...item, error, message, wasShownToUser: false };
+          }
+          return item;
+        });
+      }
+    },
+
+    /**
+     * Позволяет сохранить результат проверки утверждения распоряжения.
+     */
+    [SET_CHECK_ASSERT_ORDER_RESULT] (state, { orderId, error, message }) {
+      const orderInfo = state.checkForAssertionResults.find((item) => item.orderId === orderId);
+      if (!orderInfo) {
+        state.checkForAssertionResults.push({ orderId, error, message, wasShownToUser: false });
+      } else {
+        state.checkForAssertionResults = state.checkForAssertionResults.map((item) => {
+          if (item.orderId === orderId) {
+            return { ...item, error, message, wasShownToUser: false };
+          }
+          return item;
+        });
       }
     },
 
@@ -129,6 +189,13 @@ export const confirmOrder = {
     [CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT] (state, orderId) {
       state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.filter((item) =>
         item.orderId !== orderId);
+    },
+
+    /**
+     * Удаляет результат проверки утверждения распоряжения с заданным id.
+     */
+    [CLEAR_CHECK_ASSERT_ORDER_RESULT] (state, orderId) {
+      state.checkForAssertionResults = state.checkForAssertionResults.filter((item) => item.orderId !== orderId);
     },
 
     /**
@@ -150,6 +217,15 @@ export const confirmOrder = {
     },
 
     /**
+     * Сохраняет id распоряжения, которое проходит процедуру проверки утверждения.
+     */
+    [SET_ORDER_BEING_CHECKED_FOR_ASSERTION] (state, orderId) {
+      if (!state.ordersBeingCheckedForAssertion.includes(orderId)) {
+        state.ordersBeingCheckedForAssertion.push(orderId);
+      }
+    },
+
+    /**
      * Удаляет сохраненный id распоряжения, операция подтверждения которого была завершена.
      */
     [SET_ORDER_FINISHED_BEING_CONFIRMED] (state, orderId) {
@@ -165,18 +241,25 @@ export const confirmOrder = {
     },
 
     /**
+     * Удаляет сохраненный id распоряжения, операция проверки утверждения которого была завершена.
+     */
+    [SET_ORDER_FINISHED_BEING_CHECKED_FOR_ASSERTION] (state, orderId) {
+      state.ordersBeingCheckedForAssertion = state.ordersBeingCheckedForAssertion.filter((item) => item !== orderId);
+    },
+
+    /**
      * Для данных id распоряжений (входящих уведомлений) устанавливает флаг просмотра
      * пользователем информации об их подтверждении.
      */
     [SET_CONFIRM_ORDER_RESULT_SEEN_BY_USER] (state, orderIds) {
-      if (!orderIds) {
+      if (!orderIds || !orderIds.length) {
         return;
       }
-      orderIds.forEach((orderId) => {
-        const orderInfo = state.confirmOrdersResults.find((item) => item.orderId === orderId);
-        if (orderInfo) {
-          orderInfo.wasShownToUser = true;
+      state.confirmOrdersResults = state.confirmOrdersResults.map((item) => {
+        if (orderIds.includes(item.orderId)) {
+          return { ...item, wasShownToUser: true };
         }
+        return item;
       });
     },
 
@@ -188,11 +271,27 @@ export const confirmOrder = {
       if (!orderIds) {
         return;
       }
-      orderIds.forEach((orderId) => {
-        const orderInfo = state.confirmOrdersForOthersResults.find((item) => item.orderId === orderId);
-        if (orderInfo) {
-          orderInfo.wasShownToUser = true;
+      state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.map((item) => {
+        if (orderIds.includes(item.orderId)) {
+          return { ...item, wasShownToUser: true };
         }
+        return item;
+      });
+    },
+
+    /**
+     * Для данных id распоряжений устанавливает флаг просмотра
+     * пользователем информации об их проверках утверждения.
+     */
+    [SET_CHECK_ASSERT_ORDER_RESULT_SEEN_BY_USER] (state, orderIds) {
+      if (!orderIds || !orderIds.length) {
+        return;
+      }
+      state.checkForAssertionResults = state.checkForAssertionResults.map((item) => {
+        if (orderIds.includes(item.orderId)) {
+          return { ...item, wasShownToUser: true };
+        }
+        return item;
       });
     },
 
@@ -208,6 +307,13 @@ export const confirmOrder = {
      */
     [CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER] (state) {
       state.confirmOrdersForOthersResults = state.confirmOrdersForOthersResults.filter((item) => !item.wasShownToUser);
+    },
+
+    /**
+     * Удаляет все результаты проверок утверждения распоряжений, просмотренные пользователем.
+     */
+    [CLEAR_ALL_CHECK_ASSERT_ORDERS_RESULTS_SEEN_BY_USER] (state) {
+      state.checkForAssertionResults = state.checkForAssertionResults.filter((item) => !item.wasShownToUser);
     },
 
     /**
@@ -357,18 +463,9 @@ export const confirmOrder = {
      */
     [SET_ORDER_ASSERT_DATE_TIME] (state, { orderId, assertDateTime }) {
       const order = state.data.find((el) => el._id === orderId);
-      if (!order) {
-        return;
+      if (order) {
+        order.assertDateTime = assertDateTime;
       }
-      order.assertDateTime = assertDateTime;
-    },
-
-    [CLEAR_ASSERT_ORDER_ERROR] (state) {
-      state.assertOrderError = null;
-    },
-
-    [SET_ASSERT_ORDER_ERROR] (state, errMessage) {
-      state.assertOrderError = errMessage;
     },
   },
 
@@ -408,8 +505,9 @@ export const confirmOrder = {
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
       }
-
       if (confirmed) {
+        // После успешного прохождения процедуры подтверждения распоряжения запускаем процедуру его
+        // утверждения (если оно еще не утверждено)
         context.dispatch('checkIfOrderIsAsserted', orderId);
       }
     },
@@ -424,6 +522,10 @@ export const confirmOrder = {
       }
       if (!context.getters.canUserConfirmOrderForOthers) {
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        return;
+      }
+      if (context.getters.isOrderBeingConfirmedForOthers(orderId)) {
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
         return;
       }
       if (!confirmWorkPoligons || !confirmWorkPoligons.length) {
@@ -465,7 +567,8 @@ export const confirmOrder = {
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
       }
-
+      // После успешного прохождения процедуры подтверждения распоряжения запускаем процедуру его
+      // утверждения (если оно еще не утверждено)
       if (confirmed) {
         context.dispatch('checkIfOrderIsAsserted', orderId);
       }
@@ -481,6 +584,10 @@ export const confirmOrder = {
       }
       if (!context.getters.canUserConfirmOrderForOthers) {
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        return;
+      }
+      if (context.getters.isOrderBeingConfirmedForOthers(orderId)) {
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
@@ -500,7 +607,8 @@ export const confirmOrder = {
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
       }
-
+      // После успешного прохождения процедуры подтверждения распоряжения запускаем процедуру его
+      // утверждения (если оно еще не утверждено)
       if (confirmed) {
         context.dispatch('checkIfOrderIsAsserted', orderId);
       }
@@ -511,18 +619,23 @@ export const confirmOrder = {
      * установить дату его утверждения, если это возможно.
      */
     async checkIfOrderIsAsserted(context, orderId) {
-      if (!orderId) {
-        return;
+      if (!orderId || context.getters.getOrderAssertDateTime(orderId)) {
+        return; // распоряжение не найдено либо уже имеет дату утверждения
       }
-      context.commit(CLEAR_ASSERT_ORDER_ERROR);
+      context.commit(CLEAR_CHECK_ASSERT_ORDER_RESULT, orderId);
+      context.commit(SET_ORDER_BEING_CHECKED_FOR_ASSERTION, orderId);
       try {
         const responseData = await checkIfOrderIsAsserted(orderId);
         if (responseData.assertDateTime) {
           context.commit(SET_ORDER_ASSERT_DATE_TIME, { orderId, assertDateTime: new Date(responseData.assertDateTime) });
+          context.commit(SET_CHECK_ASSERT_ORDER_RESULT, { orderId, error: false, message: 'Распоряжение утверждено' });
         }
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка проверки утверждения распоряжения');
-        context.commit(SET_ASSERT_ORDER_ERROR, errMessage);
+        context.commit(SET_CHECK_ASSERT_ORDER_RESULT, { orderId, error: true, message: errMessage });
+
+      } finally {
+        context.commit(SET_ORDER_FINISHED_BEING_CHECKED_FOR_ASSERTION, orderId);
       }
     },
   },

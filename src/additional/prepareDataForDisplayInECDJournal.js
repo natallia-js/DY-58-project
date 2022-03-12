@@ -2,6 +2,7 @@ import { store } from '@/store';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 import {
+  getOrderTextElementTypedValue,
   sendOriginal,
   formOrderText,
   formAcceptorsStrings,
@@ -72,6 +73,16 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       otherToSend: !order.otherToSend ? [] :
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+      orderText: !order.orderText ? null : {
+        ...order.orderText,
+        orderText: !order.orderText.orderText ? null :
+          order.orderText.orderText.map((el) => {
+            return {
+              ...el,
+              value: getOrderTextElementTypedValue(el),
+            };
+          })
+      },
     }))
     .map((order, index) => ({
       // dataKey в таблице

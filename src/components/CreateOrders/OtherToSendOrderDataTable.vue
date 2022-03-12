@@ -106,7 +106,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import { CurrShiftGetOrderStatus } from '@/constants/orders';
-  import { OtherShiftTblColumnNames, OtherShiftTblColumns } from '@/store/modules/personal';
+  import { OtherShiftTblColumnNames, OtherShiftTblColumns } from '@/store/modules/personal/tablesColumns';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_OTHER_SHIFT,
     SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
