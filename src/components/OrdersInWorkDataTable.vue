@@ -359,8 +359,6 @@
     CLEAR_ALL_CONFIRM_ORDERS_FOR_OTHERS_RESULTS_SEEN_BY_USER,
     SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
     CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
-    SET_CHECK_ASSERT_ORDER_RESULT_SEEN_BY_USER,
-    CLEAR_ALL_CHECK_ASSERT_ORDERS_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
@@ -538,23 +536,6 @@
         });
         store.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER, seenOrderIdsResults);
         store.commit(CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER);
-      });
-
-      /**
-       * Отображение результатов проверки утверждения распоряжения (на сервере).
-       */
-      watch(() => store.getters.getCheckAssertOrdersResultsUnseenByUserNumber, () => {
-        const seenOrderIdsResults = [];
-        store.getters.getCheckAssertOrdersResultsUnseenByUser.forEach((result) => {
-          if (result.error) {
-            showErrMessage(result.message);
-          } else {
-            showSuccessMessage(result.message);
-          }
-          seenOrderIdsResults.push(result.orderId);
-        });
-        store.commit(SET_CHECK_ASSERT_ORDER_RESULT_SEEN_BY_USER, seenOrderIdsResults);
-        store.commit(CLEAR_ALL_CHECK_ASSERT_ORDERS_RESULTS_SEEN_BY_USER);
       });
 
       return {

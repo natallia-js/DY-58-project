@@ -10,15 +10,13 @@ export const checkIfOrderActionCanBePerformed = {
      * "свободности" данного распоряжения для выполнения над ним каких-либо действий:
      * 1) в настоящее время не должна удаляться цепочка распоряжения,
      * 2) распоряжение не должно проходить процедуру подтверждения за других,
-     * 3) распоряжение не должно проверяться на возможность его утверждения,
-     * 4) у распоряжения не должен удаляться его получатель на станции.
+     * 3) у распоряжения не должен удаляться его получатель на станции.
      * Все вышеуказанные операции - длительные: требуют обращения к серверу.
      */
     canUserPerformAnyActionOnOrder(_state, getters) {
       return (orderId) => (
         !getters.getOrdersChainsBeingDeleted.includes(orderId) &&
         !getters.isOrderBeingConfirmedForOthers(orderId) &&
-        !getters.isOrderBeingCheckedForAssertion(orderId) &&
         !getters.isOrderBeingDeletedStationWorkPlaceReceiver(orderId)
       ) ? true : false;
     },

@@ -160,11 +160,3 @@ export const getECDOrdersFromServer = async (props) => {
   );
   return response.data;
 };
-
-export const checkIfOrderIsAsserted = async (id) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.checkIfOrderIsAsserted,
-    { id },
-    { headers: getRequestAuthorizationHeader() }
-  );
-  return response.data;
-};
