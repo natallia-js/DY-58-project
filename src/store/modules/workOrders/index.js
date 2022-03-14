@@ -49,8 +49,10 @@ export const workOrders = {
     // массив результатов процессов утверждения / проверки возможности утверждения
     checkForAssertionResults: [],
 
+    // один результат на все запущенные процессы издания распоряжений
     dispatchOrderResult: null,
-    dispatchOrdersBeingProcessed: 0,
+    // количество запущенных процессов издания распоряжений по их типам
+    dispatchOrdersBeingProcessed: [],
 
     editDispatchedOrderResult: null,
     editDispatchedOrdersBeingProcessed: 0,

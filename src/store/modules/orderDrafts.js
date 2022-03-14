@@ -13,6 +13,7 @@ import {
   DEL_ORDER_DRAFT,
   SET_DELETED_ORDER_DRAFT_ID,
   DRAFT_FINISHED_BEING_DELETED,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
   getOrderDraftsFromServer,
@@ -227,7 +228,9 @@ export const orderDrafts = {
      */
     async loadOrderDrafts(context) {
       if (!context.getters.canUserGetOrderDrafts) {
-        context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: 'У вас нет прав на просмотр черновиков распоряжений' });
+        const errMessage = 'У вас нет прав на просмотр черновиков распоряжений';
+        context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_LOADING_ORDER_DRAFTS_RESULT);
@@ -235,11 +238,13 @@ export const orderDrafts = {
       try {
         const responseData = await getOrderDraftsFromServer();
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: false, message: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены черновики распоряжений' });
         context.commit(SET_ORDER_DRAFTS_ARRAY, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о черновиках распоряжений');
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_LOADING_ORDER_DRAFTS_STATUS, false);
@@ -266,11 +271,9 @@ export const orderDrafts = {
       } = params;
 
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        context.commit(SET_SAVE_ORDER_DRAFT_RESULT, {
-          error: true,
-          orderType: type,
-          message: 'У вас нет права на создание черновиков распоряжений',
-        });
+        const errMessage = 'У вас нет права на создание черновиков распоряжений';
+        context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
 
@@ -294,11 +297,13 @@ export const orderDrafts = {
           }
         );
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(ADD_ORDER_DRAFT, responseData.draft);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения черновика распоряжения на сервере');
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
       }
     },
 
@@ -322,11 +327,9 @@ export const orderDrafts = {
       } = params;
 
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        context.commit(SET_SAVE_ORDER_DRAFT_RESULT, {
-          error: true,
-          orderType: type,
-          message: 'У вас нет права на редактирование черновиков распоряжений',
-        });
+        const errMessage = 'У вас нет права на редактирование черновиков распоряжений';
+        context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
 
@@ -349,11 +352,13 @@ export const orderDrafts = {
           }
         );
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(EDIT_ORDER_DRAFT, responseData.draft);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения черновика распоряжения на сервере');
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
       }
     },
 
@@ -362,11 +367,9 @@ export const orderDrafts = {
      */
      async delOrderDraft(context, { id, type }) {
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        context.commit(SET_DEL_ORDER_DRAFT_RESULT, {
-          error: true,
-          orderType: type,
-          message: 'У вас нет права на удаление черновиков распоряжений',
-        });
+        const errMessage = 'У вас нет права на удаление черновиков распоряжений';
+        context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
 
@@ -376,11 +379,13 @@ export const orderDrafts = {
       try {
         const responseData = await delOrderDraftOnServer(id);
         context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(DEL_ORDER_DRAFT, responseData.id);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления черновика распоряжения на сервере');
         context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(DRAFT_FINISHED_BEING_DELETED, id);

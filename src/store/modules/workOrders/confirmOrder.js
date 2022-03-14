@@ -16,6 +16,7 @@ import {
   SET_ORDER_CONFIRMED_FOR_OTHERS,
   SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS,
   SET_ORDER_ASSERT_DATE_TIME,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
   confirmOrderForMyself,
@@ -368,11 +369,15 @@ export const confirmOrder = {
      */
     async confirmOrder(context, { orderId }) {
       if (!context.getters.canUserConfirmOrder) {
-        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: 'У вас нат прав на подтверждение распоряжения' });
+        const errMessage = 'У вас нат прав на подтверждение распоряжения';
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       if (context.getters.isOrderBeingConfirmed(orderId)) {
-        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
+        const errMessage = 'Распоряжение уже проходит процедуру подтверждения';
+        context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_RESULT, orderId);
@@ -381,6 +386,7 @@ export const confirmOrder = {
       try {
         const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED, {
           orderId: responseData.id,
           confirmDateTime: new Date(responseData.confirmDateTime),
@@ -396,6 +402,7 @@ export const confirmOrder = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED, orderId);
@@ -411,15 +418,21 @@ export const confirmOrder = {
         return;
       }
       if (!context.getters.canUserConfirmOrderForOthers) {
-        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        const errMessage = 'У вас нет права подтверждать распоряжение за других';
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       if (context.getters.isOrderBeingConfirmedForOthers(orderId)) {
-        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
+        const errMessage = 'Распоряжение уже проходит процедуру подтверждения';
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       if (!confirmWorkPoligons || !confirmWorkPoligons.length) {
-        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Не определены рабочие полигоны для подтверждения распоряжения' });
+        const errMessage = 'Не определены рабочие полигоны для подтверждения распоряжения';
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
@@ -432,6 +445,7 @@ export const confirmOrder = {
           confirmDateTime,
         });
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, {
           orderId: responseData.orderId,
           // полигоны, за которые подтверждение прошло в секции "Кому" распоряжения
@@ -455,6 +469,7 @@ export const confirmOrder = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);
@@ -470,11 +485,15 @@ export const confirmOrder = {
         return;
       }
       if (!context.getters.canUserConfirmOrderForOthers) {
-        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'У вас нет права подтверждать распоряжение за других' });
+        const errMessage = 'У вас нет права подтверждать распоряжение за других';
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       if (context.getters.isOrderBeingConfirmedForOthers(orderId)) {
-        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: 'Распоряжение уже проходит процедуру подтверждения' });
+        const errMessage = 'Распоряжение уже проходит процедуру подтверждения';
+        context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_CONFIRM_ORDER_FOR_OTHERS_RESULT, orderId);
@@ -483,6 +502,7 @@ export const confirmOrder = {
       try {
         const responseData = await confirmOrderForOtherReceivers({ orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS, { orderId: responseData.orderId, confirmDateTime });
         context.commit(SET_ORDER_ASSERT_DATE_TIME, {
           orderId,
@@ -492,6 +512,7 @@ export const confirmOrder = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_CONFIRMED_FOR_OTHERS, orderId);

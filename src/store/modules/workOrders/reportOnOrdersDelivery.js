@@ -3,6 +3,7 @@ import {
   CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT,
   SET_REPORT_ON_ORDERS_DELIVERY_RESULT,
   SET_REPORTING_ON_ORDER_DELIVERY_STATUS,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { reportServerOnOrdersDelivery } from '@/serverRequests/orders.requests';
@@ -140,9 +141,11 @@ export const reportOnOrdersDelivery = {
      */
     async reportOnOrdersDelivery(context, orders) {
       if (!context.getters.canUserReportOnOrdersDelivery) {
-        context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: 'У вас нет права уведомлять о доставке распоряжений на рабочий полигон' });
+        const errMessage = 'У вас нет права уведомлять о доставке распоряжений на рабочий полигон';
+        context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
         return;
       }
+      context.commit(CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT);
 
       // Сюда поместим идентификаторы тех распоряжений, о доставке которых необходимо сообщить серверу.
       const newDeliveredOrderIds = !orders ? [] :
@@ -150,9 +153,7 @@ export const reportOnOrdersDelivery = {
       if (!newDeliveredOrderIds.length) {
         return;
       }
-
       context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, true);
-      context.commit(CLEAR_REPORT_ON_ORDERS_DELIVERY_RESULT);
 
       try {
         const responseData = await reportServerOnOrdersDelivery({
@@ -160,6 +161,7 @@ export const reportOnOrdersDelivery = {
           deliverDateTime: new Date(),
         });
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDERS_DELIVERED, {
           orderIds: responseData.orderIds,
           deliverDateTime: new Date(responseData.deliverDateTime),
@@ -169,6 +171,7 @@ export const reportOnOrdersDelivery = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих распоряжений');
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_REPORTING_ON_ORDER_DELIVERY_STATUS, false);

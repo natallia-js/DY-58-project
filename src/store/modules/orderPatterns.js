@@ -25,6 +25,7 @@ import {
   ADD_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED,
   SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED,
   ADD_NEW_ORDER_PATERN,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
   getOrderPatterns,
@@ -384,7 +385,9 @@ export const orderPatterns = {
      */
     async loadOrderPatterns(context) {
       if (!context.getters.canUserGetOrderPatterns) {
-        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: 'У вас нет права просматривать шаблоны распоряжений' });
+        const errMessage = 'У вас нет права просматривать шаблоны распоряжений';
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, true);
@@ -392,7 +395,9 @@ export const orderPatterns = {
 
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: 'Не определен рабочий полигон пользователя' });
+        const errMessage = 'Не определен рабочий полигон пользователя';
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       try {
@@ -402,11 +407,13 @@ export const orderPatterns = {
           getChildPatterns: true,
         });
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: false, message: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены шаблоны распоряжений' });
         context.commit(SET_NEW_ORDER_PATTERNS_ARRAY, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о шаблонах распоряжений');
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_LOADING_ORDER_PATTERNS_STATUS, false);
@@ -418,11 +425,9 @@ export const orderPatterns = {
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
-          error: true,
-          message: 'У вас нет права редактировать наименования категорий распоряжений',
-          newTitle: null,
-        });
+        const errMessage = 'У вас нет права редактировать наименования категорий распоряжений';
+        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, { error: true, message: errMessage, newTitle: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(ADD_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
@@ -434,6 +439,7 @@ export const orderPatterns = {
           message: responseData.message,
           newTitle: responseData.newTitle,
         });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CATEGORY_TITLE, {
           service,
           orderType,
@@ -442,11 +448,8 @@ export const orderPatterns = {
         });
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования наименования категории распоряжений');
-        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, {
-          error: true,
-          message: errMessage,
-          newTitle: null,
-        });
+        context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, { error: true, message: errMessage, newTitle: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SUB_MODIFY_ORDER_CATEGORY_TITLE_RECS_BEING_PROCESSED);
@@ -458,7 +461,9 @@ export const orderPatterns = {
      */
     async delOrderPattern(context, orderPatternId) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: 'У вас нет права удалять шаблоны распоряжений' });
+        const errMessage = 'У вас нет права удалять шаблоны распоряжений';
+        context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(ADD_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -466,11 +471,13 @@ export const orderPatterns = {
       try {
         const responseData = await deleteOrderPattern(orderPatternId);
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(DEL_ORDER_PATTERN, orderPatternId);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления шаблона распоряжений');
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SUB_DEL_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -482,11 +489,9 @@ export const orderPatterns = {
      */
     async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
-          error: true,
-          message: 'У вас нет права на редактирование шаблонов распоряжений',
-          orderPattern: null,
-        });
+        const errMessage = 'У вас нет права на редактирование шаблонов распоряжений';
+        context.commit(SET_MOD_ORDER_PATTERN_RESULT, { error: true, message: errMessage, orderPattern: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(ADD_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -498,17 +503,15 @@ export const orderPatterns = {
           message: responseData.message,
           orderPattern: responseData.orderPattern,
         });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(MOD_ORDER_PATTERN, {
           orderPatternId: responseData.orderPattern._id,
           newOrderPattern: responseData.orderPattern,
         });
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования шаблона распоряжений');
-        context.commit(SET_MOD_ORDER_PATTERN_RESULT, {
-          error: true,
-          message: errMessage,
-          orderPattern: null,
-        });
+        context.commit(SET_MOD_ORDER_PATTERN_RESULT, { error: true, message: errMessage, orderPattern: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SUB_MOD_ORDER_PATTERN_RECS_BEING_PROCESSED);
@@ -520,7 +523,9 @@ export const orderPatterns = {
      */
     async createOrderPattern(context, props) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: 'У вас нет права на создание шаблонов распоряжений' });
+        const errMessage = 'У вас нет права на создание шаблонов распоряжений';
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       const { service, type, category, title, specialTrainCategories, elements } = props;
@@ -530,7 +535,9 @@ export const orderPatterns = {
 
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: 'Не определен рабочий полигон пользователя' });
+        const errMessage = 'Не определен рабочий полигон пользователя';
+        context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       try {
@@ -546,11 +553,13 @@ export const orderPatterns = {
           workPoligonId: workPoligon.code,
         });
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(ADD_NEW_ORDER_PATERN, responseData.orderPattern);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка создания шаблона распоряжений');
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SUB_CREATE_ORDER_PATTERN_RECS_BEING_PROCESSED);

@@ -7,6 +7,7 @@ import {
   CLEAR_LOADING_LAST_ORDERS_RESULT,
   SET_LOADING_LAST_ORDERS_RESULT,
   SET_LOADING_LAST_ORDERS_PARAMS_STATUS,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -121,11 +122,15 @@ export const lastOrdersParams = {
      */
     async loadLastOrdersParams(context) {
       if (!context.getters.canUserGetLastOrdersParams) {
-        context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: 'У вас не права получать параметры последних изданных распоряжений' });
+        const errMessage = 'У вас не права получать параметры последних изданных распоряжений';
+        context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       const currPoligonData = context.getters.getUserWorkPoligonData;
       if (!currPoligonData) {
+        const errMessage = 'Ошибка загрузки информации о параметрах последних изданных распоряжений: неизвестна структура рабочего полигона';
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_LOADING_LAST_ORDERS_RESULT);
@@ -135,11 +140,13 @@ export const lastOrdersParams = {
         // на текущем полигоне управления
         const responseData = await getLastOrdersParams();
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: false, message: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о параметрах последних изданных распоряжений' });
         context.commit(SET_LAST_ORDERS_PARAMS, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о последних изданных распоряжениях');
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_LOADING_LAST_ORDERS_PARAMS_STATUS, false);

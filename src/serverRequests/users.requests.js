@@ -11,9 +11,14 @@ export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) 
   return response.data;
 };
 
-export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline }) => {
+export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline, includeWorkPlaces }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPoligonsUsers,
-    { stationIds, onlyOnline, apps: [{ app: APP_CODE_NAME, creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator] }] },
+    {
+      stationIds,
+      onlyOnline,
+      apps: [{ app: APP_CODE_NAME, creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator] }],
+      includeWorkPlaces,
+    },
     { headers: getRequestAuthorizationHeader() }
   );
   return response.data;

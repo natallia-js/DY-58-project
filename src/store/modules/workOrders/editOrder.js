@@ -1,8 +1,6 @@
 import { store } from '@/store';
 import {
   CLEAR_EDIT_DISPATCHED_ORDER_RESULT,
-  ADD_DISPATCHED_ORDERS_BEING_EDITED_NUMBER,
-  SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER,
   SET_EDIT_DISPATCHED_ORDER_RESULT,
   SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT,
   CLEAR_DEL_STATION_WORK_PLACE_RECEIVER_RESULT,
@@ -12,6 +10,7 @@ import {
   SET_ORDER_FINISHED_BEING_DELETED_STATION_WORK_PLACE_RECEIVER,
   SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
   EDIT_ORDER_TEXT,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
   editDispatchedOrderOnServer,
@@ -43,13 +42,6 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
     },
 
     /**
-     * Возвращает количество распоряжений, по которым запущен процесс редактирования на сервере.
-     */
-    getEditDispatchedOrdersBeingProcessed(state) {
-      return state.editDispatchedOrdersBeingProcessed;
-    },
-
-    /**
      * Возвращает те результаты удаления получателей распоряжений на рабочих местах станций,
      * которые не были отображены пользователю.
      */
@@ -67,14 +59,6 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
   },
 
   mutations: {
-    [ADD_DISPATCHED_ORDERS_BEING_EDITED_NUMBER] (state) {
-      state.editDispatchedOrdersBeingProcessed += 1;
-    },
-
-    [SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER] (state) {
-      state.editDispatchedOrdersBeingProcessed -= 1;
-    },
-
     [SET_EDIT_DISPATCHED_ORDER_RESULT] (state, { error, orderType, message }) {
       state.editDispatchedOrderResult = {
         error,
@@ -196,16 +180,13 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
       const { type, id, timeSpan, orderText } = params;
 
       if (!context.getters.canUserDispatchOrders) {
-        context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, {
-          error: true,
-          orderType: type,
-          message: 'У вас нет права на редактирование распоряжений',
-        });
+        const errMessage = 'У вас нет права на редактирование распоряжений';
+        context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
 
       context.commit(CLEAR_EDIT_DISPATCHED_ORDER_RESULT);
-      context.commit(ADD_DISPATCHED_ORDERS_BEING_EDITED_NUMBER);
 
       try {
         const responseData = await editDispatchedOrderOnServer(
@@ -216,14 +197,13 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
           }
         );
         context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(EDIT_ORDER_TEXT, responseData.order);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования распоряжения на сервере');
         context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
-
-      } finally {
-        context.commit(SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
       }
     },
 
@@ -232,10 +212,9 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
      */
     async delStationWorkPlaceReceiver(context, { orderId, workPlaceId }) {
       if (!context.getters.canUserDeleteOrderStationReceivers) {
-        context.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, {
-          error: true,
-          message: 'У вас нет права на удаление адресата распоряжения на станции',
-        });
+        const errMessage = 'У вас нет права на удаление адресата распоряжения на станции';
+        context.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, orderId);
@@ -243,11 +222,13 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
       try {
         const responseData = await delStationWorkPlaceReceiverOnServer({ orderId, workPlaceId });
         context.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, { orderId, error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(DEL_ORDER_STATION_RECEIVER, { orderId, workPlaceId });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления адресата на станции');
         context.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, { orderId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_ORDER_FINISHED_BEING_DELETED_STATION_WORK_PLACE_RECEIVER, orderId);

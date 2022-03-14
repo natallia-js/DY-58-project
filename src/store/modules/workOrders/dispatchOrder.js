@@ -7,6 +7,7 @@ import {
   ADD_ORDER,
   SET_LAST_ORDERS_NUMBER,
   DEL_ORDER_DRAFT,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -15,15 +16,22 @@ import { getWorkOrderObject } from './getWorkOrderObject';
 
 
 /**
- * Данный модуль предназначен для издания распоряжений.
+ * Данный модуль предназначен для издания распоряжений (сохранения их на сервере).
  */
  export const dispatchOrder = {
   getters: {
     getDispatchOrderResult(state) {
       return state.dispatchOrderResult;
     },
+
     getDispatchOrdersBeingProcessed(state) {
-      return state.dispatchOrdersBeingProcessed;
+      return (orderType) => {
+        const existingType = state.dispatchOrdersBeingProcessed.find((el) => el.type === orderType);
+        if (existingType) {
+          return existingType.number;
+        }
+        return 0;
+      };
     },
   },
 
@@ -34,12 +42,34 @@ import { getWorkOrderObject } from './getWorkOrderObject';
       }
     },
 
-    [ADD_ORDERS_BEING_DISPATCHED_NUMBER] (state) {
-      state.dispatchOrdersBeingProcessed += 1;
+    [ADD_ORDERS_BEING_DISPATCHED_NUMBER] (state, type) {
+      const existingType = state.dispatchOrdersBeingProcessed.find((el) => el.type === type);
+      if (!existingType) {
+        state.dispatchOrdersBeingProcessed.push({ type, number: 1 });
+      } else {
+        state.dispatchOrdersBeingProcessed = state.dispatchOrdersBeingProcessed.map((el) => {
+          if (el.type === type) {
+            return { ...el, number: el.number + 1 };
+          }
+          return el;
+        });
+      }
     },
 
-    [SUB_ORDERS_BEING_DISPATCHED_NUMBER] (state) {
-      state.dispatchOrdersBeingProcessed -= 1;
+    [SUB_ORDERS_BEING_DISPATCHED_NUMBER] (state, type) {
+      const existingType = state.dispatchOrdersBeingProcessed.find((el) => el.type === type);
+      if (existingType) {
+        if (existingType.number === 1) {
+          state.dispatchOrdersBeingProcessed = state.dispatchOrdersBeingProcessed.filter((el) => el.type !== type);
+        } else {
+          state.dispatchOrdersBeingProcessed = state.dispatchOrdersBeingProcessed.map((el) => {
+            if (el.type === type) {
+              return { ...el, number: el.number - 1 };
+            }
+            return el;
+          });
+        }
+      }
     },
 
     [SET_DISPATCH_ORDER_RESULT] (state, { error, orderId, orderType, message }) {
@@ -81,16 +111,14 @@ import { getWorkOrderObject } from './getWorkOrderObject';
       } = params;
 
       if (!context.getters.canUserDispatchOrders && !context.getters.canUserDispatchControlRecords) {
-        context.commit(SET_DISPATCH_ORDER_RESULT, {
-          error: true,
-          orderType: type,
-          message: 'У вас нет права на издание распоряжений / создание контрольных записей',
-        });
+        const errMessage = 'У вас нет права на издание распоряжений / создание контрольных записей';
+        context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
 
       context.commit(CLEAR_DISPATCH_ORDER_RESULT);
-      context.commit(ADD_ORDERS_BEING_DISPATCHED_NUMBER);
+      context.commit(ADD_ORDERS_BEING_DISPATCHED_NUMBER, type);
 
       try {
         const responseData = await dispatchOrderToServer(
@@ -143,6 +171,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
           orderType: responseData.order.type,
           message: responseData.message,
         });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_LAST_ORDERS_NUMBER, {
           ordersType: responseData.order.type,
@@ -155,15 +184,11 @@ import { getWorkOrderObject } from './getWorkOrderObject';
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка сохранения распоряжения на сервере');
-        context.commit(SET_DISPATCH_ORDER_RESULT, {
-          error: true,
-          orderId: null,
-          orderType: type,
-          message: errMessage,
-        });
+        context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderId: null, orderType: type, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
-        context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER);
+        context.commit(SUB_ORDERS_BEING_DISPATCHED_NUMBER, type);
       }
     },
   },

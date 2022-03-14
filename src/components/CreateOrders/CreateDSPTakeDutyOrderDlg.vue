@@ -193,6 +193,9 @@
       </div>
 
       <div class="p-col-12 p-mt-2 p-text-right">
+        <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
+          На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения текущего типа. Ожидаю ответ...
+        </div>
         <Button type="submit" class="p-mr-2" label="Сохранить" />
         <Button label="Закрыть" @click="closeDialog" />
       </div>
@@ -627,6 +630,8 @@
         changeOrderNumber,
         closeDialog,
         handleSubmit,
+        // Количество распоряжений текущего типа, для которых в настоящее время запущен процесс издания (сохранения на сервере)
+        getDispatchOrdersBeingProcessed: computed(() => store.getters.getDispatchOrdersBeingProcessed(orderType)),
       };
     },
   };

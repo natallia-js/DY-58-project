@@ -4,7 +4,8 @@
     <p>
       <span class="p-text-italic">Примечание:</span>
       <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети (online), а
-      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке без права работы в системе (т.е. не имеет роли)
+      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке,
+      но не имеющий полномочий ДНЦ, ЭЦД, ДСП либо Оператора при ДСП
     </p>
     <div v-if="getLoadingCurrSectorsShiftStatus">
       <ProgressSpinner />

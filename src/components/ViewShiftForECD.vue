@@ -12,7 +12,11 @@
             -
           </div>
           <div v-else>
-            <p v-for="user of station.people" :key="user._id" :class="['p-ml-4', { 'dy58-info': user.online }]">
+            <p
+              v-for="user of station.people"
+              :key="user._id"
+              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
+            >
               {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
               ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
             </p>
@@ -31,7 +35,11 @@
             -
           </div>
           <div v-else>
-            <p v-for="user of adjSector.people" :key="user._id" :class="['p-ml-4', { 'dy58-info': user.online }]">
+            <p
+              v-for="user of adjSector.people"
+              :key="user._id"
+              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
+            >
               {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
             </p>
           </div>
@@ -49,7 +57,11 @@
             -
           </div>
           <div v-else>
-            <p v-for="user of nearSector.people" :key="user._id" :class="['p-ml-4', { 'dy58-info': user.online }]">
+            <p
+              v-for="user of nearSector.people"
+              :key="user._id"
+              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
+            >
               {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
             </p>
           </div>

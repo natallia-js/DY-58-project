@@ -9,6 +9,7 @@ import {
   SET_NEW_WORK_ORDERS_ARRAY,
   UPDATE_NUMBER_OF_INCOMING_ORDERS_PER_SHIFT,
   DEL_WORK_ORDERS,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { getWorkOrdersFromServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -481,7 +482,9 @@ export const getWorkOrders = {
      */
     async loadWorkOrders(context) {
       if (!context.getters.canUserWorkWithSystem) {
-        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: 'Не могу загрузить рабочие распоряжения: у вас нет прав на работу с системой' });
+        const errMessage = 'Не могу загрузить рабочие распоряжения: у вас нет прав на работу с системой';
+        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_LOADING_WORK_ORDERS_RESULT);
@@ -502,6 +505,7 @@ export const getWorkOrders = {
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о рабочих распоряжениях');
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_LOADING_WORK_ORDERS_STATUS, false);

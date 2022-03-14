@@ -121,7 +121,7 @@ export const useDispatchOrder = (inputVals) => {
     getIssuedOrderPlaceObject,
     getPreviewOrderTimeSpanObject,
     dispatchOrder,
-    // Количество распоряжений, для которых в настоящее время запущен процесс издания (сохранения на сервере)
-    getDispatchOrdersBeingProcessed: computed(() => store.getters.getDispatchOrdersBeingProcessed),
+    // Количество распоряжений текущего типа, для которых в настоящее время запущен процесс издания (сохранения на сервере)
+    getDispatchOrdersBeingProcessed: computed(() => store.getters.getDispatchOrdersBeingProcessed(props.orderType)),
   };
 };

@@ -6,6 +6,7 @@ import {
   SET_ORDERS_CHAIN_BEING_DELETED,
   SET_ORDERS_CHAIN_FINISHED_BEING_DELETED,
   DELETE_CONFIRMED_ORDERS_CHAIN,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { delConfirmedOrdersFromChain } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -47,9 +48,12 @@ export const delWorkOrdersChains = {
       if (!chainInfo) {
         state.deleteOrdersChainsResults.push({ chainId, error, message, wasShownToUser: false });
       } else {
-        chainInfo.error = error;
-        chainInfo.message = message;
-        chainInfo.wasShownToUser = false;
+        state.deleteOrdersChainsResults = state.deleteOrdersChainsResults.map((item) => {
+          if (item.chainId === chainId) {
+            return { ...item, error, message, wasShownToUser: false };
+          }
+          return item;
+        });
       }
     },
 
@@ -58,14 +62,14 @@ export const delWorkOrdersChains = {
      * об их удалении из списка распоряжений, находящихся в работе.
      */
     [SET_DELETE_ORDERS_CHAIN_RESULT_SEEN_BY_USER] (state, chainIds) {
-      if (!chainIds) {
+      if (!chainIds || !chainIds.length) {
         return;
       }
-      chainIds.forEach((chainId) => {
-        const chainInfo = state.deleteOrdersChainsResults.find((item) => item.chainId === chainId);
-        if (chainInfo) {
-          chainInfo.wasShownToUser = true;
+      state.deleteOrdersChainsResults = state.deleteOrdersChainsResults.map((item) => {
+        if (chainIds.includes(item.chainId)) {
+          return { ...item, wasShownToUser: true };
         }
+        return item;
       });
     },
 
@@ -115,7 +119,9 @@ export const delWorkOrdersChains = {
      */
     async delConfirmedOrdersFromChain(context, chainId) {
       if (!context.getters.canUserDelConfirmedOrdersChains) {
-        context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: 'У вас нет права удалять распоряжения / цепочки распоряжений' });
+        const errMessage = 'У вас нет права удалять распоряжения / цепочки распоряжений';
+        context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_DELETE_ORDERS_CHAIN_RESULT, chainId);
@@ -123,11 +129,13 @@ export const delWorkOrdersChains = {
       try {
         const responseData = await delConfirmedOrdersFromChain({ chainId });
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: false, message: responseData.message });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(DELETE_CONFIRMED_ORDERS_CHAIN, chainId);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления цепочки распоряжений');
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_ORDERS_CHAIN_FINISHED_BEING_DELETED, chainId);

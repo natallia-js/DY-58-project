@@ -10,6 +10,7 @@ import {
   SET_ERROR_LOADING_CURR_SHIFT,
   SET_LOADING_CURR_SECTOR_SHIFT_STATUS,
   SET_SECTOR_PERSONAL,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 
 
@@ -221,7 +222,7 @@ export const getCurrSectorShift = {
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на смежных станциях
       if (stationsIds.length) {
-        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
+        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: true });
         setStationsShift(responseData, shiftPersonal);
       }
       context.commit(SET_SECTOR_PERSONAL, shiftPersonal);
@@ -258,8 +259,9 @@ export const getCurrSectorShift = {
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
       if (stationsIds.length) {
-        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
+        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
         setStationsShift(responseData, shiftPersonal);
+        console.log(responseData)
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД, ближайших к
       // участку ДНЦ с id = sectorId
@@ -301,7 +303,7 @@ export const getCurrSectorShift = {
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
       if (stationsIds.length) {
-        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false });
+        const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
         setStationsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ, ближайших к
@@ -320,16 +322,22 @@ export const getCurrSectorShift = {
      */
     async loadCurrSectorsShift(context) {
       if (!context.getters.canUserWorkWithSystem) {
-        context.commit(SET_ERROR_LOADING_CURR_SHIFT, 'У вас нет права на получение информации о персонале рабочего полигона');
+        const errMessage = 'У вас нет права на получение информации о персонале рабочего полигона';
+        context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        context.commit(SET_ERROR_LOADING_CURR_SHIFT, 'Ошибка загрузки персонала участка: неизвестен рабочий полигон');
+        const errMessage = 'Ошибка загрузки персонала участка: неизвестен рабочий полигон';
+        context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       if (!context.getters.getUserWorkPoligonData) {
-        context.commit(SET_ERROR_LOADING_CURR_SHIFT, 'Ошибка загрузки персонала участка: неизвестна структура рабочего полигона');
+        const errMessage = 'Ошибка загрузки персонала участка: неизвестна структура рабочего полигона';
+        context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(SET_ERROR_LOADING_CURR_SHIFT, null);
@@ -346,9 +354,11 @@ export const getCurrSectorShift = {
             await context.dispatch('loadShiftDataForECD');
             break;
         }
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружен список персонала участка' });
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка загрузки персонала участка');
         context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: errMessage });
       } finally {
         context.commit(SET_LOADING_CURR_SECTOR_SHIFT_STATUS, false);
       }

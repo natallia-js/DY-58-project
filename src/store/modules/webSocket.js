@@ -48,9 +48,9 @@ export const webSocket = {
         return;
       }
       if (state.lastNServerMessages.length === WS_SERVER_PARAMS.MAX_SERVER_MESSAGES_STORED) {
-        state.lastNServerMessages.shift();
+        state.lastNServerMessages.pop();
       }
-      state.lastNServerMessages.push(messageObject);
+      state.lastNServerMessages.unshift(messageObject);
     },
 
     [SET_WS_READY_STATE] (state, { ready, datetime }) {

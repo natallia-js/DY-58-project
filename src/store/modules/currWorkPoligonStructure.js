@@ -1,6 +1,11 @@
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { ORDER_PLACE_VALUES } from '@/constants/orders';
-import { DEL_CURR_WORK_POLIGON_DATA } from '@/store/mutation-types';
+import {
+  SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA,
+  SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS,
+  DEL_CURR_WORK_POLIGON_DATA,
+  SET_SYSTEM_MESSAGE,
+} from '@/store/mutation-types';
 import {
   getDefinitStationData,
   getStationBlocksData,
@@ -17,6 +22,7 @@ import {
   getAdjacentECDSectorsShortDefinitData,
   getNearestDNCSectorsShortDefinitData,
 } from '@/serverRequests/ecdSectors.requests';
+import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
 export const currWorkPoligonStructure = {
@@ -419,6 +425,14 @@ export const currWorkPoligonStructure = {
         state.station = null;
       }
     },
+
+    [SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA] (state, error) {
+      state.errorLoadingCurrWorkPoligonStructure = error;
+    },
+
+    [SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS] (state, status) {
+      state.loadingCurrWorkPoligonStructure = status;
+    },
   },
 
   actions: {
@@ -426,71 +440,44 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера информацию о полигоне управления "Станция".
      */
     async loadStationData(context, { stationId }) {
-      context.state.errorLoadingCurrWorkPoligonStructure = null;
-      context.state.loadingCurrWorkPoligonStructure = true;
-      try {
-        const responseData = await getDefinitStationData(stationId);
-        const blocksResponseData = await getStationBlocksData(stationId);
-        const dncSectorsResponseData = await getStationDNCSectorsData(stationId);
-        const ecdSectorsResponseData = await getStationECDSectorsData(stationId);
-        context.state.station = {
-          ...responseData,
-          TBlocks: blocksResponseData,
-          TDNCSectors: dncSectorsResponseData,
-          TECDSectors: ecdSectorsResponseData,
-        };
-      } catch (error) {
-        context.state.errorLoadingCurrWorkPoligonStructure = error;
-
-      } finally {
-        context.state.loadingCurrWorkPoligonStructure = false;
-      }
+      const responseData = await getDefinitStationData(stationId);
+      const blocksResponseData = await getStationBlocksData(stationId);
+      const dncSectorsResponseData = await getStationDNCSectorsData(stationId);
+      const ecdSectorsResponseData = await getStationECDSectorsData(stationId);
+      context.state.station = {
+        ...responseData,
+        TBlocks: blocksResponseData,
+        TDNCSectors: dncSectorsResponseData,
+        TECDSectors: ecdSectorsResponseData,
+      };
     },
 
     /**
      * Подгружает с сервера информацию о полигоне управления "Участок ДНЦ".
      */
     async loadDNCSectorData(context, { sectorId }) {
-      context.state.errorLoadingCurrWorkPoligonStructure = null;
-      context.state.loadingCurrWorkPoligonStructure = true;
-      try {
-        const responseData = await getDefinitDNCSectorData(sectorId);
-        const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData(sectorId);
-        const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData(sectorId);
-        context.state.sector = {
-          ...responseData,
-          TAdjacentDNCSectors: adjDNCSectResponseData,
-          TNearestECDSectors: nearECDSectResponseData,
-        };
-      } catch (error) {
-        context.state.errorLoadingCurrWorkPoligonStructure = error;
-
-      } finally {
-        context.state.loadingCurrWorkPoligonStructure = false;
-      }
+      const responseData = await getDefinitDNCSectorData(sectorId);
+      const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData(sectorId);
+      const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData(sectorId);
+      context.state.sector = {
+        ...responseData,
+        TAdjacentDNCSectors: adjDNCSectResponseData,
+        TNearestECDSectors: nearECDSectResponseData,
+      };
     },
 
     /**
      * Подгружает с сервера информацию о полигоне управления "Участок ЭЦД".
      */
     async loadECDSectorData(context, { sectorId }) {
-      context.state.errorLoadingCurrWorkPoligonStructure = null;
-      context.state.loadingCurrWorkPoligonStructure = true;
-      try {
-        const responseData = await getDefinitECDSectorData(sectorId);
-        const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData(sectorId);
-        const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData(sectorId);
-        context.state.sector = {
-          ...responseData,
-          TAdjacentECDSectors: adjECDSectResponseData,
-          TNearestDNCSectors: nearDNCSectResponseData,
-        };
-      } catch (error) {
-        context.state.errorLoadingCurrWorkPoligonStructure = error;
-
-      } finally {
-        context.state.loadingCurrWorkPoligonStructure = false;
-      }
+      const responseData = await getDefinitECDSectorData(sectorId);
+      const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData(sectorId);
+      const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData(sectorId);
+      context.state.sector = {
+        ...responseData,
+        TAdjacentECDSectors: adjECDSectResponseData,
+        TNearestDNCSectors: nearDNCSectResponseData,
+      };
     },
 
     /**
@@ -499,22 +486,39 @@ export const currWorkPoligonStructure = {
      */
     async loadCurrWorkPoligonData(context) {
       if (!context.getters.canUserWorkWithSystem) {
+        const errMessage = 'У вас нет права на получение информации о рабочем полигоне';
+        context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
+        const errMessage = 'Ошибка загрузки информации о рабочем полигоне: неизвестен рабочий полигон';
+        context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
-      switch (workPoligon.type) {
-        case WORK_POLIGON_TYPES.STATION:
-          await context.dispatch('loadStationData', { stationId: workPoligon.code });
-          break;
-        case WORK_POLIGON_TYPES.DNC_SECTOR:
-          await context.dispatch('loadDNCSectorData', { sectorId: workPoligon.code });
-          break;
-        case WORK_POLIGON_TYPES.ECD_SECTOR:
-          await context.dispatch('loadECDSectorData', { sectorId: workPoligon.code });
-          break;
+      context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, null);
+      context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, true);
+      try {
+        switch (workPoligon.type) {
+          case WORK_POLIGON_TYPES.STATION:
+            await context.dispatch('loadStationData', { stationId: workPoligon.code });
+            break;
+          case WORK_POLIGON_TYPES.DNC_SECTOR:
+            await context.dispatch('loadDNCSectorData', { sectorId: workPoligon.code });
+            break;
+          case WORK_POLIGON_TYPES.ECD_SECTOR:
+            await context.dispatch('loadECDSectorData', { sectorId: workPoligon.code });
+            break;
+        }
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о рабочем полигоне' });
+      } catch (error) {
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка загрузки информации о рабочем полигоне');
+        context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
+      } finally {
+        context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, false);
       }
     },
   },

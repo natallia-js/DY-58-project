@@ -4,6 +4,7 @@ import {
   CLEAR_LOADING_REFS_RESULT,
   SET_ORDER_PATTERNS_ELEMENTS_REFS,
   DEL_ORDER_PATTERNS_ELEMENTS_REFS,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { getOrderPatternsElementsRefs } from '@/serverRequests/orderPatterns.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -84,7 +85,9 @@ export const orderPatternsElementsRefs = {
      */
     async loadOrderPatternsElementsRefs(context) {
       if (!context.getters.canUserGetOrderPatterns) {
-        context.commit(SET_LOADING_REFS_RESULT, { error: true, message: 'У вас нат права получать информацию о смысловых значениях элементов шаблонов распоряжений' });
+        const errMessage = 'У вас нат права получать информацию о смысловых значениях элементов шаблонов распоряжений';
+        context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, true);
@@ -92,11 +95,13 @@ export const orderPatternsElementsRefs = {
       try {
         const responseData = await getOrderPatternsElementsRefs();
         context.commit(SET_LOADING_REFS_RESULT, { error: false, message: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о смысловых значениях элементов шаблонов распоряжений' });
         context.commit(SET_ORDER_PATTERNS_ELEMENTS_REFS, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений');
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_LOADING_ORDER_PATTERNS_ELEMENTS_REFS_STATUS, false);

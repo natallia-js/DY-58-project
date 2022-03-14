@@ -31,8 +31,8 @@
         disabled
       />
       <br />
-      <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения. Ожидаю ответ...
+      <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
+        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения текущего типа. Ожидаю ответ...
       </div>
       <form @submit.prevent="handleSubmit()" class="p-grid">
 

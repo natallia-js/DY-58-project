@@ -35,7 +35,7 @@ import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constan
  * @param {boolean} showSeconds - true - показывать секунды, false - не показывать
  * @returns строковое представление заданного объекта Date
  */
-export function getLocaleDateTimeString(date, showSeconds) {
+export function getLocaleDateTimeString(date, showSeconds = true) {
   if (date instanceof Date) {
     const timeFormattingObject = { hour: 'numeric', minute: 'numeric' };
     if (showSeconds) {

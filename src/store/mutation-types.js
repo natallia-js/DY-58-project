@@ -24,9 +24,7 @@ export const SET_ACTIVE_MAIN_MENU_ITEM = 'setActiveMainMenuItem';
 export const CLEAR_DISPATCH_ORDER_RESULT = 'clearDispatchOrderResult';
 export const CLEAR_EDIT_DISPATCHED_ORDER_RESULT = 'clearEditDispatchedOrderResult';
 export const ADD_ORDERS_BEING_DISPATCHED_NUMBER = 'addOrdersBeingDispatchedNumber';
-export const ADD_DISPATCHED_ORDERS_BEING_EDITED_NUMBER = 'addDispatchedOrdersBeingEditedNumber';
 export const SUB_ORDERS_BEING_DISPATCHED_NUMBER = 'subOrdersBeingDispatchedNumber';
-export const SUB_DISPATCHED_ORDERS_BEING_EDITED_NUMBER = 'subDispatchedOrdersBeingEditedNumber';
 export const SET_DISPATCH_ORDER_RESULT = 'setDispatchOrderResult';
 export const SET_EDIT_DISPATCHED_ORDER_RESULT = 'setEditDispatchedOrderResult';
 export const SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT = 'setDelStationWorkPlaceReceiverResult';
@@ -110,7 +108,10 @@ export const CLEAR_LOGIN_RESULT = 'clearLoginResult';
 export const SET_LOGIN_RESULT = 'setLoginResult';
 
 // Curr Work Poligon Structure
+export const SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA = 'setErrorLoadingCurrWorkPoligonData';
+export const SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS = 'setLoadingCurrWorkPoligonDataStatus';
 export const DEL_CURR_WORK_POLIGON_DATA = 'delCurrWorkPoligonData';
+
 
 // Order Patterns
 export const DEL_CURR_ORDER_PATTERN_DATA = 'delCurrOrderPatternsData';
@@ -178,6 +179,8 @@ export const DEL_ALL_WS_SERVER_MESSAGES = 'delAllWSServerMessages';
 
 // Common
 export const SET_PRINT_PREVIEW = 'setPrintPreview';
+export const SET_SYSTEM_MESSAGE = 'setSystemMessage';
+export const DELETE_ALL_SYSTEM_MESSAGES = 'deleteAllSystemMessages';
 
 // Order Drafts
 export const SET_LOADING_ORDER_DRAFTS_RESULT = 'setLoadingOrderDraftsResult';

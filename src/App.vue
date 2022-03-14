@@ -34,6 +34,7 @@
     DEL_WORK_ORDERS,
     DEL_ALL_WS_SERVER_MESSAGES,
     DEL_ORDERS_DRAFTS,
+    DELETE_ALL_SYSTEM_MESSAGES,
   } from '@/store/mutation-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
@@ -118,6 +119,7 @@
           store.commit(DEL_CURR_LAST_ORDERS_PARAMS);
           store.commit(DEL_WORK_ORDERS);
           store.commit(DEL_ORDERS_DRAFTS);
+          store.commit(DELETE_ALL_SYSTEM_MESSAGES);
         }
       });
 

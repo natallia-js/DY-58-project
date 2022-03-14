@@ -1,5 +1,6 @@
 <template>
   <div class="p-d-flex" style="height: 100vh;">
+    <Toast />
 
     <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
@@ -189,6 +190,7 @@
               specialCredentials: [state.selectedCredential.cred],
             });
           }
+
           store.commit(SET_USER_TOKEN, { token: responseData.token, saveInLocalStorage: true });
           store.commit(SET_USER_TAKE_PASS_DUTY_TIMES, {
             lastTakeDutyTime: responseData.lastTakeDutyTime ? new Date(responseData.lastTakeDutyTime) : null,

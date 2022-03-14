@@ -4,6 +4,7 @@ import {
   CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT,
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS,
+  SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import { getOrdersAddressedToThisPoligonFromGivenDate } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -79,7 +80,9 @@ export const incomingOrdersPerShift = {
      */
     async loadIncomingOrdersPerShift(context) {
       if (!context.getters.canUserGetIncomingOrdersPerShift) {
-        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: 'У вас нет права получать количество входящий распоряжений за смену' });
+        const errMessage = 'У вас нет права получать количество входящий распоряжений за смену либо вы не на дежурстве';
+        context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       context.commit(CLEAR_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT);
@@ -89,11 +92,13 @@ export const incomingOrdersPerShift = {
           datetime: context.getters.getLastTakeDutyTime,
         });
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: false, message: null });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Получена информация о количестве входящих распоряжений за смену' });
         context.commit(SET_INCOMING_ORDERS_PER_SHIFT, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о входящих распоряжениях за смену');
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
+        context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
       } finally {
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS, false);
