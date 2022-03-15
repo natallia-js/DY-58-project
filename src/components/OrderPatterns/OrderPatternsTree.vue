@@ -8,10 +8,10 @@
     <Button
       icon="pi pi-refresh"
       class="p-button-rounded p-button-success"
-      v-tooltip.right="'Обновить список распоряжений'"
+      v-tooltip.right="'Обновить список шаблонов документов'"
       @click="refreshOrderPatterns"
     />
-    Список шаблонов распоряжений пуст
+    Список шаблонов документов пуст
   </div>
   <div v-else class="p-grid">
     <div class="p-col-4 dy58-order-patterns-tree">
@@ -30,29 +30,29 @@
       <Button
         icon="pi pi-refresh"
         class="p-button-rounded p-button-success dy58-refresh-orders-list-btn"
-        v-tooltip.right="'Обновить список распоряжений'"
+        v-tooltip.right="'Обновить список шаблонов документов'"
         @click="refreshOrderPatterns"
       />
     </div>
     <div class="p-col-8">
       <div v-if="getModifyOrderCategoryTitleRecsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getModifyOrderCategoryTitleRecsBeingProcessed }} запросов на редактирование наименования категории распоряжений. Ожидаю ответ...
+        На сервер отправлено {{ getModifyOrderCategoryTitleRecsBeingProcessed }} запросов на редактирование наименования категории шаблонов документов. Ожидаю ответ...
       </div>
       <div v-if="getDelOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getDelOrderPatternRecsBeingProcessed }} запросов на удаление шаблона распоряжения. Ожидаю ответ...
+        На сервер отправлено {{ getDelOrderPatternRecsBeingProcessed }} запросов на удаление шаблона документа. Ожидаю ответ...
       </div>
       <div v-if="getModOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getModOrderPatternRecsBeingProcessed }} запросов на редактирование шаблона распоряжения. Ожидаю ответ...
+        На сервер отправлено {{ getModOrderPatternRecsBeingProcessed }} запросов на редактирование шаблона документа. Ожидаю ответ...
       </div>
       <div v-if="getCreateOrderPatternRecsBeingProcessed > 0" class="dy58-warning">
-        На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона распоряжения. Ожидаю ответ...
+        На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона документа. Ожидаю ответ...
       </div>
 
       <div v-if="selectedOrderCategory && selectedOrderCategory.personalCategory">
         <div class="dy58-title-small p-mb-4">
-          Вы можете отредактировать наименование категории распоряжений
+          Вы можете отредактировать наименование категории шаблонов документов
         </div>
-        <div class="p-mb-3">Наименование категории распоряжений</div>
+        <div class="p-mb-3">Наименование категории шаблонов документов</div>
         <div class="p-mb-3">
           <InputText
             v-model="editedOrderCategoryTitle"
@@ -97,9 +97,9 @@
 
       <div v-if="editedPattern && editedPattern.elements" class="dy58-order-pattern-border p-p-2">
         <div class="dy58-title-small p-mb-3 p-text-center">
-          Редактирование распоряжения
+          Редактирование шаблона документа
         </div>
-        <div class="p-text-bold p-mb-2">Наименование распоряжения</div>
+        <div class="p-text-bold p-mb-2">Наименование шаблона документа</div>
         <div class="p-mb-2">
           <InputText
             :value="editedPattern ? editedPattern.title : null"
@@ -112,7 +112,7 @@
           <MultiSelect
             v-model="editedPattern.specialTrainCategories"
             :options="getSpecialTrainCategories"
-            placeholder="Выберите особые отметки распоряжения"
+            placeholder="Выберите особые отметки документа"
             style="width:100%"
             @change="handleEditOrderSpecialTrainCategories"
           />

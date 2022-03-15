@@ -89,11 +89,11 @@
           <div class="dy58-table-title p-pb-2">
             <div class="p-mb-2">
               <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
-              {{ isDSP_or_DSPoperator ? 'Документы' : 'Распоряжения' }} в работе
+              Документы в работе
               <Badge :value="getWorkingOrdersNumber"></Badge>
             </div>
             <div class="dy58-table-comment">
-              извлекаются цепочки распоряжений, действовавшие с
+              извлекаются цепочки документов, действовавшие с
               <Calendar
                 v-model="state.startDateToGetData"
                 :showTime="true"
@@ -237,7 +237,7 @@
         confirm.require({
           target: event.currentTarget,
           group: 'confirmDelOrderDraft',
-          message: 'Удалить черновик распоряжения?',
+          message: 'Удалить черновик документа?',
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
             store.dispatch('delOrderDraft', {
@@ -268,7 +268,6 @@
         getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
         getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
-        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
         getExistingDSPTakeDutyOrder: computed(() => store.getters.getExistingDSPTakeDutyOrder),
         getIdsOfDraftsBeingDeleted: computed(() => store.getters.getIdsOfDraftsBeingDeleted),

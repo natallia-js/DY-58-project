@@ -163,7 +163,7 @@
   import { computed, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useRouter } from 'vue-router';
-  import { getECDOrdersFromServer } from '@/serverRequests/orders.requests';
+  import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
   import { FilterMatchMode } from 'primevue/api';
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
@@ -230,7 +230,7 @@
 
       const loadLazyData = () => {
         searchInProgress.value = true;
-        getECDOrdersFromServer({
+        getJournalOrdersFromServer({
           datetimeStart: props.searchParams.timeSpan.start,
           datetimeEnd: props.searchParams.timeSpan.end,
           includeDocsCriteria: props.searchParams.includeDocsCriteria,

@@ -23,7 +23,7 @@
           v-if="(v$.number.$invalid && submitted) || v$.number.$pending.$response"
           class="p-error"
         >
-          Не указан/неверно указан номер распоряжения
+          Не указан/неверно указан номер документа
         </small>
       </div>
 
@@ -43,7 +43,7 @@
           v-if="(v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response"
           class="p-error"
         >
-          Не определены/неверно определены дата и время создания распоряжения
+          Не определены/неверно определены дата и время создания документа
         </small>
       </div>
 
@@ -194,7 +194,7 @@
 
       <div class="p-col-12 p-mt-2 p-text-right">
         <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
-          На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения текущего типа. Ожидаю ответ...
+          На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
         </div>
         <Button type="submit" class="p-mr-2" label="Сохранить" />
         <Button label="Закрыть" @click="closeDialog" />

@@ -8,7 +8,7 @@
           <Button type="submit" label="Создать шаблон" />
         </div>
         <div v-else class="p-col-12 dy58-warning">
-          На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона распоряжения. Ожидаю ответ...
+          На сервер отправлено {{ getCreateOrderPatternRecsBeingProcessed }} запросов на создание шаблона документа. Ожидаю ответ...
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="service" :class="{'p-error': v$.service.$invalid && submitted}">
@@ -29,11 +29,11 @@
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderType" :class="{'p-error': v$.orderType.$invalid && submitted}">
-            <span class="p-text-bold"><span class="dy58-required-field">*</span> Тип распоряжения</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Тип документа</span>
           </label>
           <Dropdown
             id="orderType"
-            placeholder="Выберите тип распоряжения"
+            placeholder="Выберите тип документа"
             autofocus
             :options="orderPatternTypes"
             optionLabel="label"
@@ -45,12 +45,12 @@
             v-if="(v$.orderType.$invalid && submitted) || v$.orderType.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, выберите тип распоряжения
+            Пожалуйста, выберите тип документа
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderCategory" :class="{'p-error': v$.orderCategory.$invalid && submitted}">
-            <span class="p-text-bold"><span class="dy58-required-field">*</span> Категория распоряжения</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Категория документа</span>
           </label>
           <order-category-chooser
             id="orderCategory"
@@ -62,12 +62,12 @@
             v-if="(v$.orderCategory.$invalid && submitted) || v$.orderCategory.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, определите категорию распоряжения
+            Пожалуйста, определите категорию документа
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderTitle" :class="{'p-error':v$.orderTitle.$invalid && submitted}">
-            <span class="p-text-bold"><span class="dy58-required-field">*</span> Наименование распоряжения</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Наименование документа</span>
           </label>
           <allow-clear-input-text
             id="orderTitle"
@@ -80,7 +80,7 @@
             v-if="(v$.orderTitle.$invalid && submitted) || v$.orderTitle.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, введите наименование распоряжения
+            Пожалуйста, введите наименование документа
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
@@ -90,7 +90,7 @@
           <MultiSelect
             v-model="state.selectedSpecialTrainCategories"
             :options="specialTrainCategories"
-            placeholder="Выберите особытие отметки распоряжения"
+            placeholder="Выберите особытие отметки документа"
             style="width:100%"
           />
         </div>
@@ -350,3 +350,10 @@
     },
   };
 </script>
+
+
+<style lang="scss" scoped>
+  :deep(.p-buttonset .p-button:not(:last-child)) {
+    border-right: 1px solid #a9aeb3 !important;
+  }
+</style>

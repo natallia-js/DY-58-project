@@ -4,7 +4,7 @@
 
     <ShowIncomingOrderDlg
       :showDlg="state.showIncomingOrderDlg"
-      dlgTitle="Информация о рабочем распоряжении"
+      dlgTitle="Информация о рабочем документе"
       :order="state.chosenOrder"
       :orderNeedsToBeConfirmed="false"
       @close="hideOrderInfo"
@@ -42,7 +42,7 @@
             }]"
           >
             <div
-              v-if="[getWorkMessTblColumnsTitles.seqNum, getWorkMessTblColumnsTitles.orderNum].includes(col.field)"
+              v-if="col.field === getWorkMessTblColumnsTitles.orderNum"
               style="text-align:center"
               :class="[{
                 'dy58-order-dispatched-on-this-global-poligon':

@@ -2,7 +2,7 @@
   <div>
     <ShowIncomingOrderDlg
       :showDlg="showIncomingOrderDlg"
-      dlgTitle="Информация о рабочем распоряжении"
+      dlgTitle="Информация о рабочем документе"
       :order="chosenOrder"
       :orderNeedsToBeConfirmed="false"
       @close="hideOrderInfo"

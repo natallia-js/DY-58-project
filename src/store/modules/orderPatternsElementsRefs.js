@@ -36,9 +36,9 @@ export const orderPatternsElementsRefs = {
     getOrderPatternsElementsRefsForGivenElementType: (state) => (elementType) => {
       const refs = state.refs.find((item) => item.elementType === elementType);
       if (refs) {
-        return refs.possibleRefs;
+        return ['', ...refs.possibleRefs];
       }
-      return null;
+      return [];
     },
   },
 

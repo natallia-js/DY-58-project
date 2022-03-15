@@ -10,7 +10,7 @@
   >
     <div class="p-mb-3">
       Дата и время записи о проверке определяются моментом успешного сохранения данной записи в Журнале.
-      Полагается, что все распоряжения (документы), которые изданы ранее этой даты, проверены.
+      Полагается, что все документы, которые изданы ранее этой даты, проверены.
     </div>
     <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
 
@@ -64,7 +64,7 @@
 
       <div class="p-col-12 p-mt-2 p-text-right">
         <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
-          На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения текущего типа. Ожидаю ответ...
+          На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
         </div>
         <Button type="submit" class="p-mr-2" label="Сохранить" />
         <Button label="Закрыть" @click="closeDialog" />

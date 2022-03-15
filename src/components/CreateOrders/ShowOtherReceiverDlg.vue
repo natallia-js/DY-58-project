@@ -23,7 +23,7 @@
           v-if="(vv$.placeTitle.$invalid && submitted) || vv$.placeTitle.$pending.$response"
           class="p-error"
         >
-          Не определено место отправки распоряжения
+          Не определено место отправки документа
         </small>
       </div>
       <!-- ДОЛЖНОСТЬ ЛИЦА, КОТОРОМУ АДРЕСУЕТСЯ РАСПОРЯЖЕНИЕ -->

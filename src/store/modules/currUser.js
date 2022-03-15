@@ -478,7 +478,8 @@ export const currUser = {
 
         // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
         const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
-          (!userCredential || userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
+          (!userCredential || (userCredsWithPoligons[0].poligons.length > 1) ||
+            (userCredsWithPoligons[0].poligons[0].workPoligons.length > 1)) ? null :
           {
             type: userCredsWithPoligons[0].poligons[0].type,
             code: userCredsWithPoligons[0].poligons[0].workPoligons[0].poligonId,

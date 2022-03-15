@@ -32,7 +32,7 @@
       />
       <br />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
-        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание распоряжения текущего типа. Ожидаю ответ...
+        На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
       </div>
       <form @submit.prevent="handleSubmit()" class="p-grid">
 
@@ -49,7 +49,7 @@
             v-if="(v$.number.$invalid && submitted) || v$.number.$pending.$response"
             class="p-error"
           >
-            Не указан/неверно указан номер распоряжения
+            Не указан/неверно указан номер документа
           </small>
         </div>
 
@@ -69,7 +69,7 @@
             v-if="(v$.createDateTimeString.$invalid && submitted) || v$.createDateTimeString.$pending.$response"
             class="p-error"
           >
-            Не определены/неверно определены дата и время создания распоряжения
+            Не определены/неверно определены дата и время создания документа
           </small>
         </div>
 
@@ -80,7 +80,7 @@
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="current-order-draft" class="p-text-bold">
-            Текущий черновик распоряжения
+            Текущий черновик документа
           </label>
           <Dropdown
             id="current-order-draft"
@@ -88,7 +88,7 @@
             :options="getOrderDraftsOfGivenType"
             optionLabel="displayTitle"
             optionValue="_id"
-            placeholder="Выберите черновик распоряжения"
+            placeholder="Выберите черновик документа"
           />
         </div>
 
@@ -103,11 +103,11 @@
               <span class="dy58-required-field">*</span> На приказ/запрещение
             </span>
             <span v-else class="p-text-bold">
-              <span v-if="orderType === ORDER_PATTERN_TYPES.NOTIFICATION" class="dy58-required-field">*</span> На распоряжение
+              <span v-if="orderType === ORDER_PATTERN_TYPES.NOTIFICATION" class="dy58-required-field">*</span> На документ
             </span>
           </label>
           <TreeSelect
-            placeholder="Выберите действующее распоряжение"
+            placeholder="Выберите действующий документ"
             v-model="v$.prevRelatedOrder.$model"
             :options="getActiveOrdersToDisplayInTreeSelect"
             style="width:100%"
@@ -136,7 +136,7 @@
                 v-if="(v$.cancelOrderDateTime.$invalid && submitted) || v$.cancelOrderDateTime.$pending.$response"
                 class="p-error"
               >
-                Не определены/неверно определены дата и время отмены распоряжения
+                Не определены/неверно определены дата и время отмены документа
               </small>
             </div>
           </div>
@@ -174,7 +174,7 @@
             v-if="(v$.orderPlace.$invalid && submitted) || v$.orderPlace.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, определите место действия распоряжения
+            Пожалуйста, определите место действия документа
           </small>
         </div>
 
@@ -211,7 +211,7 @@
             v-if="(v$.timeSpan.$invalid && submitted) || v$.timeSpan.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, корректно определите время действия распоряжения
+            Пожалуйста, корректно определите время действия документа
           </small>
         </div>
 
@@ -222,7 +222,7 @@
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label>
-            <span class="p-text-bold">Особые отметки распоряжения</span>
+            <span class="p-text-bold">Особые отметки документа</span>
           </label>
           {{ state.specialTrainCategories.join(', ') }}
         </div>
@@ -231,7 +231,7 @@
 
         <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="orderText" :class="{'p-error':v$.orderText.$invalid && submitted}">
-            <span class="p-text-bold"><span class="dy58-required-field">*</span> Текст распоряжения</span>
+            <span class="p-text-bold"><span class="dy58-required-field">*</span> Текст документа</span>
           </label>
           <order-text
             id="orderText"
@@ -244,7 +244,7 @@
             v-if="(v$.orderText.$invalid && submitted) || v$.orderText.$pending.$response"
             class="p-error"
           >
-            Пожалуйста, корректно определите все параметры текста распоряжения
+            Пожалуйста, корректно определите все параметры текста документа
           </small>
         </div>
 

@@ -261,7 +261,6 @@ export const getCurrSectorShift = {
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
         setStationsShift(responseData, shiftPersonal);
-        console.log(responseData)
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД, ближайших к
       // участку ДНЦ с id = sectorId

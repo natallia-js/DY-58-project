@@ -6,7 +6,7 @@
       {{ selectedRecords.length > 4 ? 'записей' : (selectedRecords.length > 1) ? 'записи' : 'запись' }}
       из {{ totalRecords }}
     </div>
-    <!--<DataTable
+    <DataTable
       :value="data"
       dataKey="id"
       :totalRecords="totalRecords"
@@ -26,12 +26,9 @@
       v-model:selection="selectedRecords"
       filterDisplay="menu"
       :globalFilterFields="[
-        getECDJournalTblColumnsTitles.toWhom,
-        getECDJournalTblColumnsTitles.number,
-        getECDJournalTblColumnsTitles.orderContent,
-        getECDJournalTblColumnsTitles.orderAcceptor,
-        getECDJournalTblColumnsTitles.orderSender,
-        getECDJournalTblColumnsTitles.notificationNumber,
+        getDNC_DSPJournalTblColumnsTitles.number,
+        getDNC_DSPJournalTblColumnsTitles.orderContent,
+        getDNC_DSPJournalTblColumnsTitles.orderAcceptor,
       ]"
       removableSort
       @page="onPage($event)"
@@ -55,28 +52,25 @@
       >
       </Column>
 
-      <Column v-for="col of getECDJournalTblColumns"
+      <Column v-for="col of getDNC_DSPJournalTblColumns"
         :field="col.field"
         :key="col.field"
         :header="col.title"
         :style="{ minWidth: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-content-cell-class"
-        :sortable="[
-          getECDJournalTblColumnsTitles.assertDateTime,
-          getECDJournalTblColumnsTitles.orderNotificationDateTime].includes(col.field)"
+        :sortable="[getDNC_DSPJournalTblColumnsTitles.assertDateTime].includes(col.field)"
         filterMatchMode="contains"
         :showFilterMatchModes="false"
       >
         <template #body="slotProps">
           <div
             v-if="[
-              getECDJournalTblColumnsTitles.orderContent,
-              getECDJournalTblColumnsTitles.toWhom,
-              getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
+              getDNC_DSPJournalTblColumnsTitles.orderContent,
+              getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
           ></div>
-          <div v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
+          <div v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
           <div v-else>
@@ -85,12 +79,9 @@
         </template>
 
         <template #filter="{filterModel,filterCallback}" v-if="[
-          getECDJournalTblColumnsTitles.toWhom,
-          getECDJournalTblColumnsTitles.number,
-          getECDJournalTblColumnsTitles.orderContent,
-          getECDJournalTblColumnsTitles.orderAcceptor,
-          getECDJournalTblColumnsTitles.orderSender,
-          getECDJournalTblColumnsTitles.notificationNumber,
+          getDNC_DSPJournalTblColumnsTitles.number,
+          getDNC_DSPJournalTblColumnsTitles.orderContent,
+          getDNC_DSPJournalTblColumnsTitles.orderAcceptor,
         ].includes(col.field)">
           <InputText
             type="text"
@@ -99,27 +90,21 @@
             placeholder="Введите значение для поиска в столбце"
             @keydown.enter="filterCallback()"
           />
-          <small v-if="[getECDJournalTblColumnsTitles.toWhom, getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)">
+          <small v-if="getDNC_DSPJournalTblColumnsTitles.orderAcceptor === col.field">
             поиск ведется по информации об адресатах
           </small>
-          <small v-else-if="[getECDJournalTblColumnsTitles.number, getECDJournalTblColumnsTitles.notificationNumber].includes(col.field)">
+          <small v-else-if="getDNC_DSPJournalTblColumnsTitles.number === col.field">
             поиск ведется по числовому значению либо его части
           </small>
-          <small v-else-if="getECDJournalTblColumnsTitles.orderContent === col.field">
+          <small v-else-if="getDNC_DSPJournalTblColumnsTitles.orderContent === col.field">
             поиск ведется только по элементам текста документа (наименование документа и его адресаты не рассматриваются)
-          </small>
-          <small v-else-if="getECDJournalTblColumnsTitles.orderSender === col.field">
-            поиск ведется по информации об издателе документа
           </small>
         </template>
 
         <template #filterclear="{filterCallback}" v-if="[
-          getECDJournalTblColumnsTitles.toWhom,
-          getECDJournalTblColumnsTitles.number,
-          getECDJournalTblColumnsTitles.orderContent,
-          getECDJournalTblColumnsTitles.orderAcceptor,
-          getECDJournalTblColumnsTitles.orderSender,
-          getECDJournalTblColumnsTitles.notificationNumber,
+          getDNC_DSPJournalTblColumnsTitles.number,
+          getDNC_DSPJournalTblColumnsTitles.orderContent,
+          getDNC_DSPJournalTblColumnsTitles.orderAcceptor,
         ].includes(col.field)">
           <Button
             type="button"
@@ -131,12 +116,9 @@
         </template>
 
         <template #filterapply="{filterCallback}" v-if="[
-          getECDJournalTblColumnsTitles.toWhom,
-          getECDJournalTblColumnsTitles.number,
-          getECDJournalTblColumnsTitles.orderContent,
-          getECDJournalTblColumnsTitles.orderAcceptor,
-          getECDJournalTblColumnsTitles.orderSender,
-          getECDJournalTblColumnsTitles.notificationNumber,
+          getDNC_DSPJournalTblColumnsTitles.number,
+          getDNC_DSPJournalTblColumnsTitles.orderContent,
+          getDNC_DSPJournalTblColumnsTitles.orderAcceptor,
         ].includes(col.field)">
           <Button
             type="button"
@@ -147,22 +129,22 @@
           </Button>
         </template>
       </Column>
-    </DataTable>-->
+    </DataTable>
   </div>
 </template>
 
 <script>
-  import { ref, watch } from 'vue';
-  //import { useStore } from 'vuex';
-  //import { useRouter } from 'vue-router';
-  //import { getECDOrdersFromServer } from '@/serverRequests/orders.requests';
-  //import { FilterMatchMode } from 'primevue/api';
-  //import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
+  import { computed, ref, watch } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRouter } from 'vue-router';
+  import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
+  import { FilterMatchMode } from 'primevue/api';
+  import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
 
   const DEF_ROWS_PER_PAGE = 10;
 
   export default {
-    name: 'dy58-ecd-journal',
+    name: 'dy58-dnc-dsp-journal',
 
     props: {
       searchParams: {
@@ -174,8 +156,8 @@
     },
 
     setup(props) {
-      //const store = useStore();
-      //const router = useRouter();
+      const store = useStore();
+      const router = useRouter();
 
       const data = ref([]);
       const errMessage = ref(null);
@@ -185,32 +167,29 @@
       const sortFields = ref(null);
       const filterFields = ref(null);
       const rowsPerPage = ref(DEF_ROWS_PER_PAGE);
-      //const getECDJournalTblColumnsTitles = computed(() => store.getters.getECDJournalTblColumnsTitles);
-      /*const filters = ref({
-        [getECDJournalTblColumnsTitles.value.toWhom]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.number]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.orderContent]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.orderAcceptor]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.orderSender]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        [getECDJournalTblColumnsTitles.value.notificationNumber]: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      });*/
+      const getDNC_DSPJournalTblColumnsTitles = computed(() => store.getters.getDNC_DSPJournalTblColumnsTitles);
+      const filters = ref({
+        [getDNC_DSPJournalTblColumnsTitles.value.number]: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        [getDNC_DSPJournalTblColumnsTitles.value.orderContent]: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        [getDNC_DSPJournalTblColumnsTitles.value.orderAcceptor]: { value: null, matchMode: FilterMatchMode.CONTAINS },
+      });
       const selectedRecords = ref();
 
-      /*const getOrderSeqNumber = (index) => {
+      const getOrderSeqNumber = (index) => {
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
-      };*/
+      };
 
       // Позволяет сформировать массив данных для отображения в таблице.
-      /*const prepareDataForDisplay = (responseData) => {
+      const prepareDataForDisplay = (responseData) => {
         if (data.value.length) {
           data.value = [];
         }
-        data.value = prepareDataForDisplayInECDJournal(responseData, getOrderSeqNumber);
+        data.value = prepareDataForDisplayInDNC_DSPJournal(responseData, getOrderSeqNumber);
       };
 
       const loadLazyData = () => {
         searchInProgress.value = true;
-        getECDOrdersFromServer({
+        getJournalOrdersFromServer({
           datetimeStart: props.searchParams.timeSpan.start,
           datetimeEnd: props.searchParams.timeSpan.end,
           includeDocsCriteria: props.searchParams.includeDocsCriteria,
@@ -230,7 +209,7 @@
           .finally(() => {
             searchInProgress.value = false;
           });
-      };*/
+      };
 
       const onPage = (event) => {
         if (rowsPerPage.value !== event.rows) {
@@ -241,7 +220,7 @@
           // если меняется текущий номер страницы
           currentPage.value = event.page + 1;
         }
-        //loadLazyData();
+        loadLazyData();
       };
 
       const onSort = (event) => {
@@ -254,26 +233,26 @@
         } else {
           sortFields.value = null;
         }
-        //loadLazyData();
+        loadLazyData();
       };
 
       const onFilter = () => {
         // таблица при попытке что-то отфильтровать производит автоматически переход на 1 страницу
         currentPage.value = 1;
         filterFields.value = [];
-        /*for (let filter in filters.value) {
+        for (let filter in filters.value) {
           if (filters.value[filter].value) {
             filterFields.value.push({ field: filter, value: filters.value[filter].value });
           }
         }
-        loadLazyData();*/
+        loadLazyData();
       };
 
       watch(() => props.searchParams, (newVal) => {
         if (!newVal || searchInProgress.value) {
           return;
         }
-        //loadLazyData();
+        loadLazyData();
       });
 
       watch(() => props.printParams, (newVal) => {
@@ -281,7 +260,7 @@
           return;
         }
         // open print preview window
-        /*const params = selectedRecords.value ?
+        const params = selectedRecords.value ?
           {
             selectedRecords: selectedRecords.value,
           } :
@@ -294,26 +273,26 @@
             filterFields: filterFields.value,
           };
         const route = router.resolve({
-          name: 'PrintECDJournalPreviewPage',
+          name: 'PrintDNC_DSPJournalPreviewPage',
           params: null,
         });
         const newWindow = window.open(route.href, '_blank');
         newWindow.addEventListener('ready', () => {
           const event = new CustomEvent('data', { detail: JSON.stringify(params) });
           newWindow.dispatchEvent(event);
-        });*/
+        });
       });
 
       return {
         data,
         totalRecords,
         selectedRecords,
-        //filters,
+        filters,
         rowsPerPage,
         errMessage,
         searchInProgress,
-        //getECDJournalTblColumnsTitles,
-        //getECDJournalTblColumns: computed(() => store.getters.getECDJournalTblColumns),
+        getDNC_DSPJournalTblColumnsTitles,
+        getDNC_DSPJournalTblColumns: computed(() => store.getters.getDNC_DSPJournalTblColumns),
         onPage,
         onSort,
         onFilter,

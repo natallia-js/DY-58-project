@@ -57,7 +57,7 @@
 <script>
   import { computed, onMounted, ref } from 'vue';
   import { useStore } from 'vuex';
-  import { getECDOrdersFromServer } from '@/serverRequests/orders.requests';
+  import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
@@ -122,7 +122,7 @@
       const loadData = (params) => {
         const { datetimeStart, datetimeEnd, includeDocsCriteria, filterFields, sortFields } = params;
         searchInProgress.value = true;
-        getECDOrdersFromServer({ datetimeStart, datetimeEnd, includeDocsCriteria, filterFields, sortFields })
+        getJournalOrdersFromServer({ datetimeStart, datetimeEnd, includeDocsCriteria, filterFields, sortFields })
           .then((responseData) => {
             errMessage.value = null;
             prepareDataForDisplay(responseData.data);

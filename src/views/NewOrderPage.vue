@@ -54,7 +54,7 @@
     </TabPanel>
   </TabView>
   <div v-else class="dy58-user-action-forbidden-block">
-    Вы не на дежурстве либо у вас нет прав на издание распоряжений
+    Вы не на дежурстве либо у вас нет прав на издание документов
   </div>
 </template>
 

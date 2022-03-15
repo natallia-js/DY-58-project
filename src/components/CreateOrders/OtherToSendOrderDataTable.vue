@@ -265,7 +265,7 @@
         if (this.user) {
           this.user = null;
         }
-        this.showOtherReceiverDlgTitle = 'Введите информацию о получателе распоряжения';
+        this.showOtherReceiverDlgTitle = 'Введите информацию о получателе документа';
         this.showOtherReceiverDlg = true;
       },
 
@@ -274,7 +274,7 @@
           this.addNewRec = false;
         }
         this.user = this.selectedUser;
-        this.showOtherReceiverDlgTitle = 'Отредактируйте информацию о получателе распоряжения';
+        this.showOtherReceiverDlgTitle = 'Отредактируйте информацию о получателе документа';
         this.showOtherReceiverDlg = true;
       },
 

@@ -22,7 +22,12 @@
         (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
       class="p-ml-1 p-mr-1"
     >
-      <DNCandDSPJournal/>
+      <DNCandDSPJournal
+        :searchParams="searchParams"
+        :printParams="printParams"
+        :checkDocs="checkDocs"
+        @finishedCreatingCheckRecord="checkDocs = false"
+      />
     </div>
   </div>
   <div v-else class="dy58-user-action-forbidden-block">

@@ -165,14 +165,12 @@ export const getWorkOrders = {
           }
           return 0;
         })
-        .map((item, index) => {
+        .map((item) => {
           return {
             id: item._id,
             type: item.type,
-            //createDateTime: item.createDateTime,
             sendOriginal: item.sendOriginal,
             state: '',
-            seqNum: index + 1,
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD, item.specialTrainCategories),
             orderNum: item.number,

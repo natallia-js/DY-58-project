@@ -19,7 +19,6 @@ const InputMessTblColumnsTitles = Object.freeze({
 const WorkMessTblColumnsTitles = Object.freeze({
   expander: 'expander',
   state: 'state',
-  seqNum: 'seqNum',
   timeSpan: 'timeSpan', // время действия распоряжения
   orderNum: 'orderNum',
   extendedOrderTitle: 'extendedOrderTitle',
@@ -60,6 +59,18 @@ const ECDJournalTblColumnsTitles = Object.freeze({
   orderSender: 'orderSender',
   orderNotificationDateTime: 'orderNotificationDateTime', // время уведомления (на приказ/запрещение)
   notificationNumber: 'notificationNumber', // номер уведомления
+});
+
+// Условные наименования столбцов таблицы журнала ДНЦ/ДСП
+// (названия столбцов должны соответствовать названию полей массива данных для корректного
+// отображения информации; кроме того, они должны совпадать с наименованиями соответствующих полей в БД,
+// т.к. по ним идут запросы на сортировку и фильтрацию данных в таблице)
+const DNC_DSPJournalTblColumnsTitles = Object.freeze({
+  seqNum: 'seqNum',
+  assertDateTime: 'assertDateTime', // дата, время утверждения
+  number: 'number',
+  orderContent: 'orderContent',
+  orderAcceptor: 'orderAcceptor',
 });
 
 /**
@@ -132,15 +143,21 @@ export const tablesColumns = {
     },
 
     /**
+     * Возвращает информацию об условных наименованиях столбцов таблицы журнала ДНЦ/ДСП.
+     */
+    getDNC_DSPJournalTblColumnsTitles() {
+      return DNC_DSPJournalTblColumnsTitles;
+    },
+
+    /**
      * Возвращает информацию о столбцах таблицы рабочих распоряжений.
      */
     getWorkMessTblColumns() {
       return [
         { field: WorkMessTblColumnsTitles.expander, title: '', width: '5%', align: 'center' },
-        { field: WorkMessTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left' },
         { field: WorkMessTblColumnsTitles.state, title: 'Действия', width: '4%', align: 'center' },
         { field: WorkMessTblColumnsTitles.orderNum, title: 'Номер', width: '5%', 'align': 'left' },
-        { field: WorkMessTblColumnsTitles.timeSpan, title: 'Время действия', width: '15%', align: 'left' },
+        { field: WorkMessTblColumnsTitles.timeSpan, title: 'Время действия', width: '19%', align: 'left' },
         { field: WorkMessTblColumnsTitles.extendedOrderTitle, title: 'Наименование', width: '44%', align: 'left' },
         { field: WorkMessTblColumnsTitles.orderReceiveStatus, title: 'Статус', width: '23%', align: 'left' },
       ];
@@ -193,6 +210,19 @@ export const tablesColumns = {
         { field: ECDJournalTblColumnsTitles.orderSender, title: 'Кто передал Фамилия И.О.', width: '9%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderNotificationDateTime, title: 'Время уведомления', width: '9%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.notificationNumber, title: 'Номер уведомления', width: '6%', align: 'left', },
+      ];
+    },
+
+    /**
+     * Возвращает информацию о столбцах таблицы журнала ДНЦ/ДСП.
+     */
+    getDNC_DSPJournalTblColumns() {
+      return [
+        { field: DNC_DSPJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '5%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения приказа', width: '10%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.number, title: 'Номер приказа', width: '10%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '45%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О.', width: '30%', align: 'left', },
       ];
     },
   },

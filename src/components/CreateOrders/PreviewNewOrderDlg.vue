@@ -9,7 +9,7 @@
     <p class="p-text-center p-text-bold p-text-capitalize p-mb-2">
       {{ getCurrDateTimeString }} &#160; {{ type }} &#160; {{ number ? '№ ' + number : '№ ?' }}
     </p>
-    <p v-if="prevRelatedOrder"><span class="p-text-bold">На распоряжение:</span> &#160;
+    <p v-if="prevRelatedOrder"><span class="p-text-bold">На документ:</span> &#160;
       №{{ prevRelatedOrder.number }} от {{ prevRelatedOrderCreateDateTime }} -
       {{ prevRelatedOrder.orderText ? prevRelatedOrder.orderText.orderTitle : '?' }}
     </p>
