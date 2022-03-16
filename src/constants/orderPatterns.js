@@ -29,6 +29,7 @@ export const ElementSizesCorrespondence = Object.freeze({
 export const OrderPatternElementType = Object.freeze({
   TEXT: 'text',
   INPUT: 'input',
+  TEXT_AREA: 'textArea',
   SELECT: 'select',
   DATE: 'date',
   TIME: 'time',
@@ -49,6 +50,7 @@ export const OrderPatternElementType_Future = Object.freeze({
 export const OrderPatternElementTypeNames = Object.freeze({
   TEXT: 'Текст',
   INPUT: 'Поле ввода',
+  TEXT_AREA: 'Текстовая область',
   SELECT: 'Выпадающий список',
   DATE: 'Дата',
   TIME: 'Время',

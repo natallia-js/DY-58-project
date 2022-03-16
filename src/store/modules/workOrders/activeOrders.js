@@ -26,7 +26,6 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  *     ЭЦД             Заявка (ДСП)        -
  *     ДНЦ             Уведомление (ДСП)   Распоряжение
  *     ДСП             Уведомление (ДСП)   -
- *     ЭЦД             Уведомление (ДСП)   Уведомление ЭЦД об отмене запрещения ЭЦД
  *     ДНЦ             Приказ ЭЦД          -
  *     ДСП             Приказ ЭЦД          -
  *     ЭЦД             Приказ ЭЦД          Уведомление ЭЦД об отмене приказа ЭЦД
@@ -72,10 +71,6 @@ const possibleDocsConnections = [
       {
         userCredentials: [APP_CREDENTIALS.DNC_FULL],
         possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER],
-      },
-      {
-        userCredentials: [APP_CREDENTIALS.ECD_FULL],
-        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_NOTIFICATION],
       },
     ],
   },

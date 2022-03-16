@@ -13,7 +13,7 @@
         v-else
         class="p-mr-2 p-mb-2"
         :style="{
-          width: getElementSizesCorrespondence[patternElement.size],
+          width: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? getElementSizesCorrespondence[patternElement.size] : '100%',
           display: 'inline-block'
         }"
       >

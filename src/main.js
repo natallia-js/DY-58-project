@@ -48,6 +48,7 @@ import TieredMenu from 'primevue/tieredmenu';
 import Slider from 'primevue/slider';
 import Panel from 'primevue/panel';
 import OverlayPanel from 'primevue/overlaypanel';
+import Textarea from 'primevue/textarea';
 
 const app = createApp(App);
 
@@ -93,5 +94,6 @@ app.component('TieredMenu', TieredMenu);
 app.component('Slider', Slider);
 app.component('Panel', Panel);
 app.component('OverlayPanel', OverlayPanel);
+app.component('Textarea', Textarea);
 
 app.mount('#app');

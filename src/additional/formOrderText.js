@@ -95,6 +95,7 @@ export function formOrderText(props) {
     switch (currVal.type) {
       case OrderPatternElementType.TEXT:
       case OrderPatternElementType.INPUT:
+      case OrderPatternElementType.TEXT_AREA:
       case OrderPatternElementType.SELECT:
         substring = currVal.value ? currVal.value : '';
         break;

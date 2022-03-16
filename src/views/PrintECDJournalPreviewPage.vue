@@ -158,4 +158,12 @@
     thead { display: table-header-group }
     tfoot { display: table-footer-group }
   }
+
+  :deep(th) {
+    border-width: 2px !important;
+  }
+
+  :deep(td) {
+    border-width: 2px !important;
+  }
 </style>

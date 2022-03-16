@@ -21,6 +21,7 @@
           'dy58-not-edited-order-pattern-element-block': patternElement._id !== editedPatternElementId,
           'dy58-edited-order-pattern-element-block': patternElement._id === editedPatternElementId,
         }"
+        :style="{width: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? 'auto' : '100%'}"
         @contextmenu="onShowOrderPatternElementContextMenu($event, patternElement)"
       >
         <order-pattern-element-view :element="patternElement" />
@@ -90,6 +91,10 @@
     },
 
     computed: {
+      getOrderPatternElementTypes() {
+        return OrderPatternElementType;
+      },
+
       orderPatternElementContextMenuItems() {
         return [
           {

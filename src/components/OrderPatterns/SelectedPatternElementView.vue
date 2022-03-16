@@ -9,6 +9,13 @@
     v-else-if="element.type === getOrderPatternElementTypes.INPUT"
     :style="{width:getElementSizesCorrespondence[element.size]}"
   />
+  <Textarea
+    v-else-if="element.type === getOrderPatternElementTypes.TEXT_AREA"
+    :autoResize="true"
+    rows="2"
+    style="width:100%;font-size:inherit;font-family:inherit;"
+    class="p-p-1"
+  />
   <Dropdown
     v-else-if="element.type === getOrderPatternElementTypes.SELECT"
     :style="{width:getElementSizesCorrespondence[element.size]}"

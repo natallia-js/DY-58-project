@@ -25,10 +25,9 @@
         />
       </div>
       <div class="p-grid">
-        <div v-if="selectedPatternElement.type === getOrderPatternElementTypesObject.INPUT ||
-          selectedPatternElement.type === getOrderPatternElementTypesObject.SELECT"
+        <div v-if="[getOrderPatternElementTypesObject.INPUT, getOrderPatternElementTypesObject.SELECT].includes(selectedPatternElement.type)"
           class="p-col-fixed"
-          style="width:130px"
+          style="width:200px"
         >
           <div class="p-mb-1">Размер</div>
           <element-size-chooser
@@ -36,9 +35,8 @@
             @changeSize="(value) => handleChangePatternElementSize(value)"
           />
         </div>
-        <div v-if="selectedPatternElement.type !== getOrderPatternElementTypesObject.TEXT &&
-          selectedPatternElement.type !== getOrderPatternElementTypesObject.DR_TRAIN_TABLE &&
-          selectedPatternElement.type !== getOrderPatternElementTypesObject.LINEBREAK"
+        <div v-if="![getOrderPatternElementTypesObject.TEXT, getOrderPatternElementTypesObject.TEXT_AREA,
+          getOrderPatternElementTypesObject.DR_TRAIN_TABLE, getOrderPatternElementTypesObject.LINEBREAK].includes(selectedPatternElement.type)"
           class="p-col"
         >
           <div class="p-mb-1">Смысловое значение</div>

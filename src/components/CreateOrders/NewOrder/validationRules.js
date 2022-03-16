@@ -18,12 +18,12 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
   // Проверка элементов шаблона распоряжения на наличие в них значений.
-  // Значение должно присутствовать у всех элементов шаблона, кроме элемента типа
-  // 'перенос строки', а также элементов, смысловые значения которых находятся в
-  // определенном списке
+  // Значение должно присутствовать у всех элементов шаблона, кроме элементов типа
+  // 'перенос строки' и 'текстовая область', а также элементов, смысловые значения
+  // которых находятся в определенном списке
   const orderTextFieldsNotEmpty = (orderText) => {
     for (let orderTextElement of orderText) {
-      if (orderTextElement.type !== OrderPatternElementType.LINEBREAK &&
+      if (![OrderPatternElementType.LINEBREAK, OrderPatternElementType.TEXT_AREA].includes(orderTextElement.type) &&
         !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) &&
         !orderTextElement.value) {
         return false;

@@ -15,6 +15,19 @@
     :placeholder="element.ref"
   />
 
+  <!-- Элемент "Текстовая область" -->
+
+  <Textarea
+    v-else-if="element.type === getOrderPatternElementTypes.TEXT_AREA"
+    v-model="state.elementModelValue"
+    :autoResize="true"
+    rows="2"
+    style="width:100%;font-size:inherit;font-family:inherit;"
+    class="p-p-1"
+    v-tooltip="element.ref"
+    :placeholder="element.ref"
+  />
+
   <!-- Элемент "Выпадающий список" -->
 
   <div v-else-if="element.type === getOrderPatternElementTypes.SELECT" v-tooltip="element.ref">
