@@ -13,8 +13,6 @@
       :lazy="true"
       class="p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
-      :scrollable="true"
-      scrollHeight="flex"
       :loading="searchInProgress"
       :paginator="true"
       :rows="rowsPerPage"
@@ -36,11 +34,11 @@
       @filter="onFilter($event)"
     >
       <template #empty>
-        <div style="marginLeft:auto;marginRight:auto">Документы не найдены.</div>
+        <div class="p-d-flex p-jc-center">Документы не найдены.</div>
       </template>
 
       <template #loading>
-        <div style="marginLeft:auto;marginRight:auto">Идет загрузка данных. Подождите...</div>
+        <div class="p-d-flex p-jc-center">Идет загрузка данных. Подождите...</div>
       </template>
 
       <Column
@@ -56,7 +54,7 @@
         :field="col.field"
         :key="col.field"
         :header="col.title"
-        :style="{ minWidth: col.width, textAlign: col.align }"
+        :style="{ width: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-content-cell-class"
         :sortable="[getDNC_DSPJournalTblColumnsTitles.assertDateTime].includes(col.field)"
@@ -66,6 +64,7 @@
         <template #body="slotProps">
           <div
             v-if="[
+              getDNC_DSPJournalTblColumnsTitles.assertDateTime,
               getDNC_DSPJournalTblColumnsTitles.orderContent,
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"

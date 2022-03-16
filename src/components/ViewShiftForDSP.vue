@@ -12,7 +12,7 @@
           :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
         >
           {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
-          ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
+          ${user.stationWorkPlaceId ? `(${getWorkPlaceDisplayData(user.stationId, user.stationWorkPlaceId)})` : ''}` }}
         </p>
       </div>
     </Fieldset>
@@ -33,7 +33,7 @@
               :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
             >
               {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
-              ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
+              ${user.stationWorkPlaceId ? `(${getWorkPlaceDisplayData(user.stationId, user.stationWorkPlaceId)})` : ''}` }}
             </p>
           </div>
         </div>
@@ -88,33 +88,50 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
 
   export default {
     name: 'dy58-view-shift-for-dsp',
 
-    computed: {
-      ...mapGetters([
-        'getSectorPersonal',
-        'getUserWorkPoligonData',
-      ]),
+    setup() {
+      const store = useStore();
 
-      currentStationShift() {
-        if (!this.getUserWorkPoligonData) {
+      const getSectorPersonal = computed(() => store.getters.getSectorPersonal);
+      const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
+
+      const currentStationShift = computed(() => {
+        if (!getUserWorkPoligonData.value) {
           return [];
         }
-        const currStationPersonal = this.getSectorPersonal.sectorStationsShift.find((shift) =>
-          shift.stationId === this.getUserWorkPoligonData.St_ID);
+        const currStationPersonal = getSectorPersonal.value.sectorStationsShift.find((shift) =>
+          shift.stationId === getUserWorkPoligonData.value.St_ID);
         return currStationPersonal && currStationPersonal.people ? currStationPersonal.people : [];
-      },
+      });
 
-      adjacentStationsShift() {
-        if (!this.getSectorPersonal.sectorStationsShift) {
+      const adjacentStationsShift = computed(() => {
+        if (!getSectorPersonal.value || !getSectorPersonal.value.sectorStationsShift ||
+          !getUserWorkPoligonData.value) {
           return [];
         }
-        return this.getSectorPersonal.sectorStationsShift.filter((shift) =>
-          shift.stationId !== this.getUserWorkPoligonData.St_ID);
-      },
+        return getSectorPersonal.value.sectorStationsShift.filter((shift) =>
+          shift.stationId !== getUserWorkPoligonData.value.St_ID);
+      });
+
+      const getWorkPlaceDisplayData = (stationId, workPlaceId) => {
+        const workPlaceName = store.getters.getStationWorkPlaceNameById(stationId, workPlaceId);
+        if (!workPlaceName) {
+          return `рабочее место с id=${workPlaceId}`;
+        }
+        return `рабочее место "${workPlaceName}"`;
+      };
+
+      return {
+        getSectorPersonal,
+        currentStationShift,
+        adjacentStationsShift,
+        getWorkPlaceDisplayData,
+      };
     },
   };
 </script>

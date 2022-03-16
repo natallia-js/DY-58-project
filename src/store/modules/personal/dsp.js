@@ -107,7 +107,7 @@ export const dsp = {
           if (!item.stationWorkPlaceId) {
             addDataInGroup(stationName, dataToAdd);
           } else {
-            addDataInGroup(getters.getStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
+            addDataInGroup(getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
           }
         });
       return groupedPeople;

@@ -23,15 +23,18 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
 
   export default {
     name: 'dy58-side-menu',
 
-    computed: {
-      ...mapGetters([
-        'getLeftMenuItems',
-      ]),
+    setup() {
+      const store = useStore();
+
+      return {
+        getLeftMenuItems: computed(() => store.getters.getLeftMenuItems),
+      };
     },
   };
 </script>

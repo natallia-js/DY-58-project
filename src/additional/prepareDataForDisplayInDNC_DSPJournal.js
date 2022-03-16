@@ -1,5 +1,5 @@
 import { store } from '@/store';
-import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+import { getLocaleDateString, getLocaleTimeString } from '@/additional/dateTimeConvertions';
 import {
   getOrderTextElementTypedValue,
   sendOriginal,
@@ -53,7 +53,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       type: order.type,
       seqNum: getOrderSeqNumberFunction(index),
       // дата-время утверждения распоряжения
-      assertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
+      assertDateTime: order.assertDateTime ? `${getLocaleDateString(new Date(order.assertDateTime))}<br/>${getLocaleTimeString(new Date(order.assertDateTime))}` : '',
       number: order.number,
       orderContent: getExtendedOrderTitle(order) + '<br/>' +
         formOrderText({

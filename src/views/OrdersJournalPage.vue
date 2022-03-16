@@ -6,23 +6,17 @@
       @print="printParams = $event"
       @createCheckRecord="checkDocs = true"
     />
-    <div
-      v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
-      class="p-ml-1 p-mr-1"
-    >
+    <div class="dy58-journal-container">
       <ECDJournal
+        v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"
         @finishedCreatingCheckRecord="checkDocs = false"
       />
-    </div>
-    <div
-      v-else-if="isDSP_or_DSPoperator || isDNC ||
-        (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
-      class="p-ml-1 p-mr-1"
-    >
       <DNCandDSPJournal
+        v-else-if="isDSP_or_DSPoperator || isDNC ||
+          (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"

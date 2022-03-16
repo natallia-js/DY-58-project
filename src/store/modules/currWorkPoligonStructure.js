@@ -114,7 +114,11 @@ export const currWorkPoligonStructure = {
       return wpStructure;
     },
 
-    getStationWorkPlaceNameById(state, getters) {
+    /**
+     * Если текущий рабочий полигон - станция, то данный метод для заданного id рабочего места на
+     * станции возвращает наименование данного рабочего места.
+     */
+    getCurrStationWorkPlaceNameById(state, getters) {
       return (workPlaceId) => {
         const workPoligon = getters.getUserWorkPoligon;
         if (!workPoligon || workPoligon.type !== WORK_POLIGON_TYPES.STATION || !state.station ||
@@ -126,6 +130,28 @@ export const currWorkPoligonStructure = {
           return null;
         }
         return stationWorkPlace.SWP_Name || null;
+      };
+    },
+
+    /**
+     * Для заданных id станции и id рабочего места на станции возвращает наименование рабочего места.
+     */
+    getStationWorkPlaceNameById(state, getters) {
+      return (stationId, workPlaceId) => {
+        const workPoligon = getters.getUserWorkPoligon;
+        if (!workPoligon) {
+          return null;
+        }
+        switch (workPoligon.type) {
+          case WORK_POLIGON_TYPES.STATION:
+            if (workPoligon.code === stationId) {
+              return getters.getCurrStationWorkPlaceNameById(workPlaceId);
+            } else {
+              return null;
+            }
+          default:
+            return null;
+        }
       };
     },
 

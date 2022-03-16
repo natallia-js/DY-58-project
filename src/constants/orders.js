@@ -59,7 +59,22 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   STATION: 'Станция',
   DPT_STATION: 'Станция отправления',
   ARR_STATION: 'Станция прибытия',
+  SWITCH_OFF_ON: 'Отключить, включить',
+  EXACT_PLACE: 'Точное место',
+  ACTIONS_ORDER: 'Порядок действий',
 });
+
+export const SWITCH_OFF_ON_ITEMS = [
+  'отключить', 'отключены', 'включить', 'включены',
+];
+
+export const EXACT_PLACE_ITEMS = [
+  'станция', 'подстанция', 'подстанции', 'перегон', 'контактная сеть', 'ВЛ', 'КЛ',
+];
+
+export const ACTIONS_ORDER_ITEMS = [
+  'вручную', 'дистанционно', 'закрыть привод на замок', 'вывесить запрещающие плакаты',
+];
 
 export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
   NOTE: 'Примечание',

@@ -7,6 +7,7 @@ import NewOrderPage from '@/views/NewOrderPage';
 import OrderPatternsPage from '@/views/OrderPatternsPage';
 import OrdersJournalPage from '@/views/OrdersJournalPage';
 import PrintECDJournalPreviewPage from '@/views/PrintECDJournalPreviewPage';
+import PrintDNC_DSPJournalPreviewPage from '@/views/PrintDNC_DSPJournalPreviewPage';
 import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
@@ -64,6 +65,14 @@ const routes = [
     path: '/printECDJournalPreviewPage',
     name: 'PrintECDJournalPreviewPage',
     component: PrintECDJournalPreviewPage,
+    meta: {
+      requiresFullAuth: true,
+    },
+  },
+  {
+    path: '/printDNC_DSPJournalPreviewPage',
+    name: 'PrintDNC_DSPJournalPreviewPage',
+    component: PrintDNC_DSPJournalPreviewPage,
     meta: {
       requiresFullAuth: true,
     },

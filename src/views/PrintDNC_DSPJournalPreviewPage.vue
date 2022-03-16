@@ -1,10 +1,10 @@
 <template>
   <div class="p-m-2">
     <h2 class="p-text-center p-m-2">
-      Оперативный журнал ЭЦД
+      Журнал диспетчерских распоряжений
     </h2>
     <h3 class="p-text-center p-m-2">
-      Рабочий полигон {{ getUserWorkPoligonName }}
+      по {{ getUserWorkPoligonTypeName }} Белорусской железной дороги
     </h3>
     <h3 v-if="startDisplayDate" class="p-text-center p-m-2">
       период c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}
@@ -25,7 +25,7 @@
         <div class="p-d-flex p-jc-center">Идет загрузка данных. Подождите...</div>
       </template>
 
-      <Column v-for="col of getECDJournalTblColumns"
+      <Column v-for="col of getDNC_DSPJournalTblColumns"
         :field="col.field"
         :key="col.field"
         :header="col.title"
@@ -36,12 +36,11 @@
         <template #body="slotProps">
           <div
             v-if="[
-              getECDJournalTblColumnsTitles.orderContent,
-              getECDJournalTblColumnsTitles.toWhom,
-              getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
+              getDNC_DSPJournalTblColumnsTitles.orderContent,
+              getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
           ></div>
-          <div v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
+          <div v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
           <div v-else>
@@ -58,12 +57,13 @@
   import { computed, onMounted, ref } from 'vue';
   import { useStore } from 'vuex';
   import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
-  import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
+  import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
-    name: 'dy58-print-ecd-journal-preview-page',
+    name: 'dy58-print-dnc-dsp-journal-preview-page',
 
     setup() {
       const store = useStore();
@@ -116,7 +116,7 @@
         if (data.value.length) {
           data.value = [];
         }
-        data.value = prepareDataForDisplayInECDJournal(responseData, getOrderSeqNumber);
+        data.value = prepareDataForDisplayInDNC_DSPJournal(responseData, getOrderSeqNumber);
       };
 
       const loadData = (params) => {
@@ -139,11 +139,21 @@
         data,
         errMessage,
         searchInProgress,
-        getECDJournalTblColumnsTitles: computed(() => store.getters.getECDJournalTblColumnsTitles),
-        getECDJournalTblColumns: computed(() => store.getters.getECDJournalTblColumns),
+        getDNC_DSPJournalTblColumnsTitles: computed(() => store.getters.getDNC_DSPJournalTblColumnsTitles),
+        getDNC_DSPJournalTblColumns: computed(() => store.getters.getDNC_DSPJournalTblColumns),
         startDisplayDate,
         endDisplayDate,
-        getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
+        getUserWorkPoligonTypeName: computed(() => {
+          switch (store.getters.getUserWorkPoligon.type) {
+            case WORK_POLIGON_TYPES.STATION:
+              return `станции ${store.getters.getUserWorkPoligonName}`;
+            case WORK_POLIGON_TYPES.DNC_SECTOR:
+            case WORK_POLIGON_TYPES.ECD_SECTOR:
+              return `участку ${store.getters.getUserWorkPoligonName}`;
+            default:
+              return '?';
+          }
+        }),
       };
     },
   }
