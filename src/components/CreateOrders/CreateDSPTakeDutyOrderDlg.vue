@@ -277,7 +277,6 @@
         passDutyDateTime: '',
         takeDutyUserPostFIO: null,
         takeDutyDateTime: '',
-        waitingForServerResponse: false,
         adjacentStationShift: null,
         additionalOrderText: null,
       });
@@ -302,7 +301,7 @@
       const textarea = ref(null);
 
       const submitted = ref(false);
-      const v$ = useVuelidate(rules, state);
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
       const initOrderNumber = () => {
         if (!props.editExistingTakeDutyOrder) {
@@ -423,6 +422,7 @@
 
       // Действия на показ/скрытие диалога
       watch(() => props.showDlg, (newVal) => {
+        state.dlgVisible = newVal;
         if (newVal) {
           // Инициализация элементов формы диалога в зависимости от того, хочет пользователь
           // создать новое распоряжение либо отредактировать существующее
@@ -451,8 +451,6 @@
         newNumberOverlayPanel.value.toggle(event);
       };
 
-      watch(() => props.showDlg, (newVal) => state.dlgVisible = newVal);
-
       const closeDialog = () => { emit('close') };
 
       //
@@ -464,7 +462,8 @@
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
-            return;
+          showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
+          return;
         }
         confirm.require({
           message: 'Сохранить распоряжение?',
@@ -543,8 +542,6 @@
        * Издание распоряжения (отправка на сервер).
        */
       const dispatchOrder = () => {
-        state.waitingForServerResponse = true;
-
         if (!props.editExistingTakeDutyOrder) {
           // Издание нового распоряжения
           store.dispatch('dispatchOrder', {
@@ -582,7 +579,6 @@
         if (!newVal || newVal.orderType !== orderType) {
           return;
         }
-        state.waitingForServerResponse = false;
         if (!newVal.error) {
           showSuccessMessage(newVal.message);
           // если диалог не закрывать, то нужно раскомментировать выше строки для обновления номера распоряжения
@@ -599,7 +595,6 @@
         if (!newVal || newVal.orderType !== orderType) {
           return;
         }
-        state.waitingForServerResponse = false;
         if (!newVal.error) {
           showSuccessMessage(newVal.message);
           closeDialog();

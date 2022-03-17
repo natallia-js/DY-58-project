@@ -3,6 +3,21 @@ import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { APP_CODE_NAME } from '@/constants/appCredentials';
 import { getRequestAuthorizationHeader } from './common';
 
+export const applyForRegistration = async (props) => {
+  const {
+    login, password, name, fatherName, surname, post, contactData,
+    service, roles, stations, dncSectors, ecdSectors,
+  } = props;
+  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.applyForRegistration,
+    {
+      login, password, name, fatherName, surname, post, contactData,
+      service, roles, stations, dncSectors, ecdSectors,
+    },
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
 export const authUser = async ({ login, password }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.login,
     {

@@ -34,7 +34,7 @@
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
       </div>
-      <form @submit.prevent="handleSubmit()" class="p-grid">
+      <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
 
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
 
@@ -456,8 +456,6 @@
         otherSectorsToSendOrder: [],
         // от имени кого издается распоряжение
         createdOnBehalfOf: null,
-        // true - ожидается ответ сервера на запрос об издании распоряжения, false - запроса не ожидается
-        waitingForServerResponse: false,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
         // запроса об издании распоряжения
         orderFieldsErrs: null,
@@ -520,15 +518,15 @@
         relatedOrderObject,
       });
 
-      const {
-        orderTextRules,
-        placeRules,
-        timeSpanRules,
-        rules,
-      } = useNewOrderValidationRules(state, props, relatedOrderObject);
+      const { rules } = useNewOrderValidationRules(state, props, relatedOrderObject);
 
       const submitted = ref(false);
-      const v$ = useVuelidate(rules, state);
+      // Код { $scope: false } нужен для того чтобы (цитата из справочника):
+      // "collect no validation results and emit none", т.к. без этого куска кода было было поведение по
+      // умолчанию: "...collect results from all and emits to all, this is the default setting.
+      // This means that each component that uses useVuelidate, can collect results from validation children,
+      // and emit to parent components."
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
       // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
       watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
@@ -617,41 +615,12 @@
        * Данный метод осуществляет проверку корректности указания значений полей создаваемого
        * распоряжения перед его изданием.
        */
-      const handleSubmit = () => {
-        // Здесь я столкулась с такой проблемой: у текущего компонента есть вложенный компонент
-        // OtherToSendOrderDataTable, у которого, в свою очередь, есть вложенная форма (в диалоговом
-        // окне). Попытка валидации текущей формы (т.е. текущего компонента) приводит к автоматической
-        // валидации формы того диалогового окна. Справится с этим простым переименованием переменных и
-        // методов не получается. Потому идея такова: если форма признана невалидной в результате
-        // валидации, то ищу те поля, на которые форма "ругается", и смотрю, есть ли они в списке тех
-        // полей, которые я заявила ранее на проверку. Если нет - то полагаю, что форма валидна.
+      const handleSubmit = (isFormValid) => {
         submitted.value = true;
-        v$.value.$touch();
-        v$.value.$validate();
-        let isFormValid = !v$.value.$invalid;
-        if (!isFormValid) {
-          const invalidProperties = v$.value.$errors.map((err) => err.$property);
-          const rulesProperties = Object.keys(rules);
-          if (rulesProperties.includes('orderText')) {
-            rulesProperties.push(...Object.keys(orderTextRules));
-          }
-          if (rulesProperties.includes('orderPlace')) {
-            rulesProperties.push(...Object.keys(placeRules));
-          }
-          if (rulesProperties.includes('timeSpan')) {
-            rulesProperties.push(...Object.keys(timeSpanRules));
-          }
-          const intersection = rulesProperties.filter((el) => invalidProperties.includes(el));
-          if (!intersection.length) {
-            isFormValid = true;
-          }
-        }
-
         if (!isFormValid) {
           showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
           return;
         }
-
         state.showPreviewNewOrderDlg = true;
       };
 

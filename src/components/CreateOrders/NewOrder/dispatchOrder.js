@@ -68,8 +68,6 @@ export const useDispatchOrder = (inputVals) => {
    * Издание распоряжения (отправка на сервер и передача всем причастным).
    */
   const dispatchOrder = ({ orderDraftIdToDelete }) => {
-    state.waitingForServerResponse = true;
-
     store.dispatch('dispatchOrder', {
       type: props.orderType,
       number: +state.number,
@@ -105,7 +103,6 @@ export const useDispatchOrder = (inputVals) => {
     if (!newVal || newVal.orderType !== props.orderType) {
       return;
     }
-    state.waitingForServerResponse = false;
     if (!newVal.error) {
       showSuccessMessage(newVal.message);
       if (state.prevRelatedOrder) {

@@ -128,7 +128,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
       message: 'Сохранить черновик распоряжения?',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        state.waitingForServerResponse = true;
         if (!currentOrderDraft.value) {
           // Создание нового черновика
           store.dispatch('saveOrderDraft', {
@@ -204,7 +203,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     if (!newVal || newVal.orderType !== props.orderType) {
       return;
     }
-    state.waitingForServerResponse = false;
     if (!newVal.error) {
       showSuccessMessage(newVal.message);
     } else {

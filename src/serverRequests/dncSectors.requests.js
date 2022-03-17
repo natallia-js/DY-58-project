@@ -2,6 +2,13 @@ import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { getRequestAuthorizationHeader } from './common';
 
+export const getAllDNCSectorsShortData = async () => {
+  const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.getAllDNCSectorsShortData,
+    { headers: getRequestAuthorizationHeader() }
+  );
+  return response.data;
+};
+
 export const getDNCSectorsShortData = async ({ dncSectorIds }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsShortData,
     { dncSectorIds },

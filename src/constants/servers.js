@@ -18,15 +18,21 @@ export const WS_SERVER_PARAMS = Object.freeze({
 });
 
 export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
+  applyForRegistration: `${AUTH_SERVER_ADDRESS}/api/auth/applyForRegistration`,
   login: `${AUTH_SERVER_ADDRESS}/api/auth/login`,
   startWorkWithoutTakingDuty: `${AUTH_SERVER_ADDRESS}/api/auth/startWorkWithoutTakingDuty`,
   takeDuty: `${AUTH_SERVER_ADDRESS}/api/auth/takeDuty`,
   logout: `${AUTH_SERVER_ADDRESS}/api/auth/logout`,
   logoutWithDutyPass: `${AUTH_SERVER_ADDRESS}/api/auth/logoutWithDutyPass`,
 
+  getAllPosts: `${AUTH_SERVER_ADDRESS}/api/nsi/posts/data`,
+  getAllServices: `${AUTH_SERVER_ADDRESS}/api/nsi/services/data`,
+
   getStationsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/shortDefinitData`,
   getStationsWorkPlacesData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/workPlacesData`,
+  getAllDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortData`,
   getDNCSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/dncSectors/shortDefinitData`,
+  getAllECDSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortData`,
   getECDSectorsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/ecdSectors/shortDefinitData`,
 
   getDefinitStationData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/definitData`,

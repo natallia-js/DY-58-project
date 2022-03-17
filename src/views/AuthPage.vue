@@ -1,5 +1,9 @@
 <template>
   <div class="p-d-flex" style="height: 100vh;">
+    <RegisterNewUserDlg
+      :showDlg="state.showRegisterNewUserDlg"
+      @close="hideRegisterNewUserDlg"
+    />
     <div class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <Toast />
       <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
@@ -46,7 +50,8 @@
           </div>
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button type="submit" label="Войти" />
+          <Button type="submit" label="Войти" class="p-mr-2" />
+          <Button label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
         </div>
         <div v-else class="p-col-12">
           <ProgressSpinner />
@@ -67,9 +72,14 @@
   import { authUser } from '@/serverRequests/auth.requests';
   import showMessage from '@/hooks/showMessage.hook';
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+  import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
 
   export default {
     name: 'dy58-auth-page',
+
+    components: {
+      RegisterNewUserDlg,
+    },
 
     setup() {
       const store = useStore();
@@ -82,6 +92,7 @@
         takeDuty: false,
         submitted: false,
         waitingForServerResponse: false,
+        showRegisterNewUserDlg: false,
       });
 
       const rules = {
@@ -93,21 +104,17 @@
         },
       };
 
-      const v$ = useVuelidate(rules, state);
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
       /**
        *
        */
       const handleSubmit = async (isFormValid) => {
         state.submitted = true;
-
         if (!isFormValid) {
+          showErrMessage('Не указаны либо неверно указаны данные для входа в систему');
           return;
         }
-        if (!state.userName.length || !state.password.length) {
-          return;
-        }
-
         state.waitingForServerResponse = true;
         let responseData;
         const workPoligons = [];
@@ -189,10 +196,20 @@
         }
       };
 
+      const handleRegisterUser = () => {
+        state.showRegisterNewUserDlg = true;
+      };
+
+      const hideRegisterNewUserDlg = () => {
+        state.showRegisterNewUserDlg = false;
+      };
+
       return {
         state,
         v$,
         handleSubmit,
+        handleRegisterUser,
+        hideRegisterNewUserDlg,
       };
     },
   }

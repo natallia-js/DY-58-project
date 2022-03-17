@@ -134,9 +134,6 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   }, { immediate: true }); // call on page load
 
   return {
-    orderTextRules,
-    placeRules,
-    timeSpanRules,
     rules,
   };
 };

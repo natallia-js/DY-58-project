@@ -114,7 +114,6 @@
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
         updateCreateDateTimeRegularly: true,
-        waitingForServerResponse: false,
         orderText: null,
       });
 
@@ -127,7 +126,7 @@
       const textarea = ref(null);
 
       const submitted = ref(false);
-      const v$ = useVuelidate(rules, state);
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
       // Для оперативного отображения даты-времени издания распоряжения при создании нового распоряжения
       useWatchCurrentDateTime(state, props, store);
@@ -145,6 +144,7 @@
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
+          showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
           return;
         }
         confirm.require({
@@ -174,7 +174,6 @@
        * Издание распоряжения (отправка на сервер).
        */
       const dispatchOrder = () => {
-        state.waitingForServerResponse = true;
         store.dispatch('dispatchOrder', {
           type: orderType,
           number: 1,
@@ -200,7 +199,6 @@
         if (!newVal || newVal.orderType !== orderType) {
           return;
         }
-        state.waitingForServerResponse = false;
         if (!newVal.error) {
           showSuccessMessage(newVal.message);
           closeDialog();

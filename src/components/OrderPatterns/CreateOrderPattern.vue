@@ -183,7 +183,7 @@
 
       const submitted = ref(false);
 
-      const v$ = useVuelidate(rules, state);
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
       const orderCategories = computed(() =>
         store.getters.getCurrentUserOrderCategories
@@ -219,6 +219,7 @@
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
+          showErrMessage('Не могу отправить созданный шаблон на сервер: не заполнены / неверно заполнены его поля');
           return;
         }
         store.dispatch('createOrderPattern', {

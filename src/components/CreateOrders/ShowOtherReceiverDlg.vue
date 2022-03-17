@@ -6,7 +6,7 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <form @submit.prevent="handleFormSubmit(!vv$.$invalid)" class="p-grid">
+    <form @submit.prevent="handleSubmit(!vv$.$invalid)" class="p-grid">
       <!-- МЕСТО ОТПРАВКИ РАСПОРЯЖЕНИЯ -->
       <div class="p-field p-col-12 p-d-flex p-flex-column">
         <label for="placeTitle" :class="{'p-error':vv$.placeTitle.$invalid && submitted}">
@@ -72,6 +72,7 @@
   import { required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
   import AllowClearInputText from '@/components/AllowClearInputText';
+  import showMessage from '@/hooks/showMessage.hook';
 
   export default {
     name: 'dy58-other-order-receiver-dialog',
@@ -98,6 +99,8 @@
     },
 
     setup(props, context) {
+      const { showErrMessage } = showMessage();
+
       const state = reactive({
         dlgVisible: false,
         placeTitle: '',
@@ -113,7 +116,7 @@
 
       const submitted = ref(false);
 
-      const vv$ = useVuelidate(rules, state);
+      const vv$ = useVuelidate(rules, state, { $scope: false });
 
       const showDlgProp = computed(() => props.showDlg);
 
@@ -127,9 +130,10 @@
         }
       });
 
-      const handleFormSubmit = (isFormValid) => {
+      const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
+          showErrMessage('Проверьте правильность заполнения полей формы');
           return;
         }
         context.emit('input', {
@@ -149,7 +153,7 @@
         state,
         vv$,
         submitted,
-        handleFormSubmit,
+        handleSubmit,
         closeDialog,
       };
     },

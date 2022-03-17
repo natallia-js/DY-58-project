@@ -133,10 +133,19 @@
       });
 
       const submitted = ref(false);
-      const v$ = useVuelidate(rules, state);
+      const v$ = useVuelidate(rules, state, { $scope: false });
 
+      /**
+       * Поиск информации в соответствии с заданными критериями.
+       * Не добавлять в параметры isFormValid, иначе при загрузке страницы не будет автоматически
+       * подгружать информация за текущий месяц!
+       */
       const handleSubmit = () => {
         submitted.value = true;
+        // Этот кусок кода не добавлять!
+        /*if (!isFormValid) {
+            return;
+        }*/
         emit('input', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
       };
 
