@@ -27,6 +27,7 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
 
   getAllPosts: `${AUTH_SERVER_ADDRESS}/api/nsi/posts/data`,
   getAllServices: `${AUTH_SERVER_ADDRESS}/api/nsi/services/data`,
+  getAllRoles: `${AUTH_SERVER_ADDRESS}/api/roles/allData`,
 
   getStationsShortData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/shortDefinitData`,
   getStationsWorkPlacesData: `${AUTH_SERVER_ADDRESS}/api/nsi/stations/workPlacesData`,

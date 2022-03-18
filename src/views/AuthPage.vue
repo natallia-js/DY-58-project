@@ -1,10 +1,10 @@
 <template>
-  <div class="p-d-flex" style="height: 100vh;">
+  <div class="p-d-flex p-jc-center p-ai-center" style="height:100vh;">
     <RegisterNewUserDlg
       :showDlg="state.showRegisterNewUserDlg"
       @close="hideRegisterNewUserDlg"
     />
-    <div class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div style="max-width:600px;">
       <Toast />
       <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
       <div class="dy58-title-small p-mb-4">Авторизуйтесь в системе</div>

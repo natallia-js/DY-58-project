@@ -2,9 +2,9 @@
   <Dialog
     header="Оформление заявки на регистрацию нового пользователя"
     v-model:visible="state.dlgVisible"
-    style="width:auto; maxWidth:600px"
+    style="width:auto; maxWidth:1000px"
     :modal="true"
-    @hide="closeDialog"
+    @hide="handleCloseDialog"
   >
     <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
 
@@ -120,7 +120,7 @@
 
       <!-- СЛУЖБА -->
 
-      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+      <div class="p-field p-col-3 p-d-flex p-flex-column p-m-0">
         <label
           for="new-user-service"
           :class="{'p-error':(v$.service.$invalid && submitted) || state.fieldsErrorsFromServer.service}"
@@ -130,7 +130,7 @@
         <Dropdown
           id="new-user-service"
           v-model="v$.service.$model"
-          :options="state.services"
+          :options="state.allServices"
           optionLabel="title"
           optionValue="title"
           dataKey="id"
@@ -147,7 +147,7 @@
 
      <!-- ДОЛЖНОСТЬ -->
 
-      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+      <div class="p-field p-col-3 p-d-flex p-flex-column p-m-0">
         <label
           for="new-user-post"
           :class="{'p-error':(v$.post.$invalid && submitted) || state.fieldsErrorsFromServer.post}"
@@ -157,9 +157,9 @@
         <Dropdown
           id="new-user-post"
           v-model="v$.post.$model"
-          :options="state.posts"
+          :options="state.allPosts"
           optionLabel="title"
-          optionValue="id"
+          optionValue="title"
           dataKey="id"
           :class="{'p-invalid':(v$.post.$invalid && submitted) || state.fieldsErrorsFromServer.post}"
           :loading="state.loadingPosts"
@@ -169,6 +169,78 @@
           class="p-error"
         >
           {{ state.fieldsErrorsFromServer.post || 'Не определена должность' }}
+        </small>
+      </div>
+
+      <!-- РОЛИ -->
+
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+        <label
+          for="new-user-roles"
+          :class="{'p-error':(v$.roles.$invalid && submitted) || state.fieldsErrorsFromServer.roles}"
+        >
+          <span class="p-text-bold">Роли</span>
+        </label>
+        <MultiSelect
+          id="new-user-roles"
+          v-model="v$.roles.$model"
+          :options="state.allRoles"
+          optionLabel="title"
+          optionValue="id"
+          dataKey="id"
+          :class="{'p-invalid':(v$.roles.$invalid && submitted) || state.fieldsErrorsFromServer.roles}"
+          :loading="state.loadingRoles"
+          :filter="true"
+        >
+          <template #option="slotProps">
+            <div style="overflow:auto">
+              {{ slotProps.option.title }}
+            </div>
+          </template>
+        </MultiSelect>
+        <small
+          v-if="(v$.roles.$invalid && submitted) || v$.roles.$pending.$response || state.fieldsErrorsFromServer.roles"
+          class="p-error"
+        >
+          {{ state.fieldsErrorsFromServer.roles || 'Не определены роли' }}
+        </small>
+      </div>
+
+      <div class="p-col-12 p-text-bold">
+        Полигоны работы
+      </div>
+
+      <!-- СТАНЦИИ -->
+
+      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+        <label
+          for="new-user-stations"
+          :class="{'p-error':(v$.stations.$invalid && submitted) || state.fieldsErrorsFromServer.stations}"
+        >
+          <span class="p-text-bold">Станции</span>
+        </label>
+        <MultiSelect
+          id="new-user-stations"
+          v-model="v$.stations.$model"
+          :options="state.allStations"
+          optionLabel="title"
+          optionValue="id"
+          dataKey="id"
+          :class="{'p-invalid':(v$.stations.$invalid && submitted) || state.fieldsErrorsFromServer.stations}"
+          :loading="state.loadingStations"
+          :filter="true"
+        >
+          <template #option="slotProps">
+            <div :class="{ 'p-ml-5': Boolean(slotProps.option.id.workPlaceId) }">
+              {{ slotProps.option.title }}
+            </div>
+          </template>
+        </MultiSelect>
+        <small
+          v-if="(v$.stations.$invalid && submitted) || v$.stations.$pending.$response || state.fieldsErrorsFromServer.stations"
+          class="p-error"
+        >
+          {{ state.fieldsErrorsFromServer.stations || 'Не определены станции' }}
         </small>
       </div>
 
@@ -190,6 +262,7 @@
           dataKey="id"
           :class="{'p-invalid':(v$.dncSectors.$invalid && submitted) || state.fieldsErrorsFromServer.dncSectors}"
           :loading="state.loadingDNCSectors"
+          :filter="true"
         />
         <small
           v-if="(v$.dncSectors.$invalid && submitted) || v$.dncSectors.$pending.$response || state.fieldsErrorsFromServer.dncSectors"
@@ -217,6 +290,7 @@
           dataKey="id"
           :class="{'p-invalid':(v$.ecdSectors.$invalid && submitted) || state.fieldsErrorsFromServer.ecdSectors}"
           :loading="state.loadingECDSectors"
+          :filter="true"
         />
         <small
           v-if="(v$.ecdSectors.$invalid && submitted) || v$.ecdSectors.$pending.$response || state.fieldsErrorsFromServer.ecdSectors"
@@ -226,12 +300,35 @@
         </small>
       </div>
 
+      <!-- ЛОГИН -->
+
+      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+        <label
+          for="new-user-contact-data"
+          :class="{'p-error':(v$.contactData.$invalid && submitted) || state.fieldsErrorsFromServer.contactData}"
+        >
+          <span class="p-text-bold">Контактные данные</span>
+        </label>
+        <InputText
+          id="new-user-contact-data"
+          v-model="v$.contactData.$model"
+          :class="{'p-invalid':(v$.contactData.$invalid && submitted) || state.fieldsErrorsFromServer.contactData}"
+        />
+        <small
+          v-if="(v$.contactData.$invalid && submitted) || v$.contactData.$pending.$response || state.fieldsErrorsFromServer.contactData"
+          class="p-error"
+        >
+          {{ state.fieldsErrorsFromServer.contactData || 'Не указаны контактные данные' }}
+        </small>
+      </div>
+
       <div
         v-if="!state.loadingDataErrors.length && !state.waitingForServerResponse"
         class="p-col-12 p-mt-2 p-text-right"
       >
         <Button type="submit" class="p-mr-2" label="Отправить" />
-        <Button label="Закрыть" @click="closeDialog" />
+        <Button class="p-mr-2" label="Очистить форму" @click="handleResetForm" />
+        <Button label="Закрыть" @click="handleCloseDialog" />
       </div>
       <div v-else-if="state.loadingDataErrors.length" class="p-col-12 p-d-flex p-flex-column">
         <p v-for="error in state.loadingDataErrors" :key="error" class="p-error">
@@ -253,10 +350,13 @@
   import showMessage from '@/hooks/showMessage.hook';
   import { getAllPostsFromServer } from '@/serverRequests/posts.requests';
   import { getAllServicesFromServer } from '@/serverRequests/services.requests';
+  import { getAllRolesFromServer } from '@/serverRequests/roles.requests';
+  import { getStationsWorkPlacesData } from '@/serverRequests/stations.requests';
   import { getAllDNCSectorsShortData } from '@/serverRequests/dncSectors.requests';
   import { getAllECDSectorsShortData } from '@/serverRequests/ecdSectors.requests';
   import { applyForRegistration } from '@/serverRequests/auth.requests';
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+  import compareStrings from '@/additional/compareStrings';
 
   export default {
     name: 'dy58-register-new-user-dialog',
@@ -290,10 +390,14 @@
         ecdSectors: [],
 
         // Информация, загружаемая с сервера
-        services: [],
+        allServices: [],
         loadingServices: false,
-        posts: [],
+        allPosts: [],
         loadingPosts: false,
+        allRoles: [],
+        loadingRoles: false,
+        allStations: [],
+        loadingStations: false,
         allDNCSectors: [],
         loadingDNCSectors: false,
         allECDSectors: [],
@@ -308,36 +412,80 @@
 
       onMounted(() => {
         // Загружаем информацию обо всех должностях
-        state.loadingServices = true;
+        state.loadingPosts = true;
         getAllPostsFromServer()
           .then((responseData) => {
-            state.loadingServices = false;
+            state.loadingPosts = false;
             if (responseData) {
-              state.posts = responseData.map((item) => ({
+              state.allPosts = responseData.map((item) => ({
                 id: item.P_ID,
                 title: item.P_Abbrev,
               }));
             }
           })
           .catch((error) => {
-            state.loadingServices = false;
+            state.loadingPosts = false;
             state.loadingDataErrors.push(formErrorMessageInCatchBlock(error, 'Ошибка загрузки служб'));
           });
         // Загружаем информацию обо всех службах
-        state.loadingPosts = true;
+        state.loadingServices = true;
         getAllServicesFromServer()
           .then((responseData) => {
-            state.loadingPosts = false;
+            state.loadingServices = false;
             if (responseData) {
-              state.services = responseData.map((item) => ({
+              state.allServices = responseData.map((item) => ({
                 id: item.S_ID,
                 title: item.S_Abbrev,
               }));
             }
           })
           .catch((error) => {
-            state.loadingPosts = false;
+            state.loadingServices = false;
             state.loadingDataErrors.push(formErrorMessageInCatchBlock(error, 'Ошибка загрузки должностей'));
+          });
+        // Загружаем информацию обо всех ролях
+        state.loadingRoles = true;
+        getAllRolesFromServer()
+          .then((responseData) => {
+            state.loadingRoles = false;
+            if (responseData) {
+              state.allRoles = responseData.map((item) => ({
+                id: item._id,
+                title: `${item.englAbbreviation} - ${item.description || '<Без описания>'}`,
+              }));
+            }
+          })
+          .catch((error) => {
+            state.loadingRoles = false;
+            state.loadingDataErrors.push(formErrorMessageInCatchBlock(error, 'Ошибка загрузки ролей'));
+          });
+        // Загружаем информацию обо всех станциях и их рабочих местах
+        state.loadingStations = true;
+        getStationsWorkPlacesData({ stationIds: null })
+          .then((responseData) => {
+            state.loadingStations = false;
+            if (responseData) {
+              responseData
+                .sort((a, b) => compareStrings(a.St_Title.toLowerCase(), b.St_Title.toLowerCase()))
+                .forEach((item) => {
+                  state.allStations.push({
+                    id: { id: item.St_ID, workPlaceId: null },
+                    title: `${item.St_Title} (${item.St_UNMC})`,
+                  });
+                  if (item.TStationWorkPlaces) {
+                    item.TStationWorkPlaces.forEach((wp) => {
+                      state.allStations.push({
+                        id: { id: item.St_ID, workPlaceId: wp.SWP_ID },
+                        title: wp.SWP_Name,
+                      });
+                    });
+                  }
+              });
+            }
+          })
+          .catch((error) => {
+            state.loadingStations = false;
+            state.loadingDataErrors.push(formErrorMessageInCatchBlock(error, 'Ошибка загрузки станций'));
           });
         // Загружаем информацию обо всех участках ДНЦ
         state.loadingDNCSectors = true;
@@ -447,12 +595,17 @@
         state.stations = [];
         state.dncSectors = [];
         state.ecdSectors = [];
-      };
 
-      const closeDialog = () => {
-        resetForm();
         state.fieldsErrorsFromServer = {};
         submitted.value = false;
+      };
+
+      const handleResetForm = () => {
+        resetForm();
+      };
+
+      const handleCloseDialog = () => {
+        resetForm();
         emit('close');
       };
 
@@ -461,7 +614,8 @@
         submitted,
         v$,
         handleSubmit,
-        closeDialog,
+        handleResetForm,
+        handleCloseDialog,
       };
     },
   };
