@@ -142,16 +142,16 @@
       };
 
       const handleSubmit = (isFormValid) => {
-        submitted.value = true;
-        if (!isFormValid) {
-          showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
-          return;
-        }
         confirm.require({
           message: 'Сохранить запись?',
           header: 'Подтверждение действия',
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
+            submitted.value = true;
+            if (!isFormValid) {
+              showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
+              return;
+            }
             dispatchOrder();
           },
         });

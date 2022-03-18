@@ -1,4 +1,5 @@
 <template>
+  <ConfirmDialog style="max-width:700px"></ConfirmDialog>
   <Dialog
     header="Оформление заявки на регистрацию нового пользователя"
     v-model:visible="state.dlgVisible"
@@ -347,6 +348,7 @@
   import { onMounted, reactive, ref, watch } from 'vue';
   import { useVuelidate } from '@vuelidate/core';
   import { required } from '@vuelidate/validators';
+  import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
   import { getAllPostsFromServer } from '@/serverRequests/posts.requests';
   import { getAllServicesFromServer } from '@/serverRequests/services.requests';
@@ -372,6 +374,7 @@
 
     setup(props, { emit }) {
       const { showSuccessMessage, showErrMessage } = showMessage();
+      const confirm = useConfirm();
 
       const state = reactive({
         dlgVisible: false,
@@ -417,10 +420,12 @@
           .then((responseData) => {
             state.loadingPosts = false;
             if (responseData) {
-              state.allPosts = responseData.map((item) => ({
-                id: item.P_ID,
-                title: item.P_Abbrev,
-              }));
+              state.allPosts = responseData
+                .sort((a, b) => compareStrings(a.P_Abbrev.toLowerCase(), b.P_Abbrev.toLowerCase()))
+                .map((item) => ({
+                  id: item.P_ID,
+                  title: item.P_Abbrev,
+                }));
             }
           })
           .catch((error) => {
@@ -433,10 +438,12 @@
           .then((responseData) => {
             state.loadingServices = false;
             if (responseData) {
-              state.allServices = responseData.map((item) => ({
-                id: item.S_ID,
-                title: item.S_Abbrev,
-              }));
+              state.allServices = responseData
+                .sort((a, b) => compareStrings(a.S_Abbrev.toLowerCase(), b.S_Abbrev.toLowerCase()))
+                .map((item) => ({
+                  id: item.S_ID,
+                  title: item.S_Abbrev,
+                }));
             }
           })
           .catch((error) => {
@@ -449,10 +456,12 @@
           .then((responseData) => {
             state.loadingRoles = false;
             if (responseData) {
-              state.allRoles = responseData.map((item) => ({
-                id: item._id,
-                title: `${item.englAbbreviation} - ${item.description || '<Без описания>'}`,
-              }));
+              state.allRoles = responseData
+                .sort((a, b) => compareStrings(a.englAbbreviation.toLowerCase(), b.englAbbreviation.toLowerCase()))
+                .map((item) => ({
+                  id: item._id,
+                  title: `${item.englAbbreviation} - ${item.description || '<Без описания>'}`,
+                }));
             }
           })
           .catch((error) => {
@@ -476,7 +485,7 @@
                     item.TStationWorkPlaces.forEach((wp) => {
                       state.allStations.push({
                         id: { id: item.St_ID, workPlaceId: wp.SWP_ID },
-                        title: wp.SWP_Name,
+                        title: `${wp.SWP_Name} (${item.St_Title})`,
                       });
                     });
                   }
@@ -493,10 +502,12 @@
           .then((responseData) => {
             state.loadingDNCSectors = false;
             if (responseData) {
-              state.allDNCSectors = responseData.map((item) => ({
-                id: item.DNCS_ID,
-                title: item.DNCS_Title,
-              }));
+              state.allDNCSectors = responseData
+                .sort((a, b) => compareStrings(a.DNCS_Title.toLowerCase(), b.DNCS_Title.toLowerCase()))
+                .map((item) => ({
+                  id: item.DNCS_ID,
+                  title: item.DNCS_Title,
+                }));
             }
           })
           .catch((error) => {
@@ -509,10 +520,12 @@
           .then((responseData) => {
             state.loadingECDSectors = false;
             if (responseData) {
-              state.allECDSectors = responseData.map((item) => ({
-                id: item.ECDS_ID,
-                title: item.ECDS_Title,
-              }));
+              state.allECDSectors = responseData
+                .sort((a, b) => compareStrings(a.ECDS_Title.toLowerCase(), b.ECDS_Title.toLowerCase()))
+                .map((item) => ({
+                  id: item.ECDS_ID,
+                  title: item.ECDS_Title,
+                }));
             }
           })
           .catch((error) => {
@@ -545,40 +558,47 @@
       const v$ = useVuelidate(rules, state, { $scope: false });
 
       const handleSubmit = (isFormValid) => {
-        submitted.value = true;
-        state.fieldsErrorsFromServer = {};
-        if (!isFormValid) {
-          showErrMessage('Не могу отправить запрос на сервер: не заполнены / неверно заполнены его поля');
-          return;
-        }
-        state.waitingForServerResponse = true;
-        applyForRegistration({
-          login: state.login,
-          password: state.password,
-          name: state.name,
-          fatherName: state.fatherName,
-          surname: state.surname,
-          post: state.post,
-          contactData: state.contactData,
-          service: state.service,
-          roles: state.roles,
-          stations: state.stations,
-          dncSectors: state.dncSectors,
-          ecdSectors: state.ecdSectors,
-        })
-        .then((responseData) => {
-          state.waitingForServerResponse = false;
-          showSuccessMessage(responseData.message);
-        })
-        .catch((error) => {
-          state.waitingForServerResponse = false;
-          if (error && error.response && error.response.data && error.response.data.errors) {
-            error.response.data.errors.forEach((err) => {
-              state.fieldsErrorsFromServer[err.param] = err.msg;
+        confirm.require({
+          message: 'Отправить запрос на регистрацию?',
+          header: 'Подтверждение действия',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            submitted.value = true;
+            state.fieldsErrorsFromServer = {};
+            if (!isFormValid) {
+              showErrMessage('Не могу отправить запрос на сервер: не заполнены / неверно заполнены его поля');
+              return;
+            }
+            state.waitingForServerResponse = true;
+            applyForRegistration({
+              login: state.login,
+              password: state.password,
+              name: state.name,
+              fatherName: state.fatherName,
+              surname: state.surname,
+              post: state.post,
+              contactData: state.contactData,
+              service: state.service,
+              roles: state.roles,
+              stations: state.stations,
+              dncSectors: state.dncSectors,
+              ecdSectors: state.ecdSectors,
+            })
+            .then((responseData) => {
+              state.waitingForServerResponse = false;
+              showSuccessMessage(responseData.message);
+            })
+            .catch((error) => {
+              state.waitingForServerResponse = false;
+              if (error && error.response && error.response.data && error.response.data.errors) {
+                error.response.data.errors.forEach((err) => {
+                  state.fieldsErrorsFromServer[err.param] = err.msg;
+                });
+              }
+              const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка регистрации пользователя');
+              showErrMessage(errMessage);
             });
-          }
-          const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка регистрации пользователя');
-          showErrMessage(errMessage);
+          },
         });
       };
 
