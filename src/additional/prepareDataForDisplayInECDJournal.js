@@ -103,6 +103,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
           dspToSend: order.dspToSend,
           ecdToSend: order.ecdToSend,
           otherToSend: order.otherToSend,
+          insertEmptyLineBeforeText: true,
         }),
       orderAcceptor: formAcceptorsStrings({
         dncToSend: order.dncToSend,

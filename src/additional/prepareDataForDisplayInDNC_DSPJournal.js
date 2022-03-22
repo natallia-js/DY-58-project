@@ -8,6 +8,7 @@ import {
   getExtendedOrderTitle,
 } from '@/additional/formOrderText';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
 
 const orderDispatchedOnThisWorkPoligon = (order) => {
@@ -25,17 +26,48 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     return [];
   }
   const userWorkPoligon = store.getters.getUserWorkPoligon;
+  const orderCreateAssertDateTimeString = (order) => {
+    let displayString = '';
+    const orderCreateDateString = order.createDateTime ? getLocaleDateString(order.createDateTime) : '';
+    const orderCreateTimeString = order.createDateTime ? getLocaleTimeString(order.createDateTime) : '';
+    const orderAssertDateString = order.assertDateTime ? getLocaleDateString(order.assertDateTime) : '';
+    const orderAssertTimeString = order.assertDateTime ? getLocaleTimeString(order.assertDateTime) : '';
+    if (orderCreateDateString === orderAssertDateString) {
+      displayString = `${orderCreateDateString}<br/>${orderCreateTimeString}<br/>${orderAssertTimeString}`;
+    } else {
+      displayString = `${orderCreateDateString}<br/>${orderCreateTimeString}<br/>${orderAssertDateString}<br/>${orderAssertTimeString}`;
+    }
+    return displayString;
+  };
+  const isDSP_or_DSPoperator = store.getters.isDSP_or_DSPoperator;
   return responseData
     .map((order) => ({
       ...order,
-      dncToSend: !order.dncToSend ? [] :
+      createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
+      assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
+      // ДСП нужна информация только по станциям
+      dncToSend: isDSP_or_DSPoperator ? [] :
+        !order.dncToSend ? [] :
         order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       dspToSend: !order.dspToSend ? [] :
         order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-      ecdToSend: !order.ecdToSend ? [] :
+      // ДСП нужна информация только по станциям
+      ecdToSend: isDSP_or_DSPoperator ? [] :
+        !order.ecdToSend ? [] :
         order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-      otherToSend: !order.otherToSend ? [] :
+      // ДСП нужна информация только по станциям
+      otherToSend: isDSP_or_DSPoperator ? [] :
+        !order.otherToSend ? [] :
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+      stationWorkPlacesToSend: !isDSP_or_DSPoperator ? [] :
+        !order.stationWorkPlacesToSend ? [] :
+        // выбираем только работников текущей станции, исключаем ДСП (он будет в dspToSend)
+        order.stationWorkPlacesToSend
+          .filter((el) => el.id === store.getters.getUserWorkPoligon.code &&
+            !order.dspToSend.find((dsp) => dsp.placeTitle === el.placeTitle && dsp.post === el.post &&
+            ((!dsp.fio && !el.fio) || (dsp.fio && el.fio && dsp.fio === el.fio)))
+          )
+          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :
@@ -52,8 +84,9 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       id: order._id,
       type: order.type,
       seqNum: getOrderSeqNumberFunction(index),
-      // дата-время утверждения распоряжения
-      assertDateTime: order.assertDateTime ? `${getLocaleDateString(new Date(order.assertDateTime))}<br/>${getLocaleTimeString(new Date(order.assertDateTime))}` : '',
+      // дата-время создания и утверждения распоряжения
+      assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
+        order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
       number: order.number,
       orderContent: getExtendedOrderTitle(order) + '<br/>' +
         formOrderText({
@@ -62,6 +95,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           dspToSend: order.dspToSend,
           ecdToSend: order.ecdToSend,
           otherToSend: order.otherToSend,
+          insertEmptyLineBeforeText: true,
         }) + '<br/><b>Передал:</b> ' +
         `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
       orderAcceptor: formAcceptorsStrings({
@@ -69,6 +103,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
         dspToSend: order.dspToSend,
         ecdToSend: order.ecdToSend,
         otherToSend: order.otherToSend,
+        stationWorkPlacesToSend: order.stationWorkPlacesToSend,
       }),
       // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
       // полигоне, распоряжение - всегда оригинал; для распоряжения, пришедшего из вне, необходимо

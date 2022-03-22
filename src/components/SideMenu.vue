@@ -1,7 +1,7 @@
 <template>
   <PanelMenu :model="getLeftMenuItems">
     <template #item="{item}">
-      <div class="p-panelmenu-panel p-mb-2">
+      <div class="p-panelmenu-panel dy58-side-menu-statistics-item">
         <div class="p-component p-panelmenu-header">
           <a class="p-panelmenu-header-link dy58-item-link">
             <div :class="['p-grid',item.itemClass]" style="width:100%;margin:0;">

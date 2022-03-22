@@ -76,6 +76,7 @@ const toSubstring = (array, substringFunction, separateRows = false) => {
  *                             3) toWhomCopy: строка "Копия" (подстроки с местом, должностью, ФИО через запятую)
  * @param {Boolean} includeFIO - если true, то в строки "Кому" и "Копия" включается информация о ФИО адресатов,
  *                               в противном случае не включается
+ * @param {Boolean} insertEmptyLineBeforeText - если true, то текст документа предваряется пробельной строкой
  * @returns - строку с полным текстом распоряжения либо массив отдельных строк, каждая из которых
  *            включает определенную информацию из полного текста распоряжения
  */
@@ -88,6 +89,7 @@ export function formOrderText(props) {
     otherToSend,
     asString = true,
     includeFIO = true,
+    insertEmptyLineBeforeText = false,
   } = props;
 
   let orderText = orderTextArray.reduce((prevVal, currVal) => {
@@ -190,7 +192,7 @@ export function formOrderText(props) {
     if (copyToString) {
       addresses += `<b>Копия:</b> ${copyToString}<br/>`;
     }
-    return `${addresses}${orderText}`;
+    return `${addresses}${insertEmptyLineBeforeText ? '<p style="line-height:50%"><br/></p>' : ''}${orderText}`;
   }
 
   return {
@@ -210,10 +212,11 @@ export function formOrderText(props) {
  * @param {Array} dspToSend - массив объектов - ДСП, которым отправлялось распоряжение
  * @param {Array} ecdToSend - массив объектов - ЭЦД, которым отправлялось распоряжение
  * @param {Array} otherToSend - массив объектов - иные лица, которым отправлялось распоряжение
+ * @param {Array} stationWorkPlacesToSend - массив объектов - работники станций (ДСП + Операторы при ДСП)
  * @param {Boolean} isTYOrder - если true, то в итоговой строке необходима особая отметка по телеуправлению
  */
 export function formAcceptorsStrings(props) {
-  const { dncToSend, dspToSend, ecdToSend, otherToSend, isTYOrder } = props;
+  const { dncToSend, dspToSend, ecdToSend, otherToSend, stationWorkPlacesToSend, isTYOrder } = props;
 
   let originalToString = '';
   let copyToString = '';
@@ -251,6 +254,10 @@ export function formAcceptorsStrings(props) {
 
   if (otherToSend && otherToSend.length) {
     formAcceptorStrings(otherToSend, formSubstring(null));
+  }
+
+  if (stationWorkPlacesToSend && stationWorkPlacesToSend.length) {
+    formAcceptorStrings(stationWorkPlacesToSend, formSubstring(null));
   }
 
   let res = isTYOrder ? SPECIAL_TELECONTROL_ORDER_SIGN : '';
