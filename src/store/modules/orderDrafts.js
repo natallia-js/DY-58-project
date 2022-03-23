@@ -92,6 +92,10 @@ export const orderDrafts = {
       return state.data;
     },
 
+    getAllOrderDraftsNumber(state) {
+      return state.data.length;
+    },
+
     getGroupedOrderDrafts(state) {
       const groupedDrafts = [];
 

@@ -49,6 +49,7 @@ import Slider from 'primevue/slider';
 import Panel from 'primevue/panel';
 import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
+import MegaMenu from 'primevue/megamenu';
 
 const app = createApp(App);
 
@@ -95,5 +96,6 @@ app.component('Slider', Slider);
 app.component('Panel', Panel);
 app.component('OverlayPanel', OverlayPanel);
 app.component('Textarea', Textarea);
+app.component('MegaMenu', MegaMenu);
 
 app.mount('#app');

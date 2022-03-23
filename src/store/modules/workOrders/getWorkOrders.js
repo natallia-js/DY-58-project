@@ -124,6 +124,7 @@ export const getWorkOrders = {
             ecdToSend: order.ecdToSend,
             otherToSend: order.otherToSend,
           }),
+          assertDateTime: order.assertDateTime ? getLocaleDateTimeString(order.assertDateTime, false) : null,
           orderChainId: order.orderChainId,
           specialTrainCategories: order.specialTrainCategories,
           children: [],

@@ -240,10 +240,6 @@
         type: Boolean,
         required: true,
       },
-      editExistingTakeDutyOrder: {
-        type: Boolean,
-        required: true,
-      },
     },
 
     components: {
@@ -303,8 +299,10 @@
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state, { $scope: false });
 
+      const editExistingTakeDutyOrder = computed(() => store.getters.canEditExistingTakeDutyOrder);
+
       const initOrderNumber = () => {
-        if (!props.editExistingTakeDutyOrder) {
+        if (!editExistingTakeDutyOrder.value) {
           state.number = store.getters.getNextOrdersNumber(orderType);
 
         } else if (existingDSPTakeDutyOrder.value) {
@@ -316,7 +314,7 @@
       };
 
       const initOrderCreateDateTime = () => {
-        if (!props.editExistingTakeDutyOrder) {
+        if (!editExistingTakeDutyOrder.value) {
           state.createDateTime = store.getters.getCurrDateTimeWithoutMilliseconds;
           state.createDateTimeString = store.getters.getCurrDateString;
 
@@ -348,7 +346,7 @@
       };
 
       const initOrderPassData = () => {
-        if (!props.editExistingTakeDutyOrder) {
+        if (!editExistingTakeDutyOrder.value) {
           if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
             const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
             if (prevValue) {
@@ -372,7 +370,7 @@
       };
 
       const initOrderTakeData = () => {
-        if (!props.editExistingTakeDutyOrder) {
+        if (!editExistingTakeDutyOrder.value) {
           state.takeDutyUserPostFIO = !store.getters.getUserId ? null :
             { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
           state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
@@ -391,7 +389,7 @@
       };
 
       const initAdjacentStationShift = () => {
-        if (props.editExistingTakeDutyOrder && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
           const prevValue = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
           if (prevValue && prevValue instanceof Array) {
             state.adjacentStationShift = prevValue.map((item) => ({
@@ -413,7 +411,7 @@
       };
 
       const initAdditionalOrderText = () => {
-        if (props.editExistingTakeDutyOrder && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
           state.additionalOrderText = getOrderTextParamValue(FILLED_ORDER_INPUT_ELEMENTS.NOTE, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.additionalOrderText = null;
@@ -428,7 +426,7 @@
           // создать новое распоряжение либо отредактировать существующее
           initOrderNumber();
           initOrderCreateDateTime();
-          state.updateCreateDateTimeRegularly = !props.editExistingTakeDutyOrder;
+          state.updateCreateDateTimeRegularly = !editExistingTakeDutyOrder.value;
           initOrderPassData();
           initOrderTakeData();
           initAdjacentStationShift();
@@ -542,7 +540,7 @@
        * Издание распоряжения (отправка на сервер).
        */
       const dispatchOrder = () => {
-        if (!props.editExistingTakeDutyOrder) {
+        if (!editExistingTakeDutyOrder.value) {
           // Издание нового распоряжения
           store.dispatch('dispatchOrder', {
             type: orderType,
@@ -608,6 +606,7 @@
         submitted,
         v$,
         textarea,
+        editExistingTakeDutyOrder,
         handleInsertRowbreak,
         getCurrStationWorkPlaceUsers,
         // Список пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах, отличных от данного

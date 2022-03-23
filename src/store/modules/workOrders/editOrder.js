@@ -1,5 +1,7 @@
 import { store } from '@/store';
 import {
+  SET_CAN_EDIT_EXISTING_TAKE_DUTY_ORDER,
+  SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG,
   CLEAR_EDIT_DISPATCHED_ORDER_RESULT,
   SET_EDIT_DISPATCHED_ORDER_RESULT,
   SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT,
@@ -26,6 +28,14 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
  */
  export const editOrder = {
   getters: {
+    canEditExistingTakeDutyOrder(state) {
+      return state.editExistingTakeDutyOrder;
+    },
+
+    showCreateDSPTakeDutyOrderDlg(state) {
+      return state.showCreateDSPTakeDutyOrderDlg;
+    },
+
     /**
      * Возвращает true, если распоряжение с заданным id в данный момент времени проходит
      * процедуру удаления у него получателя по рабочему месту на станции, false - в противном случае.
@@ -59,6 +69,14 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
   },
 
   mutations: {
+    [SET_CAN_EDIT_EXISTING_TAKE_DUTY_ORDER] (state, canEdit) {
+      state.editExistingTakeDutyOrder = canEdit;
+    },
+
+    [SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG] (state, show) {
+      state.showCreateDSPTakeDutyOrderDlg = show;
+    },
+
     [SET_EDIT_DISPATCHED_ORDER_RESULT] (state, { error, orderType, message }) {
       state.editDispatchedOrderResult = {
         error,

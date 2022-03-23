@@ -3999,7 +3999,7 @@
 
 .p-menubar {
   padding: /*0.5rem 1rem;*/ 0;
-  background: #303B44;
+  background: /*#303B44;*/ #424b5f;
   color: #fff;
   border: 0 none;
   /*border-radius: 4px;*/
@@ -4855,13 +4855,14 @@
 }
 
 .p-badge {
-  background: #007bff;
+  background: /* #007bff; */ #478BD3;
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
   min-width: 1.5rem;
   height: 1.5rem;
   line-height: 1.5rem;
+  padding: 0;
 }
 .p-badge.p-badge-secondary {
   background-color: #6c757d;

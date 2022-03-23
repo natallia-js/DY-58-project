@@ -58,8 +58,8 @@
             <div v-else-if="col.field === getInputMessTblColumnsTitles.state">
               <i v-if="isOrderBeingConfirmed(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
               <img
-                :src="slotProps.data[col.field] === WorkMessStates.cameRecently ? require('../assets/img/hourglass_black.png') :
-                      (slotProps.data[col.field] === WorkMessStates.cameLongAgo ? require('../assets/img/hourglass_red.png') : '')"
+                :src="slotProps.data[col.field] === WorkMessStates.cameRecently ? require('@/assets/img/hourglass_black.png') :
+                      (slotProps.data[col.field] === WorkMessStates.cameLongAgo ? require('@/assets/img/hourglass_red.png') : '')"
                 :alt="slotProps.data[col.field]"
                 class="dy58-order-state-img-style"
               />

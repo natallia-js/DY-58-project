@@ -77,12 +77,12 @@ export const checkUserAuthority = {
     },
 
     /**
-     * Возвращает true, если текущий пользователь на дежурстве и является ДСП либо Оператором при ДСП.
+     * Возвращает true, если текущий пользователь на дежурстве и является ДСП (не Оператором при ДСП!).
      * В этом случае он может издавать распоряжения о принятии дежурства.
      * Значение false возвращается в противном случае.
      */
     canUserDispatchDSPTakeDutyOrder(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP;
     },
 
     /**

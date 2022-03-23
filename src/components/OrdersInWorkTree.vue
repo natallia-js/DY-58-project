@@ -46,7 +46,7 @@
             icon="pi pi-ellipsis-h"
             class="p-button-info p-button-sm p-ml-2 p-mr-1 dy58-order-action-button"
             v-tooltip.bottom="'Подробнее'"
-            @click="() => showOrderInfo()"
+            @click="showOrderInfo"
           />
           <Button
             v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) &&

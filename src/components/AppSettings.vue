@@ -1,33 +1,24 @@
 <template>
-  <Accordion>
-    <AccordionTab>
-      <template #header>
-        <span class="p-text-bold">
-          Настройки программы<i class="pi pi-cog p-ml-2"></i>
-        </span>
-      </template>
-      <div class="p-mb-3">
-        Громкость аудио
-      </div>
-      <div class="p-d-flex p-ai-center">
-        <div style="width:15%;text-align:center;">
-          <i v-if="state.currentSoundVolume === MIN_SOUND_VALUE" class="pi pi-volume-off"></i>
-          <i v-else class="pi pi-volume-up"></i>
-        </div>
-        <div style="width:70%;height:auto" class="p-mr-2 p-ml-2">
-          <Slider
-            v-model="state.currentSoundVolume"
-            :min="MIN_SOUND_VALUE"
-            :max="MAX_SOUND_VALUE"
-            :step="CHANGE_SOUND_STEP"
-          />
-        </div>
-        <div style="width:15%;text-align:center;">
-          {{ state.currentSoundVolume }}
-        </div>
-      </div>
-    </AccordionTab>
-  </Accordion>
+  <div class="p-mb-3">
+    Громкость аудио
+  </div>
+  <div class="p-d-flex p-ai-center">
+    <div style="width:15%;text-align:center;">
+      <i v-if="state.currentSoundVolume === MIN_SOUND_VALUE" class="pi pi-volume-off"></i>
+      <i v-else class="pi pi-volume-up"></i>
+    </div>
+    <div style="width:70%;height:auto" class="p-mr-2 p-ml-2">
+      <Slider
+        v-model="state.currentSoundVolume"
+        :min="MIN_SOUND_VALUE"
+        :max="MAX_SOUND_VALUE"
+        :step="CHANGE_SOUND_STEP"
+      />
+    </div>
+    <div style="width:15%;text-align:center;">
+      {{ state.currentSoundVolume }}
+    </div>
+  </div>
 </template>
 
 <script>

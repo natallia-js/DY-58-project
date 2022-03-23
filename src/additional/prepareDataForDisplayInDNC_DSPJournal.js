@@ -45,28 +45,19 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       ...order,
       createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
       assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
-      // ДСП нужна информация только по станциям
-      dncToSend: isDSP_or_DSPoperator ? [] :
-        !order.dncToSend ? [] :
+      dncToSend: !order.dncToSend ? [] :
         order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       dspToSend: !order.dspToSend ? [] :
         order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-      // ДСП нужна информация только по станциям
-      ecdToSend: isDSP_or_DSPoperator ? [] :
-        !order.ecdToSend ? [] :
+      ecdToSend: !order.ecdToSend ? [] :
         order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-      // ДСП нужна информация только по станциям
-      otherToSend: isDSP_or_DSPoperator ? [] :
-        !order.otherToSend ? [] :
+      otherToSend: !order.otherToSend ? [] :
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+      // Информация по станции (своей) нужна только ДСП
       stationWorkPlacesToSend: !isDSP_or_DSPoperator ? [] :
         !order.stationWorkPlacesToSend ? [] :
-        // выбираем только работников текущей станции, исключаем ДСП (он будет в dspToSend)
-        order.stationWorkPlacesToSend
-          .filter((el) => el.id === store.getters.getUserWorkPoligon.code &&
-            !order.dspToSend.find((dsp) => dsp.placeTitle === el.placeTitle && dsp.post === el.post &&
-            ((!dsp.fio && !el.fio) || (dsp.fio && el.fio && dsp.fio === el.fio)))
-          )
+        // выбираем только работников текущей станции
+        order.stationWorkPlacesToSend.filter((el) => el.id === userWorkPoligon.code)
           .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       orderText: !order.orderText ? null : {
         ...order.orderText,
@@ -99,27 +90,27 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
         }) + '<br/><b>Передал:</b> ' +
         `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
       orderAcceptor: formAcceptorsStrings({
-        dncToSend: order.dncToSend,
-        dspToSend: order.dspToSend,
-        ecdToSend: order.ecdToSend,
-        otherToSend: order.otherToSend,
+        // ДСП нужна информация только по своей станции
+        dncToSend: isDSP_or_DSPoperator ? [] : order.dncToSend,
+        dspToSend: isDSP_or_DSPoperator ? [] : order.dspToSend,
+        ecdToSend: isDSP_or_DSPoperator ? [] : order.ecdToSend,
+        otherToSend: isDSP_or_DSPoperator ? [] : order.otherToSend,
         stationWorkPlacesToSend: order.stationWorkPlacesToSend,
       }),
       // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
-      // полигоне, распоряжение - всегда оригинал; для распоряжения, пришедшего из вне, необходимо
-      // сделать дополнительные проверки
+      // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,
+      // необходимо сделать дополнительные проверки (это распоряжение должно быть адресовано данному
+      // рабочему полигону, оттуда и берем признак "оригинал"/"копия")
       sendOriginal: Boolean(
         orderDispatchedOnThisWorkPoligon(order) ||
         (
-          order.workPoligon === WORK_POLIGON_TYPES.STATION &&
-          order.dspToSend && userWorkPoligon &&
+          order.workPoligon === WORK_POLIGON_TYPES.STATION && order.dspToSend && userWorkPoligon &&
           order.dspToSend.find((el) =>
             String(el.id) === String(userWorkPoligon.code) &&
             sendOriginal(el.sendOriginal))
         ) ||
         (
-          order.workPoligon === WORK_POLIGON_TYPES.DNC_SECTOR &&
-          order.dncToSend && userWorkPoligon &&
+          order.workPoligon === WORK_POLIGON_TYPES.DNC_SECTOR && order.dncToSend && userWorkPoligon &&
           order.dncToSend.find((el) =>
             String(el.id) === String(userWorkPoligon.code) &&
             sendOriginal(el.sendOriginal))

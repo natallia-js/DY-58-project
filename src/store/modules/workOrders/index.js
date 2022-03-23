@@ -29,6 +29,11 @@ export const workOrders = {
     gettingIncomingOrdersPerShift: false,
     gettingIncomingOrdersPerShiftResult: null,
 
+    // если true, то можно редактировать текущее распоряжение о приеме/сдаче дежурства, false - нельзя
+    editExistingTakeDutyOrder: false,
+    // если true, то необходимо отобразить диалоговое окно принятия дежурства ДСП
+    showCreateDSPTakeDutyOrderDlg: false,
+
     // массив id удаляемых цепочек распоряжений (по которым идет процесс удаления)
     ordersChainsBeingDeleted: [],
     // массив результатов удаления цепочек распоряжений (с привязкой к id цепочек распоряжений)
