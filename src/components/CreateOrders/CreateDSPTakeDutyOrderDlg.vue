@@ -227,6 +227,7 @@
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
   import { getUserPostFIOString } from '@/store/modules/personal/transformUserData';
   import OrderNumber from '@/components/CreateOrders/OrderNumber';
 
@@ -326,14 +327,6 @@
           state.createDateTime = '';
           state.createDateTimeString = '';
         }
-      };
-
-      const getOrderTextParamValue = (paramName, orderText) => {
-        if (!paramName || !orderText || !orderText.length) {
-          return null;
-        }
-        const textElement = orderText.find((el) => el.ref === paramName);
-        return textElement ? textElement.value : null;
       };
 
       // Ищет объект пользователя текущего рабочего места, который соответствует указанному в запросе

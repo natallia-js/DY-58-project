@@ -1,6 +1,20 @@
 <template>
   <div v-if="!getSectorPersonal">Сменный персонал не определен</div>
   <div v-else>
+    <Fieldset legend="Персонал текущего участка ЭЦД" :toggleable="true">
+      <div v-if="!getCurrentECDSectorShift || !getCurrentECDSectorShift.people || !getCurrentECDSectorShift.people.length">
+        -
+      </div>
+      <div v-else>
+        <p
+          v-for="user of getCurrentECDSectorShift.people"
+          :key="user._id"
+          :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
+        >
+          {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
+        </p>
+      </div>
+    </Fieldset>
     <Fieldset legend="Персонал станций участка ЭЦД" :toggleable="true">
       <div v-if="!getSectorPersonal.sectorStationsShift || !getSectorPersonal.sectorStationsShift.length">
         -
@@ -25,11 +39,11 @@
       </div>
     </Fieldset>
     <Fieldset legend="Персонал смежных участков ЭЦД" :toggleable="true">
-      <div v-if="!getSectorPersonal.ECDSectorsShift || !getSectorPersonal.ECDSectorsShift.length">
+      <div v-if="!getAllECDShiftExceptCurrent || !getAllECDShiftExceptCurrent.length">
         -
       </div>
       <div v-else>
-        <div v-for="adjSector of getSectorPersonal.ECDSectorsShift" :key="adjSector.sectorId" class="p-ml-4">
+        <div v-for="adjSector of getAllECDShiftExceptCurrent" :key="adjSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ adjSector.sectorTitle }}</span>
           <div v-if="!adjSector.people || !adjSector.people.length">
             -
@@ -81,6 +95,8 @@
     computed: {
       ...mapGetters([
         'getSectorPersonal',
+        'getCurrentECDSectorShift',
+        'getAllECDShiftExceptCurrent',
       ]),
     },
   };

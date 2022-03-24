@@ -95,7 +95,8 @@
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
 
         <div
-          v-if="orderType !== ORDER_PATTERN_TYPES.ECD_ORDER"
+          v-if="(orderType !== ORDER_PATTERN_TYPES.ECD_ORDER) &&
+            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
@@ -145,7 +146,8 @@
         <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
 
         <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) &&
+            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
           class="p-field p-col-12 p-m-0"
         >
           <SelectButton v-model="state.showOnGID" :options="showOnGIDOptions" optionLabel="name" />
@@ -181,7 +183,8 @@
         <!-- ФЛАГ УТОЧНЕНИЯ ВРЕМЕНИ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)"
+          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) &&
+            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
           class="p-field p-col-12 p-m-0"
         >
           <SelectButton
@@ -355,7 +358,8 @@
   import OrderTimeSpanChooser from '@/components/CreateOrders/OrderTimeSpanChooser';
   import OrderText from '@/components/CreateOrders/OrderText';
   import { OrderInputTypes } from '@/constants/orderInputTypes';
-  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+  import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
+  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import isValidDateTime from '@/additional/isValidDateTime';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
@@ -372,6 +376,10 @@
       orderType: {
         type: String,
         required: true,
+      },
+      orderPatternId: {
+        type: String,
+        required: false,
       },
       prevOrderId: {
         type: String,
@@ -420,6 +428,19 @@
         patternId: null,
         orderTitle: null,
         orderText: null,
+      };
+
+      const initialOrderText = () => {
+        const orderPattern = store.getters.getOrderPatternById(props.orderPatternId);
+        if (orderPattern) {
+          return {
+            orderTextSource: ORDER_TEXT_SOURCE.pattern,
+            patternId: orderPattern._id,
+            orderTitle: orderPattern.title,
+            orderText: orderPattern.elements,
+          };
+        }
+        return defaultOrderText;
       };
 
       const defaultOrderPlace = {
@@ -471,6 +492,14 @@
       onMounted(() => {
         state.currentOrderDraftId = props.orderDraftId;
         state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
+        state.orderText = { ...initialOrderText() };
+      });
+
+      // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны шаблоны распоряжений
+      watch([() => store.getters.getAllOrderPatterns, () => props.orderPatternId], ([newPatterns, newOrderPatternId]) => {
+        if (newPatterns && newPatterns.length && newOrderPatternId) {
+          state.orderText = { ...initialOrderText() };
+        }
       });
 
       useWatchCurrentDateTime(state, props, store);
@@ -634,6 +663,7 @@
         showOnGIDOptions,
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,
+        SPECIAL_CIRCULAR_ORDER_SIGN,
         isDNC: computed(() => store.getters.isDNC),
         isECD,
         v$,

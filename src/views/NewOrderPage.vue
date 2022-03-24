@@ -4,6 +4,7 @@
     <TabPanel v-if="isDNC" :header="ORDER_PATTERN_TYPES.ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         @changeProps="handleChangeRouteParams"
@@ -12,6 +13,7 @@
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_ORDER"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         @changeProps="handleChangeRouteParams"
@@ -20,6 +22,7 @@
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_PROHIBITION">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_PROHIBITION"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         @changeProps="handleChangeRouteParams"
@@ -28,6 +31,7 @@
     <TabPanel v-if="isDNC || isDSP_or_DSPoperator" :header="ORDER_PATTERN_TYPES.REQUEST">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.REQUEST"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         @changeProps="handleChangeRouteParams"
@@ -40,6 +44,7 @@
       <new-order
         v-if="isDNC || isDSP_or_DSPoperator"
         :orderType="ORDER_PATTERN_TYPES.NOTIFICATION"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         @changeProps="handleChangeRouteParams"
@@ -47,6 +52,7 @@
       <new-order
         v-if="isECD"
         :orderType="ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
+        :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         @changeProps="handleChangeRouteParams"
@@ -150,6 +156,7 @@
             name: 'NewOrderPage',
             params: {
               orderType: getOrderTypeByTabIndex(activeIndex.value),
+              orderPatternSpecialSign: null,
               prevOrderId: null,
               orderDraftId: null,
             },
@@ -178,6 +185,7 @@
           name: 'NewOrderPage',
           params: {
             orderType: getOrderTypeByTabIndex(event.index),
+            orderPatternSpecialSign: null,
             prevOrderId: null,
             orderDraftId: null,
           },
@@ -187,6 +195,10 @@
       const handleChangeRouteParams = (newRouteParams) => {
         router.replace({ name: 'NewOrderPage', params: { ...newRouteParams } });
       };
+
+      const getOrderPatternIdPropValue = (orderType) =>
+        (route.params.orderType === orderType && route.params.orderPatternSpecialSign !== 'null') ?
+        store.getters.getOrderPatternIdBySpecialSign(route.params.orderPatternSpecialSign) : null;
 
       const getPrevOrderIdPropValue = (orderType) =>
         (route.params.orderType === orderType && route.params.prevOrderId !== 'null') ? route.params.prevOrderId : null;
@@ -204,6 +216,7 @@
         TABS_INDEXES,
         handleTabChange,
         handleChangeRouteParams,
+        getOrderPatternIdPropValue,
         getPrevOrderIdPropValue,
         getOrderDraftIdPropValue,
       };

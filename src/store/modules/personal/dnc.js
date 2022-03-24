@@ -1,5 +1,6 @@
+import { store } from '@/store';
 import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { getUserFIOString } from './transformUserData';
+import { getUserFIOString, getUserPostFIOString } from './transformUserData';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import {
   SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS,
@@ -14,15 +15,58 @@ import {
 export const dnc = {
   getters: {
     /**
-     * Возвращает информацию о всех ДНЦ участков ДНЦ, связанных с текущим полигоном управления.
-     * Данным ДНЦ и может адресоваться информация, отправляемая текущим пользователем.
+     * Возвращает весь персонал текущего участка ДНЦ, если текущий полигон управления - участок ДНЦ.
      */
-    getDNCShiftForSendingData: (state) => {
+    getCurrentDNCSectorShift(state, getters) {
+      if (!state.sectorPersonal || !state.sectorPersonal.DNCSectorsShift) {
+        return null;
+      }
+      const userWorkPoligon = getters.getUserWorkPoligon;
+      return (userWorkPoligon.type !== WORK_POLIGON_TYPES.DNC_SECTOR)
+        ? null
+        : state.sectorPersonal.DNCSectorsShift.find((item) => item.sectorId === userWorkPoligon.code);
+    },
+
+    /**
+     * Возвращает массив ДНЦ текущего полигона управления "Участок ДНЦ".
+     */
+    getCurrDNCSectorWorkPoligonUsers(_state, getters) {
+      return !getters.getCurrentDNCSectorShift || !getters.getCurrentDNCSectorShift.people
+        ? [] :
+        getters.getCurrentDNCSectorShift.people
+          .filter((el) => el.appsCredentials === APP_CREDENTIALS.DNC_FULL)
+          .map((el) => {
+            return {
+              id: el._id,
+              postFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
+            };
+          });
+    },
+
+    /**
+     * Возвращает весь персонал участков ДНЦ, связанных с текущим полигоном управления.
+     * Если текущий полигон управления - участок ДНЦ, то его персонал в выборку не включается.
+     */
+    getAllDNCShiftExceptCurrent(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.DNCSectorsShift) {
         return [];
       }
-      return state.sectorPersonal.DNCSectorsShift.map((item) => {
-        return {
+      const userWorkPoligon = getters.getUserWorkPoligon;
+      return (userWorkPoligon.type !== WORK_POLIGON_TYPES.DNC_SECTOR)
+        ? state.sectorPersonal.DNCSectorsShift
+        : state.sectorPersonal.DNCSectorsShift.filter((item) => item.sectorId !== userWorkPoligon.code);
+    },
+
+    /**
+     * Возвращает информацию о всех ДНЦ участков ДНЦ, связанных с текущим полигоном управления
+     * (если текущий полигон управления - участок ДНЦ, то он в выборку не включается).
+     * Данным ДНЦ и может адресоваться информация, отправляемая текущим пользователем.
+     */
+    getDNCShiftForSendingData: (state, getters) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.DNCSectorsShift) {
+        return [];
+      }
+      return getters.getAllDNCShiftExceptCurrent.map((item) => ({
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.DNC_SECTOR,
           sector: item.sectorTitle,
@@ -41,18 +85,17 @@ export const dnc = {
               };
             }),
           sendOriginal: item.sendOriginal,
-        };
-      });
+      }));
     },
   },
 
   mutations: {
     /**
-     * Оригинал/Копия/Ничего всем участкам ДНЦ.
+     * Оригинал/Копия/Ничего всем участкам ДНЦ (кроме текущего, если текущий - участок ДНЦ).
      */
     [SET_GET_ORDER_STATUS_TO_ALL_DNC_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
-        state.sectorPersonal.DNCSectorsShift.forEach((el) => {
+        store.getters.getAllDNCShiftExceptCurrent.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
@@ -77,9 +120,8 @@ export const dnc = {
      */
     [SET_GET_ORDER_STATUS_TO_ALL_LEFT_DNC_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.DNCSectorsShift) {
-        state.sectorPersonal.DNCSectorsShift.forEach(el => {
-          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
-              el.sendOriginal !== getOrderStatus) {
+        store.getters.getAllDNCShiftExceptCurrent.forEach(el => {
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend && el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
         });

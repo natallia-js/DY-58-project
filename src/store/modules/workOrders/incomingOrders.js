@@ -63,6 +63,7 @@ export const incomingOrders = {
               dspToSend: item.dspToSend,
               ecdToSend: item.ecdToSend,
               otherToSend: item.otherToSend,
+              insertEmptyLineBeforeText: true,
             }),
             place: item.senderWorkPoligon.title,
             post: item.creator.post,

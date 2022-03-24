@@ -20,7 +20,6 @@
             <div class="p-mb-2">
               <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
               Документы в работе
-              <Badge :value="getWorkingOrdersNumber"></Badge>
             </div>
             <div class="dy58-table-comment">
               извлекаются цепочки документов, действовавшие с
@@ -31,9 +30,6 @@
                 :manualInput="false"
               />
               по настоящее время
-            </div>
-            <div class="dy58-table-comment">
-              (изменение времени запроса информации будет применено при очередном обновлении данных)
             </div>
             <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">
               {{ getErrorLoadingWorkOrders }}
@@ -124,7 +120,6 @@
         state,
         isECD: computed(() => store.getters.isECD),
         getLoadingWorkOrdersStatus: computed(() => store.getters.getLoadingWorkOrdersStatus),
-        getWorkingOrdersNumber: computed(() => store.getters.getWorkingOrdersNumber),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
         canUserDispatchDSPTakeDutyOrder: computed(() => store.getters.canUserDispatchDSPTakeDutyOrder),
         getExistingDSPTakeDutyOrder: computed(() => store.getters.getExistingDSPTakeDutyOrder),

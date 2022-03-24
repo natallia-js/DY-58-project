@@ -3,6 +3,7 @@ import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
   SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
+  SPECIAL_CIRCULAR_ORDER_SIGN,
 } from '@/constants/orderPatterns';
 import { APP_CREDENTIALS } from '@/constants/appCredentials';
 import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
@@ -352,6 +353,40 @@ export const activeOrders = {
             (order.workPoligon.workPlaceId && workPoligon.subCode && order.workPoligon.workPlaceId === workPoligon.subCode)
           ) &&
           order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN);
+      });
+      if (!orders.length) {
+        return null;
+      }
+      // сортируем распоряжения в порядке убывания времени издания и возвращаем порвое распоряжение
+      // в отсортированном массиве
+      return orders.sort((a, b) => {
+        if (a.createDateTime < b.createDateTime) return 1;
+        if (a.createDateTime > b.createDateTime) return -1;
+        return 0;
+      })[0];
+    },
+
+    /**
+     * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
+     * дежурства ДНЦ, изданное на ТЕКУЩЕМ РАБОЧЕМ МЕСТЕ.
+     * Если существует, функция возвращает последнее такое найденное распоряжение (по времени издания),
+     * в противном случае функция возвращает null.
+     *
+     * Функцию следует вызывать только в том случае, если текущий пользователь - ДНЦ, находящийся на дежурстве!
+     */
+    getExistingDNCTakeDutyOrder(_state, getters) {
+      const workPoligon = getters.getUserWorkPoligon;
+      if (!workPoligon) {
+        return null;
+      }
+      const orders = getters.getRawWorkingOrders.filter((order) => {
+        if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
+          return false;
+        }
+        return (order.workPoligon.type === workPoligon.type) &&
+          (order.workPoligon.id === workPoligon.code) &&
+          (!order.workPoligon.workPlaceId) &&
+          order.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN);
       });
       if (!orders.length) {
         return null;

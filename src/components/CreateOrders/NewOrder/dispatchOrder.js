@@ -1,5 +1,5 @@
 import { computed, watch } from 'vue';
-import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 
 /**
@@ -38,7 +38,8 @@ export const useDispatchOrder = (inputVals) => {
   //          его издания, а время окончания действия - до отмены (это нужно для того, чтобы завка /
   //          уведомление не исчезло из списка рабочих распоряжений до тех пор, пока на основании его
   //          не будет издано распоряжение)
-  //     3.2. в противном случае время начала и окончания действия распоряжения равны дате и времени
+  //     3.2 для циркулярного распоряжения о приеме-сдаче дежурства ДНЦ правило аналогичное 3.1
+  //     3.3. в противном случае время начала и окончания действия распоряжения равны дате и времени
   //          его издания
   const getPreviewOrderTimeSpanObject = computed(() => {
     if (
@@ -50,10 +51,11 @@ export const useDispatchOrder = (inputVals) => {
     if (state.cancelOrderDateTime) {
       return { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false };
     }
-    if (props.orderType === ORDER_PATTERN_TYPES.REQUEST || props.orderType === ORDER_PATTERN_TYPES.NOTIFICATION) {
+    if (props.orderType === ORDER_PATTERN_TYPES.REQUEST || props.orderType === ORDER_PATTERN_TYPES.NOTIFICATION ||
+      (state.specialTrainCategories && state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))) {
       return { start: state.createDateTime, end: null, tillCancellation: true };
     }
-    return null; // этот момент нужен для отслеживания пункта 3.2 разными компонентами
+    return null; // этот момент нужен для отслеживания пункта 3.3 разными компонентами
   });
 
   /**

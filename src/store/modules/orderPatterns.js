@@ -53,8 +53,8 @@ export const orderPatterns = {
   },
 
   getters: {
-    getCurrentUserId(_state, getters) {
-      return getters.getUserId;
+    getAllOrderPatterns(state) {
+      return state.patterns;
     },
 
     getLoadingOrderPatternsStatus(state) {
@@ -193,6 +193,17 @@ export const orderPatterns = {
 
     getOrderPatternById: (state) => (patternId) => {
       return state.patterns.find((pattern) => pattern._id === patternId);
+    },
+
+    getOrderPatternIdBySpecialSign(state) {
+      return (specialSign) => {
+        if (!specialSign) {
+          return null;
+        }
+        const orderPattern = state.patterns.find((pattern) =>
+          pattern.specialTrainCategories && pattern.specialTrainCategories.includes(specialSign));
+        return orderPattern ? orderPattern._id : null;
+      };
     },
 
     getOrderCategoryModifyResult(state) {

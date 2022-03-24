@@ -41,6 +41,8 @@ export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
   NOTIFICATION_DATETIME: 'Дата-время издания действующего уведомления',
   ECD_ORDER_DATETIME: 'Дата-время издания действующего приказа',
   ECD_PROHIBITION_DATETIME: 'Дата-время издания действующего запрещения',
+  PASS_DUTY_DATETIME: 'Дата-время сдачи дежурства',
+  TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
@@ -62,6 +64,8 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   SWITCH_OFF_ON: 'Отключить, включить',
   EXACT_PLACE: 'Точное место',
   ACTIONS_ORDER: 'Порядок действий',
+  PASS_DUTY: 'Дежурство сдал',
+  TAKE_DUTY: 'Дежурство принял',
 });
 
 export const SWITCH_OFF_ON_ITEMS = [
@@ -94,7 +98,7 @@ export const ORDERS_RECEIVERS_DEFAULT_POSTS = Object.freeze({
 
 // Смысловые значения элементов шаблона распоряжения о принятии дежурства ДСП.
 // Данные смысловые значения вынесены отдельно, т.к. их нет в общем списке, и они используются
-// исключительно данной программой.
+// исключительно данной программой для Записи о приеме/сдаче дежурства ДСП.
 export const DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS =  Object.freeze({
   TAKE_DUTY_FIO: 'ФИО принявшего дежурство',
   TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',

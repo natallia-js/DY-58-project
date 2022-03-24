@@ -1,3 +1,4 @@
+import { store } from '@/store';
 import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { getUserFIOString } from './transformUserData';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
@@ -14,35 +15,61 @@ import {
 export const ecd = {
   getters: {
     /**
-     * Возвращает информацию о всех ЭЦД участков ЭЦД, связанных с текущим полигоном управления.
-     * Данным ЭЦД и может адресоваться информация, отправляемая текущим пользователем.
+     * Возвращает весь персонал текущего участка ЭЦД, если текущий полигон управления - участок ЭЦД.
      */
-    getECDShiftForSendingData: (state) => {
+    getCurrentECDSectorShift(state, getters) {
+      if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
+        return null;
+      }
+      const userWorkPoligon = getters.getUserWorkPoligon;
+      return (userWorkPoligon.type !== WORK_POLIGON_TYPES.ECD_SECTOR)
+        ? null
+        : state.sectorPersonal.ECDSectorsShift.find((item) => item.sectorId === userWorkPoligon.code);
+    },
+
+    /**
+     * Возвращает весь персонал участков ЭЦД, связанных с текущим полигоном управления.
+     * Если текущий полигон управления - участок ЭЦД, то его персонал в выборку не включается.
+     */
+     getAllECDShiftExceptCurrent(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
         return [];
       }
-      return state.sectorPersonal.ECDSectorsShift.map((item) => {
-        return {
-          id: item.sectorId,
-          type: WORK_POLIGON_TYPES.ECD_SECTOR,
-          sector: item.sectorTitle,
-          post: item.lastUserChoicePost || '',
-          fio: item.lastUserChoice || '',
-          fioId: item.lastUserChoiceId,
-          fioOnline: item.lastUserChoiceOnline,
-          people: item.people
-            .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
-            .map((el) => {
-              return {
-                id: el._id,
-                post: el.post,
-                fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
-                online: el.online,
-              };
-            }),
-          sendOriginal: item.sendOriginal,
-        };
-      });
+      const userWorkPoligon = getters.getUserWorkPoligon;
+      return (userWorkPoligon.type !== WORK_POLIGON_TYPES.ECD_SECTOR)
+        ? state.sectorPersonal.ECDSectorsShift
+        : state.sectorPersonal.ECDSectorsShift.filter((item) => item.sectorId !== userWorkPoligon.code);
+    },
+
+    /**
+     * Возвращает информацию о всех ЭЦД участков ЭЦД, связанных с текущим полигоном управления
+     * (если текущий полигон управления - участок ЭЦД, то он в выборку не включается).
+     * Данным ЭЦД и может адресоваться информация, отправляемая текущим пользователем.
+     */
+    getECDShiftForSendingData: (state, getters) => {
+      if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
+        return [];
+      }
+      return getters.getAllECDShiftExceptCurrent.map((item) => ({
+        id: item.sectorId,
+        type: WORK_POLIGON_TYPES.ECD_SECTOR,
+        sector: item.sectorTitle,
+        post: item.lastUserChoicePost || '',
+        fio: item.lastUserChoice || '',
+        fioId: item.lastUserChoiceId,
+        fioOnline: item.lastUserChoiceOnline,
+        people: item.people
+          .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+          .map((el) => {
+            return {
+              id: el._id,
+              post: el.post,
+              fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
+              online: el.online,
+            };
+          }),
+        sendOriginal: item.sendOriginal,
+      }));
     },
   },
 
@@ -52,7 +79,7 @@ export const ecd = {
      */
     [SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
-        state.sectorPersonal.ECDSectorsShift.forEach((el) => {
+        store.getters.getAllECDShiftExceptCurrent.forEach((el) => {
           if (el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
@@ -77,7 +104,7 @@ export const ecd = {
      */
     [SET_GET_ORDER_STATUS_TO_ALL_LEFT_ECD_SECTORS] (state, { getOrderStatus }) {
       if (state.sectorPersonal && state.sectorPersonal.ECDSectorsShift) {
-        state.sectorPersonal.ECDSectorsShift.forEach(el => {
+        store.getters.getAllECDShiftExceptCurrent.forEach(el => {
           if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
               el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;

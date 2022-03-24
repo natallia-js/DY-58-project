@@ -21,7 +21,6 @@
         <div class="dy58-table-title">
           <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
           Входящие {{ isDSP_or_DSPoperator ? 'документы' : 'уведомления' }}
-          <Badge :value="getIncomingOrdersNumber"></Badge>
           <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">
             {{ getErrorLoadingWorkOrders }}
           </p>
@@ -152,7 +151,6 @@
         getReportOnOrdersDeliveryResult: computed(() => store.getters.getReportOnOrdersDeliveryResult),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
         getIncomingOrders,
-        getIncomingOrdersNumber: computed(() => store.getters.getIncomingOrdersNumber),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         getInputMessTblColumnsTitles: computed(() => store.getters.getInputMessTblColumnsTitles),
         getInputMessTblColumns: computed(() => store.getters.getInputMessTblColumns),

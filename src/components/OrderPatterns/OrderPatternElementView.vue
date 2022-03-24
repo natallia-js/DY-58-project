@@ -1,14 +1,14 @@
 <template>
   <!-- Элемент "Текст" -->
 
-  <span v-if="element.type === getOrderPatternElementTypes.TEXT">
+  <span v-if="element.type === OrderPatternElementType.TEXT">
     {{ state.elementModelValue }}
   </span>
 
   <!-- Элемент "Поле ввода" -->
 
   <InputText
-    v-else-if="element.type === getOrderPatternElementTypes.INPUT"
+    v-else-if="element.type === OrderPatternElementType.INPUT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
@@ -18,7 +18,7 @@
   <!-- Элемент "Текстовая область" -->
 
   <Textarea
-    v-else-if="element.type === getOrderPatternElementTypes.TEXT_AREA"
+    v-else-if="element.type === OrderPatternElementType.TEXT_AREA"
     v-model="state.elementModelValue"
     :autoResize="true"
     rows="2"
@@ -30,7 +30,7 @@
 
   <!-- Элемент "Выпадающий список" -->
 
-  <div v-else-if="element.type === getOrderPatternElementTypes.SELECT" v-tooltip="element.ref">
+  <div v-else-if="element.type === OrderPatternElementType.SELECT" v-tooltip="element.ref">
     <Dropdown
       :style="{ width: getElementSizesCorrespondence[element.size] }"
       :options="dropdownValues"
@@ -45,7 +45,7 @@
   <!-- Элемент "Дата" -->
 
   <Calendar
-    v-else-if="element.type === getOrderPatternElementTypes.DATE"
+    v-else-if="element.type === OrderPatternElementType.DATE"
     :showIcon="true"
     :placeholder="element.ref || 'дата'"
     :hideOnDateTimeSelect="true"
@@ -57,7 +57,7 @@
   <!-- Элемент "Таблица "Время" -->
 
   <Calendar
-    v-else-if="element.type === getOrderPatternElementTypes.TIME"
+    v-else-if="element.type === OrderPatternElementType.TIME"
     :showTime="true"
     :timeOnly="true"
     :showIcon="true"
@@ -71,7 +71,7 @@
   <!-- Элемент "Дата-время" -->
 
   <Calendar
-    v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
+    v-else-if="element.type === OrderPatternElementType.DATETIME"
     :showTime="true"
     :showIcon="true"
     :placeholder="element.ref || 'дата-время'"
@@ -83,7 +83,7 @@
 
   <!-- Элемент "Таблица "Поезд ДР" -->
 
-  <div v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE" class="dy58-dy-train-table-block">
+  <div v-else-if="element.type === OrderPatternElementType.DR_TRAIN_TABLE" class="dy58-dy-train-table-block">
     <Toast />
     <ConfirmPopup group="confirmDelAllTableRecords"></ConfirmPopup>
     <div class="p-mb-1">
@@ -211,7 +211,7 @@
   <!-- Элемент "Перенос строки" -->
 
   <i
-    v-else-if="element.type === getOrderPatternElementTypes.LINEBREAK"
+    v-else-if="element.type === OrderPatternElementType.LINEBREAK"
     class="pi pi-reply"
     style="transform: rotate(180deg)"
   ></i>
@@ -224,7 +224,7 @@
 
 
 <script>
-  import { onMounted, watch, computed, reactive, ref } from 'vue';
+  import { watch, computed, reactive, ref, onMounted } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
   import {
@@ -232,9 +232,14 @@
     ElementSizesCorrespondence,
     DRTrainTableColumns,
   } from '@/constants/orderPatterns';
-  import { GID_EVENT_TYPE } from '@/constants/orders';
+  import {
+    GID_EVENT_TYPE,
+    FILLED_ORDER_DROPDOWN_ELEMENTS,
+    FILLED_ORDER_DATETIME_ELEMENTS,
+  } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
 
   export default {
     name: 'dy58-order-pattern-element-view',
@@ -258,8 +263,47 @@
       const store = useStore();
       const confirm = useConfirm();
 
+      // Значения элементов шаблонов распоряжений, которые они в соответствии
+      // со своим смысловым значением могут принимать по умолчанию
+      const getDefaultElementModelValue = () => {
+        if (!props.element) {
+          return null;
+        }
+        if (props.element.type === OrderPatternElementType.SELECT) {
+          switch (props.element.ref) {
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
+              return store.getters.getUserPostFIO;
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
+              // Если существует (ранее изданное) распоряжение ДНЦ о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
+              // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
+              if (store.getters.getExistingDNCTakeDutyOrder) {
+                return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
+                  store.getters.getExistingDNCTakeDutyOrder.orderText);
+              }
+              break;
+            default:
+              return null;
+          }
+        } else if (props.element.type === OrderPatternElementType.DATETIME) {
+          switch (props.element.ref) {
+            // Дата-время сдачи дежурства одним человеком = дата-время принятия дежурства другим человеком
+            case FILLED_ORDER_DATETIME_ELEMENTS.TAKE_DUTY_DATETIME:
+            case FILLED_ORDER_DATETIME_ELEMENTS.PASS_DUTY_DATETIME:
+              return store.getters.getLastTakeDutyTime;
+            default:
+              return null;
+          }
+        }
+        return null;
+      };
+
       const state = reactive({
         elementModelValue: null,
+      });
+
+      // Именно здесь, а не сразу при объявлении, т.к. нужно дальнейшее срабатывание в watch
+      onMounted(() => {
+        state.elementModelValue = getDefaultElementModelValue() || (props.element ? props.element.value : null);
       });
 
       const selectedDRTableRecord = ref();
@@ -287,7 +331,6 @@
       const ADD_DR_TABLE_REC_BEFORE_DLG_TITLE = 'Добавить запись о поезде ДР перед текущей';
       const ADD_DR_TABLE_REC_AFTER_DLG_TITLE = 'Добавить запись о поезде ДР после текущей';
 
-      const getOrderPatternElementTypes = computed(() => OrderPatternElementType);
       const getElementSizesCorrespondence = computed(() => ElementSizesCorrespondence);
       const getDRTrainTableColumns = computed(() => DRTrainTableColumns);
       const elementValue = computed(() => props.element ? props.element.value : null);
@@ -518,14 +561,8 @@
       // значениям соответствующих полей связанного распоряжения)
       watch(elementValue, (newVal) => state.elementModelValue = newVal);
 
-      onMounted(() => {
-        if (props.element) {
-          state.elementModelValue = props.element.value;
-        }
-      });
-
       watch(() => state.elementModelValue, (value) => {
-        if (props.element && props.element.type !== getOrderPatternElementTypes.value.DR_TRAIN_TABLE) {
+        if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
           emit('input', {
             elementId: props.element._id,
             value,
@@ -550,10 +587,9 @@
         drTableDataToDisplay,
         DR_TABLE_MENU_ITEMS,
         getSectorStations,
-        getOrderPatternElementTypes,
+        OrderPatternElementType,
         getElementSizesCorrespondence,
         getDRTrainTableColumns,
-        elementValue,
         drTrainTableContextMenuItems,
         handleTrainTableRightClick,
         pasteDRTrainTable,

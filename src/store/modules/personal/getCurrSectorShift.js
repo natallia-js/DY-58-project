@@ -135,7 +135,7 @@ export const getCurrSectorShift = {
      * Возвращает статус процесса получения информации о персонале (true - идет процесс загрузки данных
      * с сервера, false - процесс загрузки данных не идет).
      */
-     getLoadingCurrSectorsShiftStatus: (state) => {
+    getLoadingCurrSectorsShiftStatus: (state) => {
       return state.loadingCurrShift;
     },
 
@@ -149,7 +149,8 @@ export const getCurrSectorShift = {
 
     /**
      * Возвращает идентификаторы всех лиц, входящих в состав полигона управления
-     * (т.е. идентификаторы всего зарегистрированного в системе персонала).
+     * (т.е. идентификаторы всего зарегистрированного в системе персонала, информация о котором
+     * ранее была извлечена из БД).
      * Если одно и то же лицо входит в несколько участков (например, когда станция входит
      * в состав смежных поездных участков), то его id не дублируется.
      */
@@ -209,7 +210,6 @@ export const getCurrSectorShift = {
         // управления), так и на станциях, смежных с текущей
         sectorStationsShift: initialSectorStationsPersonalData(context.getters.getSectorStations),
       };
-
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ
       if (dncSectorsIds.length) {
         const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: dncSectorsIds, onlyOnline: false });
@@ -241,22 +241,28 @@ export const getCurrSectorShift = {
       // Сюда поместим информацию о персонале, необходимую ДНЦ. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {
-        // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, смежных с
-        // участком ДНЦ с id = sectorId
-        DNCSectorsShift: initialDNCSectorsPersonalData(context.getters.getAdjacentDNCSectors),
-        // Здесь будет информация о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
+        // Здесь будет информация как о тех пользователях, которые работают на участках ДНЦ, смежных с
+        // текущим участком ДНЦ, так и на самом текущем участке ДНЦ
+        DNCSectorsShift: initialDNCSectorsPersonalData([
+          ...context.getters.getAdjacentDNCSectors,
+          {
+            DNCS_ID: context.getters.getUserWorkPoligon.code,
+            DNCS_Title: context.getters.getUserWorkPoligonName,
+          },
+        ]),
+        // Здесь будет информация о тех пользователях, которые работают на станциях текущего участка ДНЦ
         sectorStationsShift: initialSectorStationsWithTrainSectorsPersonalData(context.getters.getSectorStationsWithTrainSectors),
         // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, ближайших к
-        // участку ДНЦ с id = sectorId
+        // текущему участку ДНЦ
         ECDSectorsShift: initialECDSectorsPersonalData(context.getters.getNearestECDSectors),
       };
-
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ, смежных с
-      // участком ДНЦ с id = sectorId
-      if (adjacentSectorsIds.length) {
-        const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
-        setDNCSectorsShift(responseData, shiftPersonal);
-      }
+      // текущим участком ДНЦ
+      const responseData = await getDNCSectorsWorkPoligonsUsers({
+        sectorIds: [...adjacentSectorsIds, context.getters.getUserWorkPoligon.code],
+        onlyOnline: false,
+      });
+      setDNCSectorsShift(responseData, shiftPersonal);
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
@@ -284,22 +290,28 @@ export const getCurrSectorShift = {
       // Сюда поместим информацию о персонале, необходимую ЭЦД. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {
-        // Здесь будет информация о тех пользователях, которые работают на участках ЭЦД, смежных с
-        // участком ЭЦД с id = sectorId
-        ECDSectorsShift: initialECDSectorsPersonalData(context.getters.getAdjacentECDSectors),
+        // Здесь будет информация как о тех пользователях, которые работают на участках ЭЦД, смежных с
+        // текущим участком ЭЦД, так и на самом текущем участке ЭЦД
+        ECDSectorsShift: initialECDSectorsPersonalData([
+          ...context.getters.getAdjacentECDSectors,
+          {
+            ECDS_ID: context.getters.getUserWorkPoligon.code,
+            ECDS_Title: context.getters.getUserWorkPoligonName,
+          },
+        ]),
         // Здесь будет информация о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
         sectorStationsShift: initialSectorStationsWithTrainSectorsPersonalData(context.getters.getSectorStationsWithTrainSectors),
         // Здесь будет информация о тех пользователях, которые работают на участках ДНЦ, ближайших к
         // участку ЭЦД с id = sectorId
         DNCSectorsShift: initialDNCSectorsPersonalData(context.getters.getNearestDNCSectors),
       };
-
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД, смежных с
-      // участком ЭЦД с id = sectorId
-      if (adjacentSectorsIds.length) {
-        const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: adjacentSectorsIds, onlyOnline: false });
-        setECDSectorsShift(responseData, shiftPersonal);
-      }
+      // текущим участком ЭЦД
+      const responseData = await getECDSectorsWorkPoligonsUsers({
+        sectorIds: [...adjacentSectorsIds, context.getters.getUserWorkPoligon.code],
+        onlyOnline: false,
+      });
+      setECDSectorsShift(responseData, shiftPersonal);
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });

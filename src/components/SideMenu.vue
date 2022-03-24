@@ -78,6 +78,7 @@
       <Badge v-if="item.error" severity="danger" value="!" v-tooltip="item.error" class="dy58-img-tag"></Badge>
       <Badge v-else-if="item.info" :value="item.info" class="dy58-img-tag"></Badge>
       <Badge v-else-if="item.dangerInfo" severity="danger" :value="item.dangerInfo" class="dy58-img-tag"></Badge>
+      <i v-else-if="item.icon" :class="item.icon" class="dy58-img-tag" />
     </template>
   </MegaMenu>
 </template>
@@ -134,6 +135,7 @@
           name: 'NewOrderPage',
           params: {
             orderType: orderType,
+            orderPatternSpecialSign: null,
             prevOrderId: null,
             orderDraftId,
           },

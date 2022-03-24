@@ -1,4 +1,5 @@
 import { store } from '@/store';
+import router from '@/router';
 import {
   SHOW_APP_SETTINGS,
   SHOW_ORDER_DRAFTS,
@@ -6,6 +7,7 @@ import {
   SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG,
 } from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
 
 
 export const leftMenuItems = {
@@ -18,20 +20,17 @@ export const leftMenuItems = {
           error: getters.getErrorGettingIncomingOrdersPerShift,
           icon: getters.getGettingIncomingOrdersPerShiftStatus ? 'pi pi-spin pi-spinner' : null,
           imgURL: require('@/assets/img/incomingOrdersPerShift.png'),
-          tagPosition: 'top',
         },
         {
           label: 'Не подтверждено',
           itemClass: 'dy58-important-item',
           dangerInfo: getters.getIncomingOrdersNumber,
           imgURL: require('@/assets/img/notConfirmed.png'),
-          tagPosition: 'top',
         },
         {
           label: 'Документы в работе',
           info: getters.getWorkingOrdersNumber,
           imgURL: require('@/assets/img/ordersInWork.png'),
-          tagPosition: 'top',
         },
       ];
     },
@@ -52,7 +51,7 @@ export const leftMenuItems = {
       const items = [];
       if (getters.canUserDispatchDSPTakeDutyOrder) {
         items.push({
-          label: 'Запись о приеме/сдаче дежурства',
+          label: 'Смена',
           imgURL: require('@/assets/img/takePassDuty.png'),
           command: () => {
             store.commit(SET_CAN_EDIT_EXISTING_TAKE_DUTY_ORDER, false);
@@ -78,35 +77,50 @@ export const leftMenuItems = {
     },
 
     getDNCLeftMenuItems(_state, getters) {
+      const items = [];
+      if (getters.canUserDispatchDNCTakeDutyOrder) {
+        items.push({
+          label: 'Циркулярное распоряжение',
+          imgURL: require('@/assets/img/takePassDuty.png'),
+          command: () => {
+            router.push({
+              name: 'NewOrderPage',
+              params: {
+                orderType: ORDER_PATTERN_TYPES.ORDER,
+                orderPatternSpecialSign: SPECIAL_CIRCULAR_ORDER_SIGN,
+                prevOrderId: null,
+                orderDraftId: null,
+              },
+            });
+          },
+        });
+      }
       return [
+        ...items,
         ...getters.getCommonLeftMenuItemsAtTheBeginning,
         {
           label: 'Поезда ДР',
           itemClass: 'dy58-subitem',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ДР']),
           imgURL: require('@/assets/img/DR.png'),
-          tagPosition: 'bottom',
         },
         {
           label: 'Поезда Н',
           itemClass: 'dy58-subitem',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['Н']),
           imgURL: require('@/assets/img/N.png'),
-          tagPosition: 'bottom',
         },
         {
           label: 'Поезда ПВ, ПД, ПВПД',
           itemClass: 'dy58-subitem',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ПВ', 'ПД', 'ПВПД']),
           imgURL: require('@/assets/img/P.png'),
-          tagPosition: 'bottom',
         },
         {
           label: 'Поезда ВМ',
           itemClass: 'dy58-subitem',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ВМ']),
           imgURL: require('@/assets/img/VM.png'),
-          tagPosition: 'bottom',
         },
         ...getters.getCommonLeftMenuItemsAtTheEnd,
       ];

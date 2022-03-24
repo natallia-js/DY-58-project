@@ -24,8 +24,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   const orderTextFieldsNotEmpty = (orderText) => {
     for (let orderTextElement of orderText) {
       if (![OrderPatternElementType.LINEBREAK, OrderPatternElementType.TEXT_AREA].includes(orderTextElement.type) &&
-        !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) &&
-        !orderTextElement.value) {
+        !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) && !orderTextElement.value) {
         return false;
       }
     }

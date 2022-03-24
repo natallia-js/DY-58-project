@@ -1,7 +1,7 @@
+import { store } from '@/store';
 import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { getUserFIOString } from './transformUserData';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
-import { store } from '@/store';
 import {
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,

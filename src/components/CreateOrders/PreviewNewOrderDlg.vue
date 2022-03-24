@@ -134,6 +134,7 @@
             dspToSend: (!this.dspToSend || !this.dspToSend.length) ? [] : this.dspToSend.map((el) => ({ ...el, placeTitle: el.station })),
             ecdToSend: (!this.ecdToSend || !this.ecdToSend.length) ? [] : this.ecdToSend.map((el) => ({ ...el, placeTitle: el.sector })),
             otherToSend: this.otherToSend,
+            insertEmptyLineBeforeText: true,
           });
         }
         return '?';

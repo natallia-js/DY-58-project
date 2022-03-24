@@ -141,7 +141,7 @@ export const reportOnOrdersDelivery = {
      */
     async reportOnOrdersDelivery(context, orders) {
       if (!context.getters.canUserReportOnOrdersDelivery) {
-        const errMessage = 'У вас нет права уведомлять о доставке распоряжений на рабочий полигон';
+        const errMessage = 'Для работы с документами необходимо быть на дежурстве и обладать соответствующими правами';
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
         return;
       }

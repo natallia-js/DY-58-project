@@ -83,6 +83,7 @@
         'getSectorBlockByTitle',
         'getActiveOrdersOfGivenType',
         'getActiveOrderByNumber',
+        'getCurrDNCSectorWorkPoligonUsers',
       ]),
 
       getOrderPatternElementTypes() {
@@ -255,6 +256,12 @@
             return ACTIONS_ORDER_ITEMS.map((item) => ({
               label: item,
               value: item,
+            }));
+          case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
+          case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
+            return this.getCurrDNCSectorWorkPoligonUsers.map((item) => ({
+              label: item.postFIO,
+              value: item.postFIO,
             }));
           default:
             return [];

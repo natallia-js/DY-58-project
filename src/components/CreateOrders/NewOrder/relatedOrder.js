@@ -16,7 +16,6 @@ export const useRelatedOrder = (state, { props, store, emit }) => {
     store.getters.getActiveOrders.find((order) => order._id === relatedOrderId.value) : null
   );
 
-  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
   watch(relatedOrderObject, (newVal) => {
     emit('changeProps', {
       orderType: props.orderType,

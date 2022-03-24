@@ -78,7 +78,7 @@ const routes = [
     },
   },
   {
-    path: '/newOrderPage/:orderType/:prevOrderId/:orderDraftId',
+    path: '/newOrderPage/:orderType/:orderPatternSpecialSign/:prevOrderId/:orderDraftId',
     name: 'NewOrderPage',
     component: NewOrderPage,
     meta: {

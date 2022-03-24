@@ -64,6 +64,7 @@ export const contextMenus = {
                   name: 'NewOrderPage',
                   params: {
                     orderType: newOrderType,
+                    orderPatternSpecialSign: null,
                     prevOrderId: orderId,
                     orderDraftId: null,
                   },
