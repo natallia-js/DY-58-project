@@ -95,6 +95,14 @@ export const useDispatchOrder = (inputVals) => {
       showOnGID: state.showOnGID.value,
       specialTrainCategories: state.specialTrainCategories,
       draftId: orderDraftIdToDelete,
+      // При издании циркулярного распоряжения о приеме-сдаче дежурства ДНЦ отменяем предыдущее аналогичное
+      // распоряжение, изданное на этом же рабочем полигоне
+      idOfTheOrderToCancel: state.specialTrainCategories &&
+        state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN) ?
+        (() => {
+          const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
+          return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
+        })() : null,
     });
   };
 

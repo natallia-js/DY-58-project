@@ -266,7 +266,7 @@
         });
       };
 
-      //
+      // Изменение наименования распоряжения
       const handleChangeOrderTitle = (event) => {
         emit('input', {
           orderTextSource: state.orderTextSource,
@@ -280,24 +280,26 @@
         });
       };
 
-      //
+      // При любом изменении сообщаем "наверх"! Т.к. если будем делать проверки (например, на равенство
+      // нового значения предыдущему, чтобы решить, делать emit ил нет), то может оказаться так, что
+      // изменение в одном поле потянет изменение в другом, а это другое не отразится на исходном наборе
+      // данных, останется его прежнее значение
       const handleChangeOrderPatternElementValue = (event) => {
         const orderPatternElementIndex = state.orderPatternText.findIndex((el) => el._id === event.elementId);
-        if (orderPatternElementIndex < 0) {
-          return;
+        if (orderPatternElementIndex >= 0) {
+          if (state.orderPatternText[orderPatternElementIndex].value !== event.value) {
+            state.orderPatternText[orderPatternElementIndex].value = event.value;
+          }
         }
-        if (state.orderPatternText[orderPatternElementIndex].value !== event.value) {
-          state.orderPatternText[orderPatternElementIndex].value = event.value;
-          emit('input', {
-            orderTextSource: state.orderTextSource,
-            patternId: getSelectedOrderPattern.value._id,
-            orderTitle: getSelectedOrderPattern.value.title,
-            orderText: state.orderPatternText,
-          });
-        }
+        emit('input', {
+          orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
+          orderTitle: getSelectedOrderPattern.value.title,
+          orderText: state.orderPatternText,
+        });
       };
 
-      //
+      // Вставка переноса строки в текст распоряжения
       const handleInsertRowbreak = () => {
         state.orderText += '<br />';
         textarea.value.focus();

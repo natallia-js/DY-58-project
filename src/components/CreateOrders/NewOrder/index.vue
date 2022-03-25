@@ -622,9 +622,8 @@
        * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
        */
       const setOrderText = (event) => {
-        state.orderText = event ?
-          { ...event, orderText: event.orderText ? event.orderText.map((el) => ({ ... el})) : null } :
-          { ...defaultOrderText };
+        state.orderText = event;
+          //{ ...event, orderText: event.orderText ? event.orderText.map((el) => ({ ... el})) : null } :
       };
 
       /**

@@ -274,6 +274,20 @@
         let elementToChangeValue;
         let tmp;
         switch (event.elementType) {
+          // Изменилось значение в поле даты-времени
+          case OrderPatternElementType.DATETIME:
+            switch (event.elementRef) {
+              // Изменилась дата-время сдачи дежурства ДНЦ
+              case FILLED_ORDER_DATETIME_ELEMENTS.PASS_DUTY_DATETIME:
+                // Такую же дату-время устанавливаем в поле даты-времени принятия дежурства ДНЦ (если оно есть)
+                elementToChangeValue = this.value.find((el) =>
+                  (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.TAKE_DUTY_DATETIME));
+                if (elementToChangeValue) {
+                  elementToChangeValue.value = event.value;
+                }
+                break;
+            }
+            break;
           // Изменилось значение в выпадающем списке
           case OrderPatternElementType.SELECT:
             switch (event.elementRef) {

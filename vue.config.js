@@ -8,4 +8,7 @@ module.exports = {
       cert: fs.readFileSync('./sslcert/cert.pem'),
     },
   },
+  configureWebpack: {
+    devtool: 'source-map',
+  },
 }

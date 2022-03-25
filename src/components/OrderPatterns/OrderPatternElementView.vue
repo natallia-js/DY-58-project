@@ -224,7 +224,7 @@
 
 
 <script>
-  import { watch, computed, reactive, ref, onMounted } from 'vue';
+  import { watch, computed, reactive, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
   import {
@@ -270,17 +270,21 @@
           return null;
         }
         if (props.element.type === OrderPatternElementType.SELECT) {
+          const getPassDutyDNC = () => {
+            const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
+            if (existingDNCTakeDutyOrder && existingDNCTakeDutyOrder.orderText) {
+              return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
+                existingDNCTakeDutyOrder.orderText.orderText);
+            }
+            return null;
+          };
           switch (props.element.ref) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
               return store.getters.getUserPostFIO;
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
               // Если существует (ранее изданное) распоряжение ДНЦ о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
               // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
-              if (store.getters.getExistingDNCTakeDutyOrder) {
-                return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
-                  store.getters.getExistingDNCTakeDutyOrder.orderText);
-              }
-              break;
+              return getPassDutyDNC();
             default:
               return null;
           }
@@ -298,13 +302,31 @@
       };
 
       const state = reactive({
-        elementModelValue: null,
+        elementModelValue: getDefaultElementModelValue() || (props.element ? props.element.value : null),
       });
 
-      // Именно здесь, а не сразу при объявлении, т.к. нужно дальнейшее срабатывание в watch
-      onMounted(() => {
-        state.elementModelValue = getDefaultElementModelValue() || (props.element ? props.element.value : null);
+      // для отслеживания изменения значения поля value объекта element в родительском компоненте
+      // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
+      // значениям соответствующих полей связанного распоряжения)
+      watch(() => props.element.value, (newVal) => state.elementModelValue = newVal);
+
+      // При перезагрузке страницы информация о рабочих распоряжениях может появиться позже чем надо,
+      // в связи с чем могут оказаться незаполненными поля данными
+      const stopWatchingWorkingOrders = watch(() => store.getters.getRawWorkingOrders, () => {
+        state.elementModelValue = getDefaultElementModelValue();
+        stopWatchingWorkingOrders();
       });
+
+      watch(() => state.elementModelValue, (value) => {
+        if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
+          emit('input', {
+            elementId: props.element._id,
+            value,
+            elementType: props.element.type,
+            elementRef: props.element.ref,
+          });
+        }
+      }, { immediate: true }); // обязательно нужно зайти сюда при загрузке страницы
 
       const selectedDRTableRecord = ref();
       const addDRTableRecDlgTitle = ref('');
@@ -333,7 +355,7 @@
 
       const getElementSizesCorrespondence = computed(() => ElementSizesCorrespondence);
       const getDRTrainTableColumns = computed(() => DRTrainTableColumns);
-      const elementValue = computed(() => props.element ? props.element.value : null);
+
       const drTableDataToDisplay = computed(() => !state.elementModelValue ? [] :
         state.elementModelValue.map((el, index) => {
           return {
@@ -555,22 +577,6 @@
           elementRef: props.element.ref,
         });
       };
-
-      // для отслеживания изменения значения поля value объекта element в родительском компоненте
-      // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
-      // значениям соответствующих полей связанного распоряжения)
-      watch(elementValue, (newVal) => state.elementModelValue = newVal);
-
-      watch(() => state.elementModelValue, (value) => {
-        if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
-          emit('input', {
-            elementId: props.element._id,
-            value,
-            elementType: props.element.type,
-            elementRef: props.element.ref,
-          });
-        }
-      });
 
       const handleTrainTableRightClick = (event) => {
         menu.value.show(event);
