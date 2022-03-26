@@ -7,6 +7,7 @@ import {
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
   SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
 } from '@/store/mutation-types';
+import compareStrings from '@/additional/compareStrings';
 
 
 /**
@@ -50,15 +51,14 @@ export const dsp = {
     },
 
     /**
-     * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего
-     * полигона управления "Станция".
+     * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего полигона управления "Станция".
      * В выборку не включаются пользователи рабочего места текущего пользователя.
      * Например, на некоторой станции есть рабочее место ДСП, рабочее место оператора при ДСП №1 и
      * рабочее место оператора при ДСП №2. Если зашел пользователь с рабочего места оператора при ДСП №1,
      * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места оператора при ДСП №2.
      * Возвращаемая информация группируется по принадлежности пользователей к конкретному рабочему месту.
      */
-    getCurrStationUsersThatDoNotBelongToCurrWorkPlace: (state, getters) => {
+    getCurrStationUsersThatDoNotBelongToCurrWorkPlace(state, getters) {
       const userWorkPoligon = getters.getUserWorkPoligon;
       if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
         !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData || !userWorkPoligon) {
@@ -71,14 +71,10 @@ export const dsp = {
         return [];
       }
       const groupedPeople = [];
-      const stationName = getters.getUserWorkPoligonData.St_Title;
-      const addDataInGroup = (groupName, data) => {
-        const group = groupedPeople.find((item) => item.groupName === groupName);
+      const addDataInGroup = (groupCode, groupName, data) => {
+        const group = groupedPeople.find((item) => item.groupCode === groupCode);
         if (!group) {
-          groupedPeople.push({
-            groupName: groupName,
-            items: [data],
-          });
+          groupedPeople.push({ groupCode, groupName, items: [data] });
         } else {
           group.items.push(data);
         }
@@ -95,9 +91,6 @@ export const dsp = {
         .forEach((item) => {
           const dataToAdd = {
             key: `${item.stationId}${item.stationWorkPlaceId || ''}${item._id}`,
-            workPoligonType: userWorkPoligon.type,
-            workPoligonId: item.stationId,
-            workPlaceId: item.stationWorkPlaceId,
             userId: item._id,
             post: item.post,
             name: item.name,
@@ -105,12 +98,12 @@ export const dsp = {
             surname: item.surname,
           };
           if (!item.stationWorkPlaceId) {
-            addDataInGroup(stationName, dataToAdd);
+            addDataInGroup(`${userWorkPoligon.code}${userWorkPoligon.subCode || ''}`, getters.getUserWorkPoligonName, dataToAdd);
           } else {
-            addDataInGroup(getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
+            addDataInGroup(`${item.stationId}${item.stationWorkPlaceId || ''}`, getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
           }
         });
-      return groupedPeople;
+      return groupedPeople.sort((a, b) => compareStrings(a.groupName.toLowerCase(), b.groupName.toLowerCase()));
     },
 
     /**

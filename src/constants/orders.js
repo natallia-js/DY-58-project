@@ -105,4 +105,5 @@ export const DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS =  Object.freeze({
   PASS_DUTY_FIO: 'ФИО сдавшего дежурство',
   PASS_DUTY_DATETIME: 'Дата-время сдачи дежурства',
   TAKE_DUTY_PERSONAL: 'Персонал, принимающий дежурство',
+  PASS_DUTY_PERSONAL: 'Персонал, сдающий дежурство',
 });

@@ -135,33 +135,90 @@
         </small>
       </div>
 
+      <!-- СМЕННЫЙ ПЕРСОНАЛ, КОТОРЫЙ СДАЕТ ДЕЖУРСТВО -->
+
+      <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+        <DataTable id="adjacent-station-pass-futy-shift" :value="state.usersThatPassDuty"
+          v-model:expandedRows="expandedPassDutyUsersRows" responsiveLayout="scroll"
+          class="p-datatable-sm"
+        >
+          <Column :expander="true" headerStyle="width:3rem" headerClass="dy58-take-pass-duty-personal-table-header" />
+          <Column field="groupName"
+            header="Персонал станции, сдающий дежурство"
+            headerClass="dy58-take-pass-duty-personal-table-header"
+          >
+            <template #body="slotProps">
+              {{ slotProps.data.groupName }} {{ `: ${usersThatPassDutyStrings[slotProps.data.groupCode] || ''}` }}
+            </template>
+          </Column>
+          <template #expansion="slotProps">
+            <DataTable
+              :value="slotProps.data.items"
+              dataKey="key"
+              class="p-datatable-gridlines p-datatable-sm"
+              :rowHover="true"
+              responsiveLayout="scroll"
+              v-model:selection="state.selectedPassDutyUsers[slotProps.data.groupCode]"
+            >
+              <Column selectionMode="multiple" headerStyle="minWidth:3em" bodyStyle="minWidth:3em"></Column>
+              <Column field="userPostFIO" header="Работник" headerStyle="width:50%" bodyStyle="width:50%"></Column>
+              <Column field="takeOrPassDutyTime" header="Дата-время сдачи дежурства">
+                <template #body="slotProps">
+                  <Calendar
+                    :showTime="true"
+                    hourFormat="24"
+                    :hideOnDateTimeSelect="true"
+                    :showIcon="true"
+                    v-model="slotProps.data.takeOrPassDutyTime"
+                  />
+                </template>
+              </Column>
+            </DataTable>
+          </template>
+        </DataTable>
+      </div>
+
       <!-- СМЕННЫЙ ПЕРСОНАЛ, С КОТОРЫМ ДСП ЗАСТУПАЕТ НА ДЕЖУРСТВО -->
 
       <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
-        <label for="adjacent-station-shift" :class="{'p-error':v$.adjacentStationShift.$invalid && submitted}">
-          <span class="p-text-bold">Персонал станции, принимающий дежурство</span>
-        </label>
-        <MultiSelect
-          id="adjacent-station-shift"
-          v-model="v$.adjacentStationShift.$model"
-          :options="getCurrStationUsersThatDoNotBelongToCurrWorkPlace"
-          optionLabel="userPostFIO"
-          optionGroupLabel="groupName"
-          optionGroupChildren="items"
-          dataKey="key"
+        <DataTable id="adjacent-station-take-futy-shift" :value="state.usersThatTakeDuty"
+          v-model:expandedRows="expandedTakeDutyUsersRows" responsiveLayout="scroll"
+          class="p-datatable-sm"
         >
-          <template #optiongroup="slotProps">
-            <div>
-              <div>{{ slotProps.option.groupName }}</div>
-            </div>
+          <Column :expander="true" headerStyle="width:3rem" headerClass="dy58-take-pass-duty-personal-table-header" />
+          <Column field="groupName"
+            header="Персонал станции, принимающий дежурство"
+            headerClass="dy58-take-pass-duty-personal-table-header"
+          >
+            <template #body="slotProps">
+              {{ slotProps.data.groupName }} {{ `: ${usersThatTakeDutyStrings[slotProps.data.groupCode] || ''}` }}
+            </template>
+          </Column>
+          <template #expansion="slotProps">
+            <DataTable
+              :value="slotProps.data.items"
+              dataKey="key"
+              class="p-datatable-gridlines p-datatable-sm"
+              :rowHover="true"
+              responsiveLayout="scroll"
+              v-model:selection="state.selectedTakeDutyUsers[slotProps.data.groupCode]"
+            >
+              <Column selectionMode="multiple" headerStyle="minWidth:3em" bodyStyle="minWidth:3em"></Column>
+              <Column field="userPostFIO" header="Работник" headerStyle="width:50%" bodyStyle="width:50%"></Column>
+              <Column field="takeOrPassDutyTime" header="Дата-время принятия дежурства">
+                <template #body="slotProps">
+                  <Calendar
+                    :showTime="true"
+                    hourFormat="24"
+                    :hideOnDateTimeSelect="true"
+                    :showIcon="true"
+                    v-model="slotProps.data.takeOrPassDutyTime"
+                  />
+                </template>
+              </Column>
+            </DataTable>
           </template>
-        </MultiSelect>
-        <small
-          v-if="(v$.adjacentStationShift.$invalid && submitted) || v$.adjacentStationShift.$pending.$response"
-          class="p-error"
-        >
-          Проверьте правильность определения сменного персонала
-        </small>
+        </DataTable>
       </div>
 
       <!-- ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ -->
@@ -208,7 +265,7 @@
   import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
-  import { required, minLength } from '@vuelidate/validators';
+  import { required } from '@vuelidate/validators';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
   import {
@@ -251,6 +308,8 @@
       const store = useStore();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
+      const expandedPassDutyUsersRows = ref();
+      const expandedTakeDutyUsersRows = ref();
 
       const orderType = ORDER_PATTERN_TYPES.ORDER;
 
@@ -258,6 +317,7 @@
       const existingDSPTakeDutyOrder = computed(() => store.getters.getExistingDSPTakeDutyOrder);
 
       // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
+      // (с которого производится издание текущего распоряжения)
       const getCurrStationWorkPlaceUsers = computed(() =>
         store.getters.getCurrStationWorkPlaceUsers.map((item) => ({
           userId: item.userId,
@@ -274,8 +334,14 @@
         passDutyDateTime: '',
         takeDutyUserPostFIO: null,
         takeDutyDateTime: '',
-        adjacentStationShift: null,
         additionalOrderText: null,
+        // Списки пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах,
+        // отличных от данного рабочего места (нужны для формирования списков персонала, принимающего и сдающего дежурство)
+        usersThatTakeDuty: [],
+        usersThatPassDuty: [],
+        // Выбранные пользователи рабочих мест (которые будут фиругировать в распоряжении о приеме-сдаче дежурства)
+        selectedTakeDutyUsers: {},
+        selectedPassDutyUsers: {},
       });
 
       const takeDutyTimeNoLessPassDutyTime = (value) => {
@@ -290,8 +356,8 @@
         passDutyDateTime: { required, isValidDateTime },
         takeDutyUserPostFIO: { required },
         takeDutyDateTime: { required, isValidDateTime, takeDutyTimeNoLessPassDutyTime },
-        // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
-        adjacentStationShift: { minLength: minLength(1) },
+        selectedTakeDutyUsers: {},
+        selectedPassDutyUsers: {},
         additionalOrderText: {},
       });
 
@@ -381,9 +447,20 @@
         }
       };
 
-      const initAdjacentStationShift = () => {
+      const defaultWorkPlacesUsers = () => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
+        ...item,
+        items: item.items.map((el) => ({
+          key: el.key,
+          userId: el.userId,
+          userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
+          takeOrPassDutyTime: null,
+        })),
+      }));
+
+      const initTakeDutyStationShift = () => {
+        const workPlacesUsers = defaultWorkPlacesUsers();
         if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          const prevValue = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
+          /*const prevValue = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
           if (prevValue && prevValue instanceof Array) {
             state.adjacentStationShift = prevValue.map((item) => ({
               key: item.key,
@@ -397,9 +474,18 @@
               surname: item.surname,
               userPostFIO: item.value,
             }));
-          }
+          }*/
         } else {
-          state.adjacentStationShift = null;
+          state.usersThatTakeDuty = workPlacesUsers;
+        }
+      };
+
+      const initPassDutyStationShift = () => {
+        const workPlacesUsers = defaultWorkPlacesUsers();
+        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
+          //
+        } else {
+          state.usersThatPassDuty = workPlacesUsers;
         }
       };
 
@@ -422,8 +508,14 @@
           state.updateCreateDateTimeRegularly = !editExistingTakeDutyOrder.value;
           initOrderPassData();
           initOrderTakeData();
-          initAdjacentStationShift();
+          initTakeDutyStationShift();
+          initPassDutyStationShift();
           initAdditionalOrderText();
+        } else {
+          state.usersThatTakeDuty = [];
+          state.usersThatPassDuty = [];
+          state.selectedTakeDutyUsers = {};
+          state.selectedPassDutyUsers = {};
         }
       });
 
@@ -466,6 +558,9 @@
         });
       };
 
+      const displayTakeOrPassUserString = (user) =>
+        !user ? '' : `${user.userPostFIO} (${user.takeOrPassDutyTime ? getLocaleDateTimeString(new Date(user.takeOrPassDutyTime), false) : '?'})`;
+
       const getOrderTextObject = () => {
         const orderText = [
           {
@@ -492,27 +587,27 @@
             value: { userId: state.passDutyUserPostFIO.userId, value: state.passDutyUserPostFIO.userPostFIO },
           },
         ];
-        if (state.adjacentStationShift && state.adjacentStationShift.length) {
+        // flattening arrays
+        const selectedTakeDutyUsersArray = [].concat.apply([], Object.values(state.selectedTakeDutyUsers));
+        console.log(selectedTakeDutyUsersArray)
+        if (selectedTakeDutyUsersArray && selectedTakeDutyUsersArray.length) {
           orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
           orderText.push({ type: OrderPatternElementType.TEXT, ref: null, value: 'На дежурство заступили:' });
-          orderText.push(
-            {
-              type: OrderPatternElementType_Future.OBJECTS_LIST,
-              ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
-              value: state.adjacentStationShift.map((item) => ({
-                key: item.key,
-                workPoligonType: item.workPoligonType,
-                workPoligonId: item.workPoligonId,
-                workPlaceId: item.workPlaceId,
-                userId: item.userId,
-                post: item.post,
-                name: item.name,
-                fatherName: item.fatherName,
-                surname: item.surname,
-                value: item.userPostFIO,
-              })),
-            },
-          );
+          orderText.push({
+            type: OrderPatternElementType_Future.OBJECTS_LIST,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL,
+            value: selectedTakeDutyUsersArray.map((el) => ({ ...el, value: displayTakeOrPassUserString(el) })),
+          });
+        }
+        const selectedPassDutyUsersArray = [].concat.apply([], Object.values(state.selectedPassDutyUsers));
+        if (selectedPassDutyUsersArray && selectedPassDutyUsersArray.length) {
+          orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
+          orderText.push({ type: OrderPatternElementType.TEXT, ref: null, value: 'Дежурство сдали:' });
+          orderText.push({
+            type: OrderPatternElementType_Future.OBJECTS_LIST,
+            ref: DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_PERSONAL,
+            value: selectedPassDutyUsersArray.map((el) => ({ ...el, value: displayTakeOrPassUserString(el) })),
+          });
         }
         if (state.additionalOrderText) {
           orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
@@ -596,30 +691,41 @@
 
       return {
         state,
+        expandedPassDutyUsersRows,
+        expandedTakeDutyUsersRows,
         submitted,
         v$,
         textarea,
         editExistingTakeDutyOrder,
         handleInsertRowbreak,
         getCurrStationWorkPlaceUsers,
-        // Список пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах, отличных от данного
-        getCurrStationUsersThatDoNotBelongToCurrWorkPlace: computed(() =>
-          store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace.map((item) => {
-            return {
-              ...item,
-              items: item.items.map((el) => ({
-                ...el,
-                userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
-              })),
-            };
-          })),
         newNumberOverlayPanel,
         changeOrderNumber,
         closeDialog,
         handleSubmit,
+        usersThatTakeDutyStrings: computed(() => {
+          const resObj = {};
+          Object.entries(state.selectedTakeDutyUsers).forEach((item) => {
+            resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+          });
+          return resObj;
+        }),
+        usersThatPassDutyStrings: computed(() => {
+          const resObj = {};
+          Object.entries(state.selectedPassDutyUsers).forEach((item) => {
+            resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+          });
+          return resObj;
+        }),
         // Количество распоряжений текущего типа, для которых в настоящее время запущен процесс издания (сохранения на сервере)
         getDispatchOrdersBeingProcessed: computed(() => store.getters.getDispatchOrdersBeingProcessed(orderType)),
       };
     },
   };
 </script>
+
+<style lang="scss" scoped>
+  :deep(.dy58-take-pass-duty-personal-table-header) {
+    background-color: var(--surface-b) !important;
+  }
+</style>
