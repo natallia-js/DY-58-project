@@ -8,6 +8,7 @@ import {
   SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
 } from '@/store/mutation-types';
 import compareStrings from '@/additional/compareStrings';
+import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCode';
 
 
 /**
@@ -90,17 +91,18 @@ export const dsp = {
         )
         .forEach((item) => {
           const dataToAdd = {
-            key: `${item.stationId}${item.stationWorkPlaceId || ''}${item._id}`,
+            key: `${getStationWorkPlaceFullCode(item.stationId, item.stationWorkPlaceId)}${item._id}`,
+            workPlaceId: item.stationWorkPlaceId, // обязательно!
             userId: item._id,
-            post: item.post,
-            name: item.name,
-            fatherName: item.fatherName,
-            surname: item.surname,
+            post: item.post, // обязательно!
+            name: item.name, // обязательно!
+            fatherName: item.fatherName, // обязательно!
+            surname: item.surname, // обязательно!
           };
           if (!item.stationWorkPlaceId) {
-            addDataInGroup(`${userWorkPoligon.code}${userWorkPoligon.subCode || ''}`, getters.getUserWorkPoligonName, dataToAdd);
+            addDataInGroup(`${getStationWorkPlaceFullCode(userWorkPoligon.code, userWorkPoligon.subCode)}`, getters.getUserWorkPoligonName, dataToAdd);
           } else {
-            addDataInGroup(`${item.stationId}${item.stationWorkPlaceId || ''}`, getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
+            addDataInGroup(`${getStationWorkPlaceFullCode(item.stationId, item.stationWorkPlaceId)}`, getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
           }
         });
       return groupedPeople.sort((a, b) => compareStrings(a.groupName.toLowerCase(), b.groupName.toLowerCase()));

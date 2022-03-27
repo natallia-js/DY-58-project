@@ -287,6 +287,7 @@
   import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
   import { getUserPostFIOString } from '@/store/modules/personal/transformUserData';
   import OrderNumber from '@/components/CreateOrders/OrderNumber';
+  import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCode';
 
   export default {
     name: 'dy58-create-dsp-take-duty-order-dialog',
@@ -447,45 +448,106 @@
         }
       };
 
+      /**
+       * Пользователи на всех рабочих местах, кроме текущего (информация, которая была получена от сервера).
+       */
       const defaultWorkPlacesUsers = () => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
         ...item,
         items: item.items.map((el) => ({
           key: el.key,
+          workPlaceId: el.workPlaceId, // обязательно! (понадобится в дальнейшем для формирования списка получателей всех действующих распоряжений на станции)
           userId: el.userId,
+          post: el.post, // обязательно! (-//-)
+          name: el.name, // обязательно! (-//-)
+          fatherName: el.fatherName, // обязательно! (-//-)
+          surname: el.surname, // обязательно! (-//-)
           userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
           takeOrPassDutyTime: null,
         })),
       }));
 
-      const initTakeDutyStationShift = () => {
-        const workPlacesUsers = defaultWorkPlacesUsers();
-        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          /*const prevValue = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
-          if (prevValue && prevValue instanceof Array) {
-            state.adjacentStationShift = prevValue.map((item) => ({
-              key: item.key,
-              workPoligonType: item.workPoligonType,
-              workPoligonId: item.workPoligonId,
-              workPlaceId: item.workPlaceId,
-              userId: item.userId,
-              post: item.post,
-              name: item.name,
-              fatherName: item.fatherName,
-              surname: item.surname,
-              userPostFIO: item.value,
-            }));
-          }*/
-        } else {
-          state.usersThatTakeDuty = workPlacesUsers;
-        }
-      };
+      const initTakeAndPassDutyStationShift = () => {
+        // В первую очередь(!), устанавливаем весь персонал станции (всех рабочих мест, кроме текущего) -
+        // делаем 2 копии массива (для определения тех лиц, которые принимают дежурство, и тех,
+        // которые дежурство сдают)
+        const defaultTakeDutyUsers = defaultWorkPlacesUsers();
+        const defaultPassDutyUsers = defaultWorkPlacesUsers();
+        state.usersThatTakeDuty = defaultTakeDutyUsers;
+        state.usersThatPassDuty = defaultPassDutyUsers;
 
-      const initPassDutyStationShift = () => {
-        const workPlacesUsers = defaultWorkPlacesUsers();
-        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          //
+        // Текст предыдущего распоряжения ДСП о приеме-сдаче дежурства
+        const prevOrderText = existingDSPTakeDutyOrder.value ? existingDSPTakeDutyOrder.value.orderText : null;
+        const userWorkPoligon = store.getters.getUserWorkPoligon;
+        if (!prevOrderText || !userWorkPoligon) {
+          return; // не найдена текущая запись о приеме-сдаче дежурства либо в ней нет текста
+        }
+
+        const getTakeOrPassDutyUserObject = (arr, userId, workPlaceId) => {
+          if (!arr || !arr.length) {
+            return null;
+          }
+          const workPlaceFullCode = getStationWorkPlaceFullCode(userWorkPoligon.code, workPlaceId);
+          const usersGroup = arr.find((group) => group.groupCode === workPlaceFullCode);
+          if (usersGroup && usersGroup.items && usersGroup.items.length) {
+            return usersGroup.items.find((el) => el.userId === userId);
+          }
+          return null;
+        };
+
+        const addSelectedRecord = (selectedRecordsObject, groupCode, record) => {
+          if (selectedRecordsObject[groupCode]) {
+            selectedRecordsObject[groupCode].push(record);
+          } else {
+            selectedRecordsObject[groupCode] = [record];
+          }
+        };
+
+        const prevTakeDutyPersonal = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
+
+        // Если необходимо отредактировать текущую запись о приеме-сдаче дежурства, то из нее нам необходимо
+        // извлечь и установить ранее определенную информацию о персонале, который принимает и сдает дежурство
+        if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value) {
+          // Устанавливаем персонал, который принимает дежурство
+          if (prevTakeDutyPersonal && prevTakeDutyPersonal instanceof Array) {
+            prevTakeDutyPersonal.forEach((item) => {
+              const existingUserObject = getTakeOrPassDutyUserObject(defaultTakeDutyUsers, item.userId, item.workPlaceId);
+              if (existingUserObject) {
+                if (item.takeOrPassDutyTime) {
+                  existingUserObject.takeOrPassDutyTime = new Date(item.takeOrPassDutyTime);
+                }
+                addSelectedRecord(state.selectedTakeDutyUsers, getStationWorkPlaceFullCode(userWorkPoligon.code, item.workPlaceId), existingUserObject);
+              }
+            });
+          }
+          const prevPassDutyPersonal = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
+          // Устанавливаем персонал, который сдает дежурство
+          if (prevPassDutyPersonal && prevPassDutyPersonal instanceof Array) {
+            prevPassDutyPersonal.forEach((item) => {
+              const existingUserObject = getTakeOrPassDutyUserObject(defaultPassDutyUsers, item.userId, item.workPlaceId);
+              if (existingUserObject) {
+                if (item.takeOrPassDutyTime) {
+                  existingUserObject.takeOrPassDutyTime = new Date(item.takeOrPassDutyTime);
+                }
+                addSelectedRecord(state.selectedPassDutyUsers, getStationWorkPlaceFullCode(userWorkPoligon.code, item.workPlaceId), existingUserObject);
+              }
+            });
+          }
+        // Если будет создаваться новая запись о приеме-сдаче дежурства, то из предыдущей такой записи необходимо
+        // извлечь информацию о персонале, который ранее принимал дежурство, и установить ее в качестве персонала,
+        // сдающего дежурство, в новой записи о приеме-сдаче дежурства
         } else {
-          state.usersThatPassDuty = workPlacesUsers;
+          // Устанавливаем персонал, который сдает дежурство
+          if (prevTakeDutyPersonal && prevTakeDutyPersonal instanceof Array) {
+            prevTakeDutyPersonal.forEach((item) => {
+              const existingUserObject = getTakeOrPassDutyUserObject(defaultPassDutyUsers, item.userId, item.workPlaceId);
+              if (existingUserObject) {
+                if (item.takeOrPassDutyTime) {
+                  existingUserObject.takeOrPassDutyTime = new Date(item.takeOrPassDutyTime);
+                }
+                addSelectedRecord(state.selectedPassDutyUsers, getStationWorkPlaceFullCode(userWorkPoligon.code, item.workPlaceId), existingUserObject);
+              }
+            });
+          }
         }
       };
 
@@ -508,14 +570,15 @@
           state.updateCreateDateTimeRegularly = !editExistingTakeDutyOrder.value;
           initOrderPassData();
           initOrderTakeData();
-          initTakeDutyStationShift();
-          initPassDutyStationShift();
+          initTakeAndPassDutyStationShift();
           initAdditionalOrderText();
         } else {
           state.usersThatTakeDuty = [];
           state.usersThatPassDuty = [];
           state.selectedTakeDutyUsers = {};
           state.selectedPassDutyUsers = {};
+          expandedPassDutyUsersRows.value = null;
+          expandedTakeDutyUsersRows.value = null;
         }
       });
 
@@ -536,7 +599,7 @@
 
       const closeDialog = () => { emit('close') };
 
-      //
+      // Вставка html-символа переноса строки в поле Дополнительной информации
       const handleInsertRowbreak = () => {
         state.additionalOrderText += '<br />';
         textarea.value.focus();
@@ -589,7 +652,6 @@
         ];
         // flattening arrays
         const selectedTakeDutyUsersArray = [].concat.apply([], Object.values(state.selectedTakeDutyUsers));
-        console.log(selectedTakeDutyUsersArray)
         if (selectedTakeDutyUsersArray && selectedTakeDutyUsersArray.length) {
           orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });
           orderText.push({ type: OrderPatternElementType.TEXT, ref: null, value: 'На дежурство заступили:' });
@@ -599,6 +661,7 @@
             value: selectedTakeDutyUsersArray.map((el) => ({ ...el, value: displayTakeOrPassUserString(el) })),
           });
         }
+        // flattening arrays
         const selectedPassDutyUsersArray = [].concat.apply([], Object.values(state.selectedPassDutyUsers));
         if (selectedPassDutyUsersArray && selectedPassDutyUsersArray.length) {
           orderText.push({ type: OrderPatternElementType.LINEBREAK, ref: null, value: null });

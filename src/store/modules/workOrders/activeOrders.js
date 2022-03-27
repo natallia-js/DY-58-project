@@ -418,7 +418,7 @@ export const activeOrders = {
         if (!neededTextElement || !neededTextElement.value) {
           return { post: null, fio: null };
         }
-        const neededTextElementValue = neededTextElement.value.find((el) => el.workPlaceId === workPlaceId);
+        const neededTextElementValue = neededTextElement.value.find((el) => String(el.workPlaceId) === String(workPlaceId));
         if (!neededTextElementValue) {
           return { post: null, fio: null };
         }
