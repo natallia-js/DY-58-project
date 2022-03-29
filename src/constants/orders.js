@@ -47,6 +47,7 @@ export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   ORDER_NUMBER: 'Номер действующего распоряжения',
+  CLOSE_BLOCK_ORDER_NUMBER: 'Номер действующего распоряжения на закрытие перегона',
   REQUEST_NUMBER: 'Номер действующей заявки',
   NOTIFICATION_NUMBER: 'Номер действующего уведомления',
   ECD_ORDER_NUMBER: 'Номер действующего приказа',

@@ -33,6 +33,7 @@
   import OrderPatternElementView from '@/components/OrderPatterns/OrderPatternElementView';
   import {
     ORDER_PATTERN_TYPES,
+    SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
     OrderPatternElementType,
     ElementSizesCorrespondence,
   } from '@/constants/orderPatterns';
@@ -133,10 +134,8 @@
         linebreakElementsIndexes.forEach((element, index) => {
           const arrayPart = newOrderPattern.slice(prevLinebreakIndex, element);
           prevLinebreakIndex = element + 1;
-          if (arrayPart) {
-            if (arrayPart.length || index !== linebreakElementsIndexes.length - 1) {
-              orderPatternToDraw.push(arrayPart);
-            }
+          if (arrayPart.length || index !== linebreakElementsIndexes.length - 1) {
+            orderPatternToDraw.push(arrayPart);
           }
         });
         this.orderPatternArrays = orderPatternToDraw;
@@ -222,6 +221,11 @@
               label: order.number,
               value: order.number,
             }));
+          case FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER:
+            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN).map((order) => ({
+              label: order.number,
+              value: order.number,
+            }));
           case FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER:
             return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.REQUEST).map((order) => ({
               label: order.number,
@@ -293,7 +297,8 @@
             switch (event.elementRef) {
               // Изменился номер действующего распоряжения
               case FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER:
-                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего распоряжения
+              case FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER:
+                // Ищем в шаблоне поле с датой (датой-временем) издания действующего распоряжения
                 elementToChangeValue = this.value.find((el) =>
                   (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ORDER_DATE) ||
                   (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ORDER_DATETIME));

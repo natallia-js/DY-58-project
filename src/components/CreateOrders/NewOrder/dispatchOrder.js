@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 
@@ -10,8 +10,6 @@ export const useDispatchOrder = (inputVals) => {
     state,
     props,
     store,
-    showSuccessMessage,
-    showErrMessage,
     dspSectorsToSendOrderNoDupl,
     dncSectorsToSendOrderNoDupl,
     ecdSectorsToSendOrderNoDupl,
@@ -105,24 +103,6 @@ export const useDispatchOrder = (inputVals) => {
         })() : null,
     });
   };
-
-  /**
-   * Для отображения результата операции издания распоряжения (отправки на сервер).
-   */
-  watch(() => store.getters.getDispatchOrderResult, (newVal) => {
-    if (!newVal || newVal.orderType !== props.orderType) {
-      return;
-    }
-    if (!newVal.error) {
-      showSuccessMessage(newVal.message);
-      if (state.prevRelatedOrder) {
-        state.prevRelatedOrder = null;
-        state.cancelOrderDateTime = null;
-      }
-    } else {
-      showErrMessage(newVal.message);
-    }
-  });
 
   return {
     getIssuedOrderPlaceObject,

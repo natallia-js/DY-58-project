@@ -92,12 +92,12 @@ export const dsp = {
         .forEach((item) => {
           const dataToAdd = {
             key: `${getStationWorkPlaceFullCode(item.stationId, item.stationWorkPlaceId)}${item._id}`,
-            workPlaceId: item.stationWorkPlaceId, // обязательно!
+            workPlaceId: item.stationWorkPlaceId, // обязательно! (нужно "из вне")
             userId: item._id,
-            post: item.post, // обязательно!
-            name: item.name, // обязательно!
-            fatherName: item.fatherName, // обязательно!
-            surname: item.surname, // обязательно!
+            post: item.post, // обязательно! (нужно "из вне")
+            name: item.name, // обязательно! (нужно "из вне")
+            fatherName: item.fatherName, // обязательно! (нужно "из вне")
+            surname: item.surname, // обязательно! (нужно "из вне")
           };
           if (!item.stationWorkPlaceId) {
             addDataInGroup(`${getStationWorkPlaceFullCode(userWorkPoligon.code, userWorkPoligon.subCode)}`, getters.getUserWorkPoligonName, dataToAdd);

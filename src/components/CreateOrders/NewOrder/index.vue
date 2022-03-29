@@ -26,7 +26,7 @@
     <div class="p-col-6">
       <SelectButton
         v-model="state.selectedOrderInputType"
-        :options="getOrderInputTypes"
+        :options="OrderInputTypes"
         optionLabel="label"
         disabled
       />
@@ -75,10 +75,7 @@
 
         <!-- ЧЕРНОВИКИ РАСПОРЯЖЕНИЙ ТЕКУЩЕГО ТИПА -->
 
-        <div
-          v-if="isECD && getOrderDraftsOfGivenType.length"
-          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
-        >
+        <div v-if="showOrderDrafts" class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="current-order-draft" class="p-text-bold">
             Текущий черновик документа
           </label>
@@ -94,11 +91,7 @@
 
         <!-- СВЯЗАННОЕ РАСПОРЯЖЕНИЕ -->
 
-        <div
-          v-if="(orderType !== ORDER_PATTERN_TYPES.ECD_ORDER) &&
-            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
-          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
-        >
+        <div v-if="showConnectedOrderFields" class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="prevRelatedOrder" :class="{'p-error':v$.prevRelatedOrder.$invalid && submitted}">
             <span v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-text-bold">
               <span class="dy58-required-field">*</span> На приказ/запрещение
@@ -146,8 +139,7 @@
         <!-- ФЛАГ ОТОБРАЖЕНИЯ НА ГИД -->
 
         <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) &&
-            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
+          v-if="showDisplayOnGIDFlag"
           class="p-field p-col-12 p-m-0"
         >
           <SelectButton v-model="state.showOnGID" :options="showOnGIDOptions" optionLabel="name" />
@@ -156,8 +148,7 @@
         <!-- МЕСТО ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType)
-            && state.showOnGID.value"
+          v-if="showDisplayOnGIDFields"
           class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
         >
           <label for="orderPlace" :class="{'p-error':v$.orderPlace.$invalid && submitted}">
@@ -182,11 +173,7 @@
 
         <!-- ФЛАГ УТОЧНЕНИЯ ВРЕМЕНИ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
-        <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) &&
-            (!state.specialTrainCategories || !state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))"
-          class="p-field p-col-12 p-m-0"
-        >
+        <div v-if="showDisplayOrderTimespanFlag" class="p-field p-col-12 p-m-0">
           <SelectButton
             v-model="state.defineOrderTimeSpan"
             :options="defineOrderTimeSpanOptions"
@@ -196,10 +183,7 @@
 
         <!-- ВРЕМЯ ДЕЙСТВИЯ РАСПОРЯЖЕНИЯ -->
 
-        <div
-          v-if="[ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(orderType) && state.defineOrderTimeSpan.value"
-          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
-        >
+        <div v-if="showDisplayOrderTimespan" class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
           <label for="time-span" :class="{'p-error':v$.timeSpan.$invalid && submitted}">
             <span class="p-text-bold"><span class="dy58-required-field">*</span> Время действия</span>
           </label>
@@ -222,12 +206,10 @@
 
         <div
           v-if="state.specialTrainCategories && state.specialTrainCategories.length"
-          class="p-field p-col-12 p-d-flex p-flex-column p-m-0"
+          class="p-field p-col-12 p-m-0"
         >
-          <label>
-            <span class="p-text-bold">Особые отметки документа</span>
-          </label>
-          {{ state.specialTrainCategories.join(', ') }}
+          <span class="p-text-bold">Особые отметки документа:</span>&#160;
+          <span>{{ state.specialTrainCategories.join(', ') }}</span>
         </div>
 
         <!-- НАИМЕНОВАНИЕ И ТЕКСТ РАСПОРЯЖЕНИЯ -->
@@ -344,7 +326,7 @@
 
 
 <script>
-  import { reactive, ref, computed, watch, onMounted } from 'vue';
+  import { reactive, ref, computed, onMounted } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
   import { useConfirm } from 'primevue/useconfirm';
@@ -358,11 +340,17 @@
   import OrderTimeSpanChooser from '@/components/CreateOrders/OrderTimeSpanChooser';
   import OrderText from '@/components/CreateOrders/OrderText';
   import { OrderInputTypes } from '@/constants/orderInputTypes';
-  import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
+  import {
+    ORDER_PATTERN_TYPES,
+    SPECIAL_CIRCULAR_ORDER_SIGN,
+    SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+    SPECIAL_OPEN_BLOCK_ORDER_SIGN,
+  } from '@/constants/orderPatterns';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
-  import isValidDateTime from '@/additional/isValidDateTime';
+  import { useShowFormElements } from './showFormElements';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
+  import { useWatches } from './watches';
   import { useDispatchOrder } from './dispatchOrder';
   import { useSectorsToSendOrder } from './sectorsToSendOrder';
   import { useRelatedOrder } from './relatedOrder';
@@ -422,6 +410,9 @@
         { name: !isECD.value ? 'Не отображать на ГИД' : 'Не указывать место действия', value: false },
         { name: !isECD.value ? 'Отобразить на ГИД': 'Определить место действия', value: true },
       ]);
+
+      const getOrderDraftsOfGivenType = computed(() =>
+        [{ _id: null, displayTitle: '-' }, ...store.getters.getOrderDraftsOfGivenType(props.orderType)]);
 
       const defaultOrderText = {
         orderTextSource: null,
@@ -495,12 +486,14 @@
         state.orderText = { ...initialOrderText() };
       });
 
-      // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны шаблоны распоряжений
-      watch([() => store.getters.getAllOrderPatterns, () => props.orderPatternId], ([newPatterns, newOrderPatternId]) => {
-        if (newPatterns && newPatterns.length && newOrderPatternId) {
-          state.orderText = { ...initialOrderText() };
-        }
-      });
+      const {
+        showOrderDrafts,
+        showConnectedOrderFields,
+        showDisplayOnGIDFlag,
+        showDisplayOnGIDFields,
+        showDisplayOrderTimespanFlag,
+        showDisplayOrderTimespan,
+      } = useShowFormElements({ state, props, isECD, getOrderDraftsOfGivenType });
 
       useWatchCurrentDateTime(state, props, store);
 
@@ -513,14 +506,19 @@
         selectedECDString,
         selectedOtherAddresseesString,
         handleClearOrderAddressesLists,
-      } = useSectorsToSendOrder(state, store);
+      } = useSectorsToSendOrder({ state, store });
 
       const {
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
-      } = useRelatedOrder(state, { props, store, emit });
+      } = useRelatedOrder({ state, store });
 
-      const orderDraftObject = useOrderDraft({
+      const {
+        handleSaveOrderDraft,
+        currentOrderDraft,
+        applySelectedOrderDraft,
+        applySelectedOrderDraftPersonal,
+      } = useOrderDraft({
         state,
         props,
         emit,
@@ -535,7 +533,12 @@
         defaultTimeSpan,
       });
 
-      const dispatchOrderObject = useDispatchOrder({
+      const {
+        getIssuedOrderPlaceObject,
+        getPreviewOrderTimeSpanObject,
+        dispatchOrder,
+        getDispatchOrdersBeingProcessed,
+      } = useDispatchOrder({
         state,
         props,
         store,
@@ -547,6 +550,14 @@
         relatedOrderObject,
       });
 
+      // Здесь, в конце, когда выше уже все объявлено (иначе будут ошибки)
+      useWatches({
+        state, props, store, emit,
+        showSuccessMessage, showErrMessage, initialOrderText,
+        currentOrderDraft, applySelectedOrderDraft, applySelectedOrderDraftPersonal,
+        relatedOrderObject, showOnGIDOptions, defineOrderTimeSpanOptions,
+      });
+
       const { rules } = useNewOrderValidationRules(state, props, relatedOrderObject);
 
       const submitted = ref(false);
@@ -556,9 +567,6 @@
       // This means that each component that uses useVuelidate, can collect results from validation children,
       // and emit to parent components."
       const v$ = useVuelidate(rules, state, { $scope: false });
-
-      // Номер распоряжения заданного типа рассчитывается автоматически и отображается пользователю
-      watch(() => store.getters.getNextOrdersNumber(props.orderType), (newVal) => state.number = newVal);
 
       const getSectorStationOrBlockTitleById = computed(() => {
         if (relatedOrderObject.value && relatedOrderObject.value.place) {
@@ -589,34 +597,11 @@
       );
 
       /**
-       * Обнуляем значения секунд и миллисекунд у выбранного значения времени отмены действия распоряжения
-       * (чтобы не было проблем при сравнении с датой начала действия соответствующего распоряжения,
-       * например, когда необходимо отменить в то же время, когда оно начало действовать, если издано
-       * было случайно).
-       */
-      watch(() => state.cancelOrderDateTime, (value) => {
-        if (value && isValidDateTime(value)) {
-          state.cancelOrderDateTime.setSeconds(0, 0);
-        }
-      });
-
-      /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
        */
       const hidePreviewNewOrderDlg = () => {
         state.showPreviewNewOrderDlg = false;
       };
-
-      /**
-       * При смене шаблона распоряжения извлекает отметки об особой категории поезда,
-       * закрепленные за данным шаблоном.
-       */
-      watch(() => state.orderText.patternId, (newVal) => {
-        if (!newVal) {
-          state.specialTrainCategories = null;
-        }
-        state.specialTrainCategories = store.getters.getOrderPatternSpecialTrainCategories(state.orderText.patternId)
-      });
 
       /**
        * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
@@ -663,16 +648,24 @@
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,
         SPECIAL_CIRCULAR_ORDER_SIGN,
+        SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+        SPECIAL_OPEN_BLOCK_ORDER_SIGN,
         isDNC: computed(() => store.getters.isDNC),
         isECD,
         v$,
         submitted,
         getUserPostFIO: computed(() => store.getters.getUserPostFIO),
-        getOrderInputTypes: OrderInputTypes,
+        OrderInputTypes,
+        showOrderDrafts,
+        showConnectedOrderFields,
+        showDisplayOnGIDFlag,
+        showDisplayOnGIDFields,
+        showDisplayOrderTimespanFlag,
+        showDisplayOrderTimespan,
         handleSubmit,
-        dispatchOrder: dispatchOrderObject.dispatchOrder,
+        dispatchOrder,
         getActiveOrdersToDisplayInTreeSelect: computed(() => store.getters.getActiveOrdersToDisplayInTreeSelect(props.orderType)),
-        getOrderDraftsOfGivenType: computed(() => [{ _id: null, displayTitle: '-' }, ...store.getters.getOrderDraftsOfGivenType(props.orderType)]),
+        getOrderDraftsOfGivenType,
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
         getSectorStationOrBlockTitleById,
@@ -682,19 +675,19 @@
         selectedDNCString,
         selectedECDString,
         selectedOtherAddresseesString,
-        getDispatchOrdersBeingProcessed: dispatchOrderObject.getDispatchOrdersBeingProcessed,
+        getDispatchOrdersBeingProcessed,
         hidePreviewNewOrderDlg,
-        getIssuedOrderPlaceObject: dispatchOrderObject.getIssuedOrderPlaceObject,
-        getPreviewOrderTimeSpanObject: dispatchOrderObject.getPreviewOrderTimeSpanObject,
+        getIssuedOrderPlaceObject,
+        getPreviewOrderTimeSpanObject,
         dspSectorsToSendOrderNoDupl,
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
         getOrderPatternSpecialTrainCategoriesString,
         newNumberOverlayPanel,
         changeOrderNumber,
-        handleSaveOrderDraft: orderDraftObject.handleSaveOrderDraft,
+        handleSaveOrderDraft,
         handleClearOrderAddressesLists,
-        currentOrderDraft: orderDraftObject.currentOrderDraft,
+        currentOrderDraft,
         setOrderText,
       };
     },

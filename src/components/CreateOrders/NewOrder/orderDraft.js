@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import {
   SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
   SET_OTHER_SHIFT_FOR_SENDING_DATA,
@@ -13,11 +13,8 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   const {
     state,
     props,
-    emit,
     store,
     confirm,
-    showSuccessMessage,
-    showErrMessage,
     defineOrderTimeSpanOptions,
     showOnGIDOptions,
     defaultOrderPlace,
@@ -82,36 +79,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     state.timeSpan = currentOrderDraft.value.timeSpan ?
       { ...currentOrderDraft.value.timeSpan } : { ...defaultTimeSpan };
   };
-
-  watch(() => props.orderDraftId, () => {
-    state.currentOrderDraftId = props.orderDraftId;
-  });
-
-  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
-  watch(currentOrderDraft, (newVal) => {
-    applySelectedOrderDraft();
-    emit('changeProps', {
-      orderType: props.orderType,
-      prevOrderId: props.prevOrderId,
-      orderDraftId: newVal ? newVal._id : null,
-    });
-  });
-
-  // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны черновики распоряжений
-  // (id нужного черновика может быть, а вот подгрузки всех черновиков нужно подождать)
-  watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-    if (!state.currentOrderDraftId || !newVal || !newVal.length) {
-      return;
-    }
-    // Искусственно вызываем отображение данных выбранного черновика
-    const tmp = state.currentOrderDraftId;
-    state.currentOrderDraftId = null;
-    state.currentOrderDraftId = tmp;
-  });
-
-  watch(() => store.getters.getSectorPersonal, () => {
-    applySelectedOrderDraftPersonal();
-  });
 
   /**
    * Позволяет сохранить черновик распоряжения.
@@ -195,23 +162,10 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     });
   };
 
-  /**
-   * Для отображения результата операции сохранения черновика распоряжения (отправки на сервер) -
-   * используется как при создании нового черновика, так и при редактировании существующего.
-   */
-  watch(() => store.getters.getSaveOrderDraftResult, (newVal) => {
-    if (!newVal || newVal.orderType !== props.orderType) {
-      return;
-    }
-    if (!newVal.error) {
-      showSuccessMessage(newVal.message);
-    } else {
-      showErrMessage(newVal.message);
-    }
-  });
-
   return {
     handleSaveOrderDraft,
     currentOrderDraft,
+    applySelectedOrderDraft,
+    applySelectedOrderDraftPersonal,
   };
 };

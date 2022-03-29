@@ -1,21 +1,16 @@
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import {
   CurrShiftGetOrderStatus,
-  ORDER_PLACE_VALUES,
   ORDERS_RECEIVERS_DEFAULT_POSTS,
 } from '@/constants/orders';
-import {
-  SET_GET_ORDER_STATUS_TO_ALL_DSP,
-  SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
-  CLEAR_SHIFT_FOR_SENDING_DATA,
-} from '@/store/mutation-types';
+import { CLEAR_SHIFT_FOR_SENDING_DATA } from '@/store/mutation-types';
 
 
 /**
  * Данный модуль предназначен для работы с участками, на которые необходимо передать
  * издаваемое распоряжение.
  */
-export const useSectorsToSendOrder = (state, store) => {
+export const useSectorsToSendOrder = ({ state, store }) => {
   const dspSectorsToSendOrderNoDupl = computed(() => {
     if (!state.dspSectorsToSendOrder || !state.dspSectorsToSendOrder.length) {
       return [];
@@ -98,36 +93,7 @@ export const useSectorsToSendOrder = (state, store) => {
   const selectedOtherAddresseesString = computed(() =>
     formSelectedPersonalString(state.otherSectorsToSendOrder, 'placeTitle', null));
 
-  // При изменении значения параметра места действия распоряжения меняем список "Кому" по станциям
-  watch(() => state.orderPlace.value, (newValue) => {
-    if (!state.resetValueOnWatchChanges || !newValue) {
-      return;
-    }
-    // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
-    store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
-    let blockObject;
-    switch (state.orderPlace.place) {
-      case ORDER_PLACE_VALUES.station:
-        // Затем назначаем получение оригинала распоряжения выбранной станции
-        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
-          { stationId: newValue, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
-        break;
-      case ORDER_PLACE_VALUES.span:
-        // Затем назначаем получение оригинала распоряжения станциям выбранного перегона
-        blockObject = store.getters.getSectorBlockById(newValue);
-        if (blockObject) {
-          store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
-            { stationId: blockObject.Bl_StationID1, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
-          store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
-            { stationId: blockObject.Bl_StationID2, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
-        }
-        break;
-    }
-  });
-
-  /**
-   * Чистит списки адресатов распоряжения.
-   */
+  // Чистит списки адресатов распоряжения.
   const handleClearOrderAddressesLists = () => {
     store.commit(CLEAR_SHIFT_FOR_SENDING_DATA);
   };

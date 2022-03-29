@@ -1,4 +1,8 @@
-import { ORDER_PATTERN_TYPES, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN } from '@/constants/orderPatterns';
+import {
+  ORDER_PATTERN_TYPES,
+  SPECIAL_CIRCULAR_ORDER_SIGN,
+  SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
+} from '@/constants/orderPatterns';
 
 
 /**
@@ -66,7 +70,13 @@ export function getTimeSpanString(orderType, timeSpan, isECD, specialOrderCatego
   const endDateString = getLocaleDateTimeString(timeSpan.end, false);
   if ((timeSpan.start && timeSpan.end && startDateString === endDateString) ||
     ([ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION, ORDER_PATTERN_TYPES.ECD_NOTIFICATION].includes(orderType)) ||
-    (specialOrderCategories && specialOrderCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN))) {
+    (
+      specialOrderCategories &&
+      (
+        specialOrderCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ||
+        specialOrderCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN)
+      )
+    )) {
     return startDateString;
   }
   const startString = `с ${startDateString}`;

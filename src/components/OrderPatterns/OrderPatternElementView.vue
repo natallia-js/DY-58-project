@@ -298,11 +298,11 @@
               return null;
           }
         }
-        return null;
+        return props.element.value;
       };
 
       const state = reactive({
-        elementModelValue: getDefaultElementModelValue() || (props.element ? props.element.value : null),
+        elementModelValue: getDefaultElementModelValue(),
       });
 
       // для отслеживания изменения значения поля value объекта element в родительском компоненте
@@ -311,12 +311,22 @@
       watch(() => props.element.value, (newVal) => state.elementModelValue = newVal);
 
       // При перезагрузке страницы информация о рабочих распоряжениях может появиться позже чем надо,
-      // в связи с чем могут оказаться незаполненными поля данными
-      const stopWatchingWorkingOrders = watch(() => store.getters.getRawWorkingOrders, () => {
-        state.elementModelValue = getDefaultElementModelValue();
-        stopWatchingWorkingOrders();
+      // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке
+      // циркулярного распоряжения)
+      const watchedRawWorkingOrders = ref(false);
+      const stopWatchingRawWorkingOrders = watch(() => store.getters.getRawWorkingOrders, () => {
+        if (watchedRawWorkingOrders.value === false && !state.elementModelValue) {
+          watchedRawWorkingOrders.value = true;
+          state.elementModelValue = getDefaultElementModelValue();
+        }
+      });
+      watch(watchedRawWorkingOrders, (newVal) => {
+        if (newVal === true) {
+          stopWatchingRawWorkingOrders();
+        }
       });
 
+      // Любое изменение значения элемента должно быть известно "новерху"
       watch(() => state.elementModelValue, (value) => {
         if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
           emit('input', {
@@ -610,11 +620,4 @@
       };
     },
   };
-  /*
-  [{"Station":"138507","Time":"2021-11-22T06:00:00","EvType":1},
-   {"Station":"138507","Time":"2021-11-22T06:05:00","EvType":3},
-   {"Station":"141800","Time":"2021-11-22T07:00:00","EvType":2},
-   {"Station":"141406","Time":"2021-11-22T07:45:00","EvType":1},
-   {"Station":"111111","Time":"2021-11-22T08:00:00","EvType":1}]
-  */
 </script>

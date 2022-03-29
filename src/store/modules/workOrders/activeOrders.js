@@ -304,11 +304,18 @@ export const activeOrders = {
     },
 
     /**
-     * Возвращает действующее распоряжение заданного типа.
+     * Возвращает действующие распоряжения заданного типа. Если указана специальная отметка, которую
+     * должны иметь искомые распоряжения, то данная отметка также учитывается при поиске.
      */
     getActiveOrdersOfGivenType(_state, getters) {
-      return (ordersType) => {
-        return getters.getActiveOrders.filter((item) => item.type === ordersType);
+      return (ordersType, specialOrderSign = null) => {
+        return getters.getActiveOrders.filter((item) =>
+          (item.type === ordersType) &&
+          (
+            !specialOrderSign ||
+            (item.specialTrainCategories && item.specialTrainCategories.includes(specialOrderSign))
+          )
+        );
       };
     },
 
