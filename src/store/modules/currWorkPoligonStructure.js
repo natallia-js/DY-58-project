@@ -216,6 +216,11 @@ export const currWorkPoligonStructure = {
       return getters.getSectorStations.find((station) => station.St_Title === stationTitle);
     },
 
+    getSectorStationIdByTitle: (_state, getters) => (stationTitle) => {
+      const stationObject = getters.getSectorStations.find((station) => station.St_Title === stationTitle);
+      return stationObject ? stationObject.St_ID : null;
+    },
+
     /**
      * Возвращает объект перегона текущего полигона управления.
      * Если полигон управления - участок ДНЦ / ЭЦД, то возвращается один из перегонов,
@@ -227,11 +232,24 @@ export const currWorkPoligonStructure = {
       return getters.getSectorBlocks.find((block) => block.Bl_Title === blockTitle);
     },
 
+    getSectorBlockIdByTitle: (_state, getters) => (blockTitle) => {
+      const blockObject = getters.getSectorBlocks.find((block) => block.Bl_Title === blockTitle);
+      return blockObject ? blockObject.Bl_ID : null;
+    },
+
     /**
      * Возвращает объект перегона участка управления по его id.
      */
     getSectorBlockById: (_state, getters) => (blockId) => {
       return getters.getSectorBlocks.find((block) => block.Bl_ID === blockId);
+    },
+
+    getSectorBlockStationsIds: (_state, getters) => (blockId) => {
+      const blockObject = getters.getSectorBlockById(blockId);
+      if (blockObject) {
+        return [blockObject.Bl_StationID1, blockObject.Bl_StationID2];
+      }
+      return null;
     },
 
     /**

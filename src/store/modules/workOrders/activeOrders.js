@@ -321,10 +321,13 @@ export const activeOrders = {
 
     /**
      * Возвращает действующее распоряжение заданного типа с заданным номером.
+     * Если указана специальная отметка, которую должны иметь искомые распоряжения,
+     * то данная отметка также учитывается при поиске.
      */
     getActiveOrderByNumber(_state, getters) {
-      return (orderType, orderNumber) => {
-        return getters.getActiveOrdersOfGivenType(orderType).find((item) => String(item.number) === String(orderNumber));
+      return (orderType, orderNumber, specialOrderSign = null) => {
+        return getters.getActiveOrdersOfGivenType(orderType, specialOrderSign).find((item) =>
+          String(item.number) === String(orderNumber));
       };
     },
 

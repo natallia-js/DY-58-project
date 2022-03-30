@@ -304,7 +304,11 @@
                   (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ORDER_DATETIME));
                 // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
                 if (elementToChangeValue) {
-                  tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ORDER, event.value);
+                  tmp = this.getActiveOrderByNumber(
+                    ORDER_PATTERN_TYPES.ORDER,
+                    event.value,
+                    event.elementRef === FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER ? SPECIAL_CLOSE_BLOCK_ORDER_SIGN : null
+                  );
                   if (tmp) {
                     elementToChangeValue.value = tmp.createDateTime;
                   }

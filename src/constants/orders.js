@@ -43,6 +43,8 @@ export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
   ECD_PROHIBITION_DATETIME: 'Дата-время издания действующего запрещения',
   PASS_DUTY_DATETIME: 'Дата-время сдачи дежурства',
   TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',
+  CLOSE_BLOCK_DATETIME: 'Дата-время закрытия перегона',
+  OPEN_BLOCK_DATETIME: 'Дата-время открытия перегона',
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
