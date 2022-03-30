@@ -53,10 +53,13 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
         order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       otherToSend: !order.otherToSend ? [] :
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-      // Информация по станции (своей) нужна только ДСП
-      stationWorkPlacesToSend: !isDSP_or_DSPoperator ? [] :
-        !order.stationWorkPlacesToSend ? [] :
-        // выбираем только работников текущей станции
+      // ДСП нужна информация лишь по своей станции, ДНЦ - по всем станциям
+      stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
+        !isDSP_or_DSPoperator ?
+        // Исключаем главных ДСП (они будут в списке dspToSend)
+        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
+          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})) :
+        // Выбираем только работников текущей станции
         order.stationWorkPlacesToSend.filter((el) => el.id === userWorkPoligon.code)
           .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       orderText: !order.orderText ? null : {

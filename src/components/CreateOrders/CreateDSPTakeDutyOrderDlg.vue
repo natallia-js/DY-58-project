@@ -345,8 +345,6 @@
         selectedPassDutyUsers: {},
       });
 
-      let seePassDutyDateTimeFieldChanges = false;
-
       const takeDutyTimeNoLessPassDutyTime = (value) => {
         return value >= state.passDutyDateTime;
       };
@@ -538,13 +536,13 @@
         // извлечь информацию о персонале, который ранее принимал дежурство, и установить ее в качестве персонала,
         // сдающего дежурство, в новой записи о приеме-сдаче дежурства
         } else {
-          // Устанавливаем персонал, который сдает дежурство
+          // Устанавливаем персонал, который сдает дежурство (дата-время сдачи дежурства - как у сдающего дежурство ДСП)
           if (prevTakeDutyPersonal && prevTakeDutyPersonal instanceof Array) {
             prevTakeDutyPersonal.forEach((item) => {
               const existingUserObject = getTakeOrPassDutyUserObject(defaultPassDutyUsers, item.userId, item.workPlaceId);
               if (existingUserObject) {
                 if (item.takeOrPassDutyTime) {
-                  existingUserObject.takeOrPassDutyTime = new Date(item.takeOrPassDutyTime);
+                  existingUserObject.takeOrPassDutyTime = store.getters.getLastTakeDutyTime;
                 }
                 addSelectedRecord(state.selectedPassDutyUsers, getStationWorkPlaceFullCode(userWorkPoligon.code, item.workPlaceId), existingUserObject);
               }
@@ -574,9 +572,6 @@
           initOrderTakeData();
           initTakeAndPassDutyStationShift();
           initAdditionalOrderText();
-          // При открытии диалогового окна не реагируем на изменения в поле даты-времени сдачи дежурства ДСП
-          // (см. watch далее)
-          seePassDutyDateTimeFieldChanges = false;
         } else {
           state.usersThatTakeDuty = [];
           state.usersThatPassDuty = [];
@@ -590,21 +585,18 @@
       // Отслеживаю изменение номера последнего изданного распоряжения заданного типа
       watch(() => store.getters.getNextOrdersNumber(orderType), (newVal) => state.number = newVal);
 
-      // Изменение значения времени сдачи дежурства приводит к установке такого же значения во всех
-      // полях принятия дежурства
+      // Изменение значения времени сдачи дежурства основным ДСП приводит к установке такого же
+      // значения во всех полях сдачи и принятия дежурства на рабочих местах
       watch(() => state.passDutyDateTime, (newVal) => {
-        if (!seePassDutyDateTimeFieldChanges) {
-          seePassDutyDateTimeFieldChanges = true;
-          return;
-        }
         state.takeDutyDateTime = newVal;
         state.usersThatPassDuty.forEach((group) => {
           if (group.items && group.items.length) {
-            group.items.forEach((item) => {
-              if (item.takeOrPassDutyTime) {
-                item.takeOrPassDutyTime = newVal;
-              }
-            });
+            group.items.forEach((item) => item.takeOrPassDutyTime = newVal);
+          }
+        });
+        state.usersThatTakeDuty.forEach((group) => {
+          if (group.items && group.items.length) {
+            group.items.forEach((item) => item.takeOrPassDutyTime = newVal);
           }
         });
       });

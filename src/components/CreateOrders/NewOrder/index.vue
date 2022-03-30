@@ -96,9 +96,7 @@
             <span v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-text-bold">
               <span class="dy58-required-field">*</span> На приказ/запрещение
             </span>
-            <span v-else class="p-text-bold">
-              <span v-if="orderType === ORDER_PATTERN_TYPES.NOTIFICATION" class="dy58-required-field">*</span> На документ
-            </span>
+            <span v-else class="p-text-bold">На документ</span>
           </label>
           <TreeSelect
             placeholder="Выберите действующий документ"

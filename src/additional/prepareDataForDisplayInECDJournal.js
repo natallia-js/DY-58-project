@@ -73,6 +73,10 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       otherToSend: !order.otherToSend ? [] :
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+      // Исключаем главных ДСП (они будут в списке dspToSend)
+      stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
+        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
+          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :
@@ -110,6 +114,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         dspToSend: order.dspToSend,
         ecdToSend: order.ecdToSend,
         otherToSend: order.otherToSend,
+        stationWorkPlacesToSend: order.stationWorkPlacesToSend,
         // для ряда приказов ЭЦД указывается особая отметка ТУ (для приказов, формируемых на
         // отключение/включение коммутационного аппарата по телеуправлению); эту отметку необходимо
         // отобразить в журнале в графе "Кто принял"

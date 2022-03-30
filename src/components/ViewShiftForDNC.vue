@@ -21,7 +21,7 @@
       </div>
       <div v-else>
         <div v-for="station of getSectorPersonal.sectorStationsShift" :key="station.stationId" class="p-ml-4">
-          <span class="p-text-bold">{{ station.stationTitle }} ({{ station.trainSectorTitle }})</span>
+          <span class="p-text-bold">{{ station.stationTitle }}</span>
           <div v-if="!station.people || !station.people.length">
             -
           </div>

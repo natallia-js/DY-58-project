@@ -99,11 +99,8 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
-      rules.prevRelatedOrder = {};
-      rules.createdOnBehalfOf = {};
-      break;
     case ORDER_PATTERN_TYPES.NOTIFICATION:
-      rules.prevRelatedOrder = { prevRelatedOrderIsRequired };
+      rules.prevRelatedOrder = {};
       rules.createdOnBehalfOf = {};
       break;
     default:

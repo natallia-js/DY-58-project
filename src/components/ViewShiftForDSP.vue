@@ -106,7 +106,17 @@
         }
         const currStationPersonal = getSectorPersonal.value.sectorStationsShift.find((shift) =>
           shift.stationId === getUserWorkPoligonData.value.St_ID);
-        return currStationPersonal && currStationPersonal.people ? currStationPersonal.people : [];
+        // Персонал станции сортируем так: вначале главные (ДСП, ревизоры), у которых нет конкретного
+        // рабочего места в рамках станции, затем - Операторы при ДСП (ну или те, для кого указано
+        // конкретное рабочее место), причем группируем их по рабочим местам
+        return !(currStationPersonal && currStationPersonal.people) ? [] :
+          currStationPersonal.people.sort((a, b) => {
+            if (!a.stationWorkPlaceId && b.stationWorkPlaceId) return -1;
+            if (a.stationWorkPlaceId && !b.stationWorkPlaceId) return 1;
+            if (a.stationWorkPlaceId && b.stationWorkPlaceId)
+              return a.stationWorkPlaceId - b.stationWorkPlaceId;
+            return 0;
+          });
       });
 
       const adjacentStationsShift = computed(() => {
