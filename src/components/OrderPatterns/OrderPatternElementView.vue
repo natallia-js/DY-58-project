@@ -286,7 +286,7 @@
               // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
               return getPassDutyDNC();
             default:
-              return null;
+              return props.element.value;
           }
         } else if (props.element.type === OrderPatternElementType.DATETIME) {
           switch (props.element.ref) {
@@ -295,7 +295,7 @@
             case FILLED_ORDER_DATETIME_ELEMENTS.PASS_DUTY_DATETIME:
               return store.getters.getLastTakeDutyTime;
             default:
-              return null;
+              return props.element.value;
           }
         }
         return props.element.value;
@@ -305,15 +305,10 @@
         elementModelValue: getDefaultElementModelValue(),
       });
 
-      watch(() => props.dropdownValues, (val) => console.log('new dropdown',val))
-
       // для отслеживания изменения значения поля value объекта element в родительском компоненте
       // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
       // значениям соответствующих полей связанного распоряжения)
-      watch(() => props.element.value, (newVal) => {
-        console.log('new el val',newVal)
-        state.elementModelValue = newVal
-      });
+      watch(() => props.element.value, (newVal) => state.elementModelValue = newVal);
 
       // При перезагрузке страницы информация о рабочих распоряжениях может появиться позже чем надо,
       // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке

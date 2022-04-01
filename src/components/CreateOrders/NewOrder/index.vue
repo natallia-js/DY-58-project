@@ -25,12 +25,13 @@
   <div class="p-grid">
     <div class="p-col-6">
       <SelectButton
+        v-if="false"
         v-model="state.selectedOrderInputType"
         :options="OrderInputTypes"
         optionLabel="label"
         disabled
       />
-      <br />
+      <!--<br />-->
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
       </div>
@@ -351,7 +352,7 @@
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useWatchOrderPlace } from './watchOrderPlace';
   import { useWatchOrderNumber } from './watchOrderNumber';
-  import { useWatchCancelOrderDateTime } from './watchOrderNumber';
+  import { useWatchCancelOrderDateTime } from './watchCancelOrderDateTime';
   import { useWatchOrderPatterns } from './watchOrderPatterns';
   import { useWatchOrderDrafts } from './watchOrderDrafts';
   import { useWatchOperationsResults } from './watchOperationsResults';
@@ -581,8 +582,8 @@
 
       // Здесь все watch, в конце, когда выше уже все объявлено (иначе будут ошибки)
       useWatchOrderNumber({ state, props, store });
-      useWatchOrderPlace({ state, store });
       useWatchCancelOrderDateTime({ state });
+      useWatchOrderPlace({ state, store });
       useWatchOrderDrafts({
         state, store, props, emit, currentOrderDraft,
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
