@@ -32,24 +32,25 @@ export const useDispatchOrder = (inputVals) => {
   // действия равно указанной дате-времени отмены действия предшествующего распоряжения;
   //   3. если п.1 и п.2 не выполняются, то дату-время действия распоряжения определяем по следующему
   // алгоритму:
-  //     3.1. если издается заявка либо уведомление, то время начала его действия равно дате-времени
-  //          его издания, а время окончания действия - до отмены (это нужно для того, чтобы завка /
-  //          уведомление не исчезло из списка рабочих распоряжений до тех пор, пока на основании его
-  //          не будет издано распоряжение)
-  //     3.2 для циркулярного распоряжения о приеме-сдаче дежурства ДНЦ правило аналогичное 3.1
+  //     3.1. если издается заявка/уведомление/приказ ЭЦД/запрещение ЭЦД, то время начала его действия
+  //          равно дате-времени его издания, а время окончания действия - до отмены (это нужно для того,
+  //          чтобы документ не исчез из списка рабочих распоряжений до тех пор, пока на основании его
+  //          не будет издан другой документ)
+  //     3.2 для циркулярного распоряжения о приеме-сдаче дежурства ДНЦ действует правило 3.1
   //     3.3. в противном случае время начала и окончания действия распоряжения равны дате и времени
   //          его издания
   const getPreviewOrderTimeSpanObject = computed(() => {
-    if (
-      [ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType)
-      && state.defineOrderTimeSpan.value
-    ) {
+    if (props.orderType === ORDER_PATTERN_TYPES.ORDER && state.defineOrderTimeSpan.value) {
       return state.timeSpan;
     }
     if (state.cancelOrderDateTime) {
       return { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false };
     }
-    if (props.orderType === ORDER_PATTERN_TYPES.REQUEST || props.orderType === ORDER_PATTERN_TYPES.NOTIFICATION ||
+    if (
+      [ORDER_PATTERN_TYPES.REQUEST,
+       ORDER_PATTERN_TYPES.NOTIFICATION,
+       ORDER_PATTERN_TYPES.ECD_ORDER,
+       ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType) ||
       (state.specialTrainCategories && state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))) {
       return { start: state.createDateTime, end: null, tillCancellation: true };
     }

@@ -36,6 +36,7 @@
         <template #body="slotProps">
           <div
             v-if="[
+              getDNC_DSPJournalTblColumnsTitles.assertDateTime,
               getDNC_DSPJournalTblColumnsTitles.orderContent,
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"

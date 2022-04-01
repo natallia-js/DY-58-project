@@ -344,21 +344,23 @@
     SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
   } from '@/constants/orderPatterns';
-  import {
-    ORDER_TEXT_SOURCE,
-    ORDER_PLACE_VALUES,
-    FILLED_ORDER_DATETIME_ELEMENTS,
-    FILLED_ORDER_DROPDOWN_ELEMENTS,
-  } from '@/constants/orders';
+  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
+  import { useStoreData } from './storeData';
   import { useShowFormElements } from './showFormElements';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
-  import { useWatches } from './watches';
+  import { useWatchOrderPlace } from './watchOrderPlace';
+  import { useWatchOrderNumber } from './watchOrderNumber';
+  import { useWatchCancelOrderDateTime } from './watchOrderNumber';
+  import { useWatchOrderPatterns } from './watchOrderPatterns';
+  import { useWatchOrderDrafts } from './watchOrderDrafts';
+  import { useWatchOperationsResults } from './watchOperationsResults';
   import { useDispatchOrder } from './dispatchOrder';
   import { useSectorsToSendOrder } from './sectorsToSendOrder';
   import { useRelatedOrder } from './relatedOrder';
   import { useNewOrderValidationRules } from './validationRules';
   import { useOrderDraft } from './orderDraft';
+  import { useSetAndAnalyzeOrderText } from './setAndAnalyzeOrderText';
 
   export default {
     name: 'dy58-new-order-block',
@@ -456,15 +458,12 @@
         updateCreateDateTimeRegularly: true,
         prevRelatedOrder: null,
         cancelOrderDateTime: null,
-        orderPlace: { ...defaultOrderPlace },
-        timeSpan: { ...defaultTimeSpan },
-        defineOrderTimeSpan: [
-          ORDER_PATTERN_TYPES.ECD_ORDER,
-          ORDER_PATTERN_TYPES.ECD_PROHIBITION
-        ].includes(props.orderType) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0],
+        orderPlace: defaultOrderPlace,
+        timeSpan: defaultTimeSpan,
+        defineOrderTimeSpan: defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
         specialTrainCategories: null,
-        orderText: { ...defaultOrderText },
+        orderText: defaultOrderText,
         dncSectorsToSendOrder: [],
         dspSectorsToSendOrder: [],
         ecdSectorsToSendOrder: [],
@@ -483,20 +482,31 @@
         currentOrderDraftId: null,
       });
 
-      onMounted(() => {
-        state.currentOrderDraftId = props.orderDraftId;
-        state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
-        state.orderText = { ...initialOrderText() };
-      });
-
       const {
         showOrderDrafts,
         showConnectedOrderFields,
         showDisplayOnGIDFlag,
         showDisplayOnGIDFields,
+        getUserDutyToDefineOrderPlace,
         showDisplayOrderTimespanFlag,
         showDisplayOrderTimespan,
-      } = useShowFormElements({ state, props, isECD, getOrderDraftsOfGivenType });
+        getUserDutyToDefineOrderTimeSpan,
+      } = useShowFormElements({
+        state,
+        props,
+        isECD,
+        getOrderDraftsOfGivenType,
+        showOnGIDOptions,
+        defineOrderTimeSpanOptions,
+      });
+
+      onMounted(() => {
+        state.currentOrderDraftId = props.orderDraftId;
+        state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
+        state.orderText = initialOrderText();
+        state.showOnGID = getUserDutyToDefineOrderPlace.value;
+        state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+      });
 
       useWatchCurrentDateTime(state, props, store);
 
@@ -514,7 +524,13 @@
       const {
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
-      } = useRelatedOrder({ state, store });
+      } = useRelatedOrder({ state, store, props, emit });
+
+      const {
+        getSectorStationOrBlockTitleById,
+        getSectorStations,
+        getSectorBlocks,
+      } = useStoreData({ store, relatedOrderObject });
 
       const {
         handleSaveOrderDraft,
@@ -553,14 +569,6 @@
         relatedOrderObject,
       });
 
-      // Здесь, в конце, когда выше уже все объявлено (иначе будут ошибки)
-      useWatches({
-        state, props, store, emit,
-        showSuccessMessage, showErrMessage, initialOrderText,
-        currentOrderDraft, applySelectedOrderDraft, applySelectedOrderDraftPersonal,
-        relatedOrderObject, showOnGIDOptions, defineOrderTimeSpanOptions,
-      });
-
       const { rules } = useNewOrderValidationRules(state, props, relatedOrderObject);
 
       const submitted = ref(false);
@@ -571,33 +579,21 @@
       // and emit to parent components."
       const v$ = useVuelidate(rules, state, { $scope: false });
 
-      const getSectorStationOrBlockTitleById = computed(() => {
-        if (relatedOrderObject.value && relatedOrderObject.value.place) {
-          return store.getters.getSectorStationOrBlockTitleById({
-            placeType: relatedOrderObject.value.place.place,
-            id: relatedOrderObject.value.place.value,
-          });
-        }
-        return null;
+      // Здесь все watch, в конце, когда выше уже все объявлено (иначе будут ошибки)
+      useWatchOrderNumber({ state, props, store });
+      useWatchOrderPlace({ state, store });
+      useWatchCancelOrderDateTime({ state });
+      useWatchOrderDrafts({
+        state, store, props, emit, currentOrderDraft,
+        applySelectedOrderDraft, applySelectedOrderDraftPersonal,
       });
+      useWatchOrderPatterns({
+        state, store, props, initialOrderText, submitted,
+        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
+      });
+      useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
 
-      const getSectorStations = computed(() =>
-        store.getters.getSectorStations.map((station) => {
-          return {
-            id: station.St_ID,
-            title: `${station.St_Title} (${station.St_UNMC})`,
-          };
-        })
-      );
-
-      const getSectorBlocks = computed(() =>
-        store.getters.getSectorBlocks.map((block) => {
-          return {
-            id: block.Bl_ID,
-            title: block.Bl_Title,
-          };
-        })
-      );
+      const { setOrderText } = useSetAndAnalyzeOrderText({ state, store });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
@@ -605,146 +601,6 @@
       const hidePreviewNewOrderDlg = () => {
         state.showPreviewNewOrderDlg = false;
       };
-
-      const addStationToSendOrder = (stationId) => {
-        if (!state.dspSectorsToSendOrder.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId)) {
-          const stationToSendOrder = store.getters.getDSPShiftForSendingData.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId);
-          if (stationToSendOrder) {
-            state.dspSectorsToSendOrder.push(stationToSendOrder);
-          }
-        }
-      };
-
-      /**
-       * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
-       * Кроме того, для шаблонного распоряжения анализирует устанавливаемые в поля распоряжения значения.
-       */
-      const setOrderText = (event) => {
-        state.orderText = event;
-
-        if (!event || event.orderTextSource !== ORDER_TEXT_SOURCE.pattern || !event.orderText) {
-          return;
-        }
-        // Если установлен флаг определения места действия распоряжения (отображения на ГИД),
-        // то при изменении ряда полей в тексте шаблонного распоряжения их значения устанавливаются
-        // в качестве места действия распоряжения
-        if (state.showOnGID.value === true) {
-          // Если в тексте распоряжения встречается поле 'Станция', 'Станция отправления' либо 'Станция прибытия',
-          // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-          // распоряжения
-          let placeSet = false;
-          const stationElement = event.orderText.find((el) =>
-            [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
-             FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
-             FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION].includes(el.ref));
-          if (stationElement) {
-            if (stationElement.value) {
-              const stationId = store.getters.getSectorStationIdByTitle(stationElement.value);
-              if (stationId) {
-                state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: stationId };
-                placeSet = true;
-                // Для отображения станции в списке "Кому" необходимо ее туда добавить, если ее там еще нет
-                addStationToSendOrder(stationId);
-              }
-            } else {
-              state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: null };
-            }
-          }
-          // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
-          // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-          // распоряжения. Но только при условии что ранее не было установлено место действия при анализе
-          // поля станции!
-          if (!placeSet) {
-            const blockElement = event.orderText.find((el) =>
-              [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
-               FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
-            if (blockElement) {
-              if (blockElement.value) {
-                const blockId = store.getters.getSectorBlockIdByTitle(blockElement.value);
-                if (blockId) {
-                  state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: blockId };
-                  placeSet = true;
-                  // Для отображения перегона в списке "Кому" необходимо туда добавить обе его станции,
-                  // если их там еще нет
-                  const stationsIds = store.getters.getSectorBlockStationsIds(blockId);
-                  if (stationsIds) {
-                    addStationToSendOrder(stationsIds[0]);
-                    addStationToSendOrder(stationsIds[1]);
-                  }
-                }
-              } else {
-                state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: null };
-              }
-            }
-          }
-        }
-        // Если установлен флаг определения времени действия распоряжения, то при изменении ряда полей
-        // в тексте шаблонного распоряжения их значения устанавливаются в качестве времени действия распоряжения
-        if (state.defineOrderTimeSpan.value === true) {
-          // Если в тексте распоряжения встречается поле даты-времени 'Дата-время закрытия перегона',
-          // то значение этого поля (первого встречающегося) устанавливается в качестве даты-времени
-          // начала действия распоряжения
-          let timeSet = false;
-          const closeBlockDateTimeElement = event.orderText.find((el) =>
-            el.ref === FILLED_ORDER_DATETIME_ELEMENTS.CLOSE_BLOCK_DATETIME);
-          if (closeBlockDateTimeElement) {
-            if (closeBlockDateTimeElement.value) {
-              state.timeSpan = { start: closeBlockDateTimeElement.value, end: null, tillCancellation: true };
-              timeSet = true;
-            } else {
-              state.timeSpan = { start: null, end: null, tillCancellation: false };
-            }
-          }
-          // Если в тексте распоряжения встречается поле даты-времени 'Дата-время открытия перегона',
-          // то значение этого поля (первого встречающегося) устанавливается в качестве даты-времени
-          // начала и окончания действия распоряжения. Но только при условии что ранее не было установлено
-          // время действия!
-          if (!timeSet) {
-            const openBlockDateTimeElement = event.orderText.find((el) =>
-              el.ref === FILLED_ORDER_DATETIME_ELEMENTS.OPEN_BLOCK_DATETIME);
-            if (openBlockDateTimeElement) {
-              if (openBlockDateTimeElement.value) {
-                state.timeSpan = {
-                  start: openBlockDateTimeElement.value,
-                  end: openBlockDateTimeElement.value,
-                  tillCancellation: false,
-                };
-              } else {
-                state.timeSpan = { start: null, end: null, tillCancellation: false };
-              }
-            }
-          }
-        }
-        // Если в тексте распоряжения встречается поле 'Номер действующего распоряжения на закрытие перегона',
-        // то значение этого поля (первого встречающегося) используется для определения связанного распоряжения
-        const closeSpanActiveOrderNumberElement = event.orderText.find((el) =>
-          el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER);
-        if (closeSpanActiveOrderNumberElement) {
-          if (closeSpanActiveOrderNumberElement.value) {
-            const orderObject = store.getters.getActiveOrderByNumber(
-              ORDER_PATTERN_TYPES.ORDER,
-              closeSpanActiveOrderNumberElement.value,
-              SPECIAL_CLOSE_BLOCK_ORDER_SIGN
-            );
-            state.prevRelatedOrder = orderObject ? { [orderObject._id]: true } : null;
-          }
-          // else нет, т.к. поле со связанным распоряжением видимо пользователю, он может вручную там
-          // все поправить
-        }
-      };
-
-      /**
-       * Для выбранного шаблона распоряжения возвращает строку с особыми категориями поезда,
-       * которыми отмечен данный шаблон. Если за шаблоном не закреплены отметки об особых категориях
-       * поезда, то возвращается null.
-       */
-      const getOrderPatternSpecialTrainCategoriesString = computed(() => {
-        const specialTrainCategoriesArray = store.getters.getOrderPatternSpecialTrainCategories(state.orderText.patternId)
-        if (!specialTrainCategoriesArray || !specialTrainCategoriesArray.length) {
-          return null;
-        }
-        return specialTrainCategoriesArray.join(', ');
-      });
 
       /**
        * Данный метод осуществляет проверку корректности указания значений полей создаваемого
@@ -804,7 +660,6 @@
         dspSectorsToSendOrderNoDupl,
         dncSectorsToSendOrderNoDupl,
         ecdSectorsToSendOrderNoDupl,
-        getOrderPatternSpecialTrainCategoriesString,
         newNumberOverlayPanel,
         changeOrderNumber,
         handleSaveOrderDraft,

@@ -180,25 +180,45 @@
           return;
         }
         let atLeastOneChange = false;
+        //const newOrderPatternElementValues = [];
         state.orderPatternText.forEach((element, index) => {
           const parentMatch = parentChildRelations.patternsParamsMatchingTable.find((match) => match.childParamId === element._id);
           if (parentMatch) {
             const parentParam = parentOrderText.value.orderText.find((el) => el._id === parentMatch.baseParamId);
             const parentParamValue = parentParam ? parentParam.value : null;
             if (parentParamValue !== state.orderPatternText[index].value) {
+              //console.log('changing', parentParamValue, state.orderPatternText[index].value)
               state.orderPatternText[index].value = parentParamValue;
+              console.log('state.orderPatternText[index]',state.orderPatternText[index])
+              //console.log('state.orderPatternText',state.orderPatternText)
+              //newOrderPatternElementValues.push({ elementIndex: index, newValue: parentParamValue });
               atLeastOneChange = true;
             }
           }
         });
+        /*console.log('newOrderPatternElementValues',newOrderPatternElementValues)
+        if (newOrderPatternElementValues.length) {
+          state.orderPatternText = state.orderPatternText.map((el, index) => {
+            const newValueData = newOrderPatternElementValues.find((item) => item.elementIndex === index);
+            if (newValueData) {
+              return { ...el, value: newValueData.value };
+            }
+            return el;
+          });
+          return true; // было хотя бы одно изменение
+        }*/
+        console.log('atLeastOneChange',atLeastOneChange)
         return atLeastOneChange;
+        //return false; // не было ни одного изменения
       };
 
-      // при изменении объекта родительского распоряжения принимаем меры по заполнению
+      // при изменении объекта родительского/дочернего распоряжения принимаем меры по заполнению
       // полей текста объекта дочернего распоряжения
-      watch(parentOrderText, () => {
-        const atLeastOneChildFieldFilled = fillChildOrderTextFieldsWithParentOrderTextFields();
-        if (atLeastOneChildFieldFilled) {
+      watch([parentOrderText, () => state.orderPatternText], () => {console.log('ANY',parentOrderText,state.orderPatternText)
+        const atLeastOneChildFieldValueChanged = fillChildOrderTextFieldsWithParentOrderTextFields();
+        if (atLeastOneChildFieldValueChanged) {
+          console.log('getSelectedOrderPattern.value',getSelectedOrderPattern.value)
+          console.log('state.orderPatternText',state.orderPatternText)
           emit('input', {
             orderTextSource: state.orderTextSource,
             patternId: getSelectedOrderPattern.value._id,
@@ -240,13 +260,13 @@
       //
       const handleChooseOrderPattern = () => {
         state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => ({ ...element }));
-        fillChildOrderTextFieldsWithParentOrderTextFields();
+        /*fillChildOrderTextFieldsWithParentOrderTextFields();
         emit('input', {
           orderTextSource: state.orderTextSource,
           patternId: getSelectedOrderPattern.value._id,
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: state.orderPatternText,
-        });
+        });*/
       };
 
       //
@@ -281,7 +301,7 @@
       };
 
       // При любом изменении сообщаем "наверх"! Т.к. если будем делать проверки (например, на равенство
-      // нового значения предыдущему, чтобы решить, делать emit ил нет), то может оказаться так, что
+      // нового значения предыдущему, чтобы решить, делать emit или нет), то может оказаться так, что
       // изменение в одном поле потянет изменение в другом, а это другое не отразится на исходном наборе
       // данных, останется его прежнее значение
       const handleChangeOrderPatternElementValue = (event) => {

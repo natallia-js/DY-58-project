@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 
 
@@ -6,7 +6,7 @@ import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
  * Данный модуль предназначен для работы со связанным распоряжением по отношению к издаваемому
  * (распоряжением, находящимся в той цепочке распоряжений, что и издаваемое).
  */
-export const useRelatedOrder = ({ state, store }) => {
+export const useRelatedOrder = ({ state, store, props, emit }) => {
   const relatedOrderId = computed(() => {
     const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
     return chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;
@@ -21,6 +21,14 @@ export const useRelatedOrder = ({ state, store }) => {
       return null;
     }
     return getLocaleDateTimeString(relatedOrderObject.value.timeSpan.start);
+  });
+
+  watch(relatedOrderObject, (newVal) => {
+    emit('changeProps', {
+      orderType: props.orderType,
+      prevOrderId: newVal ? newVal._id : null,
+      orderDraftId: props.orderDraftId,
+    });
   });
 
   return {

@@ -59,7 +59,10 @@ export const leftMenuItems = {
           },
         });
       }
-      if (getters.canUserDispatchDSPTakeDutyOrder && getters.getExistingDSPTakeDutyOrder) {
+      // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
+      const existingDSPTakeDutyOrder = getters.getExistingDSPTakeDutyOrder;
+      if (getters.canUserDispatchDSPTakeDutyOrder && existingDSPTakeDutyOrder &&
+        existingDSPTakeDutyOrder.creator && existingDSPTakeDutyOrder.creator.id === getters.getUserId) {
         items.push({
           label: 'Редактировать текущую запись о приеме/сдаче дежурства',
           imgURL: require('@/assets/img/editTakePassDuty.png'),

@@ -91,7 +91,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     case ORDER_PATTERN_TYPES.ECD_ORDER:
     case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
       rules.orderPlace = {};
-      rules.timeSpan = state.defineOrderTimeSpan.value ? timeSpanRules : {};
+      rules.timeSpan = {};
       rules.prevRelatedOrder = {};
       break;
     case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
@@ -110,21 +110,19 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
   watch(() => state.showOnGID, (newVal) => {
     rules.orderPlace = newVal.value ? placeRules : {};
     if (state.resetValueOnWatchChanges === true) {
-      state.orderPlace.place = null;
-      state.orderPlace.value = null;
+      state.orderPlace = { place: null, value: null };
     }
   }, { immediate: true }); // call on page load
 
   watch(() => state.defineOrderTimeSpan, (newVal) => {
     rules.timeSpan = newVal.value ? timeSpanRules : {};
     if (state.resetValueOnWatchChanges === true) {
-      state.timeSpan.start = null;
-      state.timeSpan.end = null;
-      state.timeSpan.tillCancellation = null;
+      state.timeSpan = { start: null, end: null, tillCancellation: null };
     } else {
       // Это делаю именно здесь, не в 'watch(() => state.showOnGID...', т.к. это должно быть
       // в одном месте, после того как будет обработана вся информация по черновику распоряжения.
-      // Только по окончании обработки данной информации разрешаем reset полей при выборе режимов ввода данных
+      // Только по окончании обработки данной информации разрешаем reset полей при выборе режимов
+      // ввода данных
       state.resetValueOnWatchChanges = true;
     }
   }, { immediate: true }); // call on page load

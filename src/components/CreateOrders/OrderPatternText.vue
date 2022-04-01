@@ -112,7 +112,7 @@
       /**
        * Производит разбиение массива элементов текста распоряжения на подмассивы (отдельные абзацы).
        */
-      analyzeNewOrderPattern(newOrderPattern) {
+      analyzeNewOrderPattern(newOrderPattern) {console.log('analyzeNewOrderPattern',newOrderPattern)
         if (!newOrderPattern || !newOrderPattern.length) {
           if (this.orderPatternArrays.length) {
             this.orderPatternArrays = [];
