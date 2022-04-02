@@ -1,5 +1,5 @@
 <template>
-  <article>
+  <div>
     <h3 id="system-exit-description" class="dy58-help-contents-item">Выход из системы</h3>
     <p class="dy58-help-paragraph">
       Выход из системы означает локальное удаление всех полномочий, которые пользователь получил в момент
@@ -22,11 +22,18 @@
       Если пользователь выбирает подпункт <i><b>"Со сдачей дежурства"</b></i>, то осуществляется выход из
       системы с отметкой на сервере факта сдачи дежурства.
     </p>
-  </article>
+    <to-help-start-block />
+  </div>
 </template>
 
 <script>
+  import ToHelpStartBlock from './ToHelpStartBlock';
+
   export default {
     name: 'dy58-system-exit-description',
+
+    components: {
+      ToHelpStartBlock,
+    },
   }
 </script>

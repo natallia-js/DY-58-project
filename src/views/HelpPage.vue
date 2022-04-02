@@ -1,10 +1,14 @@
 <template>
-  <div class="p-grid">
+  <div class="p-grid" style="margin-right:0;">
     <div class="p-col-fixed" style="width:250px">
-      <MegaMenu :model="contentsItems" orientation="vertical" style="width:100%;height:100%;" />
+      <Menu :model="contentsItems" orientation="vertical" style="width:100%;height:100%;">
+        <template #item="{item}">
+          <a :href="item.url" class="p-menuitem-link">{{ item.label }}</a>
+        </template>
+      </Menu>
     </div>
     <div class="p-col">
-      <h2 class="p-text-center p-mt-3 p-mb-2">Руководство пользователя</h2>
+      <h2 class="p-text-center p-mt-3 p-mb-2" id="user-manual-start">Руководство пользователя</h2>
       <system-enter-description />
       <main-page-description />
       <work-poligon-page-description />
@@ -54,34 +58,46 @@
         {
           label: 'Вход в систему',
           url: '#system-enter-description',
+          items: [],
         },
         {
           label: 'Главная страница',
           url: '#main-page-description',
+          items: [
+            { label: 'Боковое меню', url: '#side-menu-description' },
+            { label: 'Таблица "Входящие уведомления"', url: '#incoming-notifications-description' },
+            { label: 'Таблица "Документы в работе"', url: '#orders-in-work-description' },
+          ],
         },
         {
           label: 'Страница "Рабочий полигон"',
           url: '#work-poligon-page-description',
+          items: [],
         },
         {
           label: 'Страница "Персонал"',
           url: '#personal-page-description',
+          items: [],
         },
         {
           label: 'Страница "Журнал"',
           url: '#journal-page-description',
+          items: [],
         },
         {
           label: 'Страница "Создать"',
           url: '#create-page-description',
+          items: [],
         },
         {
           label: 'Страница "Шаблоны распоряжений"',
           url: '#patterns-page-description',
+          items: [],
         },
         {
           label: 'Выход из системы',
           url: '#system-exit-description',
+          items: [],
         },
       ];
 
@@ -94,16 +110,31 @@
 
 
 <style lang="scss" scoped>
-  .p-megamenu {
+  :deep(.p-menu) {
     border-radius: 0;
     background-color: var(--surface-b);
   }
 
-  :deep(.p-menuitem-link:hover) {
-    border: 1px solid black;
+  :deep(.p-menu-list > li) {
+    background-color: var(--surface-6);
+    cursor: pointer;
   }
 
-  :deep(.p-menuitem-text) {
-    color: black !important;
+  :deep(.p-menu-list > li:hover) {
+    background-color: var(--surface-d) !important;
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+  }
+
+  :deep(.p-menu-list > li > a:hover) {
+    background-color: var(--surface-d) !important;
+  }
+
+  :deep(.p-menu .p-menuitem-link) {
+    padding: 0;
+  }
+
+  :deep(.p-menuitem) {
+    padding: 0.75rem 1rem 0.75rem 2rem;
   }
 </style>

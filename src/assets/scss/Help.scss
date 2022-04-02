@@ -1,7 +1,27 @@
 .dy58-help-contents-item {
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 
 .dy58-help-paragraph {
   text-indent: 25px;
+  line-height: 1.5;
+}
+
+.dy58-help-img-style {
+  width: 2rem;
+  height: auto;
+  display: inline-block;
+  background-color: #424b5f;
+  padding: 0.25rem;
+}
+
+.dy58-help-img-style-nobgcolor {
+  width: 1rem;
+  height: auto;
+  display: inline-block;
+}
+
+.dy58-to-help-start-block {
+  margin-top: 0.5rem;
+  text-align: right;
 }

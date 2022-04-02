@@ -1,5 +1,5 @@
 <template>
-  <article>
+  <div>
     <h3 id="system-enter-description" class="dy58-help-contents-item">Вход в систему</h3>
     <p class="dy58-help-paragraph">
       Вход в систему означает получение определенных полномочий для работы с ДУ-58.
@@ -29,11 +29,18 @@
       Если пользователь имеет право работать на нескольких рабочих полигонах, то после процедуры успешной
       аутентификации система предложит ему выбрать рабочий полигон.
     </p>
-  </article>
+    <to-help-start-block />
+  </div>
 </template>
 
 <script>
+  import ToHelpStartBlock from './ToHelpStartBlock';
+
   export default {
     name: 'dy58-system-enter-description',
+
+    components: {
+      ToHelpStartBlock,
+    },
   }
 </script>
