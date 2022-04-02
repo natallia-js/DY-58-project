@@ -202,17 +202,17 @@
 
 <style lang="scss" scoped>
   .p-megamenu {
-    border-radius: 0 !important;
-    background-color: #424b5f /*var(--bluegray-200)*/ !important;
+    border-radius: 0;
+    background-color: #424b5f;
   }
 
   .p-megamenu.p-megamenu-vertical {
-    width: 4rem !important;
+    width: 4rem;
   }
 
   :deep(.p-menuitem) {
     text-align: center;
-    margin: 0.8rem 0 !important;
+    margin: 0.8rem 0;
     position: relative;
   }
 
