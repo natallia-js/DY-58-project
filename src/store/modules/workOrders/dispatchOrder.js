@@ -111,7 +111,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
       } = params;
 
       if (!context.getters.canUserDispatchOrders && !context.getters.canUserDispatchControlRecords) {
-        const errMessage = 'У вас нет права на издание распоряжений / создание контрольных записей';
+        const errMessage = 'У вас нет права на издание документов / создание контрольных записей';
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;

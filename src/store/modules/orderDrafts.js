@@ -232,7 +232,7 @@ export const orderDrafts = {
      */
     async loadOrderDrafts(context) {
       if (!context.getters.canUserGetOrderDrafts) {
-        const errMessage = 'У вас нет прав на просмотр черновиков распоряжений';
+        const errMessage = 'У вас нет прав на просмотр черновиков документов';
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -242,11 +242,11 @@ export const orderDrafts = {
       try {
         const responseData = await getOrderDraftsFromServer();
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: false, message: null });
-        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены черновики распоряжений' });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены черновики документов' });
         context.commit(SET_ORDER_DRAFTS_ARRAY, responseData);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о черновиках распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о черновиках документов');
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
@@ -275,7 +275,7 @@ export const orderDrafts = {
       } = params;
 
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        const errMessage = 'У вас нет права на создание черновиков распоряжений';
+        const errMessage = 'У вас нет права на создание черновиков документов';
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -331,7 +331,7 @@ export const orderDrafts = {
       } = params;
 
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        const errMessage = 'У вас нет права на редактирование черновиков распоряжений';
+        const errMessage = 'У вас нет права на редактирование черновиков документов';
         context.commit(SET_SAVE_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -371,7 +371,7 @@ export const orderDrafts = {
      */
      async delOrderDraft(context, { id, type }) {
       if (!context.getters.canUserWorkWithOrderDrafts) {
-        const errMessage = 'У вас нет права на удаление черновиков распоряжений';
+        const errMessage = 'У вас нет права на удаление черновиков документов';
         context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;

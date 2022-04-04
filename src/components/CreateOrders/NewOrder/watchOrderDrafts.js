@@ -33,6 +33,8 @@ export const useWatchOrderDrafts = (inputVals) => {
     state.currentOrderDraftId = tmp;
   });
 
+  // В случае когда данные о персонале меняются позже чем доступна информация о черновике распоряжения
+  // (в частности, при перезагрузке страницы)
   watch(() => store.getters.getSectorPersonal, () => {
     applySelectedOrderDraftPersonal();
   });

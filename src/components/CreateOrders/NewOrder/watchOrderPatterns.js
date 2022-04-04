@@ -3,7 +3,7 @@ import { watch } from 'vue';
 
 export const useWatchOrderPatterns = (inputVals) => {
   const {
-    state, store, props, initialOrderText, submitted,
+    state, store, props, initialOrderText,
     getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
   } = inputVals;
 
@@ -31,6 +31,5 @@ export const useWatchOrderPatterns = (inputVals) => {
     }
     state.showOnGID = getUserDutyToDefineOrderPlace.value;
     state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
-    submitted.value = false;
   });
 };

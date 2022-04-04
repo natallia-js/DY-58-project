@@ -36,7 +36,7 @@ export const mainMenuItems = {
           }
         });
       } },
-      { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны распоряжений', to: '/orderPatternsPage'},
+      { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны документов', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
       // В поле 'command' определено действие по умолчанию на случай, когда пользователь не принимает
       // дежурство (именно такое состояние - isUserOnDuty = false - является состоянием по умолчанию)

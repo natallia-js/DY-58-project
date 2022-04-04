@@ -119,7 +119,7 @@ export const delWorkOrdersChains = {
      */
     async delConfirmedOrdersFromChain(context, chainId) {
       if (!context.getters.canUserDelConfirmedOrdersChains) {
-        const errMessage = 'У вас нет права удалять распоряжения / цепочки распоряжений';
+        const errMessage = 'У вас нет права удалять документы / цепочки документов';
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -133,7 +133,7 @@ export const delWorkOrdersChains = {
         context.commit(DELETE_CONFIRMED_ORDERS_CHAIN, chainId);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления цепочки распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления цепочки документов');
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 

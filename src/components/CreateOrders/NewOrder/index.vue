@@ -541,33 +541,13 @@
       } = useOrderDraft({
         state,
         props,
-        emit,
         store,
         confirm,
-        showSuccessMessage,
-        showErrMessage,
         defineOrderTimeSpanOptions,
         showOnGIDOptions,
         defaultOrderPlace,
         defaultOrderText,
         defaultTimeSpan,
-      });
-
-      const {
-        getIssuedOrderPlaceObject,
-        getPreviewOrderTimeSpanObject,
-        dispatchOrder,
-        getDispatchOrdersBeingProcessed,
-      } = useDispatchOrder({
-        state,
-        props,
-        store,
-        showSuccessMessage,
-        showErrMessage,
-        dspSectorsToSendOrderNoDupl,
-        dncSectorsToSendOrderNoDupl,
-        ecdSectorsToSendOrderNoDupl,
-        relatedOrderObject,
       });
 
       const { rules } = useNewOrderValidationRules(state, props, relatedOrderObject);
@@ -580,6 +560,23 @@
       // and emit to parent components."
       const v$ = useVuelidate(rules, state, { $scope: false });
 
+      // Этот хук после всех необходимых объявлений
+      const {
+        getIssuedOrderPlaceObject,
+        getPreviewOrderTimeSpanObject,
+        dispatchOrder,
+        getDispatchOrdersBeingProcessed,
+      } = useDispatchOrder({
+        state,
+        props,
+        store,
+        submitted,
+        dspSectorsToSendOrderNoDupl,
+        dncSectorsToSendOrderNoDupl,
+        ecdSectorsToSendOrderNoDupl,
+        relatedOrderObject,
+      });
+
       // Здесь все watch, в конце, когда выше уже все объявлено (иначе будут ошибки)
       useWatchOrderNumber({ state, props, store });
       useWatchCancelOrderDateTime({ state });
@@ -589,7 +586,7 @@
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
       });
       useWatchOrderPatterns({
-        state, store, props, initialOrderText, submitted,
+        state, store, props, initialOrderText,
         getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
       });
       useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });

@@ -38,6 +38,7 @@ export const personal = {
   },
 
   actions: {
+    ...common.actions,
     ...getCurrSectorShift.actions,
   },
 };

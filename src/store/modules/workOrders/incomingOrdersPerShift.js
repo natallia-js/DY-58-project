@@ -80,7 +80,7 @@ export const incomingOrdersPerShift = {
      */
     async loadIncomingOrdersPerShift(context) {
       if (!context.getters.canUserGetIncomingOrdersPerShift) {
-        const errMessage = 'У вас нет права получать количество входящий распоряжений за смену либо вы не на дежурстве';
+        const errMessage = 'У вас нет права получать количество входящий документов за смену либо вы не на дежурстве';
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -92,7 +92,7 @@ export const incomingOrdersPerShift = {
           datetime: context.getters.getLastTakeDutyTime,
         });
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: false, message: null });
-        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Получена информация о количестве входящих распоряжений за смену' });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Получена информация о количестве входящих документов за смену' });
         context.commit(SET_INCOMING_ORDERS_PER_SHIFT, responseData);
 
       } catch (error) {

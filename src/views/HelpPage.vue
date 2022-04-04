@@ -10,6 +10,8 @@
     <div class="p-col">
       <h2 class="p-text-center p-mt-3 p-mb-2" id="user-manual-start">Руководство пользователя</h2>
       <system-enter-description />
+      <main-menu-description />
+      <footer-description />
       <main-page-description />
       <work-poligon-page-description />
       <personal-page-description />
@@ -27,6 +29,7 @@
   import { MainMenuItemsKeys } from '@/store/modules/mainMenuItems';
   import { SET_ACTIVE_MAIN_MENU_ITEM } from '@/store/mutation-types';
   import SystemEnterDescription from '@/components/Help/SystemEnterDescription';
+  import MainMenuDescription from '@/components/Help/MainMenuDescription';
   import MainPageDescription from '@/components/Help/MainPageDescription';
   import WorkPoligonPageDescription from '@/components/Help/WorkPoligonPageDescription';
   import PersonalPageDescription from '@/components/Help/PersonalPageDescription';
@@ -34,12 +37,14 @@
   import CreateOrderPageDescription from '@/components/Help/CreateOrderPageDescription';
   import OrderPatternsPageDescription from '@/components/Help/OrderPatternsPageDescription';
   import SystemExitDescription from '@/components/Help/SystemExitDescription';
+  import FooterDescription from '@/components/Help/FooterDescription';
 
   export default {
     name: 'dy58-help-page',
 
     components: {
       SystemEnterDescription,
+      MainMenuDescription,
       MainPageDescription,
       WorkPoligonPageDescription,
       PersonalPageDescription,
@@ -47,6 +52,7 @@
       CreateOrderPageDescription,
       OrderPatternsPageDescription,
       SystemExitDescription,
+      FooterDescription,
     },
 
     setup() {
@@ -61,12 +67,22 @@
           items: [],
         },
         {
+          label: 'Главное меню системы',
+          url: '#main-menu-description',
+          items: [],
+        },
+        {
+          label: 'Нижний колонтитул',
+          url: '#footer-description',
+          items: [],
+        },
+        {
           label: 'Главная страница',
           url: '#main-page-description',
           items: [
             { label: 'Боковое меню', url: '#side-menu-description' },
             { label: 'Таблица "Входящие уведомления"', url: '#incoming-notifications-description' },
-            { label: 'Таблица "Документы в работе"', url: '#orders-in-work-description' },
+            { label: 'Секция "Документы в работе"', url: '#orders-in-work-description' },
           ],
         },
         {
@@ -90,7 +106,7 @@
           items: [],
         },
         {
-          label: 'Страница "Шаблоны распоряжений"',
+          label: 'Страница "Шаблоны документов"',
           url: '#patterns-page-description',
           items: [],
         },

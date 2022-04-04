@@ -10,6 +10,7 @@ export const useDispatchOrder = (inputVals) => {
     state,
     props,
     store,
+    submitted,
     dspSectorsToSendOrderNoDupl,
     dncSectorsToSendOrderNoDupl,
     ecdSectorsToSendOrderNoDupl,
@@ -103,6 +104,8 @@ export const useDispatchOrder = (inputVals) => {
           return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
         })() : null,
     });
+    // Отменяем проверку правильности введенных данных для всех полей (до следующего издания распоряжения)
+    submitted.value = false;
   };
 
   return {

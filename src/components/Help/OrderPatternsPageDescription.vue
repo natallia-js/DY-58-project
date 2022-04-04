@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 id="order-patterns-page-description" class="dy58-help-contents-item">Страница "Шаблоны распоряжений"</h3>
+    <h3 id="order-patterns-page-description" class="dy58-help-contents-item">Страница "Шаблоны документов"</h3>
   </div>
 </template>
 

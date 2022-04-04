@@ -2,8 +2,9 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import { getUserFIOString } from './transformUserData';
 import {
-  CLEAR_SHIFT_FOR_SENDING_DATA,
   SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
+  SET_OTHER_SHIFT_FOR_SENDING_DATA,
+  CLEAR_SHIFT_FOR_SENDING_DATA,
   SET_USER_CHOSEN_STATUS,
   DEL_CURR_SECTORS_SHIFT,
 } from '@/store/mutation-types';
@@ -166,6 +167,27 @@ export const common = {
 
     [DEL_CURR_SECTORS_SHIFT] (state) {
       state.sectorPersonal = {};
+    },
+  },
+
+  actions: {
+    /**
+     * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
+     */
+    applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
+      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+        poligonsType: WORK_POLIGON_TYPES.STATION,
+        sectorsGetOrderStatuses: dspToSend,
+      });
+      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+        poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
+        sectorsGetOrderStatuses: dncToSend,
+      });
+      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+        poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
+        sectorsGetOrderStatuses: ecdToSend,
+      });
+      context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend);
     },
   },
 }

@@ -169,7 +169,7 @@ export const reportOnOrdersDelivery = {
         });
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка при сообщении серверу о доставке входящих документов');
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 

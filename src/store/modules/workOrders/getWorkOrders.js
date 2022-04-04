@@ -380,10 +380,9 @@ export const getWorkOrders = {
      * распоряжениях у сервера.
      */
     [SET_START_DATE_TO_GET_DATA_NO_CHECK] (state, date) {
-      if (!(date instanceof Date)) {
-        return;
+      if (date instanceof Date) {
+        state.startDateToGetData = date;
       }
-      state.startDateToGetData = date;
     },
 
     [CLEAR_LOADING_WORK_ORDERS_RESULT] (state) {

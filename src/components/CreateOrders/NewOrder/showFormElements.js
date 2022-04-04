@@ -13,8 +13,7 @@ import {
  */
  export const useShowFormElements = (inputVals) => {
   const {
-    state, props, isECD, getOrderDraftsOfGivenType,
-    showOnGIDOptions, defineOrderTimeSpanOptions,
+    state, props, isECD, getOrderDraftsOfGivenType, showOnGIDOptions, defineOrderTimeSpanOptions,
   } = inputVals;
 
   // показывать ли список черновиков документов текущего типа (если false, то соответствующий элемент

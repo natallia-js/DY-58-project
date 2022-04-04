@@ -1,9 +1,4 @@
 import { computed } from 'vue';
-import {
-  SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
-  SET_OTHER_SHIFT_FOR_SENDING_DATA,
-} from '@/store/mutation-types';
-import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
 
 /**
@@ -31,19 +26,12 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     if (!currentOrderDraft.value) {
       return;
     }
-    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-      poligonsType: WORK_POLIGON_TYPES.STATION,
-      sectorsGetOrderStatuses: currentOrderDraft.value.dspToSend,
+    store.dispatch('applyPersonalForSendingData', {
+      dspToSend: currentOrderDraft.value.dspToSend,
+      dncToSend: currentOrderDraft.value.dncToSend,
+      ecdToSend: currentOrderDraft.value.ecdToSend,
+      otherToSend: currentOrderDraft.value.otherToSend,
     });
-    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-      poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
-      sectorsGetOrderStatuses: currentOrderDraft.value.dncToSend,
-    });
-    store.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-      poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
-      sectorsGetOrderStatuses: currentOrderDraft.value.ecdToSend,
-    });
-    store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, currentOrderDraft.value.otherToSend);
   };
 
   // Способствует отображению на полях формы данных из черновика распоряжения

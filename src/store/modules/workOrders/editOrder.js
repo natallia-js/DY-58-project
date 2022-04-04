@@ -198,7 +198,7 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
       const { type, id, timeSpan, orderText } = params;
 
       if (!context.getters.canUserDispatchOrders) {
-        const errMessage = 'У вас нет права на редактирование распоряжений';
+        const errMessage = 'У вас нет права на редактирование документов';
         context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;

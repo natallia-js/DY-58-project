@@ -396,7 +396,7 @@ export const orderPatterns = {
      */
     async loadOrderPatterns(context) {
       if (!context.getters.canUserGetOrderPatterns) {
-        const errMessage = 'У вас нет права просматривать шаблоны распоряжений';
+        const errMessage = 'У вас нет права просматривать шаблоны документов';
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -418,11 +418,11 @@ export const orderPatterns = {
           getChildPatterns: true,
         });
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: false, message: null });
-        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены шаблоны распоряжений' });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружены шаблоны документов' });
         context.commit(SET_NEW_ORDER_PATTERNS_ARRAY, responseData);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о шаблонах распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о шаблонах документов');
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
@@ -436,7 +436,7 @@ export const orderPatterns = {
      */
     async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        const errMessage = 'У вас нет права редактировать наименования категорий распоряжений';
+        const errMessage = 'У вас нет права редактировать наименования категорий документов';
         context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, { error: true, message: errMessage, newTitle: null });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -458,7 +458,7 @@ export const orderPatterns = {
           newTitle: responseData.newTitle,
         });
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования наименования категории распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования наименования категории документов');
         context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, { error: true, message: errMessage, newTitle: null });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
@@ -472,7 +472,7 @@ export const orderPatterns = {
      */
     async delOrderPattern(context, orderPatternId) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        const errMessage = 'У вас нет права удалять шаблоны распоряжений';
+        const errMessage = 'У вас нет права удалять шаблоны документов';
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -486,7 +486,7 @@ export const orderPatterns = {
         context.commit(DEL_ORDER_PATTERN, orderPatternId);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления шаблона распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка удаления шаблона документа');
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
@@ -500,7 +500,7 @@ export const orderPatterns = {
      */
     async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        const errMessage = 'У вас нет права на редактирование шаблонов распоряжений';
+        const errMessage = 'У вас нет права на редактирование шаблонов документов';
         context.commit(SET_MOD_ORDER_PATTERN_RESULT, { error: true, message: errMessage, orderPattern: null });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -520,7 +520,7 @@ export const orderPatterns = {
           newOrderPattern: responseData.orderPattern,
         });
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования шаблона распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка редактирования шаблона документа');
         context.commit(SET_MOD_ORDER_PATTERN_RESULT, { error: true, message: errMessage, orderPattern: null });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 
@@ -534,7 +534,7 @@ export const orderPatterns = {
      */
     async createOrderPattern(context, props) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
-        const errMessage = 'У вас нет права на создание шаблонов распоряжений';
+        const errMessage = 'У вас нет права на создание шаблонов документов';
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -568,7 +568,7 @@ export const orderPatterns = {
         context.commit(ADD_NEW_ORDER_PATERN, responseData.orderPattern);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка создания шаблона распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка создания шаблона документа');
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 

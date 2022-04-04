@@ -163,9 +163,7 @@
       const parentOrderText = computed(() => props.parentOrderText);
 
       // позволяет заполнить поля издаваемого распоряжения на основании полей выбранного предшествующего
-      // (родительского) распоряжения; возвращает логическое значение: true - если было найдено хотя бы
-      // одно родительское поле, на основании которого было заполнено соответствующее дочернее поле,
-      // false - если ни одно из дочерних полей на основании родительских полей заполнено не было
+      // (родительского) распоряжения
       const fillChildOrderTextFieldsWithParentOrderTextFields = () => {
         if (!parentOrderText.value || !parentOrderText.value.orderText || (parentOrderText.value.orderTextSource !== ORDER_TEXT_SOURCE.pattern) ||
             (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) || !state.orderPatternText) {
@@ -179,7 +177,6 @@
         if (!parentChildRelations) {
           return;
         }
-        let atLeastOneChange = false;
         state.orderPatternText.forEach((element, index) => {
           const parentMatch = parentChildRelations.patternsParamsMatchingTable.find((match) => match.childParamId === element._id);
           if (parentMatch) {
@@ -187,25 +184,21 @@
             const parentParamValue = parentParam ? parentParam.value : null;
             if (parentParamValue !== state.orderPatternText[index].value) {
               state.orderPatternText[index].value = parentParamValue;
-              atLeastOneChange = true;
             }
           }
         });
-        return atLeastOneChange;
       };
 
       // при изменении объекта родительского/дочернего распоряжения принимаем меры по заполнению
       // полей текста объекта дочернего распоряжения
       watch([parentOrderText, () => state.orderPatternText], () => {
-        const atLeastOneChildFieldValueChanged = fillChildOrderTextFieldsWithParentOrderTextFields();
-        if (atLeastOneChildFieldValueChanged) {
-          emit('input', {
-            orderTextSource: state.orderTextSource,
-            patternId: getSelectedOrderPattern.value._id,
-            orderTitle: getSelectedOrderPattern.value.title,
-            orderText: state.orderPatternText,
-          });
-        }
+        fillChildOrderTextFieldsWithParentOrderTextFields();
+        emit('input', {
+          orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
+          orderTitle: getSelectedOrderPattern.value.title,
+          orderText: state.orderPatternText,
+        });
       });
 
       const getCurrentOrderText = computed(() => state.orderText);

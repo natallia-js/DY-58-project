@@ -208,6 +208,8 @@ export function formOrderText(props) {
  * распоряжение. Рассматривается подтверждение как оригиналов, так и копий распоряжения.
  * Напротив каждой ФИО указывается дата подтверждения.
  * Если информации о ФИО нет, то указывается место, где распоряжение принято (место, куда оно направлялось).
+ * Данные по станциям группируются, т.е. для каждой записи из dspToSend ищутся соответствующие записи в
+ * stationWorkPlacesToSend и отображаются все рядом.
  * @param {Array} dncToSend - массив объектов - ДНЦ, которым отправлялось распоряжение
  * @param {Array} dspToSend - массив объектов - ДСП, которым отправлялось распоряжение
  * @param {Array} ecdToSend - массив объектов - ЭЦД, которым отправлялось распоряжение
@@ -244,8 +246,16 @@ export function formAcceptorsStrings(props) {
     formAcceptorStrings(dncToSend, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.DNC));
   }
 
-  if (dspToSend && dspToSend.length) {
-    formAcceptorStrings(dspToSend, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.DSP));
+  // По станциям ситуация такова: адресаты здесь не только те ДСП, которых указывают при создании документа, но и
+  // работники всех рабочих мест станций, которым адресуется документ (Операторы при ДСП). Поэтому логика такова:
+  // объединяем оба массива, сортируем по id станции (чтобы данные по одной станции были рядом); если один из
+  // массивов пуст, то используем другой для формирования результирующей подстроки.
+  const stationsReceivers = (dspToSend && stationWorkPlacesToSend)
+    ? dspToSend.concat(stationWorkPlacesToSend)
+    : dspToSend || stationWorkPlacesToSend || [];
+  stationsReceivers.sort((a, b) => a.id - b.id);
+  if (stationsReceivers.length) {
+    formAcceptorStrings(stationsReceivers, formSubstring(ORDERS_RECEIVERS_DEFAULT_POSTS.DSP));
   }
 
   if (ecdToSend && ecdToSend.length) {
@@ -254,10 +264,6 @@ export function formAcceptorsStrings(props) {
 
   if (otherToSend && otherToSend.length) {
     formAcceptorStrings(otherToSend, formSubstring(null));
-  }
-
-  if (stationWorkPlacesToSend && stationWorkPlacesToSend.length) {
-    formAcceptorStrings(stationWorkPlacesToSend, formSubstring(null));
   }
 
   let res = isTYOrder ? SPECIAL_TELECONTROL_ORDER_SIGN : '';

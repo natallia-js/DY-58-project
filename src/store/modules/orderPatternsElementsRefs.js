@@ -85,7 +85,7 @@ export const orderPatternsElementsRefs = {
      */
     async loadOrderPatternsElementsRefs(context) {
       if (!context.getters.canUserGetOrderPatterns) {
-        const errMessage = 'У вас нат права получать информацию о смысловых значениях элементов шаблонов распоряжений';
+        const errMessage = 'У вас нат права получать информацию о смысловых значениях элементов шаблонов документов';
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -95,11 +95,11 @@ export const orderPatternsElementsRefs = {
       try {
         const responseData = await getOrderPatternsElementsRefs();
         context.commit(SET_LOADING_REFS_RESULT, { error: false, message: null });
-        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о смысловых значениях элементов шаблонов распоряжений' });
+        context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о смысловых значениях элементов шаблонов документов' });
         context.commit(SET_ORDER_PATTERNS_ELEMENTS_REFS, responseData);
 
       } catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов распоряжений');
+        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подгрузки информации о смысловых значениях элементов шаблонов документов');
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
 

@@ -277,6 +277,24 @@
 
         let elementToChangeValue;
         let tmp;
+
+        const getAppSendOriginalStatusFromBoolean = (boolStatus) => {
+          return boolStatus ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
+        };
+
+        const applyPersonalForSendingData = (tmp) => {
+          this.$store.dispatch('applyPersonalForSendingData', {
+            dspToSend: !tmp.dspToSend ? [] : tmp.dspToSend.map((el) =>
+              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),
+            dncToSend: !tmp.dncToSend ? [] : tmp.dncToSend.map((el) =>
+              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),
+            ecdToSend: !tmp.ecdToSend ? [] : tmp.ecdToSend.map((el) =>
+              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),
+            otherToSend: !tmp.otherToSend ? [] : tmp.otherToSend.map((el) =>
+              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),
+          });
+        };
+
         switch (event.elementType) {
           // Изменилось значение в поле даты-времени
           case OrderPatternElementType.DATETIME:
@@ -344,28 +362,36 @@
                 break;
               // Изменился номер действующего приказа ЭЦД
               case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER:
-                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего приказа ЭЦД
-                elementToChangeValue = this.value.find((el) =>
-                  (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_ORDER_DATE) ||
-                  (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_ORDER_DATETIME));
-                // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
-                if (elementToChangeValue) {
-                  tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ECD_ORDER, event.value);
-                  if (tmp) {
+                // Из выбранного приказа ЭЦД извлекаем всех его получателей и устанавливаем в
+                // качестве получателей создаваемого документа
+                tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ECD_ORDER, event.value);
+                if (tmp) {
+                  applyPersonalForSendingData(tmp);
+                  // Ищем в текущем шаблоне документа (создаваемого) поле с датой (либо датой-временем)
+                  // издания действующего приказа ЭЦД
+                  elementToChangeValue = this.value.find((el) =>
+                    (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_ORDER_DATE) ||
+                    (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_ORDER_DATETIME));
+                  // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
+                  if (elementToChangeValue) {
                     elementToChangeValue.value = tmp.createDateTime;
                   }
                 }
                 break;
               // Изменился номер действующего запрещения ЭЦД
-              case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_PROHIBITION:
-                // Ищем в шаблоне поле с датой (либо датой-временем) издания действующего запрещения ЭЦД
-                elementToChangeValue = this.value.find((el) =>
-                  (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_PROHIBITION_DATE) ||
-                  (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_PROHIBITION_DATETIME));
-                // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
-                if (elementToChangeValue) {
-                  tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ECD_PROHIBITION, event.value);
-                  if (tmp) {
+              case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER:
+                // Из выбранного запрещения ЭЦД извлекаем всех его получателей и устанавливаем в
+                // качестве получателей создаваемого документа
+                tmp = this.getActiveOrderByNumber(ORDER_PATTERN_TYPES.ECD_PROHIBITION, event.value);
+                if (tmp) {
+                  applyPersonalForSendingData(tmp);
+                  // Ищем в текущем шаблоне документа (создаваемого) поле с датой (либо датой-временем)
+                  // издания действующего запрещения ЭЦД
+                  elementToChangeValue = this.value.find((el) =>
+                    (el.type === OrderPatternElementType.DATE && el.ref === FILLED_ORDER_DATE_ELEMENTS.ECD_PROHIBITION_DATE) ||
+                    (el.type === OrderPatternElementType.DATETIME && el.ref === FILLED_ORDER_DATETIME_ELEMENTS.ECD_PROHIBITION_DATETIME));
+                  // Если элемент с датой (либо датой-временем) издания присутствует, то необходимо изменить его значение
+                  if (elementToChangeValue) {
                     elementToChangeValue.value = tmp.createDateTime;
                   }
                 }
