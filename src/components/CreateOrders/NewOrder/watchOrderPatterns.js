@@ -3,7 +3,7 @@ import { watch } from 'vue';
 
 export const useWatchOrderPatterns = (inputVals) => {
   const {
-    state, store, props, initialOrderText,
+    state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
     getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
   } = inputVals;
 
@@ -20,8 +20,8 @@ export const useWatchOrderPatterns = (inputVals) => {
    * При смене шаблона распоряжения извлекает отметки об особой категории поезда,
    * закрепленные за данным шаблоном.
    * Кроме того, определяем необходимость заполнения полей места и времени действия распоряжения.
-   * А также сбрасываем (если установлен) флаг проверки заполнения элементов формы создания
-   * распоряжения.
+   * А также устанавливаем для шаблонного распоряжения поле номера связанного распоряжения (при его
+   * наличии и наличии связанного распоряжения).
    */
   watch(() => state.orderText.patternId, (newVal) => {
     if (!newVal) {
@@ -31,5 +31,6 @@ export const useWatchOrderPatterns = (inputVals) => {
     }
     state.showOnGID = getUserDutyToDefineOrderPlace.value;
     state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+    setRelatedOrderNumberInOrderText();
   });
 };

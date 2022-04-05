@@ -10,7 +10,48 @@ import {
 } from '@/constants/orderPatterns';
 
 
-export const useSetAndAnalyzeOrderText = ({ state, store }) => {
+export const useSetAndAnalyzeOrderText = ({ state, store, relatedOrderObject /*, showConnectedOrderFields*/ }) => {
+
+  const changeOrderPatternElementValue = (elRef, value) => {
+    if (state.orderText && state.orderText.patternId && state.orderText.orderText) {
+      const textElement = state.orderText.orderText.find((el) => el.ref === elRef);
+      if (textElement && textElement.value !== value) {
+        textElement.value = value;
+      }
+    }
+  };
+
+  /**
+   * Позволяет установить в тексте шаблонного распоряжения номер выбранного для связи документа
+   * (если в тексте есть специально предназначенный для этого элемент).
+   */
+  const setRelatedOrderNumberInOrderText = () => {
+    if (relatedOrderObject.value && state.orderText.patternId) {
+      const orderNumber = relatedOrderObject.value.number;
+      switch (relatedOrderObject.value.type) {
+        case ORDER_PATTERN_TYPES.ORDER:
+          if (relatedOrderObject.value.specialTrainCategories &&
+            relatedOrderObject.value.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN)) {
+            changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER, orderNumber);
+          } else {
+            changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER, orderNumber);
+          }
+          break;
+        case ORDER_PATTERN_TYPES.REQUEST:
+          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER, orderNumber);
+          break;
+        case ORDER_PATTERN_TYPES.NOTIFICATION:
+          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER, orderNumber);
+          break;
+        case ORDER_PATTERN_TYPES.ECD_ORDER:
+          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER, orderNumber);
+          break;
+        case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
+          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER, orderNumber);
+          break;
+      }
+    }
+  };
 
   const addStationToSendOrder = (stationId) => {
     if (!state.dspSectorsToSendOrder.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId)) {
@@ -58,8 +99,8 @@ export const useSetAndAnalyzeOrderText = ({ state, store }) => {
       }
       // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
       // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-      // распоряжения. Но только при условии что ранее не было установлено место действия при анализе
-      // поля станции!
+      // распоряжения. Но только при условии что ранее (см. выше) не было установлено место действия
+      // при анализе поля станции!
       if (!placeSet) {
         const blockElement = event.orderText.find((el) =>
           [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
@@ -103,8 +144,8 @@ export const useSetAndAnalyzeOrderText = ({ state, store }) => {
       }
       // Если в тексте распоряжения встречается поле даты-времени 'Дата-время открытия перегона',
       // то значение этого поля (первого встречающегося) устанавливается в качестве даты-времени
-      // начала и окончания действия распоряжения. Но только при условии что ранее не было установлено
-      // время действия!
+      // начала и окончания действия распоряжения. Но только при условии что ранее (см. выше)
+      // не было установлено время действия!
       if (!timeSet) {
         const openBlockDateTimeElement = event.orderText.find((el) =>
           el.ref === FILLED_ORDER_DATETIME_ELEMENTS.OPEN_BLOCK_DATETIME);
@@ -121,25 +162,60 @@ export const useSetAndAnalyzeOrderText = ({ state, store }) => {
         }
       }
     }
-    // Если в тексте распоряжения встречается поле 'Номер действующего распоряжения на закрытие перегона',
-    // то значение этого поля (первого встречающегося) используется для определения связанного распоряжения
-    const closeSpanActiveOrderNumberElement = event.orderText.find((el) =>
-      el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER);
-    if (closeSpanActiveOrderNumberElement) {
-      if (closeSpanActiveOrderNumberElement.value) {
-        const orderObject = store.getters.getActiveOrderByNumber(
-          ORDER_PATTERN_TYPES.ORDER,
-          closeSpanActiveOrderNumberElement.value,
-          SPECIAL_CLOSE_BLOCK_ORDER_SIGN
-        );
-        state.prevRelatedOrder = orderObject ? { [orderObject._id]: true } : null;
-      }
-      // else нет, т.к. поле со связанным распоряжением видимо пользователю, он может вручную там
-      // все поправить
-    }
+
+    // Пока нижеследующий кусок кода не использую из-за "накладности":
+/*
+    // Если на форме присутствуют элементы, предназначенные для указания связанного распоряжения (ранее
+    // изданного), то при изменении ряда значений элементов шаблона распоряжения можно автоматически
+    // выбрать связанное распоряжение
+    if (showConnectedOrderFields.value) {
+      const trySetRelatedOrder = (orderTextElement, orderType, specialRelatedOrderSign = null) => {
+        if (orderTextElement) {
+          if (orderTextElement.value) {
+            const orderObject = store.getters.getActiveOrderByNumber(
+              orderType, orderTextElement.value, specialRelatedOrderSign
+            );
+            state.prevRelatedOrder = orderObject ? { [orderObject._id]: true } : null;
+          }
+          // else здесь НЕТ, т.к. поле со связанным распоряжением видимо пользователю, он может вручную там
+          // все поправить
+        }
+      };
+      // Если в тексте распоряжения встречается поле 'Номер действующего распоряжения на закрытие перегона',
+      // то значение этого поля (первого встречающегося) используется для определения связанного распоряжения
+      let activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN);
+
+      // То же самое, только для поля 'Номер действующего распоряжения'
+      activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.ORDER);
+
+      // То же самое, только для поля 'Номер действующей заявки'
+      activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.REQUEST);
+
+      // То же самое, только для поля 'Номер действующего уведомления'
+      activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.NOTIFICATION);
+
+      // То же самое, только для поля 'Номер действующего приказа ЭЦД'
+      activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.ECD_ORDER);
+
+      // То же самое, только для поля 'Номер действующего запрещения ЭЦД'
+      activeOrderNumberElement = event.orderText.find((el) =>
+        el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER);
+      trySetRelatedOrder(activeOrderNumberElement, ORDER_PATTERN_TYPES.ECD_PROHIBITION);
+    }*/
   };
 
   return {
+    setRelatedOrderNumberInOrderText,
     setOrderText,
   };
 };

@@ -362,6 +362,7 @@
   import { useNewOrderValidationRules } from './validationRules';
   import { useOrderDraft } from './orderDraft';
   import { useSetAndAnalyzeOrderText } from './setAndAnalyzeOrderText';
+  import { useWatchRelatedOrder } from './watchRelatedOrder';
 
   export default {
     name: 'dy58-new-order-block',
@@ -525,7 +526,7 @@
       const {
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
-      } = useRelatedOrder({ state, store, props, emit });
+      } = useRelatedOrder({ state, store });
 
       const {
         getSectorStationOrBlockTitleById,
@@ -585,13 +586,19 @@
         state, store, props, emit, currentOrderDraft,
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
       });
-      useWatchOrderPatterns({
-        state, store, props, initialOrderText,
-        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
-      });
       useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
 
-      const { setOrderText } = useSetAndAnalyzeOrderText({ state, store });
+      const {
+        setRelatedOrderNumberInOrderText,
+        setOrderText,
+      } = useSetAndAnalyzeOrderText({ state, store, relatedOrderObject /*, showConnectedOrderFields */ });
+
+      useWatchOrderPatterns({
+        state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
+        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
+      });
+
+      useWatchRelatedOrder({ props, emit, relatedOrderObject, setRelatedOrderNumberInOrderText });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.

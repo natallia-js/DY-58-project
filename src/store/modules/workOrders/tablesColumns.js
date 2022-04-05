@@ -157,7 +157,7 @@ export const tablesColumns = {
         { field: WorkMessTblColumnsTitles.expander, title: '', width: '5%', align: 'center' },
         { field: WorkMessTblColumnsTitles.state, title: 'Действия', width: '5%', align: 'center' },
         { field: WorkMessTblColumnsTitles.orderNum, title: 'Номер', width: '5%', 'align': 'left' },
-        { field: WorkMessTblColumnsTitles.timeSpan, title: 'Время действия документа', width: '19%', align: 'left' },
+        { field: WorkMessTblColumnsTitles.timeSpan, title: 'Время действия в системе', width: '19%', align: 'left' },
         { field: WorkMessTblColumnsTitles.extendedOrderTitle, title: 'Наименование', width: '44%', align: 'left' },
         { field: WorkMessTblColumnsTitles.orderReceiveStatus, title: 'Статус', width: '22%', align: 'left' },
       ];
