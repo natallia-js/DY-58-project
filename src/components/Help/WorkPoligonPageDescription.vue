@@ -1,11 +1,24 @@
 <template>
   <div>
     <h3 id="work-poligon-page-description" class="dy58-help-contents-item">Страница "Рабочий полигон"</h3>
+    <p class="dy58-help-paragraph">
+      На данной странице представлена та информация о структуре рабочего полигона и его взаимосвязях с иными
+      рабочими полигонами, которая подгружается в момент входа пользователя в систему. Именно эта информация
+      используется ДУ-58 для формирования списков адресатов издаваемых документов, выпадающих списков с
+      перечнями станций / перегонов / ... в шаблонах документов.
+    </p>
+    <to-help-start-block />
   </div>
 </template>
 
 <script>
+  import ToHelpStartBlock from './ToHelpStartBlock';
+
   export default {
     name: 'dy58-work-poligon-page-description',
+
+    components: {
+      ToHelpStartBlock,
+    },
   }
 </script>
