@@ -262,16 +262,20 @@
 
     <div class="p-col-6">
       <p class="p-mb-2">
-        <span class="p-text-bold p-mr-2">Кому адресовать</span>
-        <Button
-          icon="pi pi-times"
-          class="p-button-secondary p-button-sm dy58-order-action-button p-m-1"
-          v-tooltip="'Очистить список'"
-          @click="handleClearOrderAddressesLists"
-        />
+        <label for="addressees" :class="{'p-error': submitted && v$.allAddressees.$invalid}">
+          <span class="p-text-bold p-mr-2">
+            <span v-if="!isECD" class="dy58-required-field">*</span> Кому адресовать
+          </span>
+          <Button
+            icon="pi pi-times"
+            class="p-button-secondary p-button-sm dy58-order-action-button p-m-1"
+            v-tooltip="'Очистить список'"
+            @click="handleClearOrderAddressesLists"
+          />
+        </label>
       </p>
       <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
-      <Accordion :multiple="true">
+      <Accordion id="addressees" :multiple="true">
         <AccordionTab v-if="orderType !== ORDER_PATTERN_TYPES.NOTIFICATION">
           <template #header>
             <span><b>ДСП:</b> <span v-html="selectedDSPString"></span></span>

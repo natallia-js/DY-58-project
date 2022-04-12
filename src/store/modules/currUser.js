@@ -259,6 +259,22 @@ export const currUser = {
       }
       return true;
     },
+    /**
+     * Возвращает время сдачи дежурства по умолчанию.
+     */
+    getDefaultPassDutyTime(_state, getters) {
+      if (!getters.isUserOnDuty) {
+        return null; // случай, когда пользователь не на дежурстве
+      }
+      const today = new Date();
+      const nowHour = today.getHours();
+      if (nowHour > 0 && nowHour < 12) {
+        // утренняя сдача дежурства
+        return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0, 0, 0);
+      }
+      // вечерняя сдача дежурства
+      return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 20, 0, 0, 0);
+    }
   },
 
   mutations: {

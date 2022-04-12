@@ -54,7 +54,7 @@ import {
     (state.specialTrainCategories && (
       state.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) ||
       state.specialTrainCategories.includes(SPECIAL_OPEN_BLOCK_ORDER_SIGN)
-    )) ? showOnGIDOptions[1] : state.showOnGID);
+    )) ? showOnGIDOptions[1] : showOnGIDOptions[0]);
 
   // Отображать ли флаг выбора временного промежутка действия распоряжения.
   // Для всех распоряжений ДНЦ эти поля будут отсутствовать. Если их необходимо будет включить,
@@ -74,11 +74,12 @@ import {
   // Так, для распоряжений ДНЦ о закрытии и открытии перегона поля времени
   // действия распоряжения не будут отображаться, но их заполнение обязательно!
   // Данные будут браться из текста распоряжения.
+  // Для остальных типов распоряжений заполнение поля времени действия не является обязательным.
   const getUserDutyToDefineOrderTimeSpan = computed(() =>
     (state.specialTrainCategories && (
       state.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) ||
       state.specialTrainCategories.includes(SPECIAL_OPEN_BLOCK_ORDER_SIGN)
-    )) ? defineOrderTimeSpanOptions[1] : state.defineOrderTimeSpan);
+    )) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0]);
 
   return {
     showOrderDrafts,

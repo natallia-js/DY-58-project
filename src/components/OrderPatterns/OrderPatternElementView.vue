@@ -83,7 +83,10 @@
 
   <!-- Элемент "Таблица "Поезд ДР" -->
 
-  <div v-else-if="element.type === OrderPatternElementType.DR_TRAIN_TABLE" class="dy58-dy-train-table-block">
+  <div
+    v-else-if="element.type === OrderPatternElementType.DR_TRAIN_TABLE"
+    class="dy58-dy-train-table-block"
+  >
     <Toast />
     <ConfirmPopup group="confirmDelAllTableRecords"></ConfirmPopup>
     <div class="p-mb-1">
@@ -132,7 +135,8 @@
       :value="drTableDataToDisplay"
       v-model:selection="selectedDRTableRecord" selectionMode="single"
       dataKey="orderNumber"
-      class="p-datatable-responsive p-datatable-gridlines p-datatable-sm z-depth-1"
+      class="p-datatable-gridlines p-datatable-sm z-depth-1"
+      :scrollable="true" scrollHeight="400px"
       @contextmenu="handleTrainTableRightClick($event)"
     >
       <Column
@@ -293,7 +297,7 @@
             // Дата-время сдачи дежурства одним человеком = дата-время принятия дежурства другим человеком
             case FILLED_ORDER_DATETIME_ELEMENTS.TAKE_DUTY_DATETIME:
             case FILLED_ORDER_DATETIME_ELEMENTS.PASS_DUTY_DATETIME:
-              return store.getters.getLastTakeDutyTime;
+              return store.getters.getDefaultPassDutyTime;
             default:
               return props.element.value;
           }

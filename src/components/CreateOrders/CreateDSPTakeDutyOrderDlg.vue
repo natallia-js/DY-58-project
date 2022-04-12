@@ -415,7 +415,7 @@
           } else {
             state.passDutyUserPostFIO = null;
           }
-          state.passDutyDateTime = store.getters.getLastTakeDutyTime;
+          state.passDutyDateTime = store.getters.getDefaultPassDutyTime;
 
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
           const prevValue = getCurrStationWorkPlaceUserObjectFromOrderText(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_FIO, existingDSPTakeDutyOrder.value.orderText.orderText);
@@ -425,7 +425,7 @@
           state.passDutyDateTime = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_DATETIME, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.passDutyUserPostFIO = null;
-          state.passDutyDateTime = '';
+          state.passDutyDateTime = store.getters.getDefaultPassDutyTime;
         }
       };
 

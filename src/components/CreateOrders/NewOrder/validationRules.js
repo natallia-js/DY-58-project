@@ -70,6 +70,11 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     return value && !value.null;
   };
 
+  const atLeastOneAddresseeIsRequired = () => {
+    return (state.dncSectorsToSendOrder.length > 0) || (state.dspSectorsToSendOrder.length > 0) ||
+      (state.ecdSectorsToSendOrder.length > 0) || (state.otherSectorsToSendOrder.length > 0);
+  };
+
   const rules = reactive({
     number: { required, isNumber },
     createDateTime: { required, isValidDateTime },
@@ -80,6 +85,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     dspSectorsToSendOrder: { minLength: minLength(1) },
     ecdSectorsToSendOrder: { minLength: minLength(1) },
     otherSectorsToSendOrder: { minLength: minLength(1) },
+    allAddressees: {},
   });
 
   switch (props.orderType) {
@@ -87,6 +93,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       rules.orderPlace = state.showOnGID.value ? placeRules : {};
       rules.timeSpan = state.defineOrderTimeSpan.value ? timeSpanRules : {};
       rules.prevRelatedOrder = {};
+      rules.allAddressees = { atLeastOneAddresseeIsRequired };
       break;
     case ORDER_PATTERN_TYPES.ECD_ORDER:
     case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
@@ -102,6 +109,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     case ORDER_PATTERN_TYPES.NOTIFICATION:
       rules.prevRelatedOrder = {};
       rules.createdOnBehalfOf = {};
+      rules.allAddressees = { atLeastOneAddresseeIsRequired };
       break;
     default:
       break;

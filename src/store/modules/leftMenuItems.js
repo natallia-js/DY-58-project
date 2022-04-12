@@ -7,7 +7,11 @@ import {
   SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG,
 } from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
+import {
+  ORDER_PATTERN_TYPES,
+  SPECIAL_CIRCULAR_ORDER_SIGN,
+  SPECIAL_DR_ORDER_SIGN,
+} from '@/constants/orderPatterns';
 
 
 export const leftMenuItems = {
@@ -91,6 +95,20 @@ export const leftMenuItems = {
               params: {
                 orderType: ORDER_PATTERN_TYPES.ORDER,
                 orderPatternSpecialSign: SPECIAL_CIRCULAR_ORDER_SIGN,
+                prevOrderId: null,
+                orderDraftId: null,
+              },
+            });
+          },
+        }, {
+          label: 'Распоряжение о поезде ДР',
+          imgURL: require('@/assets/img/newDROrder.png'),
+          command: () => {
+            router.push({
+              name: 'NewOrderPage',
+              params: {
+                orderType: ORDER_PATTERN_TYPES.ORDER,
+                orderPatternSpecialSign: SPECIAL_DR_ORDER_SIGN,
                 prevOrderId: null,
                 orderDraftId: null,
               },

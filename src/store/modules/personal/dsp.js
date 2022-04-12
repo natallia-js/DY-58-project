@@ -164,13 +164,16 @@ export const dsp = {
      * Оригинал/Копия/Ничего всем станциям. Если текущий полигон управления - станция,
      * то она не участвует в переборе.
      */
-    [SET_GET_ORDER_STATUS_TO_ALL_DSP] (state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_DSP] (state, { getOrderStatus, trainSectorTitle }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         let arr = state.sectorPersonal.sectorStationsShift;
         if (store.getters.userWorkPoligonIsStation) {
           arr = arr.filter((item) => String(item.stationId) !== String(store.getters.getUserWorkPoligonData.St_ID));
         }
         arr.forEach((el) => {
+          if (trainSectorTitle && el.trainSectorTitle !== trainSectorTitle) {
+            return;
+          }
           if (el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
@@ -195,15 +198,17 @@ export const dsp = {
      * Оригинал/Копия/Ничего всем оставшимся станциям. Если текущий полигон управления - станция,
      * то она не участвует в переборе.
      */
-    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP] (state, { getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP] (state, { getOrderStatus, trainSectorTitle }) {
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         let arr = state.sectorPersonal.sectorStationsShift;
         if (store.getters.userWorkPoligonIsStation) {
           arr = arr.filter((item) => String(item.stationId) !== String(store.getters.getUserWorkPoligonData.St_ID));
         }
-        arr.forEach(el => {
-          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend &&
-              el.sendOriginal !== getOrderStatus) {
+        arr.forEach((el) => {
+          if (trainSectorTitle && el.trainSectorTitle !== trainSectorTitle) {
+            return;
+          }
+          if (el.sendOriginal === CurrShiftGetOrderStatus.doNotSend && el.sendOriginal !== getOrderStatus) {
             el.sendOriginal = getOrderStatus;
           }
         });

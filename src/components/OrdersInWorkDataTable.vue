@@ -50,10 +50,13 @@
               }]"
             >
               <span v-if="col.field === getWorkMessTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
-                {{ slotProps.data[col.field] }}<br/><span class="dy58-order-copy">копия</span>
+                {{ slotProps.data[col.field] }}
+                {{ slotProps.data.chainMembersNumber > 1 ? '*' : '' }}
+                <br/><span class="dy58-order-copy">копия</span>
               </span>
               <span v-else>
                 {{ slotProps.data[col.field] }}
+                {{ slotProps.data.chainMembersNumber > 1 ? '*' : '' }}
               </span>
             </div>
             <!-- столбцы данных -->

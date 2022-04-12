@@ -201,10 +201,8 @@
         });
       });
 
-      const getCurrentOrderText = computed(() => state.orderText);
-
       // реагируем на ввод текста бесшаблонного распоряжения
-      watch(getCurrentOrderText, (newVal) =>
+      watch(() => state.orderText, (newVal) =>
         emit('input', {
           orderTextSource: state.orderTextSource,
           patternId: null,

@@ -84,12 +84,15 @@ export const SPECIAL_OPEN_BLOCK_ORDER_SIGN = 'ОП';
 // отметка особой категории распоряжений ДНЦ "Циркулярное распоряжение"
 export const SPECIAL_CIRCULAR_ORDER_SIGN = 'ЦР';
 
+// отметка особой категории распоряжений ДНЦ о поезде, идущем ДР (диспетчерским расписанием)
+export const SPECIAL_DR_ORDER_SIGN = 'ДР';
+
 // Поначалу данное поле нужно было для обозначения особых категорий поездов, к которым
 // имеет отношение распоряжение. Но в дальнейшем значение данного поля стало шире, и
 // теперь оно применяется для проставления отметок об особых видах распоряжений.
 // Все отметки, кроме ТУ, ЗП, ОП, ЦР, имеют отношение к поездам.
 export const SPECIAL_TRAIN_CATEGORIES = [
-  'ВМ', 'Д', 'ДР', SPECIAL_CLOSE_BLOCK_ORDER_SIGN, 'Н', SPECIAL_OPEN_BLOCK_ORDER_SIGN,
+  'ВМ', 'Д', SPECIAL_DR_ORDER_SIGN, SPECIAL_CLOSE_BLOCK_ORDER_SIGN, 'Н', SPECIAL_OPEN_BLOCK_ORDER_SIGN,
   'ПВ', 'ПВПД', 'ПД', 'Т', 'ТД', SPECIAL_TELECONTROL_ORDER_SIGN, SPECIAL_CIRCULAR_ORDER_SIGN,
 ];
 

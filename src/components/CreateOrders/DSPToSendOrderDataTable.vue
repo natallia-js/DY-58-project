@@ -94,8 +94,8 @@
       </Column>
 
       <template #groupheader="slotProps">
-        <div class="dy58-table-content-cell-class dy58-shift-tbl-group-header"
-        >
+        <div class="dy58-table-content-cell-class dy58-shift-tbl-group-header">
+          <Checkbox name="trainSectorCheckbox" :value="slotProps.data.sector" v-model="selectedTrainSectors" />
           {{ slotProps.data.sector }}
         </div>
       </template>
@@ -159,6 +159,7 @@
         selectedPerson: null,
         sectorId: -1,
         sectorName: null,
+        selectedTrainSectors: [],
       };
     },
 
@@ -208,8 +209,16 @@
 
     methods: {
       sendOriginalToAll() {
-        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
-          { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+        const selectedTrainSectors = this.selectedTrainSectors.length ? Object.values(this.selectedTrainSectors) : [];
+        if (selectedTrainSectors.length === 0) {
+          this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+            { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal, trainSectorTitle: null });
+        } else {
+          selectedTrainSectors.forEach((trainSectorTitle) => {
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+              { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal, trainSectorTitle });
+          });
+        }
       },
 
       sendOriginalToDefinitStation(stationId) {
@@ -218,13 +227,29 @@
       },
 
       sendOriginalToAllLeft() {
-        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
-          { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+        const selectedTrainSectors = this.selectedTrainSectors.length ? Object.values(this.selectedTrainSectors) : [];
+        if (selectedTrainSectors.length === 0) {
+          this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+            { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal, trainSectorTitle: null });
+        } else {
+          selectedTrainSectors.forEach((trainSectorTitle) => {
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+              { getOrderStatus: CurrShiftGetOrderStatus.sendOriginal, trainSectorTitle });
+          });
+        }
       },
 
       sendCopyToAll() {
-        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
-          { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
+        const selectedTrainSectors = this.selectedTrainSectors.length ? Object.values(this.selectedTrainSectors) : [];
+        if (selectedTrainSectors.length === 0) {
+          this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+            { getOrderStatus: CurrShiftGetOrderStatus.sendCopy, trainSectorTitle: null });
+        } else {
+          selectedTrainSectors.forEach((trainSectorTitle) => {
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+              { getOrderStatus: CurrShiftGetOrderStatus.sendCopy, trainSectorTitle });
+          });
+        }
       },
 
       sendCopyToDefinitStation(stationId) {
@@ -233,13 +258,29 @@
       },
 
       sendCopyToAllLeft() {
-        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
-          { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
+        const selectedTrainSectors = this.selectedTrainSectors.length ? Object.values(this.selectedTrainSectors) : [];
+        if (selectedTrainSectors.length === 0) {
+          this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+            { getOrderStatus: CurrShiftGetOrderStatus.sendCopy, trainSectorTitle: null });
+        } else {
+          selectedTrainSectors.forEach((trainSectorTitle) => {
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
+              { getOrderStatus: CurrShiftGetOrderStatus.sendCopy, trainSectorTitle });
+          });
+        }
       },
 
       doNotSendToAll() {
-        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
-          { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+        const selectedTrainSectors = this.selectedTrainSectors.length ? Object.values(this.selectedTrainSectors) : [];
+        if (selectedTrainSectors.length === 0) {
+          this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+            { getOrderStatus: CurrShiftGetOrderStatus.doNotSend, trainSectorTitle: null });
+        } else {
+          selectedTrainSectors.forEach((trainSectorTitle) => {
+            this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP,
+              { getOrderStatus: CurrShiftGetOrderStatus.doNotSend, trainSectorTitle });
+          });
+        }
       },
 
       doNotSendToDefinitStation(stationId) {

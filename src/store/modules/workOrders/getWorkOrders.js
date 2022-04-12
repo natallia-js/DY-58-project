@@ -356,7 +356,13 @@ export const getWorkOrders = {
   mutations: {
     /**
      * Позволяет определить дату-время начала временного интервала запроса информации о рабочих
-     * распоряжениях у сервера.
+     * распоряжениях у сервера:
+     * 1) если пользователь вошел в систему с 7:30 до 19:30, то время начала запроса информации полагается
+     *    равным 7:00 этого же дня;
+     * 2) если пользователь вошел в систему ранее 7:30, то время начала запроса информации устанавливается
+     *    равным 19:00 предыдущего дня;
+     * 3) если пользователь вошел в систему после 19:30, то время начала запроса информации устанавливается
+     *    равным 19:00 текущего дня.
      */
     [SET_START_DATE_TO_GET_DATA] (state, userLoginDateTime) {
       if (!userLoginDateTime) {
@@ -372,6 +378,9 @@ export const getWorkOrders = {
         state.startDateToGetData = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 7, 0, 0, 0);
       } else {
         state.startDateToGetData = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 19, 0, 0, 0);
+        if (userLoginDateTime < checkDate1) {
+          state.startDateToGetData.setDate(state.startDateToGetData.getDate() - 1);
+        }
       }
     },
 

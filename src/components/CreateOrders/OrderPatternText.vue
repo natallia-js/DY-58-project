@@ -12,8 +12,8 @@
         v-else
         class="p-mr-2 p-mb-2"
         :style="{
-          width: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ?
-            getElementSizesCorrespondence[patternElement.size] : '100%',
+          width: [getOrderPatternElementTypes.TEXT_AREA, getOrderPatternElementTypes.DR_TRAIN_TABLE].includes(patternElement.type) ?
+            '100%' : getElementSizesCorrespondence[patternElement.size],
           display: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? 'inline-block': 'block',
         }"
       >
