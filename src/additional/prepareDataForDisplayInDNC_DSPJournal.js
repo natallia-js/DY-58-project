@@ -107,13 +107,13 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       sendOriginal: Boolean(
         orderDispatchedOnThisWorkPoligon(order) ||
         (
-          order.workPoligon === WORK_POLIGON_TYPES.STATION && order.dspToSend && userWorkPoligon &&
+          userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.STATION && order.dspToSend &&
           order.dspToSend.find((el) =>
             String(el.id) === String(userWorkPoligon.code) &&
             sendOriginal(el.sendOriginal))
         ) ||
         (
-          order.workPoligon === WORK_POLIGON_TYPES.DNC_SECTOR && order.dncToSend && userWorkPoligon &&
+          userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR && order.dncToSend &&
           order.dncToSend.find((el) =>
             String(el.id) === String(userWorkPoligon.code) &&
             sendOriginal(el.sendOriginal))

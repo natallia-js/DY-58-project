@@ -148,18 +148,19 @@ export const leftMenuItems = {
     },
 
     getECDLeftMenuItems(_state, getters) {
-      return [
-        ...getters.getCommonLeftMenuItemsAtTheBeginning,
-        {
+      const items = [...getters.getCommonLeftMenuItemsAtTheBeginning];
+      if (getters.canUserDispatchOrders) {
+        items.push({
           label: 'Черновики документов',
           info: getters.getAllOrderDraftsNumber,
           imgURL: require('@/assets/img/drafts.png'),
           command: (event) => {
             store.commit(SHOW_ORDER_DRAFTS, { show: !store.getters.orderDraftsPanelVisible, target: event });
           },
-        },
-        ...getters.getCommonLeftMenuItemsAtTheEnd,
-      ];
+        });
+      }
+      items.push(...getters.getCommonLeftMenuItemsAtTheEnd);
+      return items;
     },
 
     getLeftMenuItems(_state, getters) {

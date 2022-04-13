@@ -144,7 +144,7 @@
         :field="col.field"
         :header="col.header"
         :key="col.field"
-        :style="{ width: col.width }"
+        :style="{ minWidth: col.width }"
       >
       </Column>
     </DataTable>
