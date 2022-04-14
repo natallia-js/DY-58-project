@@ -79,6 +79,9 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     number: { required, isNumber },
     createDateTime: { required, isValidDateTime },
     createDateTimeString: { required },
+    prevRelatedOrder: {},
+    orderPlace: {},
+    timeSpan: {},
     orderText: orderTextRules,
     // ! <minLength: minLength(1)> означает, что минимальная длина массива должна быть равна нулю
     dncSectorsToSendOrder: { minLength: minLength(1) },
@@ -86,20 +89,14 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     ecdSectorsToSendOrder: { minLength: minLength(1) },
     otherSectorsToSendOrder: { minLength: minLength(1) },
     allAddressees: {},
+    createdOnBehalfOf: {},
   });
 
   switch (props.orderType) {
     case ORDER_PATTERN_TYPES.ORDER:
       rules.orderPlace = state.showOnGID.value ? placeRules : {};
       rules.timeSpan = state.defineOrderTimeSpan.value ? timeSpanRules : {};
-      rules.prevRelatedOrder = {};
       rules.allAddressees = { atLeastOneAddresseeIsRequired };
-      break;
-    case ORDER_PATTERN_TYPES.ECD_ORDER:
-    case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
-      rules.orderPlace = {};
-      rules.timeSpan = {};
-      rules.prevRelatedOrder = {};
       break;
     case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
       rules.prevRelatedOrder = { prevRelatedOrderIsRequired };
@@ -107,8 +104,6 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
     case ORDER_PATTERN_TYPES.NOTIFICATION:
-      rules.prevRelatedOrder = {};
-      rules.createdOnBehalfOf = {};
       rules.allAddressees = { atLeastOneAddresseeIsRequired };
       break;
     default:

@@ -11,7 +11,25 @@ import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CIRCULAR_ORDER_SIGN,
   SPECIAL_DR_ORDER_SIGN,
+  SPECIAL_VM_ORDER_SIGN,
+  SPECIAL_N_ORDER_SIGN,
+  SPECIAL_PV_ORDER_SIGN,
+  SPECIAL_PD_ORDER_SIGN,
+  SPECIAL_PVPD_ORDER_SIGN,
 } from '@/constants/orderPatterns';
+
+
+const createOrderOfGivenType = (orderSign) => {
+  router.push({
+    name: 'NewOrderPage',
+    params: {
+      orderType: ORDER_PATTERN_TYPES.ORDER,
+      orderPatternSpecialSign: orderSign,
+      prevOrderId: null,
+      orderDraftId: null,
+    },
+  });
+};
 
 
 export const leftMenuItems = {
@@ -89,59 +107,42 @@ export const leftMenuItems = {
         items.push({
           label: 'Циркулярное распоряжение',
           imgURL: require('@/assets/img/takePassDuty.png'),
-          command: () => {
-            router.push({
-              name: 'NewOrderPage',
-              params: {
-                orderType: ORDER_PATTERN_TYPES.ORDER,
-                orderPatternSpecialSign: SPECIAL_CIRCULAR_ORDER_SIGN,
-                prevOrderId: null,
-                orderDraftId: null,
-              },
-            });
-          },
-        }, {
-          label: 'Распоряжение о поезде ДР',
-          imgURL: require('@/assets/img/newDROrder.png'),
-          command: () => {
-            router.push({
-              name: 'NewOrderPage',
-              params: {
-                orderType: ORDER_PATTERN_TYPES.ORDER,
-                orderPatternSpecialSign: SPECIAL_DR_ORDER_SIGN,
-                prevOrderId: null,
-                orderDraftId: null,
-              },
-            });
-          },
+          command: () => createOrderOfGivenType(SPECIAL_CIRCULAR_ORDER_SIGN),
         });
       }
       return [
         ...items,
         ...getters.getCommonLeftMenuItemsAtTheBeginning,
         {
-          label: 'Поезда ДР',
-          itemClass: 'dy58-subitem',
-          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ДР']),
+          label: 'Создать распоряжение о поезде ДР',
+          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_DR_ORDER_SIGN]),
           imgURL: require('@/assets/img/DR.png'),
+          command: () => createOrderOfGivenType(SPECIAL_DR_ORDER_SIGN),
         },
         {
-          label: 'Поезда Н',
-          itemClass: 'dy58-subitem',
-          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['Н']),
+          label: 'Создать распоряжение о поезде Н',
+          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_N_ORDER_SIGN]),
           imgURL: require('@/assets/img/N.png'),
+          command: () => createOrderOfGivenType(SPECIAL_N_ORDER_SIGN),
         },
         {
-          label: 'Поезда ПВ, ПД, ПВПД',
-          itemClass: 'dy58-subitem',
-          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ПВ', 'ПД', 'ПВПД']),
+          label: 'Создать распоряжение о поезде ПВ / ПД / ПВПД',
+          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([
+            SPECIAL_PV_ORDER_SIGN, SPECIAL_PD_ORDER_SIGN, SPECIAL_PVPD_ORDER_SIGN]),
           imgURL: require('@/assets/img/P.png'),
+          command: () => {
+            return [
+              { label: SPECIAL_PV_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PV_ORDER_SIGN) },
+              { label: SPECIAL_PD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PD_ORDER_SIGN) },
+              { label: SPECIAL_PVPD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PVPD_ORDER_SIGN) },
+            ];
+          },
         },
         {
-          label: 'Поезда ВМ',
-          itemClass: 'dy58-subitem',
-          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories(['ВМ']),
+          label: 'Создать распоряжение о поезде ВМ',
+          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_VM_ORDER_SIGN]),
           imgURL: require('@/assets/img/VM.png'),
+          command: () => createOrderOfGivenType(SPECIAL_VM_ORDER_SIGN),
         },
         ...getters.getCommonLeftMenuItemsAtTheEnd,
       ];

@@ -103,12 +103,12 @@
         },
         {
           label: 'Страница "Создать"',
-          url: '#create-page-description',
+          url: '#create-order-page-description',
           items: [],
         },
         {
           label: 'Страница "Шаблоны документов"',
-          url: '#patterns-page-description',
+          url: '#order-patterns-page-description',
           items: [],
         },
         {

@@ -2,9 +2,33 @@
   margin: 0.75rem 0;
 }
 
-.dy58-help-paragraph {
-  text-indent: 25px;
+@mixin help-text-style() {
   line-height: 1.5;
+}
+
+@mixin help-paragraph-style() {
+  text-indent: 25px;
+}
+
+.dy58-help-text {
+  @include help-text-style();
+}
+
+.dy58-help-paragraph {
+  @include help-text-style();
+  @include help-paragraph-style();
+}
+
+.dy58-help-list {
+  @include help-text-style();
+  @include help-paragraph-style();
+  counter-reset: li;
+  list-style: none;
+}
+
+.dy58-help-list span:before {
+  content: counter(li)".";
+  counter-increment: li;
 }
 
 .dy58-help-img-style {
@@ -24,4 +48,10 @@
 .dy58-to-help-start-block {
   margin-top: 0.5rem;
   text-align: right;
+}
+
+.dy58-help-definition {
+  margin: 1rem 2rem;
+  padding: 0.5rem;
+  background-color: rgb(255, 254, 183);
 }

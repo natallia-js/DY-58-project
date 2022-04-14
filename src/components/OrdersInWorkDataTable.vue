@@ -18,6 +18,7 @@
       dataKey="id"
       :scrollable="true" scrollHeight="700px"
       v-model:expandedRows="state.expandedRows"
+      @row-dblclick="expandOrCollapseRow"
     >
       <Column
         :expander="true"
@@ -541,6 +542,18 @@
         store.commit(CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER);
       });
 
+      const getWorkingOrders = computed(() => store.getters.getWorkingOrders);
+
+      const expandOrCollapseRow = (event) => {
+        const isRowExpanded = state.expandedRows.find((el) => el.id === event.data.id);
+        console.log(isRowExpanded,state.expandedRows)
+        if (!isRowExpanded) {
+          state.expandedRows.push(getWorkingOrders.value.find((_el,index) => index === event.index));
+        } else {
+          state.expandedRows = state.expandedRows.filter((el) => el.id !== event.data.id);
+        }
+      };
+
       return {
         state,
         isDNC: computed(() => store.getters.isDNC),
@@ -549,7 +562,7 @@
         isRevisor: computed(() => store.getters.isRevisor),
         WORK_POLIGON_TYPES,
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
-        getWorkingOrders: computed(() => store.getters.getWorkingOrders),
+        getWorkingOrders,//: computed(() => store.getters.getWorkingOrders),
         getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
         getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
         getWorkMessReceiversTblColumns: computed(() => store.getters.getWorkMessReceiversTblColumns),
@@ -578,6 +591,7 @@
         getOrderUnconfirmedStationWorkPoligons,
         deleteOrderStationWorkPoligon,
         isOrderDispatchedOnCurrentWorkPoligon,
+        expandOrCollapseRow,
       };
     },
   }

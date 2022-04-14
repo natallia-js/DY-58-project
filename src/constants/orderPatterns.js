@@ -87,13 +87,35 @@ export const SPECIAL_CIRCULAR_ORDER_SIGN = 'ЦР';
 // отметка особой категории распоряжений ДНЦ о поезде, идущем ДР (диспетчерским расписанием)
 export const SPECIAL_DR_ORDER_SIGN = 'ДР';
 
+// отметка особой категории распоряжений ДНЦ о поезде со взрывчатыми материалами
+export const SPECIAL_VM_ORDER_SIGN = 'ВМ';
+// отметка особой категории распоряжений ДНЦ о негабаритном поезде
+export const SPECIAL_N_ORDER_SIGN = 'Н';
+// отметка особой категории распоряжений ДНЦ о поезде повышенного веса
+export const SPECIAL_PV_ORDER_SIGN = 'ПВ';
+// отметка особой категории распоряжений ДНЦ о поезде повышенной длины
+export const SPECIAL_PD_ORDER_SIGN = 'ПД';
+// отметка особой категории распоряжений ДНЦ о поезде повышенного веса и повышенной длины
+export const SPECIAL_PVPD_ORDER_SIGN = 'ПВПД';
+
 // Поначалу данное поле нужно было для обозначения особых категорий поездов, к которым
 // имеет отношение распоряжение. Но в дальнейшем значение данного поля стало шире, и
 // теперь оно применяется для проставления отметок об особых видах распоряжений.
 // Все отметки, кроме ТУ, ЗП, ОП, ЦР, имеют отношение к поездам.
 export const SPECIAL_TRAIN_CATEGORIES = [
-  'ВМ', 'Д', SPECIAL_DR_ORDER_SIGN, SPECIAL_CLOSE_BLOCK_ORDER_SIGN, 'Н', SPECIAL_OPEN_BLOCK_ORDER_SIGN,
-  'ПВ', 'ПВПД', 'ПД', 'Т', 'ТД', SPECIAL_TELECONTROL_ORDER_SIGN, SPECIAL_CIRCULAR_ORDER_SIGN,
+  SPECIAL_VM_ORDER_SIGN,
+  'Д',
+  SPECIAL_DR_ORDER_SIGN,
+  SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  SPECIAL_N_ORDER_SIGN,
+  SPECIAL_OPEN_BLOCK_ORDER_SIGN,
+  SPECIAL_PV_ORDER_SIGN,
+  SPECIAL_PVPD_ORDER_SIGN,
+  SPECIAL_PD_ORDER_SIGN,
+  'Т',
+  'ТД',
+  SPECIAL_TELECONTROL_ORDER_SIGN,
+  SPECIAL_CIRCULAR_ORDER_SIGN,
 ];
 
 // отметка особой категории распоряжений о принятии дежурства ДСП

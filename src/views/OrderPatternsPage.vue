@@ -6,7 +6,7 @@
     <TabPanel header="Шаблоны по категориям">
       <order-patterns-tree />
     </TabPanel>
-    <TabPanel v-if="!isDNC && !isECD" header="Создать шаблон">
+    <TabPanel v-if="!isDNC && !isECD && !isDSP_or_DSPoperator" header="Создать шаблон">
       <create-order-pattern />
     </TabPanel>
   </TabView>
@@ -37,6 +37,7 @@
       return {
         isDNC: computed(() => store.getters.isDNC),
         isECD: computed(() => store.getters.isECD),
+        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         orderPatternsLoadedSuccessfully : computed(() => store.getters.orderPatternsLoadedSuccessfully),
         getErrorLoadingPatterns: computed(() => store.getters.getErrorLoadingPatterns),
       };

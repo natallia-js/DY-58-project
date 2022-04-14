@@ -17,6 +17,8 @@
     <AppSettings />
   </OverlayPanel>
 
+  <ContextMenu ref="submenu" :model="submenuItems" />
+
   <OverlayPanel
     ref="orderDraftsOverlayPanel"
     appendTo="body"
@@ -71,7 +73,7 @@
           style="display:block;width:100%;"
           class="dy58-command-item"
           v-tooltip="item.label"
-          @click="item.command"
+          @click="handlePerformItemCommand($event, item)"
         />
       </div>
       <img v-else :src="item.imgURL" v-tooltip="item.label" class="dy58-img-style" />
@@ -109,6 +111,9 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
       const appSettingsOverlayPanel = ref();
       const orderDraftsOverlayPanel = ref();
+      // Для отображения подпунктов меню создания распоряжения о поезде ПВ / ПД / ПВПД
+      const submenuItems = ref([]);
+      const submenu = ref();
 
       const state = reactive({
         selectedOrderDraft: null,
@@ -184,16 +189,33 @@
         store.commit(SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG, false);
       };
 
+      /**
+       * Обработка нажатия на кнопку бокового меню.
+       */
+      const handlePerformItemCommand = (event, item) => {
+        if (item && item.command) {
+          const result = item.command(event);
+          // Если массив, то необходимо отобразить подпункты меню
+          if (result instanceof Array) {
+            submenuItems.value = [...result];
+            submenu.value.show(event);
+          }
+        }
+      };
+
       return {
         state,
+        submenuItems,
         getLeftMenuItems: computed(() => store.getters.getLeftMenuItems),
         showCreateDSPTakeDutyOrderDlg: computed(() => store.getters.showCreateDSPTakeDutyOrderDlg),
         getIdsOfDraftsBeingDeleted: computed(() => store.getters.getIdsOfDraftsBeingDeleted),
         appSettingsOverlayPanel,
         orderDraftsOverlayPanel,
+        submenu,
         handleEditOrderDraft,
         handleDelOrderDraft,
         hidePreviewNewDSPCreateTakeDutyOrderDlg,
+        handlePerformItemCommand,
       };
     },
   };
@@ -254,5 +276,14 @@
   :deep(.p-listbox-item) {
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
+  }
+
+  .dy58-submenu-item {
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .dy58-submenu-item:hover {
+    transform: scale(1.2);
   }
 </style>
