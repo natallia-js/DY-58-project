@@ -38,6 +38,7 @@
             v-if="[
               getECDJournalTblColumnsTitles.orderContent,
               getECDJournalTblColumnsTitles.toWhom,
+              getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
           ></div>

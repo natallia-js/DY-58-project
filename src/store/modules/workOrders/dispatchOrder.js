@@ -13,6 +13,7 @@ import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
 import { getWorkOrderObject } from './getWorkOrderObject';
+import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
 
 
 /**
@@ -124,6 +125,8 @@ import { getWorkOrderObject } from './getWorkOrderObject';
         const responseData = await dispatchOrderToServer(
           {
             type,
+            // тип распоряжения, под которым хранить информацию о номере последнего изданного документа
+            orderNumSaveType: !context.getters.isECD ? type : ALL_ORDERS_TYPE_ECD,
             number,
             createDateTime: createDateTime.toISOString(),
             place,
@@ -174,7 +177,7 @@ import { getWorkOrderObject } from './getWorkOrderObject';
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_LAST_ORDERS_NUMBER, {
-          ordersType: responseData.order.type,
+          ordersType: !context.getters.isECD ? responseData.order.type : ALL_ORDERS_TYPE_ECD,
           number: +responseData.order.number,
           createDateTime: new Date(responseData.order.createDateTime),
         });

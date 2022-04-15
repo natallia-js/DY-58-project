@@ -4,6 +4,7 @@
 
 @mixin help-text-style() {
   line-height: 1.5;
+  margin-bottom: 3px;
 }
 
 @mixin help-paragraph-style() {

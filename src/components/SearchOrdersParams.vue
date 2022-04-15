@@ -56,7 +56,7 @@
               @click="handlePrint"
             />
             <Button
-              v-if="displayVerifyFunctions === true"
+              v-if="displayVerifyFunctions && canUserCreateCheckOrders"
               icon="pi pi-check-square"
               label="Создать запись о проверке"
               @click="handleCheck"
@@ -69,7 +69,8 @@
 </template>
 
 <script>
-  import { onMounted, reactive, ref } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
+  import { useStore } from 'vuex';
   import { required  } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
   import FindOrdersTimeSpanChooser from '@/components/FindOrdersTimeSpanChooser';
@@ -97,6 +98,8 @@
     },
 
     setup(_props, { emit }) {
+      const store = useStore();
+
       const state = reactive({
         timeSpan: {
           start: null,
@@ -172,6 +175,7 @@
       return {
         state,
         INCLUDE_DOCUMENTS_CRITERIA,
+        canUserCreateCheckOrders: computed(() => store.getters.canUserCreateCheckOrders),
         v$,
         submitted,
         handleSubmit,

@@ -129,7 +129,7 @@
       const v$ = useVuelidate(rules, state, { $scope: false });
 
       // Для оперативного отображения даты-времени издания распоряжения при создании нового распоряжения
-      useWatchCurrentDateTime(state, props, store);
+      useWatchCurrentDateTime({ state, props, store });
 
       watch(() => props.showDlg, (newVal) => state.dlgVisible = newVal);
 

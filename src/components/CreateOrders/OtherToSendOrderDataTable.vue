@@ -13,6 +13,7 @@
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       v-model:selection="selectedUser" selectionMode="single" dataKey="_id"
+      breakpoint="200px"
     >
       <template #header>
         <div class="p-mb-2">

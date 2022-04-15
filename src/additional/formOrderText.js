@@ -113,7 +113,7 @@ export function formOrderText(props) {
       case OrderPatternElementType.DR_TRAIN_TABLE:
         substring = '<div><table style="width:100%;text-align:left;border-collapse:collapse;"><thead><tr>';
         DRTrainTableColumns.forEach((column) => {
-          substring += `<th style="width:${column.width};font-weight:400;border:1px solid grey;padding:0 2px;">${column.header}</th>`;
+          substring += `<th style="width:${column.width};font-weight:bold;border:1px solid grey;padding:0 2px;">${column.header}</th>`;
         });
         substring += '</tr></thead><tbody>';
         if (currVal.value instanceof Array) {
@@ -187,16 +187,18 @@ export function formOrderText(props) {
     formToStrings(otherToSend, formSubstring(null));
   }
 
+  const emptyLineBeforeText = insertEmptyLineBeforeText ? '<p style="line-height:50%"><br/></p>' : '';
+
   if (asString) {
-    let addresses = originalToString ? `<b>Кому:</b> ${originalToString}<br/>` : '';
+    let addresses = originalToString ? `Кому: ${originalToString}<br/>` : '';
     if (copyToString) {
-      addresses += `<b>Копия:</b> ${copyToString}<br/>`;
+      addresses += `Копия: ${copyToString}<br/>`;
     }
-    return `${addresses}${insertEmptyLineBeforeText ? '<p style="line-height:50%"><br/></p>' : ''}${orderText}`;
+    return `${addresses}${emptyLineBeforeText}<b>${orderText}</b>`;
   }
 
   return {
-    text: orderText,
+    text: `${emptyLineBeforeText}<b>${orderText}</b>`,
     toWhom: originalToString || '',
     toWhomCopy: copyToString ? `Копия: ${copyToString}` : '',
   };

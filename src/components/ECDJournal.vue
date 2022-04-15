@@ -75,6 +75,7 @@
             v-if="[
               getECDJournalTblColumnsTitles.orderContent,
               getECDJournalTblColumnsTitles.toWhom,
+              getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
             :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`"

@@ -13,8 +13,7 @@ import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBl
 
 
 /**
- * Для работы с параметрами последних изданных распоряжений (в частности,
- * с номерами распоряжений)
+ * Для работы с параметрами последних изданных распоряжений (в частности, с номерами распоряжений).
  */
 export const lastOrdersParams = {
   state: {
@@ -24,10 +23,6 @@ export const lastOrdersParams = {
   },
 
   getters: {
-    getLastOrdersParams: (state) => {
-      return state.params;
-    },
-
     getLoadingLastOrdersParamsStatus: (state) => {
       return state.loadingParams;
     },

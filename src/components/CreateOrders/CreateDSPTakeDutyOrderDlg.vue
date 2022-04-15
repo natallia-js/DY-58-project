@@ -602,7 +602,7 @@
       });
 
       // Для оперативного отображения даты-времени издания распоряжения при создании нового распоряжения
-      useWatchCurrentDateTime(state, props, store);
+      useWatchCurrentDateTime({ state, props, store });
 
       const newNumberOverlayPanel = ref();
       const changeOrderNumber = (event) => {

@@ -12,9 +12,10 @@
       <label for="new-number" :class="{'p-error':wrongOrderNumber,'p-mb-2':true}">
         <span class="p-text-bold"><span class="dy58-required-field">*</span> Новый номер</span>
       </label>
-      <InputText
+      <InputNumber
         id="new-number"
         v-model="state.number"
+        inputStyle="width:100%"
         :class="{'p-invalid':wrongOrderNumber}"
       />
     </div>
@@ -24,7 +25,7 @@
     <span class="p-text-bold"><span class="dy58-required-field">*</span> Номер</span>
   </label>
   <div class="p-inputgroup">
-    <InputText
+    <InputNumber
       id="number"
       disabled
       v-model="state.number"

@@ -69,6 +69,7 @@ export const reportServerOnOrdersDelivery = async ({ orderIds, deliverDateTime }
 export const dispatchOrderToServer = async (params) => {
   const {
     type,
+    orderNumSaveType,
     number,
     createDateTime,
     place,
@@ -89,6 +90,7 @@ export const dispatchOrderToServer = async (params) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
     {
       type,
+      orderNumSaveType,
       number,
       createDateTime,
       place,

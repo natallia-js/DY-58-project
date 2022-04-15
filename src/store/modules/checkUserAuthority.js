@@ -70,6 +70,13 @@ export const checkUserAuthority = {
     },
 
     /**
+     * Создавать записи о проверке Журнала может лишь принявший дежурство ревизор.
+     */
+    canUserCreateCheckOrders(_state, getters) {
+      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty;
+    },
+
+    /**
      * Создавать записи о проверке распоряжений может лишь ревизор, принявший дежурство.
      */
     canUserDispatchControlRecords(_state, getters) {

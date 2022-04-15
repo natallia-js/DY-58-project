@@ -1,6 +1,10 @@
 <template>
   <div v-if="errMessage">{{ errMessage }}</div>
   <div v-else>
+    <CreateRevisorCheckRecordDlg
+      :showDlg="showCreateRevisorCheckRecordDlg"
+      @close="hideCreateRevisorCheckRecordDlg"
+    />
     <div v-if="selectedRecords && selectedRecords.length">
       Выделено: {{ selectedRecords.length }}
       {{ selectedRecords.length > 4 ? 'записей' : (selectedRecords.length > 1) ? 'записи' : 'запись' }}
@@ -68,11 +72,15 @@
               getDNC_DSPJournalTblColumnsTitles.orderContent,
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
+            :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`"
           ></div>
-          <div v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
+          <div
+            v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
+            :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`"
+          >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
-          <div v-else>
+          <div v-else :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -139,11 +147,19 @@
   import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
   import { FilterMatchMode } from 'primevue/api';
   import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
+  import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
+  import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
   const DEF_ROWS_PER_PAGE = 10;
 
   export default {
     name: 'dy58-dnc-dsp-journal',
+
+    components: {
+      CreateRevisorCheckRecordDlg,
+    },
+
+    emits: ['finishedCreatingCheckRecord'],
 
     props: {
       searchParams: {
@@ -152,9 +168,12 @@
       printParams: {
         type: Object,
       },
+      checkDocs: {
+        type: Boolean,
+      },
     },
 
-    setup(props) {
+    setup(props, { emit }) {
       const store = useStore();
       const router = useRouter();
 
@@ -173,6 +192,7 @@
         [getDNC_DSPJournalTblColumnsTitles.value.orderAcceptor]: { value: null, matchMode: FilterMatchMode.CONTAINS },
       });
       const selectedRecords = ref();
+      const showCreateRevisorCheckRecordDlg = ref(false);
 
       const getOrderSeqNumber = (index) => {
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
@@ -282,8 +302,20 @@
         });
       });
 
+      watch(() => props.checkDocs, (newVal) => {
+        if (newVal === true) {
+          showCreateRevisorCheckRecordDlg.value = true;
+        }
+      });
+
+      const hideCreateRevisorCheckRecordDlg = () => {
+        showCreateRevisorCheckRecordDlg.value = false;
+        emit('finishedCreatingCheckRecord');
+      };
+
       return {
         data,
+        ORDER_PATTERN_TYPES,
         totalRecords,
         selectedRecords,
         filters,
@@ -295,6 +327,8 @@
         onPage,
         onSort,
         onFilter,
+        showCreateRevisorCheckRecordDlg,
+        hideCreateRevisorCheckRecordDlg,
       };
     },
   }

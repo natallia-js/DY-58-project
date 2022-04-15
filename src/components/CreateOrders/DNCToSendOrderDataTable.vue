@@ -14,6 +14,7 @@
       :value="getDNCShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
+      breakpoint="200px"
     >
       <Column v-for="col of getCurrSectorsShiftTblColumns"
         :field="col.field"

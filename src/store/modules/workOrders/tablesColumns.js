@@ -202,10 +202,10 @@ export const tablesColumns = {
     getECDJournalTblColumns() {
       return [
         { field: ECDJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '4%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '8%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.toWhom, title: 'Кому', width: '15%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения приказа', width: '8%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.number, title: 'Номер приказа', width: '5%', align: 'left', },
-        { field: ECDJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '36%', align: 'left', },
+        { field: ECDJournalTblColumnsTitles.orderContent, title: 'Содержание приказа', width: '29%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '15%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderSender, title: 'Кто передал Фамилия И.О.', width: '9%', align: 'left', },
         { field: ECDJournalTblColumnsTitles.orderNotificationDateTime, title: 'Время уведомления', width: '9%', align: 'left', },

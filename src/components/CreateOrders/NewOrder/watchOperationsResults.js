@@ -1,8 +1,11 @@
 import { watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 
 export const useWatchOperationsResults = (inputVals) => {
-  const { state, store, props, showSuccessMessage, showErrMessage } = inputVals;
+  const { /*state,*/ store, props, showSuccessMessage, showErrMessage } = inputVals;
+
+  const router = useRouter();
 
   /**
    * Для отображения результата операции издания распоряжения (отправки на сервер).
@@ -13,10 +16,16 @@ export const useWatchOperationsResults = (inputVals) => {
     }
     if (!newVal.error) {
       showSuccessMessage(newVal.message);
-      if (state.prevRelatedOrder) {
+      // Закомментированный ниже код при переходе на главную страницу не нужен, но если вдруг понадобится
+      // не переходить на главную страницу, а оставаться на странице издания распоряжения, то важно не забыть
+      // его раскомментировать
+      /*if (state.prevRelatedOrder) {
         state.prevRelatedOrder = null;
         state.cancelOrderDateTime = null;
-      }
+      }*/
+      // Даем пользователю просмотреть сообщение об успешном издании документа прежде чем переходить
+      // на главную страницу
+      setTimeout(() => router.push({ name: 'MainPage' }), 1000);
     } else {
       showErrMessage(newVal.message);
     }

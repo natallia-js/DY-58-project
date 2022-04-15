@@ -25,7 +25,7 @@
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
     <p><span v-html="getOrderText"></span></p>
-    <p><span class="p-text-bold">Передал:</span> &#160;
+    <p>Передал: &#160;
       {{ getUserPost }} &#160; {{ getUserFIO }} &#160;
       <span v-if="createdOnBehalfOf">(от имени {{ createdOnBehalfOf }}) &#160; </span>
       {{ getUserWorkPoligonName }}

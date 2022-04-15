@@ -8,6 +8,10 @@ export const ORDER_PATTERN_TYPES = Object.freeze({
   CONTROL: 'контроль',
 });
 
+// У ЭЦД в журнале присутствует сквозная нумерация распоряжений (т.е. нет нумерации распоряжений по типам).
+// С этой целью для хранения номера последнего изданного распоряжения используется этот "тип документа".
+export const ALL_ORDERS_TYPE_ECD = 'all';
+
 export const SPECIAL_ORDER_SUBPATTERN_TYPES = Object.freeze({
   RECORD: 'запись',
 });

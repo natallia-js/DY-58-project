@@ -1,5 +1,8 @@
 import { computed } from 'vue';
-import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
+import {
+  ORDER_PATTERN_TYPES,
+  SPECIAL_CIRCULAR_ORDER_SIGN,
+} from '@/constants/orderPatterns';
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 
 /**

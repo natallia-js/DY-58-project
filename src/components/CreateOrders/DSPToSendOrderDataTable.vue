@@ -16,6 +16,7 @@
       :rowHover="true"
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
       sortMode="single" :sortField="getCurrShiftTblColumnNames.sector" :sortOrder="1"
+      breakpoint="200px"
     >
       <Column
         :field="getCurrShiftTblColumnNames.sector"
@@ -93,7 +94,7 @@
         </template>
       </Column>
 
-      <template #groupheader="slotProps">
+      <template v-if="trainSectorsNumber > 1" #groupheader="slotProps">
         <div class="dy58-table-content-cell-class dy58-shift-tbl-group-header">
           <Checkbox name="trainSectorCheckbox" :value="slotProps.data.sector" v-model="selectedTrainSectors" />
           {{ slotProps.data.sector }}
@@ -186,6 +187,10 @@
 
       workPoligonTypes() {
         return WORK_POLIGON_TYPES;
+      },
+
+      trainSectorsNumber() {
+        return new Set(this.getDSPShiftForSendingData.map((el) => el.sector)).size;
       },
     },
 

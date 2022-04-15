@@ -142,13 +142,13 @@
       </Column>
 
       <template #expansion="slotProps">
-        <div class="p-grid" style="width:100%;background:var(--dy58-expand-row-bg-color);margin:0;">
+        <div class="dy58-additional-order-info-block">
 
           <!-- Текст распоряжения -->
 
-          <div class="p-col">
+          <div class="dy58-additional-order-info-subblock">
             <div v-html="slotProps.data.orderText"></div>
-            <div><b>Передал:</b> {{ `${slotProps.data.post} ${slotProps.data.fio} ${slotProps.data.place}` }}</div>
+            <div>Передал: {{ `${slotProps.data.post} ${slotProps.data.fio} ${slotProps.data.place}` }}</div>
             <div v-if="slotProps.data.assertDateTime">
               <b>Утверждение:</b> {{ slotProps.data.assertDateTime }}
             </div>
@@ -156,13 +156,13 @@
 
           <!-- Адресаты распоряжения -->
 
-          <div class="p-col">
+          <div class="dy58-additional-order-info-subblock dy58-addresses-subblock">
 
             <!-- Если таблица основных адресатов распоряжения на глобальных рабочих полигонах пуста, не отображаем ее -->
 
             <div v-if="slotProps.data.receivers && slotProps.data.receivers.length">
               <p>Адресаты:</p>
-              <DataTable :value="slotProps.data.receivers">
+              <DataTable :value="slotProps.data.receivers" breakpoint="200px">
                 <Column v-for="col2 of getWorkMessReceiversTblColumns"
                   :field="col2.field"
                   :header="col2.title"
@@ -261,7 +261,7 @@
 
             <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length">
               <p>Получатели на станции:</p>
-              <DataTable :value="slotProps.data.stationReceivers">
+              <DataTable :value="slotProps.data.stationReceivers" breakpoint="200px">
                 <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
                   :field="col3.field"
                   :header="col3.title"
@@ -542,13 +542,10 @@
         store.commit(CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER);
       });
 
-      const getWorkingOrders = computed(() => store.getters.getWorkingOrders);
-
       const expandOrCollapseRow = (event) => {
         const isRowExpanded = state.expandedRows.find((el) => el.id === event.data.id);
-        console.log(isRowExpanded,state.expandedRows)
         if (!isRowExpanded) {
-          state.expandedRows.push(getWorkingOrders.value.find((_el,index) => index === event.index));
+          state.expandedRows = [...state.expandedRows, event.data];
         } else {
           state.expandedRows = state.expandedRows.filter((el) => el.id !== event.data.id);
         }
@@ -562,7 +559,7 @@
         isRevisor: computed(() => store.getters.isRevisor),
         WORK_POLIGON_TYPES,
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
-        getWorkingOrders,//: computed(() => store.getters.getWorkingOrders),
+        getWorkingOrders: computed(() => store.getters.getWorkingOrders),
         getWorkMessReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessReceiversTblColumnsTitles),
         getWorkMessStationReceiversTblColumnsTitles: computed(() => store.getters.getWorkMessStationReceiversTblColumnsTitles),
         getWorkMessReceiversTblColumns: computed(() => store.getters.getWorkMessReceiversTblColumns),
@@ -596,3 +593,33 @@
     },
   }
 </script>
+
+
+<style lang="scss" scoped>
+  .dy58-additional-order-info-block {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: var(--dy58-expand-row-bg-color);
+    margin: 0;
+    gap: 10px;
+  }
+
+  .dy58-additional-order-info-subblock {
+    width: 50%;
+  }
+
+  @media screen and (max-width: 70rem) {
+    .dy58-additional-order-info-block {
+      flex-direction: column;
+    }
+
+    .dy58-additional-order-info-subblock {
+      width: 100%;
+    }
+
+    .dy58-addresses-subblock {
+      max-width: 500px !important;
+    }
+  }
+</style>

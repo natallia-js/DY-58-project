@@ -22,8 +22,8 @@
 
   <ConfirmPopup group="confirmSaveOrderDraft"></ConfirmPopup>
 
-  <div class="p-grid">
-    <div class="p-col-6">
+  <div class="dy58-create-order-block">
+    <div class="dy58-create-order-subblock">
       <SelectButton
         v-if="false"
         v-model="state.selectedOrderInputType"
@@ -31,7 +31,6 @@
         optionLabel="label"
         disabled
       />
-      <!--<br />-->
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
       </div>
@@ -260,7 +259,7 @@
 
     <!-- АДРЕСАТЫ -->
 
-    <div class="p-col-6">
+    <div class="dy58-create-order-subblock">
       <p class="p-mb-2">
         <label for="addressees" :class="{'p-error': submitted && v$.allAddressees.$invalid}">
           <span class="p-text-bold p-mr-2">
@@ -348,6 +347,7 @@
     SPECIAL_CIRCULAR_ORDER_SIGN,
     SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
+    ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
@@ -458,7 +458,7 @@
 
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
-        number: store.getters.getNextOrdersNumber(props.orderType),
+        number: store.getters.getNextOrdersNumber(!isECD.value ? props.orderType : ALL_ORDERS_TYPE_ECD),
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
         createDateTimeString: store.getters.getCurrDateString,
         updateCreateDateTimeRegularly: true,
@@ -514,7 +514,7 @@
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
       });
 
-      useWatchCurrentDateTime(state, props, store);
+      useWatchCurrentDateTime({ state, props, store });
 
       const {
         dspSectorsToSendOrderNoDupl,
@@ -583,14 +583,14 @@
       });
 
       // Здесь все watch, в конце, когда выше уже все объявлено (иначе будут ошибки)
-      useWatchOrderNumber({ state, props, store });
+      useWatchOrderNumber({ state, props, store, isECD });
       useWatchCancelOrderDateTime({ state });
       useWatchOrderPlace({ state, store });
       useWatchOrderDrafts({
         state, store, props, emit, currentOrderDraft,
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
       });
-      useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
+      useWatchOperationsResults({ /*state,*/ store, props, showSuccessMessage, showErrMessage });
 
       const {
         setRelatedOrderNumberInOrderText,
@@ -679,3 +679,26 @@
     },
   };
 </script>
+
+
+<style lang="scss" scoped>
+  .dy58-create-order-block {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .dy58-create-order-subblock {
+    width: 50%;
+  }
+
+  @media screen and (max-width: 70rem) {
+    .dy58-create-order-block {
+      flex-direction: column;
+    }
+
+    .dy58-create-order-subblock {
+      width: 100%;
+    }
+  }
+</style>

@@ -90,7 +90,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           ecdToSend: order.ecdToSend,
           otherToSend: order.otherToSend,
           insertEmptyLineBeforeText: true,
-        }) + '<br/><b>Передал:</b> ' +
+        }) + '<br/>Передал: ' +
         `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
       orderAcceptor: formAcceptorsStrings({
         // ДСП нужна информация только по своей станции
