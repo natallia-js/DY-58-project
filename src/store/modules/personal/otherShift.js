@@ -10,6 +10,7 @@ import {
   SET_OTHER_SHIFT_FOR_SENDING_DATA,
   DEL_UNSELECTED_STRUCTURAL_DIVISIONS,
 } from '@/store/mutation-types';
+import compareStrings from '@/additional/compareStrings';
 
 
 /**
@@ -19,13 +20,14 @@ export const otherShift = {
   getters: {
     /**
      * Возвращает информацию о виртуальном персонале (который реально не зарегистрирован в системе,
-     * но должен присутствовать в текстах распоряжений).
+     * но должен присутствовать в текстах распоряжений). Данные сортируем по наименованию места.
      */
     getOtherShiftForSendingData: (state) => {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return [];
       }
-      return state.sectorPersonal.otherShift.map((item) => ({ ...item }));
+      return state.sectorPersonal.otherShift.map((item) => ({ ...item }))
+        .sort((a, b) => compareStrings(a.placeTitle.toLowerCase(), b.placeTitle.toLowerCase()));
     },
   },
 

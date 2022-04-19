@@ -24,6 +24,7 @@ import {
   confirmOrderForOtherReceivers,
 } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import { getWorkOrderTimeSpanInfo } from '@/store/modules/workOrders/getWorkOrderObject';
 
 
 /**
@@ -223,13 +224,16 @@ export const confirmOrder = {
      *    само рабочее распоряжение, список адресатов на станции
      * 3) для ДНЦ и ЭЦД подтверждать необходимо в 2 местах: само рабочее распоряжение, секция "Кому" распоряжения
      */
-    [SET_ORDER_CONFIRMED] (state, { orderId, confirmDateTime, userPost, userFIO, userWorkPoligon }) {
+    [SET_ORDER_CONFIRMED] (state, props) {
+      const { orderId, orderTimeSpan, confirmDateTime, userPost, userFIO, userWorkPoligon } = props;
+
       const order = state.data.find((el) => el._id === orderId);
       if (!order || !confirmDateTime || !userWorkPoligon) {
         return;
       }
       // подтверждаем само распоряжение (переносим его в рабочие распоряжения)
       order.confirmDateTime = confirmDateTime;
+      order.timeSpan = orderTimeSpan;
 
       // сюда поместим ссылку на массив, в котором будем искать элемент для установки даты подтверждения
       // (из секции "Кому" распоряжения)
@@ -292,11 +296,19 @@ export const confirmOrder = {
      * распоряжения автоматически перейдут из секции входящих уведомлений в секцию рабочих распоряжений.
      */
     [SET_ORDER_CONFIRMED_FOR_OTHERS] (state, props) {
-      const { orderId, actualGlobalConfirmWorkPoligonsInfo, actualLocalConfirmWorkPoligonsInfo } = props;
+      const {
+        orderId,
+        orderTimeSpan,
+        actualGlobalConfirmWorkPoligonsInfo,
+        actualLocalConfirmWorkPoligonsInfo,
+      } = props;
+
       const order = state.data.find((el) => el._id === orderId);
       if (!order) {
         return;
       }
+      order.timeSpan = orderTimeSpan;
+
       // подтверждение в секции "Кому" распоряжения
       if (actualGlobalConfirmWorkPoligonsInfo) {
         actualGlobalConfirmWorkPoligonsInfo.forEach((poligon) => {
@@ -313,9 +325,10 @@ export const confirmOrder = {
               break;
           }
           if (foundPoligon) {
-            foundPoligon.confirmDateTime = poligon.confirmDateTime,
+            foundPoligon.confirmDateTime = poligon.confirmDateTime;
             foundPoligon.post = poligon.post;
             foundPoligon.fio = poligon.fio;
+            foundPoligon.confirmForPostFIO = poligon.confirmForPostFIO;
           }
         });
       }
@@ -330,7 +343,7 @@ export const confirmOrder = {
             )
           );
           if (foundWorkPlace) {
-            foundWorkPlace.confirmDateTime = poligon.confirmDateTime,
+            foundWorkPlace.confirmDateTime = poligon.confirmDateTime;
             foundWorkPlace.post = poligon.post;
             foundWorkPlace.fio = poligon.fio;
           }
@@ -342,11 +355,12 @@ export const confirmOrder = {
      * Для заданного распоряжения позволяет установить информацию о его подтверждении
      * за "иные" полигоны управления.
      */
-    [SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS] (state, { orderId, confirmDateTime }) {
+    [SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS] (state, { orderId, orderTimeSpan, confirmDateTime }) {
       const order = state.data.find((el) => el._id === orderId);
       if (!order || !order.otherToSend || !order.otherToSend.length) {
         return;
       }
+      order.timeSpan = orderTimeSpan;
       order.otherToSend.forEach((el) => {
         el.confirmDateTime = confirmDateTime;
       });
@@ -389,6 +403,7 @@ export const confirmOrder = {
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED, {
           orderId: responseData.id,
+          orderTimeSpan: getWorkOrderTimeSpanInfo(responseData.timeSpan),
           confirmDateTime: new Date(responseData.confirmDateTime),
           userPost: responseData.userPost,
           userFIO: responseData.userFIO,
@@ -448,6 +463,7 @@ export const confirmOrder = {
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHERS, {
           orderId: responseData.orderId,
+          orderTimeSpan: getWorkOrderTimeSpanInfo(responseData.timeSpan),
           // полигоны, за которые подтверждение прошло в секции "Кому" распоряжения
           actualGlobalConfirmWorkPoligonsInfo: responseData.actualGlobalConfirmWorkPoligonsInfo ?
             responseData.actualGlobalConfirmWorkPoligonsInfo.map((el) => ({
@@ -503,7 +519,11 @@ export const confirmOrder = {
         const responseData = await confirmOrderForOtherReceivers({ orderId, confirmDateTime });
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
-        context.commit(SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS, { orderId: responseData.orderId, confirmDateTime });
+        context.commit(SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS, {
+          orderId: responseData.orderId,
+          orderTimeSpan: getWorkOrderTimeSpanInfo(responseData.timeSpan),
+          confirmDateTime,
+        });
         context.commit(SET_ORDER_ASSERT_DATE_TIME, {
           orderId,
           assertDateTime: responseData.assertDateTime ? new Date(responseData.assertDateTime) : null,

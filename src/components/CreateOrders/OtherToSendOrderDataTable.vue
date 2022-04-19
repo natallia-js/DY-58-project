@@ -14,6 +14,8 @@
       :rowHover="true"
       v-model:selection="selectedUser" selectionMode="single" dataKey="_id"
       breakpoint="200px"
+      rowGroupMode="rowspan"
+      :groupRowsBy="getOtherShiftTblColumnNames.placeTitle"
     >
       <template #header>
         <div class="p-mb-2">

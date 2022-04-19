@@ -170,8 +170,8 @@ export const tablesColumns = {
       let tblCols = [
         { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '25%', },
         { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '25%', },
-        { field: WorkMessReceiversTblColumnsTitles.fio, title: 'ФИО', width: '25%', },
-        { field: WorkMessReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '25%', },
+        { field: WorkMessReceiversTblColumnsTitles.fio, title: 'ФИО', width: '20%', },
+        { field: WorkMessReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '30%', },
       ];
       if (!rootGetters.isECD) {
         return tblCols;

@@ -8,7 +8,7 @@ import isNumber from '@/additional/isNumber';
 /**
  * Данный модуль предназначен для проверки параметров издаваемого распоряжения.
  */
-export const useNewOrderValidationRules = (state, props, relatedOrderObject) => {
+export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject */ }) => {
 
   const endDateNoLessStartDate = (value) => {
     return !value ? true :
@@ -40,14 +40,14 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
     }
     return true;
   };
-
+/*
   const cancelOrderDateTimeNoLessOrderStartDate = (value) => {
     if (!relatedOrderObject.value) {
       return true;
     }
     return relatedOrderObject.value.timeSpan.start <= value;
   };
-
+*/
   const orderTextRules = {
     orderTextSource: { required },
     patternId: {},
@@ -100,7 +100,7 @@ export const useNewOrderValidationRules = (state, props, relatedOrderObject) => 
       break;
     case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
       rules.prevRelatedOrder = { prevRelatedOrderIsRequired };
-      rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
+      //rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
     case ORDER_PATTERN_TYPES.NOTIFICATION:

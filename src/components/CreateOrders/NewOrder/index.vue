@@ -111,6 +111,9 @@
             <p v-if="relatedOrderObjectStartDateTimeString">
               Время начала действия: {{ relatedOrderObjectStartDateTimeString }}
             </p>
+            <!-- Этот кусок кода использовался поначалу для указания даты и времени отмены действия
+            предыдущего распоряжения текущим распоряжением. В дальнейшем временем отмены действия
+            предыдущего распоряжения стала дата-время утверждения издаваемого распоряжения
             <div v-if="orderType === ORDER_PATTERN_TYPES.ECD_NOTIFICATION" class="p-mb-2 p-mt-2">
               <label for="cancelOrderDateTime" :class="{'p-error':v$.cancelOrderDateTime.$invalid && submitted}">
                 <span class="p-text-bold">Отменяется с &#160;</span>
@@ -130,7 +133,7 @@
               >
                 Не определены/неверно определены дата и время отмены документа
               </small>
-            </div>
+            </div>-->
           </div>
         </div>
 
@@ -356,7 +359,7 @@
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useWatchOrderPlace } from './watchOrderPlace';
   import { useWatchOrderNumber } from './watchOrderNumber';
-  import { useWatchCancelOrderDateTime } from './watchCancelOrderDateTime';
+  //import { useWatchCancelOrderDateTime } from './watchCancelOrderDateTime';
   import { useWatchOrderPatterns } from './watchOrderPatterns';
   import { useWatchOrderDrafts } from './watchOrderDrafts';
   import { useWatchOperationsResults } from './watchOperationsResults';
@@ -463,7 +466,7 @@
         createDateTimeString: store.getters.getCurrDateString,
         updateCreateDateTimeRegularly: true,
         prevRelatedOrder: null,
-        cancelOrderDateTime: null,
+        //cancelOrderDateTime: null,
         orderPlace: defaultOrderPlace,
         timeSpan: defaultTimeSpan,
         defineOrderTimeSpan: defineOrderTimeSpanOptions[0],
@@ -555,7 +558,7 @@
         defaultTimeSpan,
       });
 
-      const { rules } = useNewOrderValidationRules(state, props, relatedOrderObject);
+      const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */ });
 
       const submitted = ref(false);
       // Код { $scope: false } нужен для того чтобы (цитата из справочника):
@@ -584,7 +587,22 @@
 
       // Здесь все watch, в конце, когда выше уже все объявлено (иначе будут ошибки)
       useWatchOrderNumber({ state, props, store, isECD });
-      useWatchCancelOrderDateTime({ state });
+
+/*
+      //
+      // Обнуляем значения секунд и миллисекунд у выбранного значения времени отмены действия распоряжения
+      // (чтобы не было проблем при сравнении с датой начала действия соответствующего распоряжения,
+      // например, когда необходимо отменить в то же время, когда оно начало действовать, если издано
+      // было случайно).
+      //
+      watch(() => state.cancelOrderDateTime, (value) => {
+        if (value && isValidDateTime(value)) {
+          state.cancelOrderDateTime.setSeconds(0, 0);
+        }
+      });
+*/
+
+      //useWatchCancelOrderDateTime({ state });
       useWatchOrderPlace({ state, store });
       useWatchOrderDrafts({
         state, store, props, emit, currentOrderDraft,

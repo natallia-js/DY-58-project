@@ -104,13 +104,17 @@ export const activeOrders = {
     /**
      * Возвращает true, если за распоряжением order в рамках его цепочки распоряжений следует
      * распоряжение типа followerOrderType, в противном случае возвращает false.
+     * Если дополнительно указан параметр considerOrderId, то при поиске следующего распоряжения
+     * необходимо учитывать его непосредственную взаимосвязь с текущим распоряжением: у искомого
+     * распоряжения должна быть ссылка (dispatchedOnOrder) на id текущего распоряжения.
      */
     isOrderFollowedByOrderOfGivenType(state) {
-      return ({ followerOrderType, order }) => {
+      return ({ followerOrderType, order, considerOrderId = false }) => {
         return state.data.find((item) =>
           item.orderChainId === order.orderChainId &&
           item.createDateTime > order.createDateTime &&
-          item.type === followerOrderType
+          item.type === followerOrderType &&
+          (!considerOrderId || item.dispatchedOnOrder === order._id)
         ) ? true : false;
       };
     },
@@ -141,8 +145,8 @@ export const activeOrders = {
      * - если речь идет о распоряжении ДНЦ, то в рамках цепочки распоряжений только последнее
      *   распоряжение ДНЦ может рассматриваться как действующее / недействующее, все же предшествующие
      *   ему распоряжения ДНЦ автоматически становятся недействующими,
-     * - приказы и запрещения ЭЦД, за которыми следует уведомление (отмена запрещения) считаются
-     *   недействующими,
+     * - приказ ЭЦД / запрещение ЭЦД, за которым следует уведомление, ссылающееся именно на этого приказ /
+     *   запрещение, считается недействующим,
      * - уведомление (отмена запрещения) ЭЦД может рассматриваться как действующие при условии, что
      *   оно в цепочке распоряжений последнее.
      * ! В данный перечень войдут также те распоряжения, дата начала действия которых еще не наступила
@@ -167,7 +171,7 @@ export const activeOrders = {
           ) ||
           (
             (item.type === ORDER_PATTERN_TYPES.ECD_ORDER || item.type === ORDER_PATTERN_TYPES.ECD_PROHIBITION) &&
-            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION, order: item })
+            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION, order: item, considerOrderId: true })
           ) ||
           ((item.type === ORDER_PATTERN_TYPES.ECD_NOTIFICATION) && getters.isOrderLastInChain(item))
         )

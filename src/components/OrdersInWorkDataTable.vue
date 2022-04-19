@@ -192,6 +192,7 @@
                       <!-- если дата подтверждения указана, то отображаем ее -->
                       <span v-if="slotProps2.data[col2.field]">
                         {{ getDateTimeString(slotProps2.data[col2.field]) }}
+                        {{ slotProps2.data.confirmForPostFIO ? `/ ${slotProps2.data.confirmForPostFIO}` : '' }}
                       </span>
                       <!-- в противном случае отображаем кнопку подтверждения (если подтверждение возможно) -->
                       <Button
@@ -619,7 +620,7 @@
     }
 
     .dy58-addresses-subblock {
-      max-width: 500px !important;
+      max-width: 600px !important;
     }
   }
 </style>

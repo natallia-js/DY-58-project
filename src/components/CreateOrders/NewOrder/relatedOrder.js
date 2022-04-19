@@ -24,6 +24,7 @@ export const useRelatedOrder = ({ state, store }) => {
   });
 
   return {
+    relatedOrderId,
     relatedOrderObject,
     relatedOrderObjectStartDateTimeString,
   };

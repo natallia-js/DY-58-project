@@ -21,7 +21,7 @@ export const useWatchOperationsResults = (inputVals) => {
       // его раскомментировать
       /*if (state.prevRelatedOrder) {
         state.prevRelatedOrder = null;
-        state.cancelOrderDateTime = null;
+        state.cancelOrderDateTime = null; // этого уже нет
       }*/
       // Даем пользователю просмотреть сообщение об успешном издании документа прежде чем переходить
       // на главную страницу

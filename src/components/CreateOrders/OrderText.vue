@@ -162,9 +162,10 @@
       // для отслеживания изменения объекта родительского распоряжения
       const parentOrderText = computed(() => props.parentOrderText);
 
-      // позволяет заполнить поля издаваемого распоряжения на основании полей выбранного предшествующего
-      // (родительского) распоряжения
-      const fillChildOrderTextFieldsWithParentOrderTextFields = () => {
+      // при изменении объекта родительского/дочернего распоряжения принимаем меры по заполнению
+      // полей текста объекта дочернего распоряжения (из полей родительского)
+      watch([parentOrderText, () => state.orderPatternText], () => {
+        // если родительское либо дочернее распоряжение - бесшаблонное, то ничего не делаем
         if (!parentOrderText.value || !parentOrderText.value.orderText || (parentOrderText.value.orderTextSource !== ORDER_TEXT_SOURCE.pattern) ||
             (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) || !state.orderPatternText) {
           return;
@@ -187,12 +188,7 @@
             }
           }
         });
-      };
-
-      // при изменении объекта родительского/дочернего распоряжения принимаем меры по заполнению
-      // полей текста объекта дочернего распоряжения
-      watch([parentOrderText, () => state.orderPatternText], () => {
-        fillChildOrderTextFieldsWithParentOrderTextFields();
+        // сюда попадем только в случае когда родительское и дочернее распоряжения - шаблонные
         emit('input', {
           orderTextSource: state.orderTextSource,
           patternId: getSelectedOrderPattern.value._id,
@@ -231,6 +227,12 @@
       //
       const handleChooseOrderPattern = () => {
         state.orderPatternText = getSelectedOrderPattern.value.elements.map((element) => ({ ...element }));
+        emit('input', {
+          orderTextSource: state.orderTextSource,
+          patternId: getSelectedOrderPattern.value._id,
+          orderTitle: getSelectedOrderPattern.value.title,
+          orderText: state.orderPatternText,
+        });
       };
 
       //

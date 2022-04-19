@@ -3,6 +3,14 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
 
 
+export function getWorkOrderTimeSpanInfo(timeSpan) {
+  return timeSpan ? {
+    start: timeSpan.start ? new Date(timeSpan.start) : null,
+    end: timeSpan.end ? new Date(timeSpan.end) : null,
+    tillCancellation: Boolean(timeSpan.tillCancellation),
+  } : null;
+}
+
 export function getWorkOrderGeneralInfoObject(order) {
   return {
     _id: order._id,
@@ -13,6 +21,7 @@ export function getWorkOrderGeneralInfoObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        confirmForPostFIO: item.confirmForPostFIO,
         post: item.post,
         fio: item.fio,
         id: +item.id,
@@ -26,6 +35,7 @@ export function getWorkOrderGeneralInfoObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        confirmForPostFIO: item.confirmForPostFIO,
         post: item.post,
         fio: item.fio,
         id: +item.id,
@@ -39,6 +49,7 @@ export function getWorkOrderGeneralInfoObject(order) {
       return {
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
         deliverDateTime: item.deliverDateTime ? new Date(item.deliverDateTime) : null,
+        confirmForPostFIO: item.confirmForPostFIO,
         post: item.post,
         fio: item.fio,
         id: +item.id,
@@ -92,11 +103,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         })
     },
     place: order.place ? { place: order.place.place, value: +order.place.value } : null,
-    timeSpan: order.timeSpan ? {
-      start: order.timeSpan.start ? new Date(order.timeSpan.start) : null,
-      end: order.timeSpan.end ? new Date(order.timeSpan.end) : null,
-      tillCancellation: Boolean(order.timeSpan.tillCancellation),
-    } : null,
+    timeSpan: getWorkOrderTimeSpanInfo(order.timeSpan),
     type: order.type,
     workPoligon: order.workPoligon ? {
       id: order.workPoligon.id,
@@ -106,6 +113,7 @@ export function getWorkOrderGeneralInfoObject(order) {
     orderChainId: order.orderChain.chainId,
     specialTrainCategories: order.specialTrainCategories,
     assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
+    dispatchedOnOrder: order.dispatchedOnOrder,
   };
 }
 

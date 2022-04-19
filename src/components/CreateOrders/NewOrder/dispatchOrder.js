@@ -30,11 +30,15 @@ export const useDispatchOrder = (inputVals) => {
   // Возвращает объект со временем действия издаваемого распоряжения:
   //   1. если установлен флаг "Уточнить время действия распоряжения", то полагаем,
   // что пользователь определил временной интервал действия распоряжения;
+  //   Ранее была такая постановка п.2:
   //   2. если п.1. не выполняется, то смотрим, указаны ли дата-время отмены действия
   // предшествующего распоряжения; если определены дата-время отмены действия предшествующего
   // распоряжения, то полагаем, что издаваемое распоряжение действует одномоментно и время его
   // действия равно указанной дате-времени отмены действия предшествующего распоряжения;
-  //   3. если п.1 и п.2 не выполняются, то дату-время действия распоряжения определяем по следующему
+  // Теперь такая:
+  //   2. пункт 2 использовался ранее для работы с уведомлениями ЭЦД, теперь работа с ними идет по другой
+  // схеме: для определения времени действия уведомления ЭЦД идем на п.3.3;
+  //   3. если п.1 не выполняются, то дату-время действия распоряжения определяем по следующему
   // алгоритму:
   //     3.1. если издается заявка/уведомление/приказ ЭЦД/запрещение ЭЦД, то время начала его действия
   //          равно дате-времени его издания, а время окончания действия - до отмены (это нужно для того,
@@ -47,9 +51,9 @@ export const useDispatchOrder = (inputVals) => {
     if (props.orderType === ORDER_PATTERN_TYPES.ORDER && state.defineOrderTimeSpan.value) {
       return state.timeSpan;
     }
-    if (state.cancelOrderDateTime) {
+    /*if (state.cancelOrderDateTime) {
       return { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false };
-    }
+    }*/
     if (
       [ORDER_PATTERN_TYPES.REQUEST,
        ORDER_PATTERN_TYPES.NOTIFICATION,
@@ -94,6 +98,7 @@ export const useDispatchOrder = (inputVals) => {
         }) : [],
       otherToSend: state.otherSectorsToSendOrder,
       orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
+      dispatchedOnOrder: relatedOrderObject.value ? relatedOrderObject.value._id : null,
       createdOnBehalfOf: state.createdOnBehalfOf,
       showOnGID: state.showOnGID.value,
       specialTrainCategories: state.specialTrainCategories,
