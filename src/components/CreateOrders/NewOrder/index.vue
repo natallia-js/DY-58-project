@@ -24,6 +24,7 @@
 
   <div class="dy58-create-order-block">
     <div class="dy58-create-order-subblock">
+      <!-- Данная кнопка-переключатель пока не используется -->
       <SelectButton
         v-if="false"
         v-model="state.selectedOrderInputType"
@@ -33,6 +34,45 @@
       />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
+        <br />
+      </div>
+      <div v-if="(isDSP_or_DSPoperator || isDNC) && orderType === ORDER_PATTERN_TYPES.REQUEST">
+        <div class="p-mb-2">
+          <span class="p-text-bold">Текущие "окна"</span>
+        </div>
+        <div class="dy58-okna-tbl-block">
+        <DataTable
+          :value="state.oknaData"
+          class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
+          :rowHover="true"
+          breakpoint="200px"
+        >
+          <Column
+            selectionMode="single"
+            headerStyle="minWidth:3em"
+            bodyStyle="minWidth:3em"
+            headerClass="dy58-table-header-cell-class"
+            bodyClass="dy58-table-content-cell-class"
+          >
+          </Column>
+          <Column v-for="col of getOknaTblColumns"
+            :field="col.field"
+            :key="col.field"
+            :header="col.title"
+            :style="{ width: col.width, textAlign: col.align }"
+            headerClass="dy58-table-header-cell-class"
+            bodyClass="dy58-table-content-cell-class"
+          >
+          </Column>
+        </DataTable>
+        <Button
+          icon="pi pi-refresh"
+          class="p-button-rounded p-button-text dy58-refresh-okns-list-btn"
+          v-tooltip.right="'Обновить список окон'"
+          @click="refreshOknas"
+        />
+        </div>
+        <br />
       </div>
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
 
@@ -352,6 +392,7 @@
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
     ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
+  import { SET_USER_CHOSEN_STATUS /*SET_DEFAULT_DSP_ADDRESSES*/ } from '@/store/mutation-types';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { useStoreData } from './storeData';
@@ -370,6 +411,7 @@
   import { useOrderDraft } from './orderDraft';
   import { useSetAndAnalyzeOrderText } from './setAndAnalyzeOrderText';
   import { useWatchRelatedOrder } from './watchRelatedOrder';
+  import { useOkna } from './okna';
 
   export default {
     name: 'dy58-new-order-block',
@@ -413,6 +455,7 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const isECD = computed(() => store.getters.isECD);
+      const isDNC = computed(() => store.getters.isDNC);
 
       // Уточнять время действия издаваемого распоряжения либо не уточнять
       const defineOrderTimeSpanOptions = ([
@@ -489,6 +532,9 @@
         resetValueOnWatchChanges: true,
         // id текущего черновика распоряжения
         currentOrderDraftId: null,
+        gettingOknasData: false,
+        oknaData: [],
+        getOknaDataError: null,
       });
 
       const {
@@ -515,6 +561,30 @@
         state.orderText = initialOrderText();
         state.showOnGID = getUserDutyToDefineOrderPlace.value;
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+        // для ДНЦ при издании нового документа подгружаем список ДСП из последнего циркулярного распоряжения
+        if (isDNC.value) {
+          const circularOrder = store.getters.getExistingDNCTakeDutyOrder;
+          console.log('circularOrder', circularOrder ? circularOrder.dspToSend : null)
+          if (circularOrder && circularOrder.dspToSend) {
+            circularOrder.dspToSend.forEach((stationDSP) => {
+              const user = store.getters.getStationUserByFIO({ stationId: stationDSP.id, fio: stationDSP.fio });
+              console.log('user',user)
+              if (user) {
+                store.commit(SET_USER_CHOSEN_STATUS, {
+                  userId: user._id,
+                  chooseUser: true,
+                  workPoligonType: stationDSP.type,
+                  workPoligonId: stationDSP.id,
+                });
+              }
+            });
+            /*store.commit(SET_DEFAULT_DSP_ADDRESSES, circularOrder.dspToSend.map((el) => ({
+              stationId: el.id,
+              post: el.post,
+              fio: el.fio,
+            })));*/
+          }
+        }
       });
 
       useWatchCurrentDateTime({ state, props, store });
@@ -622,6 +692,8 @@
 
       useWatchRelatedOrder({ props, emit, relatedOrderObject, setRelatedOrderNumberInOrderText });
 
+      const { refreshOknas } = useOkna({ store, state });
+
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
        */
@@ -655,8 +727,10 @@
         SPECIAL_CIRCULAR_ORDER_SIGN,
         SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
         SPECIAL_OPEN_BLOCK_ORDER_SIGN,
-        isDNC: computed(() => store.getters.isDNC),
+        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isDNC,
         isECD,
+        getOknaTblColumns: computed(() => store.getters.getOknaTblColumns),
         v$,
         submitted,
         getUserPostFIO: computed(() => store.getters.getUserPostFIO),
@@ -693,6 +767,7 @@
         handleClearOrderAddressesLists,
         currentOrderDraft,
         setOrderText,
+        refreshOknas,
       };
     },
   };
@@ -718,5 +793,15 @@
     .dy58-create-order-subblock {
       width: 100%;
     }
+  }
+
+  .dy58-okna-tbl-block {
+    position: relative;
+  }
+
+  .dy58-refresh-okns-list-btn {
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 </style>

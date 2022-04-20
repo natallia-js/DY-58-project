@@ -79,4 +79,5 @@ export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
   saveOrderDraft: `${AUTH_SERVER_ADDRESS}/api/orderDrafts/add`,
   editOrderDraft: `${AUTH_SERVER_ADDRESS}/api/orderDrafts/mod`,
   delOrderDraft: `${AUTH_SERVER_ADDRESS}/api/orderDrafts/del`,
+  getOknas: `${AUTH_SERVER_ADDRESS}/api/okna/data`,
 });

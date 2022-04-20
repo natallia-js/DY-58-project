@@ -3,6 +3,7 @@ import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials'
 import { getUserFIOString } from './transformUserData';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import {
+  SET_DEFAULT_DSP_ADDRESSES,
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
   SET_GET_ORDER_STATUS_TO_ALL_LEFT_DSP,
@@ -127,7 +128,8 @@ export const dsp = {
         arr = arr.filter((item) => String(item.stationId) !== String(getters.getUserWorkPoligonData.St_ID));
       }
       // Извлекаем необходимые данные, сортируя их по поездным участкам и порядку станций на данных участках
-      arr = arr.sort((a, b) => { return a.trainSectorId - b.trainSectorId; })
+      arr = arr
+        .sort((a, b) => { return a.trainSectorId - b.trainSectorId; })
         .sort((a, b) => {
           if (a.trainSectorId !== b.trainSectorId) return 0;
           return a.stationPosInTrainSector - b.stationPosInTrainSector;
@@ -157,9 +159,55 @@ export const dsp = {
         });
       return arr;
     },
+
+    getStationUserByFIO(state) {
+      return ({ stationId, fio }) => {
+        if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
+          return null;
+        }
+        const stationShiftInfo = state.sectorPersonal.sectorStationsShift.find((el) => el.stationId === stationId);
+        if (!stationShiftInfo || !stationShiftInfo.people) {
+          return;
+        }
+        return stationShiftInfo.people.find((u) =>
+          getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === fio);
+      };
+    },
   },
 
   mutations: {
+    /**
+     *
+     */
+    [SET_DEFAULT_DSP_ADDRESSES] (state, dspUsers) {
+      if (!dspUsers || !state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
+        return;
+      }
+      /*this.$store.commit(SET_USER_CHOSEN_STATUS, {
+        userId: this.selectedUser.id,
+        chooseUser: true,
+        workPoligonType: this.workPoligonType,
+        workPoligonId: this.sectorId,
+      });*/
+      dspUsers.forEach((user) => {
+        const stationShiftInfo = state.sectorPersonal.sectorStationsShift.find((el) => el.stationId === user.stationId);
+        if (!stationShiftInfo || !stationShiftInfo.people) {
+          return;
+        }
+        const stationUser = stationShiftInfo.people.find((u) =>
+          getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === user.fio);
+        if (!stationUser) {
+          return;
+        }
+        /*console.log('stationUser', stationUser)
+        stationShiftInfo.lastUserChoiceId = stationUser._id;
+        stationShiftInfo.lastUserChoicePost = stationUser.post;
+        stationShiftInfo.lastUserChoice = user.fio;*/
+
+      });
+      console.log('sectorStationsShift',state.sectorPersonal.sectorStationsShift)
+    },
+
     /**
      * Оригинал/Копия/Ничего всем станциям. Если текущий полигон управления - станция,
      * то она не участвует в переборе.

@@ -73,6 +73,17 @@ const DNC_DSPJournalTblColumnsTitles = Object.freeze({
   orderAcceptor: 'orderAcceptor',
 });
 
+// Условные наименования столбцов таблицы информации об "окнах"
+// (названия столбцов должны соответствовать названию полей массива данных для корректного
+// отображения информации)
+const OknaTblColumnsTitles = Object.freeze({
+  fullNumDoc: 'fullNumDoc', // № документа
+  performer: 'performer', // исполнитель
+  datetime: 'datetime',
+  placeWorkPlan: 'placeWorkPlan', // место работ, указанное в суточном плане
+  typeWork: 'typeWork', // вид работ
+});
+
 /**
  * Данный модуль предназначен для работы с данными о столбцах таблиц в зависимости от должности
  * человека, вошедшего в систему.
@@ -150,6 +161,13 @@ export const tablesColumns = {
     },
 
     /**
+     * Возвращает информацию об условных наименованиях столбцов таблицы окон.
+     */
+    getOknaTblColumnsTitles() {
+      return OknaTblColumnsTitles;
+    },
+
+    /**
      * Возвращает информацию о столбцах таблицы рабочих распоряжений.
      */
     getWorkMessTblColumns() {
@@ -223,6 +241,19 @@ export const tablesColumns = {
         { field: DNC_DSPJournalTblColumnsTitles.number, title: '№ распоряжения', width: '8%', align: 'left', },
         { field: DNC_DSPJournalTblColumnsTitles.orderContent, title: 'Содержание распоряжения', width: '57%', align: 'left', },
         { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '20%', align: 'left', },
+      ];
+    },
+
+    /**
+     * Возвращает информацию о столбцах таблицы окон.
+     */
+    getOknaTblColumns() {
+      return [
+        { field: OknaTblColumnsTitles.fullNumDoc, title: '№ Документа', width: '14%', align: 'left' },
+        { field: OknaTblColumnsTitles.performer, title: 'Исполнитель', width: '13%', align: 'left' },
+        { field: OknaTblColumnsTitles.datetime, title: 'Дата/Время', width: '13%', align: 'left' },
+        { field: OknaTblColumnsTitles.placeWorkPlan, title: 'Место работ', width: '30%', align: 'left' },
+        { field: OknaTblColumnsTitles.typeWork, title: 'Вид работ', width: '30%', align: 'left' },
       ];
     },
   },
