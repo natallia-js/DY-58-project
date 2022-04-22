@@ -77,7 +77,7 @@
                   :header="col.title"
                   :style="{ width: col.width, textAlign: col.align }"
                   headerClass="dy58-table-header-cell-class"
-                  bodyClass="dy58-table-content-cell-class"
+                  bodyClass="dy58-table-top-content-cell-class"
                 >
                 </Column>
                 <template #empty>

@@ -29,13 +29,13 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
     .map((order) => ({
       ...order,
       dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       // Исключаем главных ДСП (они будут в списке dspToSend)
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
         order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)

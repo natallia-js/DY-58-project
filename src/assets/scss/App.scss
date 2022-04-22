@@ -4,9 +4,7 @@
 @import './MainMenu.scss';
 @import './LeftMenu.scss';
 @import './Text.scss';
-@import './Footer.scss';
 @import './Block.scss';
-@import './ContextMenu.scss';
 @import './Orders.scss';
 @import './Help.scss';
 
@@ -19,65 +17,15 @@
 }
 
 html, body {
+  width: 100%;
+  height: 100%;
   min-width: 50rem;
 }
 
-#app {
-  font-family: Helvetica, Arial, sans-serif;
+body {
+  margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/***************************************/
-
-.dy58-data-block {
-  padding-bottom: 10px;
-}
-
-.dy58-inline-block {
-  display: inline-block;
-}
-
-.dy58-row-flex-block {
-  display: flex;
-  flex-direction: row;
-}
-
-/***************************************/
-
-.no-uppercase {
-  text-transform: none !important;
-}
-
-/***************************************/
-
-.dy58-input-size-small {
-  width: 100px !important;
-}
-
-.dy58-input-size-50-percent {
-  width: 50% !important;
-}
-
-/***************************************/
-
-.is-today .datepicker-day-button {
-  border: 1px solid var(--dy58-datetime-pickers-bg-color) !important;
-  color: black !important;
-}
-
-.datepicker-date-display,
-.datepicker-row .is-selected,
-.timepicker-digital-display {
-  background-color: var(--dy58-datetime-pickers-bg-color) !important;
-}
-
-.datepicker-cancel, .datepicker-done, .timepicker-close {
-  color: var(--dy58-datetime-pickers-bg-color) !important;
-}
-
-/***************************************/
-
-.p-field {
-  margin-bottom: 0.5rem !important;
+  font-family: var(--font-family);
+  font-size: 1.2rem;
 }

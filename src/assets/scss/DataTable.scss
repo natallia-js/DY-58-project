@@ -3,7 +3,7 @@
 
 .dy58-table-title {
   color: var(--text-color);
-  font-family: var(--font-family); // оставляем
+  //font-family: var(--font-family); // оставляем
   font-size: 1.3rem; // оставляем
   font-weight: bold;
   text-align: center;
@@ -22,17 +22,25 @@
   vertical-align: middle !important;
   background: var(--bluegray-200) !important;
   color: var(--text-color) !important;
-  /*font-size: 0.9rem !important;*/
   padding: 5px !important;
   overflow: hidden;
 }
 
-.dy58-table-content-cell-class {
+@mixin dy58-table-content-cell() {
   overflow: auto;
-  //vertical-align: top !important;
   padding: 0.5rem !important;
   color: var(--text-color) !important;
-  /*font-size: 0.9rem !important;*/
+  text-align: left !important;
+}
+
+.dy58-table-top-content-cell-class {
+  @include dy58-table-content-cell();
+  vertical-align: top !important;
+}
+
+.dy58-table-middle-content-cell-class {
+  @include dy58-table-content-cell();
+  vertical-align: middle !important;
 }
 
 .dy58-control-record {
@@ -93,7 +101,6 @@
 .dy58-shift-tbl-group-header {
   text-align: center;
   color: var(--bluegray-800) !important;
-  /*font-size: 0.9rem !important;*/
   font-weight: bold;
   padding: 0 !important;
 }
@@ -103,9 +110,3 @@
   grid-template-columns: repeat(3, 1fr);
   grid-row-gap: 5px;
 }
-/*
-.p-datatable.p-datatable-sm .p-datatable-tbody > tr > td {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-*/

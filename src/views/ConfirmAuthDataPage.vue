@@ -2,7 +2,7 @@
   <div class="p-d-flex" style="height: 100vh;">
     <Toast />
 
-    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
+    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
         Получаю информацию о рабочих полигонах...
       </div>
@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
+    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="p-col-12">
         <InlineMessage severity="error">{{ state.getDataError }}</InlineMessage>
       </div>
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
+    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
       <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
       <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
         <p class="p-text-bold p-mb-3">Полномочие</p>

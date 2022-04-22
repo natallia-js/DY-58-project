@@ -12,31 +12,12 @@
   @include dy58-order-pattern-element-block(var(--primary-color), 4px);
 }
 
-.dy58-date-user-block {
-  background-color: var(--surface-300);
-  margin-bottom: 0.5rem;
-}
-
-.dy58-left-menu-panel {
-  position: relative;
-  background-color: #424b5f;
-  max-width: 350px;
-}
-
-.dy58-settings-panel {
-  position: absolute;
-  bottom: 0.5rem;
-  max-width: calc(350px - 2rem);
-}
-
 .dy58-search-params-panel {
   padding: 5px 10px;
 }
 
 .dy58-outer-cursor-block {
-  /*width: auto !important;*/
   margin: 0 10px 10px 0;
-  /*display: flex;*/
 }
 
 .dy58-order-pattern-border {
@@ -52,13 +33,13 @@
 }
 
 .dy58-footer {
-  background-color: /* #303B44;*/ #424b5f;
+  background-color: #424b5f;
   color: #fff;
   padding: 10px 0;
 }
 
 .dy58-work-orders-tabview {
-  background-color: var(--surface-b) !important;
+  background-color: var(--surface-b);
   border: 1px solid #dee2e6;
 }
 
@@ -87,8 +68,4 @@
   background-color: #424b5f;
   padding: 5px 5px 0 5px;
   color: #fff;
-}
-
-.dy58-side-menu-statistics-item {
-  border: 1px solid var(--surface-600);
 }

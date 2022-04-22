@@ -4,7 +4,7 @@
       :showDlg="state.showRegisterNewUserDlg"
       @close="hideRegisterNewUserDlg"
     />
-    <div style="max-width:600px;" class="dy58-text">
+    <div style="max-width:600px;">
       <Toast />
       <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
       <div class="p-text-bold p-mb-4">Авторизуйтесь в системе</div>

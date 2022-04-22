@@ -53,7 +53,7 @@
         headerStyle="minWidth:3em"
         bodyStyle="minWidth:3em"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-top-content-cell-class"
       >
       </Column>
 
@@ -63,7 +63,7 @@
         :header="col.title"
         :style="{ width: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-top-content-cell-class"
         :sortable="[
           getECDJournalTblColumnsTitles.assertDateTime,
           getECDJournalTblColumnsTitles.orderNotificationDateTime].includes(col.field)"

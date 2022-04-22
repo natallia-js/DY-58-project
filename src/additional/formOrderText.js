@@ -240,7 +240,9 @@ export function formAcceptorsStrings(props) {
     return (obj) => {
       const post = obj.post ? obj.post : (!obj.fio && defPost) ? defPost : '';
       const fioOrPlace = obj.fio || obj.placeTitle;
-      return `${post}${fioOrPlace ? ' ' + fioOrPlace : ''} (${getLocaleDateTimeString(obj.confirmDateTime, false)})`;
+      const img = require('@/assets/img/telephone.png');
+      const imgString = `<img src=${img} alt="*" style="width:1.2rem;height:auto" />`;
+      return `${obj.confirmForPostFIO ? imgString : ''} ${post}${fioOrPlace ? ' ' + fioOrPlace : ''} (${getLocaleDateTimeString(obj.confirmDateTime, false)})`;
     };
   };
 

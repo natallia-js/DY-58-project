@@ -44,7 +44,7 @@
         :key="col.field"
         :style="{ minWidth: col.width, maxWidth: col.maxWidth, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-top-content-cell-class"
       >
         <template #body="slotProps">
           <div style="width:100%;height:100%">

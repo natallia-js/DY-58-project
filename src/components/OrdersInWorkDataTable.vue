@@ -24,7 +24,7 @@
         :expander="true"
         :style="{ minWidth: getExpanderColumnObject.width, textAlign: getExpanderColumnObject.align, alignItems: 'center', justifyContent: 'center' }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-top-content-cell-class"
       />
 
       <Column v-for="col of getWorkMessTblColumnsExceptExpander"
@@ -33,7 +33,7 @@
         :key="col.field"
         :style="{ minWidth: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
-        bodyClass="dy58-table-content-cell-class"
+        bodyClass="dy58-table-top-content-cell-class"
       >
         <template #body="slotProps">
           <div
@@ -169,7 +169,7 @@
                   :key="col2.field"
                   :style="{ width: col2.width, }"
                   headerClass="dy58-table-header-cell-class"
-                  bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
+                  bodyClass="dy58-table-middle-content-cell-class dy58-send-table-data-cell"
                 >
                   <template #body="slotProps2">
                     <!-- правило отображения данных всех столбцов, кроме столбца с датой подтверждения распоряжения -->
@@ -214,9 +214,7 @@
 
               <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
               ввиду его "занятости", отображаем состояние прогресса -->
-              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
-                style="text-align:right"
-              >
+              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)" style="text-align:right">
                 <i class="pi pi-spin pi-spinner"></i>
               </div>
               <!-- Отображаем кнопку подтверждения распоряжения за всех, если есть хотя бы одна неподтвержденная
@@ -245,10 +243,14 @@
               <div>
                 Не подтверждено иными адресатами: {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}
               </div>
+              <!-- Если распоряжение не может быть подтверждено ввиду его "занятости", отображаем состояние прогресса -->
+              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)" style="text-align:right">
+                <i class="pi pi-spin pi-spinner"></i>
+              </div>
               <!-- Подтвердить за "Иных" адресатов можно лишь с рабочего полигона-издателя распоряжения,
               сделать это могут лишь те лица, которые имеют право на издание распоряжений -->
               <Button
-                v-if="isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon, true) && canUserConfirmOrderForOthers"
+                v-else-if="isOrderDispatchedOnCurrentWorkPoligon(slotProps.data.senderWorkPoligon, true) && canUserConfirmOrderForOthers"
                 label="Подтвердить"
                 class="p-button-primary p-button-text"
                 @click="confirmOrderForOtherReceivers($event, slotProps.data.id)"
@@ -269,7 +271,7 @@
                   :key="col3.field"
                   :style="{ width: col3.width, }"
                   headerClass="dy58-table-header-cell-class"
-                  bodyClass="dy58-table-content-cell-class dy58-send-table-data-cell"
+                  bodyClass="dy58-table-middle-content-cell-class dy58-send-table-data-cell"
                 >
                   <template #body="slotProps3">
                     <!-- правило отображения данных всех столбцов, кроме столбца с датой подтверждения распоряжения -->
@@ -318,9 +320,7 @@
               </DataTable>
               <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
               на станции ввиду его "занятости", отображаем состояние прогресса -->
-              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)"
-                style="text-align:right"
-              >
+              <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)" style="text-align:right">
                 <i class="pi pi-spin pi-spinner"></i>
               </div>
               <!-- Отображаем кнопку подтверждения распоряжения за всех на станции, если есть хотя бы

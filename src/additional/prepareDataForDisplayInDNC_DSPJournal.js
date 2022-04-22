@@ -46,13 +46,13 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
       assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
       dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       // ДСП нужна информация лишь по своей станции, ДНЦ - по всем станциям
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
         !isDSP_or_DSPoperator ?
