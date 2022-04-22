@@ -44,7 +44,7 @@
       >
         Документ подтверждается...
       </span>
-      <Button label="Закрыть" @click="closeDialog" />
+      <Button class="p-button-secondary" label="Закрыть" @click="closeDialog" />
     </template>
   </Dialog>
 </template>

@@ -4,10 +4,10 @@
       :showDlg="state.showRegisterNewUserDlg"
       @close="hideRegisterNewUserDlg"
     />
-    <div style="max-width:600px;">
+    <div style="max-width:600px;" class="dy58-text">
       <Toast />
       <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
-      <div class="dy58-title-small p-mb-4">Авторизуйтесь в системе</div>
+      <div class="p-text-bold p-mb-4">Авторизуйтесь в системе</div>
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="userName" :class="{'p-error': v$.userName.$invalid && state.submitted}">
@@ -51,7 +51,7 @@
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
           <Button type="submit" label="Войти" class="p-mr-2" />
-          <Button label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
+          <Button class="p-button-secondary" label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
         </div>
         <div v-else class="p-col-12">
           <ProgressSpinner />

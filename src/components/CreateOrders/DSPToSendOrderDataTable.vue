@@ -205,7 +205,7 @@
     },
 
     watch: {
-      getDSPShiftForSendingData(newVal) { console.log('watch getDSPShiftForSendingData',newVal)
+      getDSPShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);

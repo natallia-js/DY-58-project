@@ -10,7 +10,13 @@
           :showIcon="true"
           :manualInput="true"
           v-model="state.startDateTime"
-        />
+        >
+          <template #footer>
+            <Button @click="state.startDateTime = new Date()" class="p-mb-2 p-ml-2">
+              Текущее время
+            </Button>
+          </template>
+        </Calendar>
       </div>
     </div>
     <div class="p-col-5">
@@ -23,7 +29,13 @@
           :hideOnDateTimeSelect="true"
           :manualInput="true"
           v-model="state.endDateTime"
-        />
+        >
+          <template #footer>
+            <Button @click="state.endDateTime = new Date()" class="p-mb-2 p-ml-2">
+              Текущее время
+            </Button>
+          </template>
+        </Calendar>
       </div>
     </div>
     <div class="p-col-2">

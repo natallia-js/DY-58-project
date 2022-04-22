@@ -1,3 +1,11 @@
+h3 {
+  font-size: 1.3em;
+}
+
+h4 {
+  font-size: 1.2em;
+}
+
 .dy58-title-small {
   font-size: 1.2rem;
   font-weight: 700;
@@ -8,12 +16,9 @@
   font-weight: 700;
 }
 
-.dy58-text-big {
+.dy58-text {
   font-size: 1.2rem;
-}
-
-.dy58-text-small {
-  font-size: 0.8rem;
+  font-family: var(--font-family);
 }
 
 .dy58-warning {

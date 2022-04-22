@@ -3,6 +3,7 @@ import {
   ORDER_PLACE_VALUES,
   FILLED_ORDER_DATETIME_ELEMENTS,
   FILLED_ORDER_DROPDOWN_ELEMENTS,
+  FILLED_ORDER_INPUT_ELEMENTS,
 } from '@/constants/orders';
 import {
   ORDER_PATTERN_TYPES,
@@ -10,7 +11,7 @@ import {
 } from '@/constants/orderPatterns';
 
 
-export const useSetAndAnalyzeOrderText = ({ state, store, relatedOrderObject /*, showConnectedOrderFields*/ }) => {
+export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObject /*, showConnectedOrderFields*/ }) => {
 
   const changeOrderPatternElementValue = (elRef, value) => {
     if (state.orderText && state.orderText.patternId && state.orderText.orderText) {
@@ -53,6 +54,78 @@ export const useSetAndAnalyzeOrderText = ({ state, store, relatedOrderObject /*,
     }
   };
 
+  /**
+   * Позволяет заполнить в тексте шаблонного распоряжения-заявки поля, соответствующие выбранному "окну".
+   */
+   const setRequestOrderTextFields = () => {
+    if (!state.selectedOkno || !state.orderText.patternId || props.orderType !== ORDER_PATTERN_TYPES.REQUEST) {
+      return;
+    }
+    // работы
+    changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORKS, state.selectedOkno.typeWork);
+
+    // место работ
+    if (state.selectedOkno.km1 || state.selectedOkno.km2 || state.selectedOkno.comment) {
+      let place = `${state.selectedOkno.km1}` || ''; // пример: 776
+      if (state.selectedOkno.pk1) {
+        place += ` км ПК ${state.selectedOkno.pk1}`; // пример: 776 км ПК 1
+        if (state.selectedOkno.km2) {
+          place += ` - ${state.selectedOkno.km2} км`; // пример: 776 км ПК 1 - 777 км
+          if (state.selectedOkno.pk2) {
+            place += ` ПК ${state.selectedOkno.pk2}`; // пример: 776 км ПК 1 - 777 км ПК 2
+          }
+        } else {
+          if (state.selectedOkno.pk2) {
+            place += ` - ${state.selectedOkno.pk2}`; // пример: 776 км ПК 1 - 3
+          }
+        }
+      } else {
+        if (state.selectedOkno.km2) {
+          place += ` - ${state.selectedOkno.km2} км`; // пример: 776 - 777 км
+        } else {
+          place += ` км`; // пример: 776 км
+        }
+        if (state.selectedOkno.pk2) {
+          place += ` ПК ${state.selectedOkno.pk2}`; // пример: 1) 776 - 777 км ПК 2; 2) 776 км ПК 2
+        }
+      }
+      if (state.selectedOkno.comment) {
+        if (place) {
+          place += ` ${state.selectedOkno.comment}`;
+        } else {
+          place = state.selectedOkno.comment;
+        }
+      }
+      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORK_PLACE, place);
+    }
+
+    // пути перегона
+    if (state.selectedOkno.mainline || state.selectedOkno.line) {
+      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.BLOCK_TRACKS,
+        state.selectedOkno.mainline ? state.selectedOkno.mainline + ' гл. путь' : state.selectedOkno.line + ' путь');
+    }
+
+    // перегон
+    changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+      store.getters.getBlockTitleByStationsUNMCs(state.selectedOkno.sta1, state.selectedOkno.sta2));
+
+    // руководители
+    changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
+      `${state.selectedOkno.performer}${state.selectedOkno.fioPerf ? ' ' + state.selectedOkno.fioPerf : ''}`);
+
+    // продолжительность "окна"
+    if (state.selectedOkno.duration) {
+      const oknoDuration = +state.selectedOkno.duration;
+      const oknoDurationHours = Math.trunc(oknoDuration / 60);
+      const oknoDurationMinutes = oknoDuration - oknoDurationHours * 60;
+      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.OKNO_DURATION,
+        `${oknoDurationHours >= 10 ? oknoDurationHours : '0' + oknoDurationHours}ч. ${oknoDurationMinutes >= 10 ? oknoDurationMinutes : '0' + oknoDurationMinutes}мин.`);
+    }
+  };
+
+  /**
+   *
+   */
   const addStationToSendOrder = (stationId) => {
     if (!state.dspSectorsToSendOrder.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId)) {
       const stationToSendOrder = store.getters.getDSPShiftForSendingData.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId);
@@ -216,6 +289,7 @@ export const useSetAndAnalyzeOrderText = ({ state, store, relatedOrderObject /*,
 
   return {
     setRelatedOrderNumberInOrderText,
+    setRequestOrderTextFields,
     setOrderText,
   };
 };

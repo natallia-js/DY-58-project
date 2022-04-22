@@ -121,7 +121,7 @@ export const dsp = {
         !getters.getUserWorkPoligon || !getters.getUserWorkPoligonData) {
         return [];
       }
-      let arr = state.sectorPersonal.sectorStationsShift;
+      let arr = state.sectorPersonal.sectorStationsShift; console.log('arr',arr)
 
       // Если текущий полигон - станция, то не включаем ее в выборку
       if (getters.userWorkPoligonIsStation) {
@@ -189,8 +189,33 @@ export const dsp = {
         workPoligonType: this.workPoligonType,
         workPoligonId: this.sectorId,
       });*/
+
+
       dspUsers.forEach((user) => {
+        /*state.sectorPersonal = {
+          ...state.sectorPersonal,
+          sectorStationsShift: state.sectorPersonal.sectorStationsShift.map((el) => {
+            if (el.stationId !== user.stationId || !el.people) {
+              return el;
+            }
+            const stationUser = el.people.find((u) =>
+              getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === user.fio);
+            if (!stationUser) {
+              return el;
+            }
+            return {
+              ...el,
+              lastUserChoiceId: stationUser._id,
+              lastUserChoicePost: stationUser.post,
+              lastUserChoice: user.fio,
+            };
+          }),
+        };
+*/
+
+
         const stationShiftInfo = state.sectorPersonal.sectorStationsShift.find((el) => el.stationId === user.stationId);
+        const elIndex = state.sectorPersonal.sectorStationsShift.findIndex((el) => el.stationId === user.stationId);
         if (!stationShiftInfo || !stationShiftInfo.people) {
           return;
         }
@@ -199,13 +224,20 @@ export const dsp = {
         if (!stationUser) {
           return;
         }
-        /*console.log('stationUser', stationUser)
-        stationShiftInfo.lastUserChoiceId = stationUser._id;
+        console.log('stationUser', stationUser)
+        /*stationShiftInfo.lastUserChoiceId = stationUser._id;
         stationShiftInfo.lastUserChoicePost = stationUser.post;
         stationShiftInfo.lastUserChoice = user.fio;*/
+        state.sectorPersonal.sectorStationsShift[elIndex] = {
+          ...state.sectorPersonal.sectorStationsShift[elIndex],
+          lastUserChoiceId: stationUser._id,
+          lastUserChoicePost: stationUser.post,
+          lastUserChoice: user.fio,
+        };
+        console.log('sectorStationsShift',state.sectorPersonal.sectorStationsShift)
 
       });
-      console.log('sectorStationsShift',state.sectorPersonal.sectorStationsShift)
+
     },
 
     /**

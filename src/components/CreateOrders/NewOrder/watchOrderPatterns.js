@@ -4,7 +4,7 @@ import { watch } from 'vue';
 export const useWatchOrderPatterns = (inputVals) => {
   const {
     state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
-    getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
+    getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
   } = inputVals;
 
   // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны шаблоны распоряжений
@@ -22,6 +22,8 @@ export const useWatchOrderPatterns = (inputVals) => {
    * Кроме того, определяем необходимость заполнения полей места и времени действия распоряжения.
    * А также устанавливаем для шаблонного распоряжения поле номера связанного распоряжения (при его
    * наличии и наличии связанного распоряжения).
+   * Если текущий тип распоряжения - заявка, то при наличии выбранного "окна" необходимо произвести
+   * заполнение соответствующих полей шаблонного распоряжения.
    */
   watch(() => state.orderText.patternId, (newVal) => {
     if (!newVal) {
@@ -32,5 +34,6 @@ export const useWatchOrderPatterns = (inputVals) => {
     state.showOnGID = getUserDutyToDefineOrderPlace.value;
     state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
     setRelatedOrderNumberInOrderText();
+    setRequestOrderTextFields();
   });
 };

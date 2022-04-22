@@ -103,7 +103,7 @@
                 <div class="p-mb-1">
                   <Button
                     icon="pi pi-ellipsis-h"
-                    class="p-button-info p-button-sm dy58-order-action-button"
+                    class="p-button-info p-button dy58-order-action-button"
                     v-tooltip.bottom="'Подробнее'"
                     @click="showOrderInfo(slotProps.data)"
                   />
@@ -111,7 +111,7 @@
                 <div v-if="canOrdersChainBeDeleted(slotProps.data.id)" class="p-mb-1">
                   <Button
                     icon="pi pi-times"
-                    class="p-button-secondary p-button-sm dy58-order-action-button"
+                    class="p-button-secondary p-button dy58-order-action-button"
                     v-tooltip.bottom="slotProps.data.chainMembersNumber > 1 ? 'Не показывать цепочку' : 'Не показывать'"
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
@@ -128,7 +128,7 @@
                   />
                   <Button
                     icon="pi pi-file"
-                    class="p-button-success p-button-sm dy58-order-action-button"
+                    class="p-button-success p-button dy58-order-action-button"
                     v-tooltip.bottom="'Создать'"
                     @click="(event) => $refs[`createOrderMenu${slotProps.data.id}`].toggle(event)"
                     aria-haspopup="true"

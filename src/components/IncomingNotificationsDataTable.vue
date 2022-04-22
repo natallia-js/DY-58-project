@@ -16,6 +16,7 @@
       :rowHover="true"
       :scrollable="true" scrollHeight="200px"
       v-model:selection="state.chosenOrder" selectionMode="single" dataKey="id"
+      @row-dblclick="showOrderInfo"
     >
       <template #header>
         <div class="dy58-table-title">
@@ -54,7 +55,10 @@
               v-else-if="col.field === getInputMessTblColumnsTitles.orderText"
               v-html="slotProps.data[col.field]"
             ></span>
-            <div v-else-if="col.field === getInputMessTblColumnsTitles.state">
+            <div
+              v-else-if="col.field === getInputMessTblColumnsTitles.state"
+              style="height:100%;display:flex;justify-content:center;align-items:center;"
+            >
               <i v-if="isOrderBeingConfirmed(slotProps.data.id)" class="pi pi-spin pi-check-circle"></i>
               <img
                 :src="slotProps.data[col.field] === WorkMessStates.cameRecently ? require('@/assets/img/hourglass_black.png') :

@@ -239,7 +239,7 @@
   }
 
   .dy58-img-style {
-    width: 1.7rem !important;
+    width: 2rem !important;
     height: auto !important;
   }
 

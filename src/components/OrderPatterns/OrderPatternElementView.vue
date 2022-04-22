@@ -52,7 +52,13 @@
     :manualInput="true"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
-  />
+  >
+    <template #footer>
+      <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
+        Текущая дата
+      </Button>
+    </template>
+  </Calendar>
 
   <!-- Элемент "Таблица "Время" -->
 
@@ -66,7 +72,13 @@
     :placeholder="element.ref || 'время'"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
-  />
+  >
+    <template #footer>
+      <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
+        Текущее время
+      </Button>
+    </template>
+  </Calendar>
 
   <!-- Элемент "Дата-время" -->
 
@@ -79,7 +91,13 @@
     :manualInput="true"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
-  />
+  >
+    <template #footer>
+      <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
+        Текущее время
+      </Button>
+    </template>
+  </Calendar>
 
   <!-- Элемент "Таблица "Поезд ДР" -->
 
@@ -240,6 +258,8 @@
     GID_EVENT_TYPE,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
     FILLED_ORDER_DATETIME_ELEMENTS,
+    FILLED_ORDER_DATE_ELEMENTS,
+    FILLED_ORDER_TIME_ELEMENTS,
   } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
@@ -298,6 +318,22 @@
             case FILLED_ORDER_DATETIME_ELEMENTS.TAKE_DUTY_DATETIME:
             case FILLED_ORDER_DATETIME_ELEMENTS.PASS_DUTY_DATETIME:
               return store.getters.getDefaultPassDutyTime;
+            case FILLED_ORDER_DATETIME_ELEMENTS.CURR_DATETIME:
+              return new Date();
+            default:
+              return props.element.value;
+          }
+        } else if (props.element.type === OrderPatternElementType.DATE) {
+          switch (props.element.ref) {
+            case FILLED_ORDER_DATE_ELEMENTS.CURR_DATE:
+              return new Date();
+            default:
+              return props.element.value;
+          }
+        } else if (props.element.type === OrderPatternElementType.TIME) {
+          switch (props.element.ref) {
+            case FILLED_ORDER_TIME_ELEMENTS.CURR_TIME:
+              return new Date();
             default:
               return props.element.value;
           }

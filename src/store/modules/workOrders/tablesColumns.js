@@ -66,7 +66,6 @@ const ECDJournalTblColumnsTitles = Object.freeze({
 // отображения информации; кроме того, они должны совпадать с наименованиями соответствующих полей в БД,
 // т.к. по ним идут запросы на сортировку и фильтрацию данных в таблице)
 const DNC_DSPJournalTblColumnsTitles = Object.freeze({
-  seqNum: 'seqNum',
   assertDateTime: 'assertDateTime', // дата, время утверждения
   number: 'number',
   orderContent: 'orderContent',
@@ -236,11 +235,10 @@ export const tablesColumns = {
      */
     getDNC_DSPJournalTblColumns() {
       return [
-        { field: DNC_DSPJournalTblColumnsTitles.seqNum, title: '№ п/п', width: '5%', align: 'left', },
-        { field: DNC_DSPJournalTblColumnsTitles.assertDateTime, title: 'Время утверждения распоряжения', width: '10%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.assertDateTime, title: 'Время создания/утверждения распоряжения', width: '10%', align: 'left', },
         { field: DNC_DSPJournalTblColumnsTitles.number, title: '№ распоряжения', width: '8%', align: 'left', },
         { field: DNC_DSPJournalTblColumnsTitles.orderContent, title: 'Содержание распоряжения', width: '57%', align: 'left', },
-        { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '20%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '25%', align: 'left', },
       ];
     },
 

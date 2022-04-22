@@ -27,12 +27,17 @@ export const ORDER_ELEMENTS_CAN_BE_EMPTY = [
   'Примечание',
 ];
 
+export const FILLED_ORDER_TIME_ELEMENTS = Object.freeze({
+  CURR_TIME: 'Текущее время',
+});
+
 export const FILLED_ORDER_DATE_ELEMENTS = Object.freeze({
   ORDER_DATE: 'Дата издания действующего распоряжения',
   REQUEST_DATE: 'Дата издания действующей заявки',
   NOTIFICATION_DATE: 'Дата издания действующего уведомления',
   ECD_ORDER_DATE: 'Дата издания действующего приказа',
   ECD_PROHIBITION_DATE: 'Дата издания действующего запрещения',
+  CURR_DATE: 'Текущая дата',
 });
 
 export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
@@ -45,6 +50,16 @@ export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
   TAKE_DUTY_DATETIME: 'Дата-время принятия дежурства',
   CLOSE_BLOCK_DATETIME: 'Дата-время закрытия перегона',
   OPEN_BLOCK_DATETIME: 'Дата-время открытия перегона',
+  CURR_DATETIME: 'Текущее время',
+});
+
+export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
+  NOTE: 'Примечание',
+  WORKS: 'Работы',
+  WORK_PLACE: 'Место работ',
+  BLOCK_TRACKS: 'Пути перегона',
+  WORKS_HEADS: 'Руководители',
+  OKNO_DURATION: 'Продолжительность "окна"',
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
@@ -82,10 +97,6 @@ export const EXACT_PLACE_ITEMS = [
 export const ACTIONS_ORDER_ITEMS = [
   'вручную', 'дистанционно', 'закрыть привод на замок', 'вывесить запрещающие плакаты',
 ];
-
-export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
-  NOTE: 'Примечание',
-});
 
 export const GID_EVENT_TYPE = Object.freeze({
   ARRIVAL: 1,

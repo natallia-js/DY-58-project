@@ -254,7 +254,7 @@
           На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
         </div>
         <Button type="submit" class="p-mr-2" label="Сохранить" />
-        <Button label="Закрыть" @click="closeDialog" />
+        <Button class="p-button-secondary" label="Закрыть" @click="closeDialog" />
       </div>
     </form>
   </Dialog>

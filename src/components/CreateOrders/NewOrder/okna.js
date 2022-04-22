@@ -1,3 +1,4 @@
+import { watch } from 'vue';
 import { getOknas } from '@/serverRequests/oknas.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import { SET_SYSTEM_MESSAGE } from '@/store/mutation-types';
@@ -5,15 +6,23 @@ import { SET_SYSTEM_MESSAGE } from '@/store/mutation-types';
 /**
  * Данный модуль предназначен для работы с "окнами".
  */
-export const useOkna = ({ store, state }) => {
+export const useOkna = ({ store, state, setRequestOrderTextFields }) => {
+  /**
+   * Обновляет информацию по "окнам".
+   */
   const refreshOknas = async () => {
     state.getOknaDataError = null;
     state.gettingOknasData = true;
     try {
-      const responseData = await getOknas();
+      const stationsCodes = store.getters.getSectorStations.map((el) => el.St_UNMC);
+      const responseData = await getOknas(stationsCodes);
       if (responseData && responseData.data) {
         if (responseData.data instanceof Array) {
-          state.oknaData = responseData.data;
+          state.oknaData = responseData.data.map((el) => ({
+            ...el,
+            id: `${el.idPlan}${el.nppPlan}${el.idSpan}`,
+            datetime: `с ${el.beginStr.split(' ')[1]} по ${el.endStr.split(' ').[1]}`,
+          }));
         } else if (responseData.data.error) {
           if (responseData.data.error === "Отсутствуют данные за указанный период") {
             state.oknaData = [];
@@ -31,6 +40,11 @@ export const useOkna = ({ store, state }) => {
       state.gettingOknasData = false;
     }
   };
+
+  /**
+   * При выборе "окна" необходимо обновлять поля текущего шаблона заявки (если таковой есть).
+   */
+  watch(() => state.selectedOkno, () => setRequestOrderTextFields());
 
   return {
     refreshOknas,

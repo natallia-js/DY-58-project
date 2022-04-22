@@ -3,23 +3,17 @@
 
 .dy58-table-title {
   color: var(--text-color);
-  /*font-family: var(--font-family) !important;*/
-  font-size: 1.2rem;
+  font-family: var(--font-family); // оставляем
+  font-size: 1.3rem; // оставляем
   font-weight: bold;
   text-align: center;
 }
 
 .dy58-table-comment {
   color: var(--text-color);
-  font-size: 1rem;
+  font-size: 1.2rem; // оставляем
   font-weight: 400;
   text-align: center;
-}
-
-.dy58-table-upper-comment {
-  color: var(--text-color) !important;
-  font-size: 0.9rem !important;
-  text-align: right;
 }
 
 .dy58-table-header-cell-class {
@@ -28,7 +22,7 @@
   vertical-align: middle !important;
   background: var(--bluegray-200) !important;
   color: var(--text-color) !important;
-  font-size: 0.9rem !important;
+  /*font-size: 0.9rem !important;*/
   padding: 5px !important;
   overflow: hidden;
 }
@@ -38,7 +32,7 @@
   //vertical-align: top !important;
   padding: 0.5rem !important;
   color: var(--text-color) !important;
-  font-size: 0.9rem !important;
+  /*font-size: 0.9rem !important;*/
 }
 
 .dy58-control-record {
@@ -49,8 +43,8 @@
 // Стили для таблиц со входящими уведомлениями и распоряжениями в работе
 
 .dy58-order-state-img-style {
-  width: 10px !important;
-  height: 15px !important;
+  width: 1.1rem !important;
+  height: 1.4rem !important;
 }
 
 // ------------------------------------------------------------------------
@@ -99,7 +93,7 @@
 .dy58-shift-tbl-group-header {
   text-align: center;
   color: var(--bluegray-800) !important;
-  font-size: 0.9rem !important;
+  /*font-size: 0.9rem !important;*/
   font-weight: bold;
   padding: 0 !important;
 }

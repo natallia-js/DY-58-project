@@ -194,11 +194,11 @@ export function formOrderText(props) {
     if (copyToString) {
       addresses += `Копия: ${copyToString}<br/>`;
     }
-    return `${addresses}${emptyLineBeforeText}<b>${orderText}</b>`;
+    return `${addresses}${emptyLineBeforeText}<p style="text-align:justify;font-weight:bold">${orderText}</p>`;
   }
 
   return {
-    text: `${emptyLineBeforeText}<b>${orderText}</b>`,
+    text: `${emptyLineBeforeText}<p style="text-align:justify;font-weight:bold">${orderText}</p>`,
     toWhom: originalToString || '',
     toWhomCopy: copyToString ? `Копия: ${copyToString}` : '',
   };

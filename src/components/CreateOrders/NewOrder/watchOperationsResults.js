@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 
 
 export const useWatchOperationsResults = (inputVals) => {
-  const { /*state,*/ store, props, showSuccessMessage, showErrMessage } = inputVals;
+  const { state, store, props, showSuccessMessage, showErrMessage } = inputVals;
 
   const router = useRouter();
 
@@ -43,6 +43,15 @@ export const useWatchOperationsResults = (inputVals) => {
       showSuccessMessage(newVal.message);
     } else {
       showErrMessage(newVal.message);
+    }
+  });
+
+  /**
+   * Для отображения ошибки получения информации об "окнах".
+   */
+  watch(() => state.getOknaDataError, (newVal) => {
+    if (newVal) {
+      showErrMessage(newVal);
     }
   });
 };

@@ -345,6 +345,26 @@ export const currWorkPoligonStructure = {
     },
 
     /**
+     * Возвращает объект перегона по заданным кодам ограничивающих его станций.
+     */
+    getBlockTitleByStationsUNMCs(state, getters) {
+      return (stationUNMC1, stationUNMC2) => {
+        const station1 = getters.getSectorStationByESRCode(stationUNMC1);
+        const station2 = getters.getSectorStationByESRCode(stationUNMC2);
+        if (!station1 || !station2) {
+          return null;
+        }
+        const block = getters.getSectorBlocks.find((bl) =>
+          [station1.St_ID, station2.St_ID].includes(bl.Bl_StationID1) &&
+          [station1.St_ID, station2.St_ID].includes(bl.Bl_StationID2));
+        if (block) {
+          return block.Bl_Title;
+        }
+        return null;
+      };
+    },
+
+    /**
      * Возвращает список перегонов текущего полигона управления.
      * Если полигон управления - участок ДНЦ / ЭЦД, то возвращается список перегонов,
      * входящих в состав поездных участков.

@@ -22,9 +22,6 @@ export const mainMenuItems = {
   state: {
     mainMenuItems: [
       { key: MainMenuItemsKeys.mainPage, label: 'Главная страница', to: '/mainPage' },
-      { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: '/sectorStructure' },
-      { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
-      { key: MainMenuItemsKeys.ordersJournal, label: 'Журнал', to: '/ordersJournalPage' },
       { key: MainMenuItemsKeys.createOrder, label: 'Создать', command: () => {
         router.push({
           name: 'NewOrderPage',
@@ -36,6 +33,9 @@ export const mainMenuItems = {
           }
         });
       } },
+      { key: MainMenuItemsKeys.ordersJournal, label: 'Журнал', to: '/ordersJournalPage' },
+      { key: MainMenuItemsKeys.sectorStructure, label: 'Рабочий полигон', to: '/sectorStructure' },
+      { key: MainMenuItemsKeys.currShift, label: 'Персонал', to: '/shiftPage' },
       { key: MainMenuItemsKeys.orderPatterns, label: 'Шаблоны документов', to: '/orderPatternsPage'},
       { key: MainMenuItemsKeys.help, label: 'Помощь', to: '/helpPage' },
       // В поле 'command' определено действие по умолчанию на случай, когда пользователь не принимает

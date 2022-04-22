@@ -328,8 +328,8 @@
         class="p-col-12 p-mt-2 p-text-right"
       >
         <Button type="submit" class="p-mr-2" label="Отправить" />
-        <Button class="p-mr-2" label="Очистить форму" @click="handleResetForm" />
-        <Button label="Закрыть" @click="handleCloseDialog" />
+        <Button class="p-mr-2 p-button-secondary" label="Очистить форму" @click="handleResetForm" />
+        <Button class="p-button-secondary p-button-outlined" label="Закрыть" @click="handleCloseDialog" />
       </div>
       <div v-else-if="state.loadingDataErrors.length" class="p-col-12 p-d-flex p-flex-column">
         <p v-for="error in state.loadingDataErrors" :key="error" class="p-error">

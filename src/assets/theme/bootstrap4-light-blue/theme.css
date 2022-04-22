@@ -33,7 +33,7 @@
 
 .p-component {
   font-family: var(--font-family);
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: normal;
 }
 
@@ -55,11 +55,11 @@
 }
 
 .pi {
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .p-link {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-family: var(--font-family);
   border-radius: 4px;
 }
@@ -316,7 +316,7 @@
   margin-right: 0.5rem;
 }
 .p-datepicker table {
-  font-size: 1rem;
+  font-size: 1.2rem;
   margin: 0.5rem 0;
 }
 .p-datepicker table th {
@@ -974,7 +974,7 @@
 
 .p-inputtext {
   font-family: var(--font-family);
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #495057;
   background: #ffffff;
   /*padding: 0.5rem 0.75rem;*/
@@ -1595,7 +1595,7 @@
   border: 1px solid #007bff;
   /*padding: 0.5rem 0.75rem;*/
   padding: 0.2rem 0.75rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
   border-radius: 4px;
 }
@@ -1707,18 +1707,18 @@
   height: 2.357rem;
 }
 .p-button.p-button-sm {
-  font-size: 0.875rem;
+  font-size: 1rem;
   padding: 0.4375rem 0.65625rem;
 }
 .p-button.p-button-sm .p-button-icon {
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 .p-button.p-button-lg {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   padding: 0.625rem 0.9375rem;
 }
 .p-button.p-button-lg .p-button-icon {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
 }
 .p-button.p-button-loading-label-only .p-button-label {
   margin-left: 0.5rem;
@@ -4857,7 +4857,7 @@
 .p-badge {
   background: /* #007bff; */ #478BD3;
   color: #ffffff;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 700;
   min-width: 1.5rem;
   height: 1.5rem;

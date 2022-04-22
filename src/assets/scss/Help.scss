@@ -5,6 +5,7 @@
 @mixin help-text-style() {
   line-height: 1.5;
   margin-bottom: 3px;
+  font-size: 1.2rem;
 }
 
 @mixin help-paragraph-style() {
@@ -49,6 +50,7 @@
 .dy58-to-help-start-block {
   margin-top: 0.5rem;
   text-align: right;
+  font-size: 1.2rem;
 }
 
 .dy58-help-definition {

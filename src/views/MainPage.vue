@@ -28,7 +28,13 @@
                 :showTime="true"
                 :showIcon="true"
                 :manualInput="false"
-              />
+              >
+                <template #footer>
+                  <Button @click="state.startDateToGetData = new Date()" class="p-mb-2 p-ml-2">
+                    Текущее время
+                  </Button>
+                </template>
+              </Calendar>
               по настоящее время
             </div>
             <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">

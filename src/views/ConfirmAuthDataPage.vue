@@ -2,7 +2,7 @@
   <div class="p-d-flex" style="height: 100vh;">
     <Toast />
 
-    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
       <div class="p-col-12">
         Получаю информацию о рабочих полигонах...
       </div>
@@ -10,20 +10,20 @@
         <ProgressSpinner />
       </div>
       <div class="p-col-12">
-        <Button type="button" label="Назад" @click="goToAuthPage" class="p-mr-3" />
+        <Button type="button" label="Назад" class="p-button-secondary" @click="goToAuthPage" />
       </div>
     </div>
 
-    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
       <div class="p-col-12">
         <InlineMessage severity="error">{{ state.getDataError }}</InlineMessage>
       </div>
       <div class="p-col-12">
-        <Button type="button" label="Назад" @click="goToAuthPage" class="p-mr-3" />
+        <Button type="button" label="Назад" class="p-button-secondary" @click="goToAuthPage" />
       </div>
     </div>
 
-    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
+    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6 dy58-text">
       <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
       <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
         <p class="p-text-bold p-mb-3">Полномочие</p>
@@ -60,8 +60,13 @@
         </div>
       </div>
       <div class="p-col-12">
-        <Button type="button" label="Назад" @click="goToAuthPage" class="p-mr-3" />
-        <Button type="button" label="Продолжить" v-if="state.selectedCredential && state.selectedPoligon" @click="goToMainPage" />
+        <Button type="button" label="Назад" class="p-button-secondary p-mr-2" @click="goToAuthPage" />
+        <Button
+          v-if="state.selectedCredential && state.selectedPoligon"
+          type="button"
+          label="Продолжить"
+          @click="goToMainPage"
+        />
       </div>
     </div>
   </div>

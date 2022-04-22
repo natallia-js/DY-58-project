@@ -42,7 +42,9 @@
 .dy58-order-pattern-border {
   border-width: 1px;
   border-style: solid;
+  background-color: var(--surface-b);
   border-color: var(--surface-400);
+  font-weight: 600;
 }
 
 .dy58-edit-order-pattern-element-block {

@@ -19,7 +19,7 @@
     </div>
     <template #footer>
       <Button v-if="!isLogoutProcessUnderway" label="Выйти" @click="handleConfirmLogout" />
-      <Button v-if="!isLogoutProcessUnderway" label="Отмена" @click="handleCloseDialog" />
+      <Button v-if="!isLogoutProcessUnderway" label="Отмена" class="p-button-secondary" @click="handleCloseDialog" />
     </template>
   </Dialog>
 </template>

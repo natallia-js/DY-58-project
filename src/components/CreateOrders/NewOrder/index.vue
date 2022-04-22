@@ -34,46 +34,66 @@
       />
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
-        <br />
       </div>
-      <div v-if="(isDSP_or_DSPoperator || isDNC) && orderType === ORDER_PATTERN_TYPES.REQUEST">
-        <div class="p-mb-2">
-          <span class="p-text-bold">Текущие "окна"</span>
-        </div>
-        <div class="dy58-okna-tbl-block">
-        <DataTable
-          :value="state.oknaData"
-          class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
-          :rowHover="true"
-          breakpoint="200px"
-        >
-          <Column
-            selectionMode="single"
-            headerStyle="minWidth:3em"
-            bodyStyle="minWidth:3em"
-            headerClass="dy58-table-header-cell-class"
-            bodyClass="dy58-table-content-cell-class"
-          >
-          </Column>
-          <Column v-for="col of getOknaTblColumns"
-            :field="col.field"
-            :key="col.field"
-            :header="col.title"
-            :style="{ width: col.width, textAlign: col.align }"
-            headerClass="dy58-table-header-cell-class"
-            bodyClass="dy58-table-content-cell-class"
-          >
-          </Column>
-        </DataTable>
-        <Button
-          icon="pi pi-refresh"
-          class="p-button-rounded p-button-text dy58-refresh-okns-list-btn"
-          v-tooltip.right="'Обновить список окон'"
-          @click="refreshOknas"
-        />
-        </div>
-        <br />
+      <div v-if="(isDSP_or_DSPoperator || isDNC) && orderType === ORDER_PATTERN_TYPES.REQUEST" class="p-mb-2">
+        <Accordion class="dy58-oknas-accordion">
+          <AccordionTab>
+            <template #header>
+              <div class="p-grid p-ml-1" style="margin:0;overflow-x:auto">
+                <div class="p-col-fixed dy58-okna-accord-title-block" style="width:45px">
+                  <Button
+                    v-if="!state.gettingOknasData"
+                    icon="pi pi-refresh"
+                    class="p-button-rounded p-button-success"
+                    v-tooltip.right="'Обновить список окон'"
+                    @click="refreshOknas"
+                  />
+                </div>
+                <div class="p-col p-d-flex p-ai-center dy58-okna-accord-title-block">
+                  <span>Текущие "окна" ({{ state.oknaData.length }})</span>
+                </div>
+                <div v-if="state.selectedOkno" class="p-col-12 dy58-okna-accord-title-block">
+                  Выбрано окно: <br />
+                  <span v-for="col in getOknaTblColumns" :key="col.field">
+                    {{ col.title }}: {{ state.selectedOkno[col.field] }} <br />
+                  </span>
+                </div>
+              </div>
+            </template>
+            <div>
+              <DataTable
+                :value="state.oknaData"
+                class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
+                :rowHover="true"
+                :loading="state.gettingOknasData"
+                breakpoint="200px"
+                dataKey="id"
+                v-model:selection="state.selectedOkno"
+                selectionMode="single"
+              >
+                <Column v-for="col of getOknaTblColumns"
+                  :field="col.field"
+                  :key="col.field"
+                  :header="col.title"
+                  :style="{ width: col.width, textAlign: col.align }"
+                  headerClass="dy58-table-header-cell-class"
+                  bodyClass="dy58-table-content-cell-class"
+                >
+                </Column>
+                <template #empty>
+                  <div class="p-d-flex p-jc-center">{{ state.getOknaDataError || 'Данных нет' }}</div>
+                </template>
+                <template #footer>
+                  <small>
+                    Для снятия выделения со строки таблицы необходимо удерживать клавишу Ctrl
+                  </small>
+                </template>
+              </DataTable>
+            </div>
+          </AccordionTab>
+        </Accordion>
       </div>
+
       <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
 
         <!-- НОМЕР РАСПОРЯЖЕНИЯ -->
@@ -294,7 +314,7 @@
           </div>
           <div class="p-as-stretch p-d-flex p-ai-center p-flex-row p-flex-wrap" style="width:30%">
             <Button type="submit" label="Просмотреть и издать" class="p-mb-2" />
-            <Button v-if="isECD" label="Сохранить черновик" @click="handleSaveOrderDraft($event)" />
+            <Button v-if="isECD" label="Сохранить черновик" class="p-button-secondary" @click="handleSaveOrderDraft($event)" />
           </div>
         </div>
       </form>
@@ -392,7 +412,7 @@
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
     ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
-  import { SET_USER_CHOSEN_STATUS /*SET_DEFAULT_DSP_ADDRESSES*/ } from '@/store/mutation-types';
+  import { /*SET_USER_CHOSEN_STATUS*/ SET_DEFAULT_DSP_ADDRESSES } from '@/store/mutation-types';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { useStoreData } from './storeData';
@@ -533,8 +553,39 @@
         // id текущего черновика распоряжения
         currentOrderDraftId: null,
         gettingOknasData: false,
-        oknaData: [],
+        oknaData: [/*{
+          id: '1',
+          fullNumDoc: '15-07-15/2026 от 13.04.2022',
+          performer: 'ПМС Орша',
+          fioPerf: 'помощник Петров',
+          datetime: 'с 11:20 по 15:20',
+          placeWorkPlan: 'Городище - Колодищи 2 гл. путь 730 км',
+          typeWork: 'разрядка темп.напряж.',
+          sta2: '144832',
+          sta1: '138507',
+          duration: 263,
+          mainline: '1',
+          km1: 10,
+          pk1: null,
+          km2: null,
+          pk2: 5,
+          comment: 'комментарий',
+        }, {
+          id: '2',
+          fullNumDoc: '15-07-15/2026 от 13.04.2022',
+          performer: 'ПЧ-2',
+          datetime: 'с 13:00 по 15:45',
+          placeWorkPlan: 'Борисов - Жодино 1 гл. путь 683 км ,675 км',
+          typeWork: 'работы по постановке изостыков по наугольнику, работы по обеспечению электробезопасности работников ПЧ-2 АДМ, работы по ремонту и регулировке устройств контактной сети АДМ',
+          line: '1A',
+          km1: 10,
+          pk1: 1,
+          km2: 12,
+          pk2: 2,
+          comment: 'комментарий к окну',
+        }*/],
         getOknaDataError: null,
+        selectedOkno: null,
       });
 
       const {
@@ -566,7 +617,7 @@
           const circularOrder = store.getters.getExistingDNCTakeDutyOrder;
           console.log('circularOrder', circularOrder ? circularOrder.dspToSend : null)
           if (circularOrder && circularOrder.dspToSend) {
-            circularOrder.dspToSend.forEach((stationDSP) => {
+            /*circularOrder.dspToSend.forEach((stationDSP) => {
               const user = store.getters.getStationUserByFIO({ stationId: stationDSP.id, fio: stationDSP.fio });
               console.log('user',user)
               if (user) {
@@ -577,12 +628,12 @@
                   workPoligonId: stationDSP.id,
                 });
               }
-            });
-            /*store.commit(SET_DEFAULT_DSP_ADDRESSES, circularOrder.dspToSend.map((el) => ({
+            });*/
+            store.commit(SET_DEFAULT_DSP_ADDRESSES, circularOrder.dspToSend.map((el) => ({
               stationId: el.id,
               post: el.post,
               fio: el.fio,
-            })));*/
+            })));
           }
         }
       });
@@ -678,21 +729,22 @@
         state, store, props, emit, currentOrderDraft,
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
       });
-      useWatchOperationsResults({ /*state,*/ store, props, showSuccessMessage, showErrMessage });
+      useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
 
       const {
         setRelatedOrderNumberInOrderText,
+        setRequestOrderTextFields,
         setOrderText,
-      } = useSetAndAnalyzeOrderText({ state, store, relatedOrderObject /*, showConnectedOrderFields */ });
+      } = useSetAndAnalyzeOrderText({ state, props, store, relatedOrderObject /*, showConnectedOrderFields */ });
 
       useWatchOrderPatterns({
         state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
-        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan,
+        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
       useWatchRelatedOrder({ props, emit, relatedOrderObject, setRelatedOrderNumberInOrderText });
 
-      const { refreshOknas } = useOkna({ store, state });
+      const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
@@ -778,7 +830,7 @@
   .dy58-create-order-block {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 20px;
   }
 
   .dy58-create-order-subblock {
@@ -795,13 +847,18 @@
     }
   }
 
-  .dy58-okna-tbl-block {
-    position: relative;
+  .p-accordion :deep(.p-accordion-content), .dy58-okna-accord-title-block {
+    padding: 0;
   }
 
-  .dy58-refresh-okns-list-btn {
-    position: absolute;
-    left: 0;
-    top: 0;
+  .p-accordion.dy58-oknas-accordion :deep(.p-accordion-header-link) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .p-accordion.dy58-oknas-accordion :deep(.p-accordion-toggle-icon) {
+    display: block;
   }
 </style>
