@@ -11,4 +11,14 @@ module.exports = {
   configureWebpack: {
     devtool: 'source-map',
   },
+  pluginOptions: {
+    electronBuilder: {
+      builderOptions: {
+        win: {
+          icon: './src/assets/img/favicon.png',
+        },
+        productName: 'ДУ-58',
+      },
+    },
+  },
 }

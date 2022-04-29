@@ -1,5 +1,5 @@
 import { watch } from 'vue';
-import {
+/*import {
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
 } from '@/store/mutation-types';
@@ -7,9 +7,9 @@ import {
   CurrShiftGetOrderStatus,
   ORDER_PLACE_VALUES,
 } from '@/constants/orders';
+*/
 
-
-export const useWatchOrderPlace = ({ state, store }) => {
+export const useWatchOrderPlace = ({ state /*, store*/ }) => {
   // При изменении значения параметра места действия распоряжения меняем список "Кому" по станциям,
   // а также, при необходимости, заполняем значения соответствующих полей в тексте распоряжения
   watch(() => state.orderPlace.value, (newValue) => {
@@ -17,7 +17,7 @@ export const useWatchOrderPlace = ({ state, store }) => {
       return;
     }
     // Вначале все записи "чистим" (т.е. отменяем передачу всем, кто до этого был назначен)
-    store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+  /*  store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
     let blockObject;
     switch (state.orderPlace.place) {
       case ORDER_PLACE_VALUES.station:
@@ -35,6 +35,6 @@ export const useWatchOrderPlace = ({ state, store }) => {
             { stationId: blockObject.Bl_StationID2, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
         }
         break;
-    }
+    }*/
   });
 };

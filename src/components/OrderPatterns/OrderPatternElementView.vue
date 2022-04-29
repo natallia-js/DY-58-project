@@ -115,6 +115,12 @@
         @click="pasteDRTrainTable"
       />
       <Button
+        icon="pi pi-book"
+        class="p-button-rounded p-button-success p-mr-1"
+        v-tooltip.right="DR_TABLE_MENU_ITEMS.SELECT_STATIONS"
+        @click="showAddDRTableStationsDialog"
+      />
+      <Button
         v-if="drTableDataToDisplay.length"
         icon="pi pi-times"
         class="p-button-rounded p-button-secondary p-mr-1"
@@ -155,78 +161,172 @@
       dataKey="orderNumber"
       class="p-datatable-gridlines p-datatable-sm z-depth-1"
       :scrollable="true" scrollHeight="400px"
+      editMode="cell"
+      @cell-edit-complete="onDRTimeEditComplete"
       @contextmenu="handleTrainTableRightClick($event)"
     >
       <Column
-        v-for="col of getDRTrainTableColumns"
+        v-for="col of DRTrainTableColumns"
         :field="col.field"
         :header="col.header"
         :key="col.field"
         :style="{ minWidth: col.width }"
       >
+        <!--<template #body="slotProps">
+          <span v-if="['arrivalTime', 'departureTime'].includes(col.field)">
+            {{ slotProps.data[col.field] ? getLocaleTimeString(slotProps.data[col.field]) : '' }}
+          </span>
+          <span v-else>
+            {{ slotProps.data[col.field] }}
+          </span>
+        </template>-->
+        <!-- возможность редактировать поля даты-времени прибытия и отправления прямо в таблице -->
+        <template
+          v-if="['arrivalTime', 'departureTime'].includes(col.field)"
+          #editor="{ data, field }"
+        >
+          <!--<Calendar
+            v-model="data[field]"
+            :showTime="true"
+            :timeOnly="true"
+            :showIcon="false"
+            required="false"
+            :hideOnDateTimeSelect="true"
+            :manualInput="true"
+            @date-select="(value) => onDRTimeEditComplete({ data, field }, value)"
+            autofocus
+          />-->
+          <InputMask v-model="data[field]" mask="99:99" autofocus />
+        </template>
       </Column>
     </DataTable>
 
     <ContextMenu ref="menu" :model="drTrainTableContextMenuItems" />
 
+    <!-- Диалог выбора станций для поезда ДР -->
     <Dialog
-      :header="addDRTableRecDlgTitle"
-      v-model:visible="newDRRecordDialog"
-      :style="{width: '450px'}"
+      header="Выбрать станции для таблицы ДР"
+      v-model:visible="addDRTableStationsDialog"
+      style="width:450px"
       :modal="true"
       class="p-fluid"
     >
-      <div class="p-field">
-        <label for="chooseStation"><span class="dy58-required-field">*</span> Станция</label>
-        <Dropdown
-          id="chooseStation"
-          v-model="drTableRec.station"
-          placeholder="Выберите станцию"
-          required="true"
-          autofocus
-          style="width:100%"
-          :class="{'p-invalid': submitted && !drTableRec.station}"
-          :options="getSectorStations"
-          optionLabel="title"
-        />
-        <small class="p-error" v-if="submitted && !drTableRec.station">Необходимо указать станцию</small>
-      </div>
-      <div class="p-field">
-        <label for="arrivalDateTime">Время прибытия</label>
-        <Calendar
-          id="arrivalDateTime"
-          v-model="drTableRec.arrivalTime"
-          :showTime="true"
-          :showIcon="true"
-          placeholder="Определить время прибытия"
-          required="false"
-          :hideOnDateTimeSelect="true"
-          :manualInput="false"
-          :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
-        />
-      </div>
-      <div class="p-field">
-        <label for="departureDateTime">Время отправления</label>
-        <Calendar
-          id="departureDateTime"
-          v-model="drTableRec.departureTime"
-          :showTime="true"
-          :showIcon="true"
-          placeholder="Определить время отправления"
-          required="false"
-          :hideOnDateTimeSelect="true"
-          :manualInput="false"
-          :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
-        />
-        <small class="p-error" v-if="submitted && !drTableRec.arrivalTime && !drTableRec.departureTime">
-          Необходимо указать время события на станции (прибытие и/или отправление)
-        </small>
-      </div>
-      <small>! При проследовании поездом станции время прибытия = время отправления</small>
+      <MultiSelect
+        v-model="selectedStations"
+        :options="orderedStations"
+        optionLabel="St_Title"
+        dataKey="St_ID"
+        :filter="true"
+        placeholder="Выберите станции из списка"
+      >
+        <template #option="slotProps">
+          <div style="overflow:auto">
+            {{ slotProps.option.St_Title }}
+          </div>
+        </template>
+      </MultiSelect>
+      <small>! Станции необходимо выбирать в том порядке, в котором они должны быть добавлены в таблицу</small>
       <template #footer>
-        <Button label="Отмена" icon="pi pi-times" class="p-button-text" @click="hideNewDRRecordDialog"/>
-        <Button label="Добавить" icon="pi pi-check" class="p-button-text" @click="saveNewDRRecord" />
+        <Button label="Закрыть" icon="pi pi-times" class="p-button-text" @click="hideAddDRTableStationsDialog"/>
+        <Button label="Добавить" icon="pi pi-check" class="p-button-text" @click="saveNewStationsDRRecords" />
       </template>
+    </Dialog>
+
+    <!-- диалог добавления новой записи в таблицу поезда ДР -->
+    <Dialog
+      :header="addDRTableRecDlgTitle"
+      v-model:visible="newDRRecordDialog"
+      style="width:450px"
+      :modal="true"
+      class="p-fluid"
+    >
+      <form @submit.prevent="handleSubmitNewDRRecord(!v$.$invalid)" class="p-grid">
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+          <label for="choose-station" :class="{'p-error':v$.station.$invalid && submitted}">
+            <span class="dy58-required-field">*</span> Станция
+          </label>
+          <Dropdown
+            id="choose-station"
+            v-model="drTableRec.station"
+            placeholder="Выберите станцию"
+            required="true"
+            autofocus
+            style="width:100%"
+            :class="{'p-invalid':v$.station.$invalid && submitted}"
+            :options="getSectorStations"
+            optionLabel="St_Title"
+          />
+          <small v-if="(v$.station.$invalid && submitted) || v$.station.$pending.$response" class="p-error">
+            Необходимо указать станцию
+          </small>
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+          <label for="arrival-time" :class="{'p-error':v$.arrivalTime.$invalid && submitted}">
+            Время прибытия
+          </label>
+          <!--<Calendar
+            id="arrival-time"
+            v-model="drTableRec.arrivalTime"
+            :showTime="true"
+            :timeOnly="true"
+            :showIcon="true"
+            placeholder="Определить время прибытия"
+            required="false"
+            :hideOnDateTimeSelect="true"
+            :manualInput="true"
+            :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
+          />-->
+          <InputMask
+            id="arrival-time"
+            v-model="drTableRec.arrivalTime"
+            mask="99:99"
+            placeholder="Определить время прибытия"
+            :class="{'p-invalid':(v$.arrivalTime.$invalid || v$.times.$invalid) && submitted}"
+          />
+          <small v-if="(v$.arrivalTime.$invalid && submitted) || v$.arrivalTime.$pending.$response" class="p-error">
+            Неверно указано время прибытия
+          </small>
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+          <label for="departure-time" :class="{'p-error':v$.departureTime.$invalid && submitted}">
+            Время отправления
+          </label>
+          <!--<Calendar
+            id="departureDateTime"
+            v-model="drTableRec.departureTime"
+            :showTime="true"
+            :timeOnly="true"
+            :showIcon="true"
+            placeholder="Определить время отправления"
+            required="false"
+            :hideOnDateTimeSelect="true"
+            :manualInput="true"
+            :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
+          />-->
+          <InputMask
+            id="departure-time"
+            v-model="drTableRec.departureTime"
+            mask="99:99"
+            placeholder="Определить время отправления"
+            :class="{'p-invalid':(v$.departureTime.$invalid || v$.times.$invalid) && submitted}"
+          />
+          <small v-if="(v$.departureTime.$invalid && submitted) || v$.departureTime.$pending.$response" class="p-error">
+            Неверно указано время отправления
+          </small>
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-flex-column p-m-0">
+          <small class="p-error" v-if="v$.times.$invalid && submitted">
+            Необходимо указать время события на станции (прибытие и/или отправление)
+          </small>
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-m-0">
+          <small>! При проследовании поездом станции время прибытия = время отправления</small>
+        </div>
+        <div class="p-field p-col-12 p-d-flex p-jc-end p-m-0">
+          <Button class="p-button-text p-mr-2" icon="pi pi-check" label="Добавить" type="submit" />
+          <Button class="p-button-text" icon="pi pi-times" label="Закрыть" @click="hideNewDRRecordDialog" />
+        </div>
+      </form>
     </Dialog>
   </div>
 
@@ -249,6 +349,8 @@
   import { watch, computed, reactive, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
+  import { required } from '@vuelidate/validators';
+  import { useVuelidate } from '@vuelidate/core';
   import {
     OrderPatternElementType,
     ElementSizesCorrespondence,
@@ -262,7 +364,7 @@
     FILLED_ORDER_TIME_ELEMENTS,
   } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
-  import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
   import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
 
   export default {
@@ -294,21 +396,20 @@
           return null;
         }
         if (props.element.type === OrderPatternElementType.SELECT) {
-          const getPassDutyDNC = () => {
-            const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
-            if (existingDNCTakeDutyOrder && existingDNCTakeDutyOrder.orderText) {
-              return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
-                existingDNCTakeDutyOrder.orderText.orderText);
-            }
-            return null;
-          };
           switch (props.element.ref) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
-              return store.getters.getUserPostFIO;
+              return store.getters.isDNC ? store.getters.getUserPostFIO : null;
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
               // Если существует (ранее изданное) распоряжение ДНЦ о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
               // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
-              return getPassDutyDNC();
+              if (store.getters.isDNC) {
+                const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
+                if (existingDNCTakeDutyOrder && existingDNCTakeDutyOrder.orderText) {
+                  return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
+                    existingDNCTakeDutyOrder.orderText.orderText);
+                }
+              }
+              return null;
             default:
               return props.element.value;
           }
@@ -348,7 +449,11 @@
       // для отслеживания изменения значения поля value объекта element в родительском компоненте
       // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
       // значениям соответствующих полей связанного распоряжения)
-      watch(() => props.element.value, (newVal) => state.elementModelValue = newVal);
+      watch(() => props.element.value, (newVal) => {
+        if (JSON.stringify(state.elementModelValue) !== JSON.stringify(newVal)) {
+          state.elementModelValue = newVal;
+        }
+      });
 
       // При перезагрузке страницы информация о рабочих распоряжениях может появиться позже чем надо,
       // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке
@@ -368,30 +473,46 @@
 
       // Любое изменение значения элемента должно быть известно "наверху"
       watch(() => state.elementModelValue, (value) => {
-        if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
+        //if (props.element && props.element.type !== OrderPatternElementType.DR_TRAIN_TABLE) {
           emit('input', {
             elementId: props.element._id,
             value,
             elementType: props.element.type,
             elementRef: props.element.ref,
           });
-        }
+        //}
       }, { immediate: true }); // обязательно нужно зайти сюда при загрузке страницы
 
       const selectedDRTableRecord = ref();
       const addDRTableRecDlgTitle = ref('');
       const newDRRecordDialog = ref(false);
+      const addDRTableStationsDialog = ref(false);
+      const selectedStations = ref([]);
       const drTableRec = ref({});
-      const submitted = ref(false);
       const insertNewDRRecPos = ref();
       // true - когда значение insertNewDRRecPos после добавления очередной записи нужно поменять
       // (когда запись в таблицу ДР добавляется в конец списка либо перед выбранной записью);
       // false - когда значение insertNewDRRecPos после добавления очередной записи менять не нужно
       // (когда запись вставляется после текущей)
       const moveInsertNewDRRecPos = ref(true);
+      const submitted = ref(false);
+      const checkTime = (value) => {
+        if (!value) return true;
+        const time = value.split(':');
+        return !(time[0] < 0 || time[0] > 23 || time[1] < 0 || time[1] > 59);
+      }
+      const checkTimes = () => drTableRec.value.arrivalTime || drTableRec.value.departureTime;
+      const rules = {
+        station: { required },
+        arrivalTime: { checkTime },
+        departureTime: { checkTime },
+        times: { checkTimes },
+      };
+      const v$ = useVuelidate(rules, drTableRec, { $scope: false });
 
       const DR_TABLE_MENU_ITEMS = {
         PASTE: 'Вставить из буфера обмена',
+        SELECT_STATIONS: 'Добавить станции',
         CLEAR: 'Очистить таблицу',
         INSERT: 'Добавить запись',
         INSERT_BEFORE: 'Добавить перед',
@@ -404,20 +525,48 @@
       const ADD_DR_TABLE_REC_AFTER_DLG_TITLE = 'Добавить запись о поезде ДР после текущей';
 
       const getElementSizesCorrespondence = computed(() => ElementSizesCorrespondence);
-      const getDRTrainTableColumns = computed(() => DRTrainTableColumns);
 
-      const drTableDataToDisplay = computed(() => !state.elementModelValue ? [] :
-        state.elementModelValue.map((el, index) => {
-          return {
+      const orderedStations = computed(() => {
+        const stationsArray = [...store.getters.getSectorStationsWithTrainSectors];
+        return stationsArray
+          .sort((a, b) => {
+            if (a.trainSectorId < b.trainSectorId) return -1;
+            if (a.trainSectorId > b.trainSectorId) return 1;
+            return a.posInTrainSector - b.posInTrainSector;
+          });
+      });
+
+      const drTableDataToDisplay = computed(() => {
+        if (state.elementModelValue) {
+          return state.elementModelValue.map((el, index) => ({
             orderNumber: index + 1,
             ...el,
-          };
+          }));
+        } else {
+          return [];
         }
-      ));
+      });
+
+      const checkArrivalDepartureTime = () => {
+        if (!drTableRec.value.arrivalTime && !drTableRec.value.departureTime) {
+          return false;
+        }
+        const checkTimeArr = (time) => {
+          if (!time) return true;
+          return !(time[0] < 0 || time[0] > 23 || time[1] < 0 || time[1] > 59);
+        };
+        const arrivalTimeArray = drTableRec.value.arrivalTime ? drTableRec.value.arrivalTime.split(':') : null;
+        const departureTimeArray = drTableRec.value.departureTime ? drTableRec.value.departureTime.split(':') : null;
+        return checkTimeArr(arrivalTimeArray) && checkTimeArr(departureTimeArray);
+      };
+
       const drTrainTableContextMenuItems = computed(() => {
         const items = [{
           label: DR_TABLE_MENU_ITEMS.PASTE,
           command: () => { pasteDRTrainTable(); menu.value.hide(); },
+        }, {
+          label: DR_TABLE_MENU_ITEMS.SELECT_STATIONS,
+          command: () => { showAddDRTableStationsDialog(); menu.value.hide(); },
         }];
         if (drTableDataToDisplay.value.length) {
           items.push(
@@ -451,15 +600,16 @@
         }
         return items;
       });
-      const getSectorStations = computed(() =>
-        store.getters.getSectorStations.map((station) => {
-          return {
-            id: station.St_ID,
-            title: `${station.St_Title} (${station.St_UNMC})`,
-          };
-        })
-      );
-
+/*
+      const emitDRTable = () => {
+        emit('input', {
+          elementId: props.element._id,
+          value: state.elementModelValue,
+          elementType: props.element.type,
+          elementRef: props.element.ref,
+        });
+      };
+*/
       const pasteDRTrainTable = () => {
         navigator.clipboard.readText()
           .then((text) => {
@@ -471,7 +621,7 @@
                 const stationObject = store.getters.getSectorStationByESRCode(el.Station);
                 //
                 const dispStationNameCode = (stationObject && stationObject.St_Title)
-                  ? `${stationObject.St_Title} (${el.Station})`
+                  ? `${stationObject.St_Title}`
                   : el.Station;
 
                 if (!trainTimeTable.length || trainTimeTable[trainTimeTable.length - 1].station !== dispStationNameCode) {
@@ -481,17 +631,17 @@
                     station: dispStationNameCode,
                     departureTime:
                       String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
-                      ? getLocaleDateTimeString(new Date(el.Time), false) : null,
+                      ? getLocaleTimeString(new Date(el.Time)) : null,
                     arrivalTime:
                       String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
-                      ? getLocaleDateTimeString(new Date(el.Time), false) : null,
+                      ? getLocaleTimeString(new Date(el.Time)) : null,
                   });
                 } else {
                   //
                   if (String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
-                    trainTimeTable[trainTimeTable.length - 1].departureTime = getLocaleDateTimeString(new Date(el.Time), false);
+                    trainTimeTable[trainTimeTable.length - 1].departureTime = getLocaleTimeString(new Date(el.Time));
                   } else if (String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
-                    trainTimeTable[trainTimeTable.length - 1].arrivalTime = getLocaleDateTimeString(new Date(el.Time), false);
+                    trainTimeTable[trainTimeTable.length - 1].arrivalTime = getLocaleTimeString(new Date(el.Time));
                   }
                 }
               }
@@ -499,12 +649,7 @@
                 state.elementModelValue = [];
               }
               state.elementModelValue.push(...trainTimeTable);
-              emit('input', {
-                elementId: props.element._id,
-                value: state.elementModelValue,
-                elementType: props.element.type,
-                elementRef: props.element.ref,
-              });
+              //emitDRTable();
             }
           })
           .catch((err) => {
@@ -520,14 +665,18 @@
           icon: 'pi pi-exclamation-circle',
           accept: () => {
             state.elementModelValue = null;
-            emit('input', {
-              elementId: props.element._id,
-              value: state.elementModelValue,
-              elementType: props.element.type,
-              elementRef: props.element.ref,
-            });
+            //emitDRTable();
           },
         });
+      };
+
+      const showAddDRTableStationsDialog = () => {
+        selectedStations.value = [];
+        addDRTableStationsDialog.value = true;
+      };
+
+      const hideAddDRTableStationsDialog = () => {
+        addDRTableStationsDialog.value = false;
       };
 
       const showNewDRRecordDialog = (dlgTitle) => {
@@ -571,26 +720,55 @@
         moveInsertNewDRRecPos.value = true;
       };
 
+      const handleSubmitNewDRRecord = (isFormValid) => {
+        submitted.value = true;
+        if (!isFormValid) {
+          showErrMessage('Проверьте правильность заполнения полей формы');
+          return;
+        }
+        if (!state.elementModelValue) {
+          state.elementModelValue = [];
+        }
+        const newElement = {
+          stationId: drTableRec.value.station.St_ID,
+          station: drTableRec.value.station.St_Title,
+          arrivalTime: drTableRec.value.arrivalTime,
+          departureTime: drTableRec.value.departureTime,
+        };
+        state.elementModelValue.splice(insertNewDRRecPos.value, 0, newElement);
+        //emitDRTable();
+
+        drTableRec.value = {};
+        submitted.value = false;
+
+        // Определяем действия, которые необходимо произвести после добавления новой записи в таблицу
+        // при условии, что требуется сдвинуть позицию вставки следующей записи
+        if (moveInsertNewDRRecPos.value) {
+          // Если в таблице выделена запись и новая запись добавлена была перед нею, то необходимо, чтобы
+          // после добавления новой записи выделение осталось на текущей записи
+          if (selectedDRTableRecord.value && selectedDRTableRecord.value.orderNumber === insertNewDRRecPos.value + 1) {
+            selectedDRTableRecord.value = drTableDataToDisplay.value.find((el) => el.orderNumber === insertNewDRRecPos.value + 2)
+          }
+          // Смещаем позицию вставки очередной записи
+          insertNewDRRecPos.value += 1;
+        }
+      };
+
       const saveNewDRRecord = () => {
         submitted.value = true;
 
-        if (drTableRec.value.station && (drTableRec.value.arrivalTime || drTableRec.value.departureTime)) {
+        if (drTableRec.value.station && checkArrivalDepartureTime()) {
           if (!state.elementModelValue) {
             state.elementModelValue = [];
           }
           const newElement = {
-            stationId: drTableRec.value.station.id,
-            station: drTableRec.value.station.title,
-            arrivalTime: getLocaleDateTimeString(drTableRec.value.arrivalTime, false),
-            departureTime: getLocaleDateTimeString(drTableRec.value.departureTime, false),
+            stationId: drTableRec.value.station.St_ID,
+            station: drTableRec.value.station.St_Title,
+            arrivalTime: drTableRec.value.arrivalTime,
+            departureTime: drTableRec.value.departureTime,
           };
           state.elementModelValue.splice(insertNewDRRecPos.value, 0, newElement);
-          emit('input', {
-            elementId: props.element._id,
-            value: state.elementModelValue,
-            elementType: props.element.type,
-            elementRef: props.element.ref,
-          });
+          //emitDRTable();
 
           drTableRec.value = {};
           submitted.value = false;
@@ -609,6 +787,19 @@
         }
       };
 
+      const saveNewStationsDRRecords = () => {
+        if (!state.elementModelValue) {
+          state.elementModelValue = [];
+        }
+        selectedStations.value.forEach((station) => {
+          state.elementModelValue.push({
+            stationId: station.St_ID,
+            station: station.St_Title,
+          });
+        });
+        //emitDRTable();
+      };
+
       const delDRTableRecord = () => {
         if (!selectedDRTableRecord.value) {
           return;
@@ -617,47 +808,99 @@
           (index + 1) !== selectedDRTableRecord.value.orderNumber
         );
         selectedDRTableRecord.value = null;
-        if (!state.elementModelValue.length) {
+        /*if (!state.elementModelValue.length) {
           state.elementModelValue = null;
-        }
-        emit('input', {
-          elementId: props.element._id,
-          value: state.elementModelValue,
-          elementType: props.element.type,
-          elementRef: props.element.ref,
-        });
+        }*/
+        //emitDRTable();
       };
 
       const handleTrainTableRightClick = (event) => {
         menu.value.show(event);
+      };
+/*
+      const getCurrDRTableSelectedDateTimeValue = (value) => {
+        if (!selectedDRTableRecord.value || !value) {
+          return new Date();
+        }
+        const utcString = appDateTimeStringToUTCDateTimeString(value);
+        if (!utcString) {
+          return new Date();
+        }
+        return new Date(utcString);
+      };
+*/
+      const onDRTimeEditComplete = (event) => {
+        let { data, newValue, field } = event;
+        switch (field) {
+          case 'arrivalTime':
+          case 'departureTime':
+            if (data[field] !== newValue) {
+              const numArr = newValue.split(':');
+              if (+numArr[0] < 0 || +numArr[0] > 23 || +numArr[1] < 0 || +numArr[1] > 59) {
+                return;
+              }
+              state.elementModelValue = state.elementModelValue.map((el) => {
+                if (el.stationId !== data.stationId) {
+                  return el;
+                }
+                return {
+                  ...el,
+                  [field]: newValue,
+                };
+              });
+              //emitDRTable();
+            }
+            break;
+          default:
+            break;
+        }
       };
 
       return {
         state,
         selectedDRTableRecord,
         menu,
+        v$,
+        orderedStations,
+        selectedStations,
         addDRTableRecDlgTitle,
         drTableRec,
+        addDRTableStationsDialog,
         submitted,
         insertNewDRRecPos,
         drTableDataToDisplay,
         DR_TABLE_MENU_ITEMS,
-        getSectorStations,
+        getSectorStations: computed(() => store.getters.getSectorStations),
         OrderPatternElementType,
         getElementSizesCorrespondence,
-        getDRTrainTableColumns,
+        DRTrainTableColumns,
         drTrainTableContextMenuItems,
         handleTrainTableRightClick,
         pasteDRTrainTable,
+        showAddDRTableStationsDialog,
+        hideAddDRTableStationsDialog,
         clearDRTrainTable,
         newDRTableRecord,
         newDRTableRecordBefore,
         newDRTableRecordAfter,
+        saveNewStationsDRRecords,
         delDRTableRecord,
         newDRRecordDialog,
         hideNewDRRecordDialog,
         saveNewDRRecord,
+        onDRTimeEditComplete,
+        //getCurrDRTableSelectedDateTimeValue,
+        getLocaleTimeString,
+        checkArrivalDepartureTime,
+        handleSubmitNewDRRecord,
       };
     },
   };
 </script>
+
+
+<style lang="scss" scoped>
+  .p-inputmask {
+    width: 100%;
+  }
+</style>

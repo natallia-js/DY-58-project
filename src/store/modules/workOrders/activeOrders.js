@@ -132,6 +132,26 @@ export const activeOrders = {
     },
 
     /**
+     * По заданному id цепочки позволяет получить первое распоряжение, принадлежащее ей.
+     */
+    getFirstOrderInChain(state) {
+      return (chainId) => {
+        const chainOrders = state.data
+          .filter((order) => order.orderChainId === chainId)
+          .sort((a, b) => {
+            if (a.createDateTime < b.createDateTime) {
+              return -1;
+            }
+            if (a.createDateTime > b.createDateTime) {
+              return 1;
+            }
+            return 0;
+          });
+        return chainOrders.length ? chainOrders[0] : null;
+      };
+    },
+
+    /**
      * Возвращает массив действующих распоряжений.
      * Действующим является такое рабочее распоряжение (должны выполняться все условия одновременно):
      * - у которого есть дата подтверждения его получения,

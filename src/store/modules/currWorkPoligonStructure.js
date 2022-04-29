@@ -216,6 +216,9 @@ export const currWorkPoligonStructure = {
       return getters.getSectorStations.find((station) => station.St_Title === stationTitle);
     },
 
+    /**
+     *
+     */
     getSectorStationIdByTitle: (_state, getters) => (stationTitle) => {
       const stationObject = getters.getSectorStations.find((station) => station.St_Title === stationTitle);
       return stationObject ? stationObject.St_ID : null;
@@ -232,6 +235,9 @@ export const currWorkPoligonStructure = {
       return getters.getSectorBlocks.find((block) => block.Bl_Title === blockTitle);
     },
 
+    /**
+     *
+     */
     getSectorBlockIdByTitle: (_state, getters) => (blockTitle) => {
       const blockObject = getters.getSectorBlocks.find((block) => block.Bl_Title === blockTitle);
       return blockObject ? blockObject.Bl_ID : null;
@@ -244,10 +250,18 @@ export const currWorkPoligonStructure = {
       return getters.getSectorBlocks.find((block) => block.Bl_ID === blockId);
     },
 
+    /**
+     *
+     */
     getSectorBlockStationsIds: (_state, getters) => (blockId) => {
       const blockObject = getters.getSectorBlockById(blockId);
       if (blockObject) {
-        return [blockObject.Bl_StationID1, blockObject.Bl_StationID2];
+        const station1Id = blockObject.Bl_StationID1 ? blockObject.Bl_StationID1 : (blockObject.station1 ? blockObject.station1.St_ID : null);
+        const station2Id = blockObject.Bl_StationID2 ? blockObject.Bl_StationID2 : (blockObject.station2 ? blockObject.station2.St_ID : null);
+        if (!station1Id || !station2Id) {
+          return null;
+        }
+        return [station1Id, station2Id];
       }
       return null;
     },
@@ -347,16 +361,24 @@ export const currWorkPoligonStructure = {
     /**
      * Возвращает объект перегона по заданным кодам ограничивающих его станций.
      */
-    getBlockTitleByStationsUNMCs(state, getters) {
+    getBlockTitleByStationsUNMCs(_state, getters) {
       return (stationUNMC1, stationUNMC2) => {
+        if (!stationUNMC1 || !stationUNMC2) {
+          return null;
+        }
         const station1 = getters.getSectorStationByESRCode(stationUNMC1);
         const station2 = getters.getSectorStationByESRCode(stationUNMC2);
         if (!station1 || !station2) {
           return null;
         }
-        const block = getters.getSectorBlocks.find((bl) =>
-          [station1.St_ID, station2.St_ID].includes(bl.Bl_StationID1) &&
-          [station1.St_ID, station2.St_ID].includes(bl.Bl_StationID2));
+        const block = getters.getSectorBlocks.find((bl) => {
+          // Заранее определяем id станций, ограничивающих перегон (делается это по-разному для случаев
+          // перегона полигона управления ДНЦ/ЭЦД и станции)
+          const blockStation1 = bl.Bl_StationID1 ? bl.Bl_StationID1 : bl.station1 ? bl.station1.St_ID : null;
+          const blockStation2 = bl.Bl_StationID2 ? bl.Bl_StationID2 : bl.station2 ? bl.station2.St_ID : null;
+          return [station1.St_ID, station2.St_ID].includes(blockStation1) &&
+                 [station1.St_ID, station2.St_ID].includes(blockStation2);
+        });
         if (block) {
           return block.Bl_Title;
         }

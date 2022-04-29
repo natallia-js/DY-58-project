@@ -112,7 +112,7 @@ export const dsp = {
     /**
      * Возвращает информацию обо всех ДСП (не Операторах ДСП станций!), связанных с текущим полигом управления.
      * Данным лицам и может адресоваться информация, отправляемая текущим пользователем.
-     * Если текущий олигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
+     * Если текущий полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
      * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как ДСП, так и оператор при
      * ДСП одной и той же станции. Будет выбрана только информация по ДСП.
      */
@@ -121,7 +121,7 @@ export const dsp = {
         !getters.getUserWorkPoligon || !getters.getUserWorkPoligonData) {
         return [];
       }
-      let arr = state.sectorPersonal.sectorStationsShift; console.log('arr',arr)
+      let arr = state.sectorPersonal.sectorStationsShift;
 
       // Если текущий полигон - станция, то не включаем ее в выборку
       if (getters.userWorkPoligonIsStation) {
@@ -129,9 +129,9 @@ export const dsp = {
       }
       // Извлекаем необходимые данные, сортируя их по поездным участкам и порядку станций на данных участках
       arr = arr
-        .sort((a, b) => { return a.trainSectorId - b.trainSectorId; })
         .sort((a, b) => {
-          if (a.trainSectorId !== b.trainSectorId) return 0;
+          if (a.trainSectorId < b.trainSectorId) return -1;
+          if (a.trainSectorId > b.trainSectorId) return 1;
           return a.stationPosInTrainSector - b.stationPosInTrainSector;
         })
         .map((item) => {
@@ -177,43 +177,13 @@ export const dsp = {
 
   mutations: {
     /**
-     *
+     * Устанавливает указанных адресатов распоряжения из числа ДСП станций.
      */
     [SET_DEFAULT_DSP_ADDRESSES] (state, dspUsers) {
       if (!dspUsers || !state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
         return;
       }
-      /*this.$store.commit(SET_USER_CHOSEN_STATUS, {
-        userId: this.selectedUser.id,
-        chooseUser: true,
-        workPoligonType: this.workPoligonType,
-        workPoligonId: this.sectorId,
-      });*/
-
-
       dspUsers.forEach((user) => {
-        /*state.sectorPersonal = {
-          ...state.sectorPersonal,
-          sectorStationsShift: state.sectorPersonal.sectorStationsShift.map((el) => {
-            if (el.stationId !== user.stationId || !el.people) {
-              return el;
-            }
-            const stationUser = el.people.find((u) =>
-              getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === user.fio);
-            if (!stationUser) {
-              return el;
-            }
-            return {
-              ...el,
-              lastUserChoiceId: stationUser._id,
-              lastUserChoicePost: stationUser.post,
-              lastUserChoice: user.fio,
-            };
-          }),
-        };
-*/
-
-
         const stationShiftInfo = state.sectorPersonal.sectorStationsShift.find((el) => el.stationId === user.stationId);
         const elIndex = state.sectorPersonal.sectorStationsShift.findIndex((el) => el.stationId === user.stationId);
         if (!stationShiftInfo || !stationShiftInfo.people) {
@@ -224,20 +194,13 @@ export const dsp = {
         if (!stationUser) {
           return;
         }
-        console.log('stationUser', stationUser)
-        /*stationShiftInfo.lastUserChoiceId = stationUser._id;
-        stationShiftInfo.lastUserChoicePost = stationUser.post;
-        stationShiftInfo.lastUserChoice = user.fio;*/
         state.sectorPersonal.sectorStationsShift[elIndex] = {
           ...state.sectorPersonal.sectorStationsShift[elIndex],
           lastUserChoiceId: stationUser._id,
           lastUserChoicePost: stationUser.post,
           lastUserChoice: user.fio,
         };
-        console.log('sectorStationsShift',state.sectorPersonal.sectorStationsShift)
-
       });
-
     },
 
     /**

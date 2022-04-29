@@ -83,3 +83,15 @@ export function getTimeSpanString(orderType, timeSpan, isECD, specialOrderCatego
   const endString = timeSpan.end ? ` по ${endDateString}` : (!isECD ? ' до отмены' : ' до уведомления');
   return startString + endString;
 }
+
+/**
+ * Строку вида '12.04.2005 12:45' преобразует к виду '2005-04-12T12:45'.
+ */
+export function appDateTimeStringToUTCDateTimeString(dtString) {
+  if (!dtString || dtString.indexOf(' ') < 0) {
+    return null;
+  }
+  const dateTimeComponents = dtString.split(' ');
+  const utcDatePattern = /(\d{2})\.(\d{2})\.(\d{4})/;
+  return dateTimeComponents[0].replace(utcDatePattern,'$3-$2-$1') + 'T' + dateTimeComponents[1];
+}

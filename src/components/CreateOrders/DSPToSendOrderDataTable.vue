@@ -15,7 +15,6 @@
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
       :rowHover="true"
       rowGroupMode="subheader" :groupRowsBy="getCurrShiftTblColumnNames.sector"
-      sortMode="single" :sortField="getCurrShiftTblColumnNames.sector" :sortOrder="1"
       breakpoint="200px"
     >
       <Column

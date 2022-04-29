@@ -412,7 +412,6 @@
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
     ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
-  import { /*SET_USER_CHOSEN_STATUS*/ SET_DEFAULT_DSP_ADDRESSES } from '@/store/mutation-types';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { useStoreData } from './storeData';
@@ -432,6 +431,7 @@
   import { useSetAndAnalyzeOrderText } from './setAndAnalyzeOrderText';
   import { useWatchRelatedOrder } from './watchRelatedOrder';
   import { useOkna } from './okna';
+  import { useWatchExistingDNCTakeDutyOrder } from './watchExistingDNCTakeDutyOrder';
 
   export default {
     name: 'dy58-new-order-block',
@@ -553,7 +553,7 @@
         // id текущего черновика распоряжения
         currentOrderDraftId: null,
         gettingOknasData: false,
-        oknaData: [/*{
+        oknaData: [{
           id: '1',
           fullNumDoc: '15-07-15/2026 от 13.04.2022',
           performer: 'ПМС Орша',
@@ -564,7 +564,7 @@
           sta2: '144832',
           sta1: '138507',
           duration: 263,
-          mainline: '1',
+          mainLine: '1',
           km1: 10,
           pk1: null,
           km2: null,
@@ -583,7 +583,110 @@
           km2: 12,
           pk2: 2,
           comment: 'комментарий к окну',
-        }*/],
+        }
+
+
+   /* { id: '1',
+      "idPlan": 579796,
+      "nppPlan": 16,
+      "idSpan": 255,
+      "day": "27.04.2022",
+      "beginStr": "27.04.2022 10:20",
+      "endStr": "27.04.2022 16:20",
+      "duration": 360,
+      "fullNumDoc": "15-07-15/2259 от 20.04.2022",
+      "typeWork": "работы по замене рельсошпальной решетки, планировка щеб. балласта",
+      "performer": "ПМС Орша",
+      "fioPerf": "Ляхнович А.В.",
+      "postPerf": "ПМСЗ",
+      "accountability": "безопасное и своевременное производство работ",
+      "placeWorkPlan": "Орша-Центр. - Можеевка 2 гл. путь 78 км, Можеевка 2 гл. путь, уч. пути св. Ч - св. Ч2 для занятия хозпоездами.",
+      "sta1": "166723",
+      "sta2": "166403",
+      "mainLine": "2",
+      "line": "",
+      "comment": "",
+      "km1": 78,
+      "km2": null,
+      "pk1": null,
+      "pk2": null
+    },
+    { id: '2',
+      "idPlan": 579796,
+      "nppPlan": 18,
+      "idSpan": 404,
+      "day": "27.04.2022",
+      "beginStr": "27.04.2022 12:05",
+      "endStr": "27.04.2022 15:05",
+      "duration": 180,
+      "fullNumDoc": "15-07-15/2256 от 20.04.2022",
+      "typeWork": "сплошное закреп. болтов при скреплении типа КБ ПМГ",
+      "performer": "ПЧ-1",
+      "fioPerf": "Бладыко А.Ф.",
+      "postPerf": "ПД",
+      "accountability": "безопасное и своевременное производство работ, выдачу и отмену предупреждений, выполнение требований действующих положений и инструкций, обеспечение безопасности движения по месту работ, подачу уведомления об окончании работ и возможность открытия движения, ограждение места работ",
+      "placeWorkPlan": "Хлусово - Хлюстино 2 гл. путь 521 км ПК 1 - 527 км ПК 5",
+      "sta1": "168907",
+      "sta2": "166422",
+      "mainLine": "2",
+      "line": "",
+      "comment": "",
+      "km1": 521,
+      "km2": 527,
+      "pk1": 1,
+      "pk2": 5
+    },
+    { id: '3',
+      "idPlan": 579796,
+      "nppPlan": 20,
+      "idSpan": 55,
+      "day": "27.04.2022",
+      "beginStr": "27.04.2022 11:40",
+      "endStr": "27.04.2022 14:35",
+      "duration": 175,
+      "fullNumDoc": "15-07-15/2261 от 20.04.2022",
+      "typeWork": "выпр. пути",
+      "performer": "ПЧ-1",
+      "fioPerf": "Готовкин Д.П.",
+      "postPerf": "ПД",
+      "accountability": "безопасное и своевременное производство работ, выдачу и отмену предупреждений, выполнение требований действующих положений и инструкций, обеспечение безопасности движения по месту работ, подачу уведомления об окончании работ и возможность открытия движения, ограждение места работ, охрану переезда",
+      "placeWorkPlan": "Бурбин - Чашники 1 гл. путь 89 км ПК 1 - 91 км ПК 10",
+      "sta1": "168606",
+      "sta2": "168305",
+      "mainLine": "1",
+      "line": "",
+      "comment": "",
+      "km1": 89,
+      "km2": 91,
+      "pk1": 1,
+      "pk2": 10
+    },
+    { id: '4',
+      "idPlan": 579796,
+      "nppPlan": 22,
+      "idSpan": 291,
+      "day": "27.04.2022",
+      "beginStr": "27.04.2022 10:05",
+      "endStr": "27.04.2022 11:35",
+      "duration": 90,
+      "fullNumDoc": "15-07-15/2261 от 20.04.2022",
+      "typeWork": "работы по проверка пути средствами дефектоскопии",
+      "performer": "ПЧ-1",
+      "fioPerf": "Курашевич О.В.",
+      "postPerf": "ПЧЗ",
+      "accountability": "безопасное и своевременное производство работ, выдачу и отмену предупреждений, выполнение требований действующих положений и инструкций, обеспечение безопасности движения по месту работ, подачу уведомления об окончании работ и возможность открытия движения, охрану переезда",
+      "placeWorkPlan": "Орша-Центр. - Смольяны 1 гл. путь 4 км ПК 1 - 21 км ПК 10",
+      "sta1": "166403",
+      "sta2": "168697",
+      "mainLine": "1",
+      "line": "",
+      "comment": "",
+      "km1": 4,
+      "km2": 21,
+      "pk1": 1,
+      "pk2": 10
+    }*/
+  ],
         getOknaDataError: null,
         selectedOkno: null,
       });
@@ -612,31 +715,9 @@
         state.orderText = initialOrderText();
         state.showOnGID = getUserDutyToDefineOrderPlace.value;
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
-        // для ДНЦ при издании нового документа подгружаем список ДСП из последнего циркулярного распоряжения
-        if (isDNC.value) {
-          const circularOrder = store.getters.getExistingDNCTakeDutyOrder;
-          console.log('circularOrder', circularOrder ? circularOrder.dspToSend : null)
-          if (circularOrder && circularOrder.dspToSend) {
-            /*circularOrder.dspToSend.forEach((stationDSP) => {
-              const user = store.getters.getStationUserByFIO({ stationId: stationDSP.id, fio: stationDSP.fio });
-              console.log('user',user)
-              if (user) {
-                store.commit(SET_USER_CHOSEN_STATUS, {
-                  userId: user._id,
-                  chooseUser: true,
-                  workPoligonType: stationDSP.type,
-                  workPoligonId: stationDSP.id,
-                });
-              }
-            });*/
-            store.commit(SET_DEFAULT_DSP_ADDRESSES, circularOrder.dspToSend.map((el) => ({
-              stationId: el.id,
-              post: el.post,
-              fio: el.fio,
-            })));
-          }
-        }
       });
+
+      useWatchExistingDNCTakeDutyOrder({ store, isDNC });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -742,7 +823,7 @@
         getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
-      useWatchRelatedOrder({ props, emit, relatedOrderObject, setRelatedOrderNumberInOrderText });
+      useWatchRelatedOrder({ props, emit, store, relatedOrderObject, setRelatedOrderNumberInOrderText });
 
       const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields });
 
@@ -860,5 +941,9 @@
 
   .p-accordion.dy58-oknas-accordion :deep(.p-accordion-toggle-icon) {
     display: block;
+  }
+
+  .p-datatable :deep(table) {
+    width: 100%;
   }
 </style>

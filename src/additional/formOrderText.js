@@ -118,7 +118,7 @@ export function formOrderText(props) {
         substring += '</tr></thead><tbody>';
         if (currVal.value instanceof Array) {
           currVal.value.forEach((row, index) => {
-            substring += '<tr>';
+            substring += '<tr style="font-weight:bold;">';
             DRTrainTableColumns.forEach((column) => {
               if (column.field === 'orderNumber') {
                 substring += `<td style="border:1px solid grey;padding:0 2px;">${index + 1}</td>`;

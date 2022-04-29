@@ -62,6 +62,7 @@ export function getWorkOrderGeneralInfoObject(order) {
     otherToSend: order.otherToSend.map((item) => {
       return {
         _id: item._id,
+        additionalId: item.additionalId ? +item.additionalId : null,
         post: item.post,
         fio: item.fio,
         placeTitle: item.placeTitle,

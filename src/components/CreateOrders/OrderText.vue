@@ -63,7 +63,7 @@
   import { useStore } from 'vuex';
   import OrderPatternText from '@/components/CreateOrders/OrderPatternText';
   import { OrderPatternElementType } from '@/constants/orderPatterns';
-  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
+  import { ORDER_TEXT_SOURCE, FILLED_ORDER_DROPDOWN_ELEMENTS } from '@/constants/orders';
 
   export default {
     name: 'dy58-order-text',
@@ -275,6 +275,15 @@
         if (orderPatternElementIndex >= 0) {
           if (state.orderPatternText[orderPatternElementIndex].value !== event.value) {
             state.orderPatternText[orderPatternElementIndex].value = event.value;
+          }
+          switch (event.elementRef) {
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION:
+              break;
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK:
+              break;
           }
         }
         emit('input', {

@@ -52,6 +52,7 @@ import OverlayPanel from 'primevue/overlaypanel';
 import Textarea from 'primevue/textarea';
 import MegaMenu from 'primevue/megamenu';
 import Menu from 'primevue/menu';
+import InputMask from 'primevue/inputmask';
 
 const app = createApp(App);
 
@@ -101,5 +102,6 @@ app.component('OverlayPanel', OverlayPanel);
 app.component('Textarea', Textarea);
 app.component('MegaMenu', MegaMenu);
 app.component('Menu', Menu);
+app.component('InputMask', InputMask);
 
 app.mount('#app');

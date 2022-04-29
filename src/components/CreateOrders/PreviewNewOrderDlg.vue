@@ -36,7 +36,7 @@
         <label for="if-del-order-draft">&#160; Удалить черновик</label>
       </div>
       <Button label="Издать" @click="dispatchOrder" />
-      <Button label="Отмена" @click="closeDialog" />
+      <Button label="Отмена" @click="closeDialog" class="p-button-secondary" />
     </template>
   </Dialog>
 </template>

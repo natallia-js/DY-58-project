@@ -140,7 +140,8 @@
         selectedUser: null,
         user: null,
         addNewRec: true, // true = add, false = edit
-        selectedDivisions: null, // массив id выбранных (из существующих в БД на сервере) структурных подразделений
+        selectedDivisions: null, // массив id выбранных (из существующих в БД на сервере) структурных подразделений,
+                                 // только для ЭЦД!
       };
     },
 
@@ -181,15 +182,18 @@
 
     watch: {
       getOtherShiftForSendingData(newVal) {
-        if (newVal) {
-          const selectedDivisonsIds = newVal
-            .filter((el) => el.additionalId && el.additionalId > 0)
-            .map((el) => el.additionalId);
-          if (JSON.stringify(this.selectedDivisions) !== JSON.stringify(selectedDivisonsIds)) {
-            this.selectedDivisions = selectedDivisonsIds;
+        if (this.isECD) {
+          if (newVal) {
+            const selectedDivisonsIds = newVal
+              .filter((el) => el.additionalId && el.additionalId > 0)
+              .map((el) => el.additionalId);
+            if ((this.selectedDivisions || selectedDivisonsIds) &&
+              JSON.stringify(this.selectedDivisions) !== JSON.stringify(selectedDivisonsIds)) {
+              this.selectedDivisions = selectedDivisonsIds;
+            }
+          } else if (this.selectedDivisions || this.selectedDivisions.length) {
+            this.selectedDivisions = null;
           }
-        } else if (this.selectedDivisions || this.selectedDivisions.length) {
-          this.selectedDivisions = null;
         }
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
@@ -197,17 +201,20 @@
       },
 
       // Учитываем, что могло измениться как одно значение, так и сразу несколько
-      // (когда устанавливается / снимается флаг выделения всех записей)
+      // (когда устанавливается / снимается флаг выделения всех записей).
+      // Только для ЭЦД!
       selectedDivisions(newVal) {
-        const selectedRecs = newVal ? newVal.map((id) => this.getStructuralDivisionById(id)) : [];
-        if (selectedRecs.length) {
-          selectedRecs.forEach((rec) => {
-            if (rec) {
-              this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, rec);
-            }
-          });
+        if (this.isECD) {
+          const selectedRecs = newVal ? newVal.map((id) => this.getStructuralDivisionById(id)) : [];
+          if (selectedRecs.length) {
+            selectedRecs.forEach((rec) => {
+              if (rec) {
+                this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, rec);
+              }
+            });
+          }
+          this.$store.commit(DEL_UNSELECTED_STRUCTURAL_DIVISIONS, selectedRecs.map((el) => el.additionalId));
         }
-        this.$store.commit(DEL_UNSELECTED_STRUCTURAL_DIVISIONS, selectedRecs.map((el) => el.additionalId));
       },
     },
 

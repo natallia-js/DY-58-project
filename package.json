@@ -2,6 +2,8 @@
   "name": "dy-58-project",
   "version": "0.1.0",
   "private": true,
+  "author": "Natallia Fedartsova",
+  "description": "Журнал диспетчесрких распоряжений ДУ-58",
   "scripts": {
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
     "build": "cross-env NODE_ENV=production vue-cli-service build",

@@ -111,12 +111,13 @@ export const onlinePersonal = {
                   surname: onlineUser.surname,
                 });
                 sector.lastUserChoiceOnline = onlineUser.online;
-              } else {
+              } /* этого делать не нужно, т.к. затрется вся информация, подтягиваемая с циркуляра:
+              else {
                 sector.lastUserChoicePost = null;
                 sector.lastUserChoiceId = null;
                 sector.lastUserChoice = null;
                 sector.lastUserChoiceOnline = false;
-              }
+              }*/
             }
           });
         }

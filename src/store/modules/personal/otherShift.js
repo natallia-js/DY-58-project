@@ -20,13 +20,15 @@ export const otherShift = {
   getters: {
     /**
      * Возвращает информацию о виртуальном персонале (который реально не зарегистрирован в системе,
-     * но должен присутствовать в текстах распоряжений). Данные сортируем по наименованию места.
+     * но должен присутствовать в текстах распоряжений).
+     * Данные сортируем по наименованию места.
      */
     getOtherShiftForSendingData: (state) => {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
         return [];
       }
-      return state.sectorPersonal.otherShift.map((item) => ({ ...item }))
+      return state.sectorPersonal.otherShift
+        .map((item) => ({ ...item })) // без этой строки корректно работать не будет!
         .sort((a, b) => compareStrings(a.placeTitle.toLowerCase(), b.placeTitle.toLowerCase()));
     },
   },
@@ -154,10 +156,11 @@ export const otherShift = {
         return;
       }
       if (!selectedRecsAdditionalIds || !selectedRecsAdditionalIds.length) {
-        state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((el) => el.additionalId < 0);
+        state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((el) =>
+          !el.additionalId || el.additionalId < 0);
       } else {
         state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((el) =>
-          el.additionalId < 0 ||
+          !el.additionalId || el.additionalId < 0 ||
           (el.additionalId > 0 && selectedRecsAdditionalIds.includes(el.additionalId))
         );
       }

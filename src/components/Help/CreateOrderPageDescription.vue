@@ -32,14 +32,13 @@
       Поля <i><b>левого блока</b></i>:
     </p>
     <p class="dy58-help-paragraph">
-      - <i><b>Номер</b></i> - номер создаваемого документа. Система генерирует его автоматически, увеличивая
-      на 1:
+      - <i><b>Номер</b></i> - номер создаваемого документа. Система генерирует его автоматически:
     </p>
     <p class="dy58-help-paragraph">
-      а) номер последнего изданного документа <i><b>этого же типа</b></i> - для ДНЦ и ДСП,
+      а) увеличивая на 1 номер последнего изданного документа <i><b>этого же типа</b></i> - для ДНЦ и ДСП,
     </p>
       <p class="dy58-help-paragraph">
-      б) номер последнего изданного документа - для ЭЦД.
+      б) увеличивая на 1 номер последнего изданного документа - для ЭЦД.
     </p>
     <p class="dy58-help-text">
       С наступлением нового месяца нумерация документов снова начинается с 1.
@@ -74,8 +73,9 @@
     </p>
     <p class="dy58-help-paragraph">
       - <i><b>На документ</b></i> / <i><b>На приказ/запрещение</b></i> - позволяет связать создаваемый
-      документ с ранее изданным документом.
-      Ниже приведена таблица, в которой содержится информация о возможностях пользователей с конкретными
+      документ с ранее изданным документом (точнее, включить его в цепочку документов, которой
+      принадлежит ранее изданный документ; определение цепочки документов см. ниже).
+      Далее приведена таблица, в которой содержится информация о возможностях пользователей с конкретными
       полномочиями создавать документы в связке с ранее созданными документами.
     </p>
     <br />
@@ -110,7 +110,7 @@
     </p>
     <div class="dy58-help-definition">
       <p class="dy58-help-text">
-        <i><b>Действующий документ</b></i> - такой документ, для которого выполняются следующие условия:
+        <i><b>Действующий документ</b></i> - такой документ цепочки, для которого выполняются следующие условия:
         <ol class="dy58-help-list">
           <li>
             <span>
@@ -147,9 +147,10 @@
       </p>
     </div>
     <p class="dy58-help-text">
-      При издании уведомления ЭЦД заполнение поля "На приказ/запрещение" обязательно, при этом после выбора
-      приказа / запрещения необходимо определить дату-время, начиная с которых отменяется действие соответствующего
-      документа.
+      При издании уведомления ЭЦД заполнение поля "На приказ/запрещение" обязательно. При этом дата-время,
+      начиная с которых отменяется действие соответствующего документа, устанавливаются равными времени
+      издания уведомления ЭЦД. В дальнейшем это время будет скорректировано и примет значение даты-времени
+      утверждения уведомления ЭЦД.
     </p>
     <p class="dy58-help-paragraph">
       Если текст документа, определяемого для связи с новым документом, создан по шаблону и текст
@@ -208,9 +209,9 @@
     <p class="dy58-help-paragraph">
       Если текст документа необходимо сформировать на основании шаблона, то этот шаблон необходимо предварительно
       выбрать в соответствующем списке. Поля шаблона делятся на статические (тест и перенос строки) и
-      динамические (поля ввода). Динамические поля предназначены для ввода в них определенных значений.
+      динамические (поля, предназначенные для ввода значения пользователем).
       За динамически полем может быть закреплено смысловое значение (отображается при наведении на поле ввода),
-      которое определяет, какая конкретно информация содержится в данном поле.
+      которое определяет, какая конкретно информация содержится (должна содержаться) в данном поле.
       Виды динамических полей, возможные их смысловые значения, способы заполнения полей и влияние их на
       другие динамические поля шаблона представлены в таблице 2.
     </p>
@@ -224,16 +225,21 @@
       <template #header>
         <div>Таблица 2</div>
       </template>
-      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType" header="Вид динамического поля"></Column>
-      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description" header="Описание"></Column>
-      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues" header="Смысловые значения"></Column>
-      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription" header="Описание смыслового значения"></Column>
+      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType" header="Вид динамического поля" style="width:10%;vertical-align:top">
+        <template #body="slotProps">
+          <div style="background-color:#bffcc6">
+            {{ slotProps.data[DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType] }}
+          </div>
+        </template>
+      </Column>
+      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description" header="Описание" style="width:20%;vertical-align:top"></Column>
+      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues" header="Смысловые значения" style="width:10%"></Column>
+      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription" header="Описание смыслового значения" style="width:30%"></Column>
+      <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill" header="Комментарий к заполнению поля" style="width:30%"></Column>
     </DataTable>
     <br />
     <DataTable
-      :value="orderReceiversTableData"
-      rowGroupMode="rowspan"
-      :groupRowsBy="ORDER_RECEIVERS_TABLE_COLUMNS.orderCreator"
+      :value="createOrderElementsConnectionsTableData"
       class="p-datatable-sm"
     >
       <template #header>
@@ -247,11 +253,26 @@
       </template>
     </DataTable>
     <br />
+    <DataTable
+      :value="orderReceiversTableData"
+      rowGroupMode="rowspan"
+      :groupRowsBy="ORDER_RECEIVERS_TABLE_COLUMNS.orderCreator"
+      class="p-datatable-sm"
+    >
+      <template #header>
+        <div>Таблица 4</div>
+      </template>
+      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.element" header="Элемент"></Column>
+      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.defaultValue" header="Значение по умолчанию"></Column>
+      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.affectedElements" header="На что влияет при изменении"></Column>
+    </DataTable>
+    <br />
     <p class="dy58-help-paragraph">
       После успешного издания документа ДУ-58 перенаправляет пользователя на Главную страницу программы.
     </p>
   </div>
 </template>
+
 
 <script>
   const ORDER_CONNECTIONS_TABLE_COLUMNS = {
@@ -264,11 +285,17 @@
     description: 'description',
     senceValues: 'senceValues',
     senceValueDescription: 'senceValueDescription',
+    autofill: 'autofill',
   };
   const ORDER_RECEIVERS_TABLE_COLUMNS = {
     orderCreator: 'orderCreator',
     orderType: 'orderType',
     orderReceivers: 'orderReceivers',
+  };
+  const CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS = {
+    element: 'element',
+    defaultValue: 'defaultValue',
+    affectedElements: 'affectedElements',
   };
 
   export default {
@@ -321,30 +348,365 @@
       const dynamicOrderPatternFieldsTableData = () => {
         const tableData = [];
         let fieldType = 'Поле ввода';
-        let description = 'Значение в данное поле пользователь вводит самостоятельно, никаких проверок на корректность введенного значения нет.';
-        tableData.push({
+        let description = 'Значение в данное поле пользователь вводит самостоятельно, никаких проверок на корректность введенного значения нет, ' +
+          'ограничение на длину вводимого значения не установлено. Автоматически заполняется значением "связанного" поля (если есть) выбранного ' +
+          'предшествующего документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
+        tableData.push(
+        {
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
-          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
-          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Вес поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Вид движения',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Выходные светофоры ст.отпр.',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Длина поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'ДНЦ',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Индекс поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Километры',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+          {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Количество вагонов',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Место работ',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Для заявок заполняется при выборе "окна"',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер соединенного поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Перегон',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Примечание',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. ДУ-58 не требует заполнения данного поля',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Причина оставления поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Продолжительность "окна"',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Для заявок заполняется при выборе "окна"',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Пути перегона',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Для заявок заполняется при выборе "окна"',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Пути станции',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Пути станции отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Пути станции прибытия',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Работы',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Для заявок заполняется при выборе "окна"',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Руководители',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Для заявок заполняется при выборе "окна"',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Средства связи',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция прибытия',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Характеристика поезда',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Четность',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Произвольный текст. Заполнение обязательно',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Текстовая область';
         description = 'Предполагает ввод со стороны пользователя текста произвольной длины. ' +
           'Размер поля "подстраивается" под размер содержащихся в нем данных. ' +
-          'ДУ-58 позволяет не заполнять данное поле.';
-        tableData.push({
+          'ДУ-58 позволяет не заполнять данное поле. ' +
+          'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
+          'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
+        tableData.push(
+        {
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '-',
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Выпадающий список';
-        description = '';
-        tableData.push({
+        description = 'Предполагает выбор со стороны пользователя одного из значений, содержащихся в списке выбора. ' +
+          'Заполнение поля обязательно. ' +
+          'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
+          'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
+        tableData.push(
+        {
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
-          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
-          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Дежурство сдал',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Дежурство принял',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующего распоряжения',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующего распоряжения на закрытие перегона',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующей заявки',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующего уведомления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующего приказа',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Номер действующего запрещения',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Отключить, включить',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Перегон',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Перегон станции отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Порядок действий',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Путь перегона',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Путь перегона станции отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Путь станции',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Путь станции отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Путь станции прибытия',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция отправления',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция прибытия',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
+        },
+        {
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Точное место',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Дата';
         description = '';
@@ -353,6 +715,7 @@
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Время';
         description = '';
@@ -361,6 +724,7 @@
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Дата-время';
         description = '';
@@ -369,6 +733,7 @@
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         fieldType = 'Таблица "Поезд ДР"';
         description = '';
@@ -377,6 +742,7 @@
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '',
           [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '',
+          [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: '-',
         });
         return tableData;
       };
@@ -424,13 +790,23 @@
         },
       ];
 
+      const createOrderElementsConnectionsTableData = [
+        {
+          [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.element]: '',
+          [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.defaultValue]: '',
+          [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.affectedElements]: '',
+        },
+      ];
+
       return {
         ORDER_CONNECTIONS_TABLE_COLUMNS,
         DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS,
         ORDER_RECEIVERS_TABLE_COLUMNS,
+        CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS,
         orderConnectionsTableData,
         dynamicOrderPatternFieldsTableData,
         orderReceiversTableData,
+        createOrderElementsConnectionsTableData,
       };
     }
   }

@@ -4,21 +4,31 @@ import {
   FILLED_ORDER_DATETIME_ELEMENTS,
   FILLED_ORDER_DROPDOWN_ELEMENTS,
   FILLED_ORDER_INPUT_ELEMENTS,
+  CurrShiftGetOrderStatus,
 } from '@/constants/orders';
 import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  OrderPatternElementType,
 } from '@/constants/orderPatterns';
+//import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { SET_GET_ORDER_STATUS_TO_DEFINIT_DSP } from '@/store/mutation-types';
 
 
 export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObject /*, showConnectedOrderFields*/ }) => {
 
-  const changeOrderPatternElementValue = (elRef, value) => {
+  /**
+   * Находит все элементы текущего шаблона распоряжения с типом elType, смысловым значением elRef,
+   * и устанавливает им значение value.
+   */
+  const changeOrderPatternElementValue = (elType, elRef, value) => {
     if (state.orderText && state.orderText.patternId && state.orderText.orderText) {
-      const textElement = state.orderText.orderText.find((el) => el.ref === elRef);
-      if (textElement && textElement.value !== value) {
-        textElement.value = value;
-      }
+      const textElements = state.orderText.orderText.filter((el) => el.type === elType && el.ref === elRef);
+      textElements.forEach((el) => {
+        if (el.value !== value) {
+          el.value = value;
+        }
+      });
     }
   };
 
@@ -33,22 +43,22 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
         case ORDER_PATTERN_TYPES.ORDER:
           if (relatedOrderObject.value.specialTrainCategories &&
             relatedOrderObject.value.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN)) {
-            changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER, orderNumber);
+            changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER, orderNumber);
           } else {
-            changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER, orderNumber);
+            changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER, orderNumber);
           }
           break;
         case ORDER_PATTERN_TYPES.REQUEST:
-          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER, orderNumber);
+          changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER, orderNumber);
           break;
         case ORDER_PATTERN_TYPES.NOTIFICATION:
-          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER, orderNumber);
+          changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER, orderNumber);
           break;
         case ORDER_PATTERN_TYPES.ECD_ORDER:
-          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER, orderNumber);
+          changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER, orderNumber);
           break;
         case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
-          changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER, orderNumber);
+          changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER, orderNumber);
           break;
       }
     }
@@ -62,7 +72,7 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
       return;
     }
     // работы
-    changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORKS, state.selectedOkno.typeWork);
+    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS, state.selectedOkno.typeWork);
 
     // место работ
     if (state.selectedOkno.km1 || state.selectedOkno.km2 || state.selectedOkno.comment) {
@@ -96,21 +106,21 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
           place = state.selectedOkno.comment;
         }
       }
-      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORK_PLACE, place);
+      changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORK_PLACE, place);
     }
 
     // пути перегона
-    if (state.selectedOkno.mainline || state.selectedOkno.line) {
-      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.BLOCK_TRACKS,
-        state.selectedOkno.mainline ? state.selectedOkno.mainline + ' гл. путь' : state.selectedOkno.line + ' путь');
+    if (state.selectedOkno.mainLine || state.selectedOkno.line) {
+      changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.BLOCK_TRACKS,
+        state.selectedOkno.mainLine ? state.selectedOkno.mainLine + ' гл. путь' : state.selectedOkno.line + ' путь');
     }
 
     // перегон
-    changeOrderPatternElementValue(FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
       store.getters.getBlockTitleByStationsUNMCs(state.selectedOkno.sta1, state.selectedOkno.sta2));
 
     // руководители
-    changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
+    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
       `${state.selectedOkno.performer}${state.selectedOkno.fioPerf ? ' ' + state.selectedOkno.fioPerf : ''}`);
 
     // продолжительность "окна"
@@ -118,21 +128,23 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
       const oknoDuration = +state.selectedOkno.duration;
       const oknoDurationHours = Math.trunc(oknoDuration / 60);
       const oknoDurationMinutes = oknoDuration - oknoDurationHours * 60;
-      changeOrderPatternElementValue(FILLED_ORDER_INPUT_ELEMENTS.OKNO_DURATION,
+      changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.OKNO_DURATION,
         `${oknoDurationHours >= 10 ? oknoDurationHours : '0' + oknoDurationHours}ч. ${oknoDurationMinutes >= 10 ? oknoDurationMinutes : '0' + oknoDurationMinutes}мин.`);
     }
   };
 
   /**
-   *
+   * Указанную станцию (по ее id) определяет в качестве получателя оригинала формируемого распоряжения.
    */
-  const addStationToSendOrder = (stationId) => {
-    if (!state.dspSectorsToSendOrder.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId)) {
-      const stationToSendOrder = store.getters.getDSPShiftForSendingData.find((el) => el.type === ORDER_PLACE_VALUES.station && el.id === stationId);
-      if (stationToSendOrder) {
-        state.dspSectorsToSendOrder.push(stationToSendOrder);
-      }
-    }
+  const sendOrderOriginalToStation = (stationId) => {
+    //if (!state.dspSectorsToSendOrder.find((el) => el.type === WORK_POLIGON_TYPES.STATION && el.id === stationId)) {
+     // const stationToSendOrder = store.getters.getDSPShiftForSendingData.find((el) =>
+      //  el.type === WORK_POLIGON_TYPES.STATION && el.id === stationId);
+      //if (stationToSendOrder) {
+        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+          { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+      //}
+    //}
   };
 
   /**
@@ -145,59 +157,75 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
     if (!event || event.orderTextSource !== ORDER_TEXT_SOURCE.pattern || !event.orderText) {
       return;
     }
-    // Если установлен флаг определения места действия распоряжения (отображения на ГИД),
-    // то при изменении ряда полей в тексте шаблонного распоряжения их значения устанавливаются
-    // в качестве места действия распоряжения
-    if (state.showOnGID.value === true) {
-      // Если в тексте распоряжения встречается поле 'Станция', 'Станция отправления' либо 'Станция прибытия',
-      // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-      // распоряжения
-      let placeSet = false;
-      const stationElement = event.orderText.find((el) =>
-        [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
-         FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
-         FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION].includes(el.ref));
-      if (stationElement) {
-        if (stationElement.value) {
-          const stationId = store.getters.getSectorStationIdByTitle(stationElement.value);
-          if (stationId) {
+
+    // Если в тексте распоряжения встречается поле 'Станция', 'Станция отправления' либо 'Станция прибытия',
+    // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
+    // распоряжения (если установлен соответствующий флаг), кроме того, определяется станция-получатель
+    // документа (секция "Кому")
+    let placeSet = false;
+
+    const stationElement = event.orderText.find((el) =>
+      [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
+       FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
+       FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION].includes(el.ref));
+
+    if (stationElement) {
+      if (stationElement.value) {
+        const stationId = store.getters.getSectorStationIdByTitle(stationElement.value);
+        if (stationId) {
+          // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+          // то определяется место действия распоряжения
+          if (state.showOnGID.value === true) {
             state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: stationId };
             placeSet = true;
-            // Для отображения станции в списке "Кому" необходимо ее туда добавить, если ее там еще нет
-            addStationToSendOrder(stationId);
           }
-        } else {
+          // Для отображения станции в списке "Кому" необходимо ее туда добавить, если ее там еще нет
+          sendOrderOriginalToStation(stationId);
+        }
+      } else {
+        // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+        // то обнуляем место действия распоряжения
+        if (state.showOnGID.value === true) {
           state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: null };
         }
       }
-      // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
-      // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-      // распоряжения. Но только при условии что ранее (см. выше) не было установлено место действия
-      // при анализе поля станции!
-      if (!placeSet) {
-        const blockElement = event.orderText.find((el) =>
-          [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
-           FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
-        if (blockElement) {
-          if (blockElement.value) {
-            const blockId = store.getters.getSectorBlockIdByTitle(blockElement.value);
-            if (blockId) {
-              state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: blockId };
-              placeSet = true;
-              // Для отображения перегона в списке "Кому" необходимо туда добавить обе его станции,
-              // если их там еще нет
-              const stationsIds = store.getters.getSectorBlockStationsIds(blockId);
-              if (stationsIds) {
-                addStationToSendOrder(stationsIds[0]);
-                addStationToSendOrder(stationsIds[1]);
-              }
-            }
-          } else {
-            state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: null };
+    }
+    // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
+    // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
+    // распоряжения (если установлен соответствующий флаг). Но только при условии что ранее (см. выше)
+    // не было установлено место действия при анализе поля станции!
+    // В любом случае, определяются станции-получатели документа (секция "Кому")
+    const blockElement = event.orderText.find((el) =>
+      [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+       FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
+
+    if (blockElement) {
+      if (blockElement.value) {
+        const blockId = store.getters.getSectorBlockIdByTitle(blockElement.value);
+        if (blockId) {
+          // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+          // при этом место действия распоряжения ранее не было определено, то определяется место действия распоряжения
+          if (state.showOnGID.value === true && !placeSet) {
+            state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: blockId };
+            placeSet = true;
           }
+          // Для отображения перегона в списке "Кому" необходимо туда добавить обе его станции,
+          // если их там еще нет
+          const stationsIds = store.getters.getSectorBlockStationsIds(blockId);
+          if (stationsIds) {
+            sendOrderOriginalToStation(stationsIds[0]);
+            sendOrderOriginalToStation(stationsIds[1]);
+          }
+        }
+      } else {
+        // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+        // при этом место действия распоряжения ранее не было определено, то обнуляем место действия распоряжения
+        if (state.showOnGID.value === true && !placeSet) {
+          state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: null };
         }
       }
     }
+
     // Если установлен флаг определения времени действия распоряжения, то при изменении ряда полей
     // в тексте шаблонного распоряжения их значения устанавливаются в качестве времени действия распоряжения
     if (state.defineOrderTimeSpan.value === true) {
