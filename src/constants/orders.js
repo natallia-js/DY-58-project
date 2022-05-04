@@ -76,6 +76,7 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   STATION_TRACK: 'Путь станции',
   DPT_STATION_TRACK: 'Путь станции отправления',
   ARR_STATION_TRACK: 'Путь станции прибытия',
+  WORKS_HEADS: 'Руководители',
   STATION: 'Станция',
   DPT_STATION: 'Станция отправления',
   ARR_STATION: 'Станция прибытия',

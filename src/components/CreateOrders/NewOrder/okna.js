@@ -22,7 +22,8 @@ export const useOkna = ({ store, state, setRequestOrderTextFields }) => {
           state.oknaData = responseData.data.map((el) => ({
             ...el,
             id: `${el.idPlan}${el.nppPlan}${el.idSpan}`,
-            datetime: `с ${el.beginStr.split(' ')[1]} по ${el.endStr.split(' ').[1]}`,
+            datetime: `с ${el.beginStr.split(' ')[1]} по ${el.endStr.split(' ')[1]}`,
+            //performer: [`${el.postPerf} ${el.fioPerf}`].concat(!el.dopPerf ? [] : el.dopPerf.map((p) => `${p.post} ${p.fio}`)),
           }));
         } else if (responseData.data.error) {
           if (responseData.data.error === "Отсутствуют данные за указанный период") {

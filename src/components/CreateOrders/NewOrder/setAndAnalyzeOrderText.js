@@ -32,6 +32,18 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
     }
   };
 
+  const setPossibleOrderPatternElementValues = (elType, elRef, values) => { console.log(values)
+    if (state.orderText && state.orderText.patternId && state.orderText.orderText) {
+      const textElements = state.orderText.orderText.filter((el) => el.type === elType && el.ref === elRef);
+      console.log(textElements)
+      /*textElements.forEach((el) => {
+        if (el.value !== value) {
+          el.value = value;
+        }
+      });*/
+    }
+  }
+
   /**
    * Позволяет установить в тексте шаблонного распоряжения номер выбранного для связи документа
    * (если в тексте есть специально предназначенный для этого элемент).
@@ -120,8 +132,10 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
       store.getters.getBlockTitleByStationsUNMCs(state.selectedOkno.sta1, state.selectedOkno.sta2));
 
     // руководители
-    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
-      `${state.selectedOkno.performer}${state.selectedOkno.fioPerf ? ' ' + state.selectedOkno.fioPerf : ''}`);
+    setPossibleOrderPatternElementValues(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS,
+      [`${state.selectedOkno.postPerf} ${state.selectedOkno.fioPerf}`].concat(!state.selectedOkno.dopPerf ? [] : state.selectedOkno.dopPerf.map((p) => `${p.post} ${p.fio}`)));
+    //changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
+      //`${state.selectedOkno.performer}${state.selectedOkno.fioPerf ? ' ' + state.selectedOkno.fioPerf : ''}`);
 
     // продолжительность "окна"
     if (state.selectedOkno.duration) {
