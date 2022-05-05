@@ -10,6 +10,7 @@ import { editOrder } from './editOrder';
 import { delWorkOrdersChains } from './delWorkOrdersChains';
 import { contextMenus } from './contextMenus';
 import { checkIfOrderActionCanBePerformed } from './checkIfOrderActionCanBePerformed';
+import { okna } from './okna';
 
 
 export const workOrders = {
@@ -66,6 +67,9 @@ export const workOrders = {
     ordersBeingDeletedStationWorkPlaceReceivers: [],
     // массив результатов удаления получателей распоряжений на рабочих местах станций (привязан к id распоряжений)
     delStationWorkPlaceReceiverResults: [],
+
+    // текущее выбранное "окно"
+    selectedOkno: null,
   },
 
   getters: {
@@ -81,6 +85,7 @@ export const workOrders = {
     ...dispatchOrder.getters,
     ...editOrder.getters,
     ...checkIfOrderActionCanBePerformed.getters,
+    ...okna.getters,
   },
 
   mutations: {
@@ -92,6 +97,7 @@ export const workOrders = {
     ...delWorkOrdersChains.mutations,
     ...dispatchOrder.mutations,
     ...editOrder.mutations,
+    ...okna.mutations,
   },
 
   actions: {

@@ -172,30 +172,11 @@
         :key="col.field"
         :style="{ minWidth: col.width }"
       >
-        <!--<template #body="slotProps">
-          <span v-if="['arrivalTime', 'departureTime'].includes(col.field)">
-            {{ slotProps.data[col.field] ? getLocaleTimeString(slotProps.data[col.field]) : '' }}
-          </span>
-          <span v-else>
-            {{ slotProps.data[col.field] }}
-          </span>
-        </template>-->
         <!-- возможность редактировать поля даты-времени прибытия и отправления прямо в таблице -->
         <template
           v-if="['arrivalTime', 'departureTime'].includes(col.field)"
           #editor="{ data, field }"
         >
-          <!--<Calendar
-            v-model="data[field]"
-            :showTime="true"
-            :timeOnly="true"
-            :showIcon="false"
-            required="false"
-            :hideOnDateTimeSelect="true"
-            :manualInput="true"
-            @date-select="(value) => onDRTimeEditComplete({ data, field }, value)"
-            autofocus
-          />-->
           <InputMask v-model="data[field]" mask="99:99" autofocus />
         </template>
       </Column>
@@ -264,18 +245,6 @@
           <label for="arrival-time" :class="{'p-error':v$.arrivalTime.$invalid && submitted}">
             Время прибытия
           </label>
-          <!--<Calendar
-            id="arrival-time"
-            v-model="drTableRec.arrivalTime"
-            :showTime="true"
-            :timeOnly="true"
-            :showIcon="true"
-            placeholder="Определить время прибытия"
-            required="false"
-            :hideOnDateTimeSelect="true"
-            :manualInput="true"
-            :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
-          />-->
           <InputMask
             id="arrival-time"
             v-model="drTableRec.arrivalTime"
@@ -291,18 +260,6 @@
           <label for="departure-time" :class="{'p-error':v$.departureTime.$invalid && submitted}">
             Время отправления
           </label>
-          <!--<Calendar
-            id="departureDateTime"
-            v-model="drTableRec.departureTime"
-            :showTime="true"
-            :timeOnly="true"
-            :showIcon="true"
-            placeholder="Определить время отправления"
-            required="false"
-            :hideOnDateTimeSelect="true"
-            :manualInput="true"
-            :class="{'p-invalid': submitted && !drTableRec.arrivalTime && !drTableRec.departureTime}"
-          />-->
           <InputMask
             id="departure-time"
             v-model="drTableRec.departureTime"
@@ -398,15 +355,15 @@
         if (props.element.type === OrderPatternElementType.SELECT) {
           switch (props.element.ref) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
-              return store.getters.isDNC ? store.getters.getUserPostFIO : null;
+              return store.getters.getUserPostFIO;
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
-              // Если существует (ранее изданное) распоряжение ДНЦ о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
+              // Если существует (ранее изданное) распоряжение ДНЦ/ЭЦД о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
               // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
-              if (store.getters.isDNC) {
-                const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
-                if (existingDNCTakeDutyOrder && existingDNCTakeDutyOrder.orderText) {
+              if (store.getters.isDNC || store.getters.isECD) {
+                const existingTakeDutyOrder = store.getters.getExistingDNC_ECDTakeDutyOrder;
+                if (existingTakeDutyOrder && existingTakeDutyOrder.orderText) {
                   return getOrderTextParamValue(FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY,
-                    existingDNCTakeDutyOrder.orderText.orderText);
+                    existingTakeDutyOrder.orderText.orderText);
                 }
               }
               return null;

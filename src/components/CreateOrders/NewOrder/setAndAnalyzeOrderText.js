@@ -15,7 +15,8 @@ import {
 import { SET_GET_ORDER_STATUS_TO_DEFINIT_DSP } from '@/store/mutation-types';
 
 
-export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObject /*, showConnectedOrderFields*/ }) => {
+export const useSetAndAnalyzeOrderText = (inputVals) => {
+  const { state, props, store, relatedOrderObject /*, showConnectedOrderFields*/, selectedOkno } = inputVals;
 
   /**
    * Находит все элементы текущего шаблона распоряжения с типом elType, смысловым значением elRef,
@@ -31,18 +32,6 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
       });
     }
   };
-
-  const setPossibleOrderPatternElementValues = (elType, elRef, values) => { console.log(values)
-    if (state.orderText && state.orderText.patternId && state.orderText.orderText) {
-      const textElements = state.orderText.orderText.filter((el) => el.type === elType && el.ref === elRef);
-      console.log(textElements)
-      /*textElements.forEach((el) => {
-        if (el.value !== value) {
-          el.value = value;
-        }
-      });*/
-    }
-  }
 
   /**
    * Позволяет установить в тексте шаблонного распоряжения номер выбранного для связи документа
@@ -80,66 +69,67 @@ export const useSetAndAnalyzeOrderText = ({ state, props, store, relatedOrderObj
    * Позволяет заполнить в тексте шаблонного распоряжения-заявки поля, соответствующие выбранному "окну".
    */
    const setRequestOrderTextFields = () => {
-    if (!state.selectedOkno || !state.orderText.patternId || props.orderType !== ORDER_PATTERN_TYPES.REQUEST) {
+    if (!selectedOkno.value || !state.orderText.patternId || props.orderType !== ORDER_PATTERN_TYPES.REQUEST) {
       return;
     }
     // работы
-    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS, state.selectedOkno.typeWork);
+    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS, selectedOkno.value.typeWork);
 
     // место работ
-    if (state.selectedOkno.km1 || state.selectedOkno.km2 || state.selectedOkno.comment) {
-      let place = `${state.selectedOkno.km1}` || ''; // пример: 776
-      if (state.selectedOkno.pk1) {
-        place += ` км ПК ${state.selectedOkno.pk1}`; // пример: 776 км ПК 1
-        if (state.selectedOkno.km2) {
-          place += ` - ${state.selectedOkno.km2} км`; // пример: 776 км ПК 1 - 777 км
-          if (state.selectedOkno.pk2) {
-            place += ` ПК ${state.selectedOkno.pk2}`; // пример: 776 км ПК 1 - 777 км ПК 2
+    if (selectedOkno.value.km1 || selectedOkno.value.km2 || selectedOkno.value.comment) {
+      let place = `${selectedOkno.value.km1}` || ''; // пример: 776
+      if (selectedOkno.value.pk1) {
+        place += ` км ПК ${selectedOkno.value.pk1}`; // пример: 776 км ПК 1
+        if (selectedOkno.value.km2) {
+          place += ` - ${selectedOkno.value.km2} км`; // пример: 776 км ПК 1 - 777 км
+          if (selectedOkno.value.pk2) {
+            place += ` ПК ${selectedOkno.value.pk2}`; // пример: 776 км ПК 1 - 777 км ПК 2
           }
         } else {
-          if (state.selectedOkno.pk2) {
-            place += ` - ${state.selectedOkno.pk2}`; // пример: 776 км ПК 1 - 3
+          if (selectedOkno.value.pk2) {
+            place += ` - ${selectedOkno.value.pk2}`; // пример: 776 км ПК 1 - 3
           }
         }
       } else {
-        if (state.selectedOkno.km2) {
-          place += ` - ${state.selectedOkno.km2} км`; // пример: 776 - 777 км
+        if (selectedOkno.value.km2) {
+          place += ` - ${selectedOkno.value.km2} км`; // пример: 776 - 777 км
         } else {
           place += ` км`; // пример: 776 км
         }
-        if (state.selectedOkno.pk2) {
-          place += ` ПК ${state.selectedOkno.pk2}`; // пример: 1) 776 - 777 км ПК 2; 2) 776 км ПК 2
+        if (selectedOkno.value.pk2) {
+          place += ` ПК ${selectedOkno.value.pk2}`; // пример: 1) 776 - 777 км ПК 2; 2) 776 км ПК 2
         }
       }
-      if (state.selectedOkno.comment) {
+      if (selectedOkno.value.comment) {
         if (place) {
-          place += ` ${state.selectedOkno.comment}`;
+          place += ` ${selectedOkno.value.comment}`;
         } else {
-          place = state.selectedOkno.comment;
+          place = selectedOkno.value.comment;
         }
       }
       changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORK_PLACE, place);
     }
 
     // пути перегона
-    if (state.selectedOkno.mainLine || state.selectedOkno.line) {
+    if (selectedOkno.value.mainLine || selectedOkno.value.line) {
       changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.BLOCK_TRACKS,
-        state.selectedOkno.mainLine ? state.selectedOkno.mainLine + ' гл. путь' : state.selectedOkno.line + ' путь');
+        selectedOkno.value.mainLine ? selectedOkno.value.mainLine + ' гл. путь' : selectedOkno.value.line + ' путь');
     }
 
     // перегон
     changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
-      store.getters.getBlockTitleByStationsUNMCs(state.selectedOkno.sta1, state.selectedOkno.sta2));
+      store.getters.getBlockTitleByStationsUNMCs(selectedOkno.value.sta1, selectedOkno.value.sta2));
 
-    // руководители
-    setPossibleOrderPatternElementValues(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS,
-      [`${state.selectedOkno.postPerf} ${state.selectedOkno.fioPerf}`].concat(!state.selectedOkno.dopPerf ? [] : state.selectedOkno.dopPerf.map((p) => `${p.post} ${p.fio}`)));
-    //changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.WORKS_HEADS,
-      //`${state.selectedOkno.performer}${state.selectedOkno.fioPerf ? ' ' + state.selectedOkno.fioPerf : ''}`);
+    // в качестве руководителя работ устанавливаем основного руководителя, остальные (дополнительные)
+    // будут в соответствующем списке выбора
+    if (selectedOkno.value) {
+      changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS,
+        `${selectedOkno.value.postPerf} ${selectedOkno.value.fioPerf}`);
+    }
 
     // продолжительность "окна"
-    if (state.selectedOkno.duration) {
-      const oknoDuration = +state.selectedOkno.duration;
+    if (selectedOkno.value.duration) {
+      const oknoDuration = +selectedOkno.value.duration;
       const oknoDurationHours = Math.trunc(oknoDuration / 60);
       const oknoDurationMinutes = oknoDuration - oknoDurationHours * 60;
       changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.OKNO_DURATION,

@@ -31,9 +31,10 @@ export const dnc = {
      * Возвращает массив ДНЦ текущего полигона управления "Участок ДНЦ".
      */
     getCurrDNCSectorWorkPoligonUsers(_state, getters) {
-      return !getters.getCurrentDNCSectorShift || !getters.getCurrentDNCSectorShift.people
+      const currentDNCSectorShift = getters.getCurrentDNCSectorShift;
+      return !currentDNCSectorShift || !currentDNCSectorShift.people
         ? [] :
-        getters.getCurrentDNCSectorShift.people
+        currentDNCSectorShift.people
           .filter((el) => el.appsCredentials === APP_CREDENTIALS.DNC_FULL)
           .map((el) => {
             return {

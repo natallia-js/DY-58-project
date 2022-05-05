@@ -52,10 +52,10 @@
                 <div class="p-col p-d-flex p-ai-center dy58-okna-accord-title-block">
                   <span>Текущие "окна" ({{ state.oknaData.length }})</span>
                 </div>
-                <div v-if="state.selectedOkno" class="p-col-12 dy58-okna-accord-title-block">
+                <div v-if="selectedOkno" class="p-col-12 dy58-okna-accord-title-block">
                   Выбрано окно: <br />
                   <span v-for="col in getOknaTblColumns" :key="col.field">
-                    {{ col.title }}: {{ state.selectedOkno[col.field] }} <br />
+                    {{ col.title }}: {{ selectedOkno[col.field] }} <br />
                   </span>
                 </div>
               </div>
@@ -68,7 +68,7 @@
                 :loading="state.gettingOknasData"
                 breakpoint="200px"
                 dataKey="id"
-                v-model:selection="state.selectedOkno"
+                v-model:selection="state.selectedOknoInDataTable"
                 selectionMode="single"
               >
                 <Column v-for="col of getOknaTblColumns"
@@ -417,9 +417,7 @@
   import { useStoreData } from './storeData';
   import { useShowFormElements } from './showFormElements';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
-  import { useWatchOrderPlace } from './watchOrderPlace';
   import { useWatchOrderNumber } from './watchOrderNumber';
-  //import { useWatchCancelOrderDateTime } from './watchCancelOrderDateTime';
   import { useWatchOrderPatterns } from './watchOrderPatterns';
   import { useWatchOrderDrafts } from './watchOrderDrafts';
   import { useWatchOperationsResults } from './watchOperationsResults';
@@ -553,7 +551,7 @@
         // id текущего черновика распоряжения
         currentOrderDraftId: null,
         gettingOknasData: false,
-        oknaData: [{
+        oknaData: [/*{
           id: '1',
           fullNumDoc: '15-07-15/2026 от 13.04.2022',
           performer: 'ПМС Орша',
@@ -588,7 +586,7 @@
           km2: 12,
           pk2: 2,
           comment: 'комментарий к окну',
-        }
+        }*/
 
 
    /* { id: '1',
@@ -693,8 +691,10 @@
     }*/
   ],
         getOknaDataError: null,
-        selectedOkno: null,
+        selectedOknoInDataTable: null,
       });
+
+      const selectedOkno = computed(() => store.getters.getSelectedOkno);
 
       const {
         showOrderDrafts,
@@ -722,7 +722,7 @@
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
       });
 
-      useWatchExistingDNCTakeDutyOrder({ store, isDNC });
+      useWatchExistingDNCTakeDutyOrder({ store, isDNC, isECD });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -738,6 +738,7 @@
       } = useSectorsToSendOrder({ state, store });
 
       const {
+        relatedOrderId,
         relatedOrderObject,
         relatedOrderObjectStartDateTimeString,
       } = useRelatedOrder({ state, store });
@@ -809,8 +810,6 @@
       });
 */
 
-      //useWatchCancelOrderDateTime({ state });
-      useWatchOrderPlace({ state, store });
       useWatchOrderDrafts({
         state, store, props, emit, currentOrderDraft,
         applySelectedOrderDraft, applySelectedOrderDraftPersonal,
@@ -821,16 +820,16 @@
         setRelatedOrderNumberInOrderText,
         setRequestOrderTextFields,
         setOrderText,
-      } = useSetAndAnalyzeOrderText({ state, props, store, relatedOrderObject /*, showConnectedOrderFields */ });
+      } = useSetAndAnalyzeOrderText({ state, props, store, relatedOrderObject /*, showConnectedOrderFields */, selectedOkno });
 
       useWatchOrderPatterns({
         state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
         getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
-      useWatchRelatedOrder({ props, emit, store, relatedOrderObject, setRelatedOrderNumberInOrderText });
+      useWatchRelatedOrder({ props, emit, store, relatedOrderId, setRelatedOrderNumberInOrderText });
 
-      const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields });
+      const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields, selectedOkno });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
@@ -872,6 +871,7 @@
         v$,
         submitted,
         getUserPostFIO: computed(() => store.getters.getUserPostFIO),
+        selectedOkno,
         OrderInputTypes,
         showOrderDrafts,
         showConnectedOrderFields,

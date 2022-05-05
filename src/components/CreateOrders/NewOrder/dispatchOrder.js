@@ -1,9 +1,7 @@
 import { computed } from 'vue';
-import {
-  ORDER_PATTERN_TYPES,
-  SPECIAL_CIRCULAR_ORDER_SIGN,
-} from '@/constants/orderPatterns';
+import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
+
 
 /**
  * Данный модуль предназначен для сбора данных о распоряжении и для его издания.
@@ -51,16 +49,17 @@ export const useDispatchOrder = (inputVals) => {
     if (props.orderType === ORDER_PATTERN_TYPES.ORDER && state.defineOrderTimeSpan.value) {
       return state.timeSpan;
     }
-    /*if (state.cancelOrderDateTime) {
-      return { start: state.cancelOrderDateTime, end: state.cancelOrderDateTime, tillCancellation: false };
-    }*/
     if (
       [ORDER_PATTERN_TYPES.REQUEST,
        ORDER_PATTERN_TYPES.NOTIFICATION,
        ORDER_PATTERN_TYPES.ECD_ORDER,
        ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType) ||
       (state.specialTrainCategories && state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN))) {
-      return { start: state.createDateTime, end: null, tillCancellation: true };
+      return {
+        start: state.createDateTime,
+        end: null,
+        tillCancellation: true,
+      };
     }
     return null; // этот момент нужен для отслеживания пункта 3.3 разными компонентами
   });
@@ -69,8 +68,12 @@ export const useDispatchOrder = (inputVals) => {
    * Возвращает объект времени действия издаваемого распоряжения
    */
   const getIssuedOrderTimeSpanObject = computed(() => {
-    const tso = getPreviewOrderTimeSpanObject.value;
-    return tso ? tso : { start: state.createDateTime, end: state.createDateTime, tillCancellation: false };
+    return getPreviewOrderTimeSpanObject.value ||
+      {
+        start: state.createDateTime,
+        end: state.createDateTime,
+        tillCancellation: false,
+      };
   });
 
   /**
@@ -84,18 +87,24 @@ export const useDispatchOrder = (inputVals) => {
       place: getIssuedOrderPlaceObject.value,
       timeSpan: getIssuedOrderTimeSpanObject.value,
       orderText: state.orderText,
-      dncToSend: dncSectorsToSendOrderNoDupl.value ? dncSectorsToSendOrderNoDupl.value.map((el) => {
-          if (el.post) return el;
-          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DNC };
-        }) : [],
-      dspToSend: dspSectorsToSendOrderNoDupl.value ? dspSectorsToSendOrderNoDupl.value.map((el) => {
-          if (el.post) return el;
-          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DSP };
-        }) : [],
-      ecdToSend: ecdSectorsToSendOrderNoDupl.value ? ecdSectorsToSendOrderNoDupl.value.map((el) => {
-          if (el.post) return el;
-          return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.ECD };
-        }) : [],
+      dncToSend: dncSectorsToSendOrderNoDupl.value
+        ? dncSectorsToSendOrderNoDupl.value.map((el) => {
+            if (el.post) return el;
+            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DNC };
+          })
+        : [],
+      dspToSend: dspSectorsToSendOrderNoDupl.value
+        ? dspSectorsToSendOrderNoDupl.value.map((el) => {
+            if (el.post) return el;
+            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DSP };
+          })
+        : [],
+      ecdToSend: ecdSectorsToSendOrderNoDupl.value
+        ? ecdSectorsToSendOrderNoDupl.value.map((el) => {
+            if (el.post) return el;
+            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.ECD };
+          })
+        : [],
       otherToSend: state.otherSectorsToSendOrder,
       orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
       dispatchedOnOrder: relatedOrderObject.value ? relatedOrderObject.value._id : null,
@@ -108,7 +117,7 @@ export const useDispatchOrder = (inputVals) => {
       idOfTheOrderToCancel: state.specialTrainCategories &&
         state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN) ?
         (() => {
-          const existingDNCTakeDutyOrder = store.getters.getExistingDNCTakeDutyOrder;
+          const existingDNCTakeDutyOrder = store.getters.getExistingDNC_ECDTakeDutyOrder;
           return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
         })() : null,
     });

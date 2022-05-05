@@ -183,7 +183,7 @@
         });
 
         state.waitingForServerResponse = false;
-console.log(store.getters.getLoginResult)
+
         const loginResult = store.getters.getLoginResult;
         if (!loginResult || loginResult.error) {
           const errMessage = !loginResult ? 'Что-то пошло не так' : loginResult.message;

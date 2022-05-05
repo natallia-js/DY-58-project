@@ -2,17 +2,16 @@ import { watch } from 'vue';
 import { SET_DEFAULT_DSP_ADDRESSES } from '@/store/mutation-types';
 
 
-export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC }) => {
-
+export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
   /**
-   * Для ДНЦ при издании любого нового документа подгружаем список ДСП из последнего
-   * циркулярного распоряжения, но только в том случае, если этот ДНЦ - автор этого
+   * Для ДНЦ/ЭЦД при издании любого нового документа подгружаем список ДСП из последнего
+   * циркулярного распоряжения, но только в том случае, если этот ДНЦ/ЭЦД - автор этого
    * циркулярного распоряжения.
    */
-  watch(() => store.getters.getExistingDNCTakeDutyOrder, (circularOrder) => {
+  watch(() => store.getters.getExistingDNC_ECDTakeDutyOrder, (circularOrder) => {
     if (
       circularOrder &&
-      isDNC.value &&
+      (isDNC.value || isECD.value) &&
       circularOrder.dspToSend &&
       circularOrder.creator &&
       circularOrder.creator.id === store.getters.getUserId

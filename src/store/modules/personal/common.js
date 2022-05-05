@@ -175,19 +175,23 @@ export const common = {
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
      */
     applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
-      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-        poligonsType: WORK_POLIGON_TYPES.STATION,
-        sectorsGetOrderStatuses: dspToSend,
-      });
-      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-        poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
-        sectorsGetOrderStatuses: dncToSend,
-      });
-      context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
-        poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
-        sectorsGetOrderStatuses: ecdToSend,
-      });
-      context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend);
+      if (dspToSend)
+        context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+          poligonsType: WORK_POLIGON_TYPES.STATION,
+          sectorsGetOrderStatuses: dspToSend,
+        });
+      if (dncToSend)
+        context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+          poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
+          sectorsGetOrderStatuses: dncToSend,
+        });
+      if (ecdToSend)
+        context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
+          poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
+          sectorsGetOrderStatuses: ecdToSend,
+        });
+      if (otherToSend)
+        context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend);
     },
   },
 }

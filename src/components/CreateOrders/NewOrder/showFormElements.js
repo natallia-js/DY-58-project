@@ -35,7 +35,9 @@ import {
   // циркулярного распоряжения ДНЦ и распоряжений о закрытии/открытии перегона данный флаг не нужно
   // отображать.
   const showDisplayOnGIDFlag = computed(() =>
-    [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType)
+    // Для ЭЦД в будущем может понадобиться указывать место действия документа, но пока его надо скрыть
+    // [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(props.orderType)
+    false
   );
 
   // Отображать ли поля выбора места действия распоряжения (если false, то соответствующий элемент

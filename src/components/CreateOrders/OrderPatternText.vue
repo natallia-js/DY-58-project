@@ -19,7 +19,7 @@
       >
         <order-pattern-element-view
           :element="patternElement"
-          :dropdownValues="getElementDropdownValues(patternElement.ref)"
+          :dropdownValues="getElementDropdownValues(patternElement.type, patternElement.ref)"
           @input="handleChangeElementValue"
         />
       </div>
@@ -85,6 +85,10 @@
         'getActiveOrdersOfGivenType',
         'getActiveOrderByNumber',
         'getCurrDNCSectorWorkPoligonUsers',
+        'getCurrECDSectorWorkPoligonUsers',
+        'getSelectedOkno',
+        'isDNC',
+        'isECD',
       ]),
 
       getOrderPatternElementTypes() {
@@ -93,6 +97,128 @@
 
       getElementSizesCorrespondence() {
         return ElementSizesCorrespondence;
+      },
+
+      getElementDropdownValues() {
+        return (elementType, elementRef) => {
+          if (elementType !== OrderPatternElementType.SELECT) {
+            return null;
+          }
+          switch (elementRef) {
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION:
+              return this.getSectorStations.map((station) => ({
+                label: station.St_Title,
+                value: station.St_Title,
+              })).sort();
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_TRACK:
+              return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.STATION).map((track) => ({
+                label: track.ST_Name,
+                value: track.ST_Name,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_TRACK:
+              return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION).map((track) => ({
+                label: track.ST_Name,
+                value: track.ST_Name,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION_TRACK:
+              return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION).map((track) => ({
+                label: track.ST_Name,
+                value: track.ST_Name,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK:
+              return this.getSectorBlocks.map((block) => ({
+                label: block.Bl_Title,
+                value: block.Bl_Title,
+              })).sort();
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK:
+              return this.getStationBlocks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION).map((block) => ({
+                label: block.Bl_Title,
+                value: block.Bl_Title,
+              })).sort();
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_TRACK:
+              return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK).map((track) => ({
+                label: track.BT_Name,
+                value: track.BT_Name,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK_TRACK:
+              return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK).map((track) => ({
+                label: track.BT_Name,
+                value: track.BT_Name,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.REQUEST).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.NOTIFICATION).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_ORDER).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION).map((order) => ({
+                label: order.number,
+                value: order.number,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.SWITCH_OFF_ON:
+              return SWITCH_OFF_ON_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.EXACT_PLACE:
+              return EXACT_PLACE_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.ACTIONS_ORDER:
+              return ACTIONS_ORDER_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
+              if (this.isDNC)
+                return this.getCurrDNCSectorWorkPoligonUsers.map((item) => ({
+                  label: item.postFIO,
+                  value: item.postFIO,
+                }));
+              if (this.isECD)
+                return this.getCurrECDSectorWorkPoligonUsers.map((item) => ({
+                  label: item.postFIO,
+                  value: item.postFIO,
+                }));
+              return [];
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS:
+              return !this.getSelectedOkno
+                ? null
+                : [{
+                    label: `${this.getSelectedOkno.postPerf} ${this.getSelectedOkno.fioPerf}`,
+                    value: `${this.getSelectedOkno.postPerf} ${this.getSelectedOkno.fioPerf}`,
+                  }].concat(!this.getSelectedOkno.dopPerf
+                    ? []
+                    : this.getSelectedOkno.dopPerf.map((p) => ({ label: `${p.post} ${p.fio}`, value: `${p.post} ${p.fio}` }))
+                  );
+            default:
+              return [];
+          }
+        };
       },
     },
 
@@ -170,106 +296,6 @@
           }
         }
         return [];
-      },
-
-      getElementDropdownValues(elementRef) {
-        switch (elementRef) {
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION:
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION:
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION:
-            return this.getSectorStations.map((station) => ({
-              label: station.St_Title,
-              value: station.St_Title,
-            })).sort();
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_TRACK:
-            return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.STATION).map((track) => ({
-              label: track.ST_Name,
-              value: track.ST_Name,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_TRACK:
-            return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION).map((track) => ({
-              label: track.ST_Name,
-              value: track.ST_Name,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION_TRACK:
-            return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION).map((track) => ({
-              label: track.ST_Name,
-              value: track.ST_Name,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK:
-            return this.getSectorBlocks.map((block) => ({
-              label: block.Bl_Title,
-              value: block.Bl_Title,
-            })).sort();
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK:
-            return this.getStationBlocks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION).map((block) => ({
-              label: block.Bl_Title,
-              value: block.Bl_Title,
-            })).sort();
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_TRACK:
-            return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK).map((track) => ({
-              label: track.BT_Name,
-              value: track.BT_Name,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK_TRACK:
-            return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK).map((track) => ({
-              label: track.BT_Name,
-              value: track.BT_Name,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.REQUEST).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.NOTIFICATION).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_ORDER).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER:
-            return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION).map((order) => ({
-              label: order.number,
-              value: order.number,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.SWITCH_OFF_ON:
-            return SWITCH_OFF_ON_ITEMS.map((item) => ({
-              label: item,
-              value: item,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.EXACT_PLACE:
-            return EXACT_PLACE_ITEMS.map((item) => ({
-              label: item,
-              value: item,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.ACTIONS_ORDER:
-            return ACTIONS_ORDER_ITEMS.map((item) => ({
-              label: item,
-              value: item,
-            }));
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
-          case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
-            return this.getCurrDNCSectorWorkPoligonUsers.map((item) => ({
-              label: item.postFIO,
-              value: item.postFIO,
-            }));
-          default:
-            return [];
-        }
       },
 
       handleChangeElementValue(event) {

@@ -1,13 +1,13 @@
 import { watch } from 'vue';
 import { getOknas } from '@/serverRequests/oknas.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
-import { SET_SYSTEM_MESSAGE, SET_GET_ORDER_STATUS_TO_ALL_DSP } from '@/store/mutation-types';
+import { SET_SYSTEM_MESSAGE, SET_GET_ORDER_STATUS_TO_ALL_DSP, SET_SELECTED_OKNO } from '@/store/mutation-types';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 
 /**
  * Данный модуль предназначен для работы с "окнами".
  */
-export const useOkna = ({ store, state, setRequestOrderTextFields }) => {
+export const useOkna = ({ store, state, setRequestOrderTextFields, selectedOkno }) => {
   /**
    * Обновляет информацию по "окнам".
    */
@@ -23,7 +23,6 @@ export const useOkna = ({ store, state, setRequestOrderTextFields }) => {
             ...el,
             id: `${el.idPlan}${el.nppPlan}${el.idSpan}`,
             datetime: `с ${el.beginStr.split(' ')[1]} по ${el.endStr.split(' ')[1]}`,
-            //performer: [`${el.postPerf} ${el.fioPerf}`].concat(!el.dopPerf ? [] : el.dopPerf.map((p) => `${p.post} ${p.fio}`)),
           }));
         } else if (responseData.data.error) {
           if (responseData.data.error === "Отсутствуют данные за указанный период") {
@@ -47,9 +46,16 @@ export const useOkna = ({ store, state, setRequestOrderTextFields }) => {
    * При выборе "окна" необходимо обновлять поля текущего шаблона заявки (если таковой есть)
    * и чистить список адресатов.
    */
-  watch(() => state.selectedOkno, () => {
+  watch(selectedOkno, () => {
     setRequestOrderTextFields();
     store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+  });
+
+  /**
+   * Обновляю значение выбранного "окна" в глобальном хранилище.
+   */
+  watch(() => state.selectedOknoInDataTable, (newVal) => {
+    store.commit(SET_SELECTED_OKNO, { okno: newVal });
   });
 
   return {

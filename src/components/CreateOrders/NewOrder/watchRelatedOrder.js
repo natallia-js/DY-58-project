@@ -2,23 +2,19 @@ import { watch } from 'vue';
 
 
 export const useWatchRelatedOrder = (inputVals) => {
-  const { props, emit, store, relatedOrderObject, setRelatedOrderNumberInOrderText } = inputVals;
+  const { props, emit, store, relatedOrderId, setRelatedOrderNumberInOrderText } = inputVals;
 
-  const setOtherAddresses = (relatedOrder) => {
-    if (relatedOrder) {
-      const firstOrderInChain = store.getters.getFirstOrderInChain(relatedOrder.orderChainId);
-      if (firstOrderInChain) {
-        store.dispatch('applyPersonalForSendingData', { otherToSend: firstOrderInChain.otherToSend });
-      }
-    }
-  };
-
-  watch(relatedOrderObject, (newVal) => {
+  watch(relatedOrderId, (newVal) => {
     setRelatedOrderNumberInOrderText();
 
     // Если выбрано связанное распоряжение и у самого первого распоряжения в его цепочке есть список "иных"
     // адресатов, то этот список необходимо применить к формируемому распоряжению.
-    setOtherAddresses(newVal);
+    if (newVal) {
+      const firstOrderInChain = store.getters.getFirstOrderInChain(newVal.orderChainId);
+      if (firstOrderInChain) {
+        store.dispatch('applyPersonalForSendingData', { otherToSend: firstOrderInChain.otherToSend });
+      }
+    }
 
     emit('changeProps', {
       orderType: props.orderType,

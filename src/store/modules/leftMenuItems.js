@@ -32,6 +32,19 @@ const createOrderOfGivenType = (orderSign) => {
 };
 
 
+const createECDOrderOfGivenType = (orderSign) => {
+  router.push({
+    name: 'NewOrderPage',
+    params: {
+      orderType: ORDER_PATTERN_TYPES.ECD_ORDER,
+      orderPatternSpecialSign: orderSign,
+      prevOrderId: null,
+      orderDraftId: null,
+    },
+  });
+};
+
+
 export const leftMenuItems = {
   getters: {
     getCommonLeftMenuItemsAtTheBeginning(_state, getters) {
@@ -149,7 +162,15 @@ export const leftMenuItems = {
     },
 
     getECDLeftMenuItems(_state, getters) {
-      const items = [...getters.getCommonLeftMenuItemsAtTheBeginning];
+      const items = [];
+      if (getters.canUserDispatchECDTakeDutyOrder) {
+        items.push({
+          label: 'Циркулярное распоряжение',
+          imgURL: require('@/assets/img/takePassDuty.png'),
+          command: () => createECDOrderOfGivenType(SPECIAL_CIRCULAR_ORDER_SIGN),
+        });
+      }
+      items.push(...getters.getCommonLeftMenuItemsAtTheBeginning);
       if (getters.canUserDispatchOrders) {
         items.push({
           label: 'Черновики документов',

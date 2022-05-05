@@ -450,10 +450,6 @@ export const currUser = {
         lastWorkPoligon,
       } = payload;
 
-      if (context.state.isAuthenticated) {
-        return;
-      }
-
       // Без этой строчки не пойдут запросы на сервер в текущей функции
       context.commit(SET_USER_TOKEN, { token: jtwToken, saveInLocalStorage: false });
 

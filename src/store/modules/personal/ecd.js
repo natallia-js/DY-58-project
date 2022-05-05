@@ -1,6 +1,6 @@
 import { store } from '@/store';
 import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { getUserFIOString } from './transformUserData';
+import { getUserFIOString, getUserPostFIOString } from './transformUserData';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import {
   SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
@@ -25,6 +25,23 @@ export const ecd = {
       return (userWorkPoligon.type !== WORK_POLIGON_TYPES.ECD_SECTOR)
         ? null
         : state.sectorPersonal.ECDSectorsShift.find((item) => item.sectorId === userWorkPoligon.code);
+    },
+
+    /**
+     * Возвращает массив ЭЦД текущего полигона управления "Участок ЭЦД".
+     */
+    getCurrECDSectorWorkPoligonUsers(_state, getters) {
+      const currentECDSectorShift = getters.getCurrentECDSectorShift;
+      return !currentECDSectorShift || !currentECDSectorShift.people
+        ? [] :
+        currentECDSectorShift.people
+          .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+          .map((el) => {
+            return {
+              id: el._id,
+              postFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
+            };
+          });
     },
 
     /**
