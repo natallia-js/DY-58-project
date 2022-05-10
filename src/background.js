@@ -20,7 +20,6 @@ async function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
@@ -83,3 +82,26 @@ if (isDevelopment) {
     })
   }
 }
+
+// ------------------------
+/*
+async function createPrintPreviewWindow() {
+  const modalPath = process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8081/#/printDNC_DSPJournalPreviewPage'
+    : `file://${__dirname}/index.html#printDNC_DSPJournalPreviewPage`;
+  // Create the browser window
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    center: true,
+    webPreferences: {
+      // Use pluginOptions.nodeIntegration, leave this alone
+      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
+      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
+      enableRemoteModule: true
+    }
+  });
+  win.on('close', function () { win = null });
+  win.loadURL(modalPath);
+}
+*/

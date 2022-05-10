@@ -9,6 +9,11 @@
     <h3 v-if="startDisplayDate" class="p-text-center p-m-2">
       период c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}
     </h3>
+    <Button
+      label="Печать"
+      class="print-btn"
+      @click="sendToPrinter"
+    />
     <DataTable
       :value="data"
       dataKey="id"
@@ -62,6 +67,7 @@
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
+  import isElectron from '@/additional/isElectron';
 
   export default {
     name: 'dy58-print-ecd-journal-preview-page',
@@ -74,41 +80,6 @@
       const searchInProgress = ref(false);
       const startDisplayDate = ref(null);
       const endDisplayDate = ref(null);
-
-      onMounted(() => {
-        // Не хотим отображения главного меню и футера
-        store.commit(SET_PRINT_PREVIEW, true);
-        // Для приема данных
-        window.addEventListener('data', (event) => {
-          if (!event.detail) {
-            return;
-          }
-          const params = JSON.parse(event.detail);
-
-          startDisplayDate.value = params.datetimeStart && params.datetimeStart !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeStart), false) : null;
-          endDisplayDate.value = params.datetimeEnd && params.datetimeEnd !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeEnd), false) : null;
-
-          if (params.selectedRecords && params.selectedRecords.length) {
-            // будем отображать выбранные пользователем записи, предварительно их отсортировав по
-            // номеру, под которым они отображались в исходной таблице и присвоив им новую нумерацию
-            data.value = params.selectedRecords
-              .sort((a, b) => a.seqNum - b.seqNum)
-              .map((el, index) => ({ ...el, seqNum: index + 1 }));
-          } else {
-            // будем отображать данные, которые подгрузим с сервера
-            loadData({
-              datetimeStart: params.datetimeStart,
-              datetimeEnd: params.datetimeEnd,
-              includeDocsCriteria: params.includeDocsCriteria,
-              filterFields: params.filterFields,
-              sortFields: params.sortFields,
-            });
-          }
-        });
-        // Сообщаем о готовности к отображению данных
-        const event = new CustomEvent('ready');
-        window.dispatchEvent(event);
-      });
 
       const getOrderSeqNumber = (index) => index + 1;
 
@@ -136,6 +107,55 @@
           });
       };
 
+      const viewJournal = (params) => {
+        startDisplayDate.value = params.datetimeStart && params.datetimeStart !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeStart), false) : null;
+        endDisplayDate.value = params.datetimeEnd && params.datetimeEnd !== 'null' ? getLocaleDateTimeString(new Date(params.datetimeEnd), false) : null;
+
+        if (params.selectedRecords && params.selectedRecords.length) {
+          // будем отображать выбранные пользователем записи, предварительно их отсортировав по
+          // номеру, под которым они отображались в исходной таблице и присвоив им новую нумерацию
+          data.value = params.selectedRecords
+            .sort((a, b) => a.seqNum - b.seqNum)
+            .map((el, index) => ({ ...el, seqNum: index + 1 }));
+        } else {
+          // будем отображать данные, которые подгрузим с сервера
+          loadData({
+            datetimeStart: params.datetimeStart,
+            datetimeEnd: params.datetimeEnd,
+            includeDocsCriteria: params.includeDocsCriteria,
+            filterFields: params.filterFields,
+            sortFields: params.sortFields,
+          });
+        }
+      };
+      
+      if (isElectron()) {
+        window.printJournal = (params) => {
+          viewJournal(params);
+        };
+      }
+
+      onMounted(() => {
+        // Не хотим отображения главного меню и футера
+        store.commit(SET_PRINT_PREVIEW, true);
+
+        if (!isElectron()) {
+          window.addEventListener('data', (event) => {
+            if (event.detail) {
+              const params = JSON.parse(event.detail);
+              viewJournal(params);
+            }
+          });
+          // Сообщаем о готовности к отображению данных
+          const event = new CustomEvent('ready');
+          window.dispatchEvent(event);
+        }
+      });
+
+      const sendToPrinter = () => {
+        window.print();
+      };
+
       return {
         data,
         errMessage,
@@ -145,6 +165,7 @@
         startDisplayDate,
         endDisplayDate,
         getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
+        sendToPrinter,
       };
     },
   }
@@ -158,6 +179,7 @@
     td    { page-break-inside: avoid; page-break-after: auto }
     thead { display: table-header-group }
     tfoot { display: table-footer-group }
+    .print-btn { display: none }
   }
 
   :deep(th) {

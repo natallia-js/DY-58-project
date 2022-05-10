@@ -167,6 +167,7 @@
   import prepareDataForDisplayInECDJournal from '@/additional/prepareDataForDisplayInECDJournal';
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+  import isElectron from '@/additional/isElectron';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -316,11 +317,16 @@
           name: 'PrintECDJournalPreviewPage',
           params: null,
         });
-        const newWindow = window.open(route.href, '_blank');
-        newWindow.addEventListener('ready', () => {
-          const event = new CustomEvent('data', { detail: JSON.stringify(params) });
-          newWindow.dispatchEvent(event);
-        });
+        
+        const printWindow = window.open(route.href, '_blank');
+        if (!isElectron()) {
+          printWindow.addEventListener('ready', () => {
+            const event = new CustomEvent('data', { detail: JSON.stringify(params) });
+            printWindow.dispatchEvent(event);
+          });
+        } else {
+          printWindow.eval(`printJournal(${JSON.stringify(params)})`);
+        }
       });
 
       watch(() => props.checkDocs, (newVal) => {

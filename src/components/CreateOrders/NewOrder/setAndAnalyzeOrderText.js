@@ -12,7 +12,10 @@ import {
   OrderPatternElementType,
 } from '@/constants/orderPatterns';
 //import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { SET_GET_ORDER_STATUS_TO_DEFINIT_DSP } from '@/store/mutation-types';
+import {
+  SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+  SET_GET_ORDER_STATUS_TO_ALL_DSP,
+} from '@/store/mutation-types';
 
 
 export const useSetAndAnalyzeOrderText = (inputVals) => {
@@ -138,20 +141,6 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
   };
 
   /**
-   * Указанную станцию (по ее id) определяет в качестве получателя оригинала формируемого распоряжения.
-   */
-  const sendOrderOriginalToStation = (stationId) => {
-    //if (!state.dspSectorsToSendOrder.find((el) => el.type === WORK_POLIGON_TYPES.STATION && el.id === stationId)) {
-     // const stationToSendOrder = store.getters.getDSPShiftForSendingData.find((el) =>
-      //  el.type === WORK_POLIGON_TYPES.STATION && el.id === stationId);
-      //if (stationToSendOrder) {
-        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
-          { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
-      //}
-    //}
-  };
-
-  /**
    * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
    * Кроме того, для шаблонного распоряжения анализирует устанавливаемые в поля распоряжения значения.
    */
@@ -162,54 +151,76 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
       return;
     }
 
+    // id станций, которым необходимо отправить оригинал документа
+    const stationsToSendOrder = [];
+
     // Если в тексте распоряжения встречается поле 'Станция', 'Станция отправления' либо 'Станция прибытия',
     // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
-    // распоряжения (если установлен соответствующий флаг), кроме того, определяется станция-получатель
-    // документа (секция "Кому")
+    // распоряжения (если установлен соответствующий флаг).
+    // Также, определяются станции-получатели документа (секция "Кому") - это все станции в полях
+    // 'Станция', 'Станция отправления' либо 'Станция прибытия'.
     let placeSet = false;
 
-    const stationElement = event.orderText.find((el) =>
+    const stationElements = event.orderText.filter((el) =>
       [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
        FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION].includes(el.ref));
 
-    if (stationElement) {
+    stationElements.forEach((stationElement, index) => {
+      const resetOrderPlace = () => {
+        if (index === 0) {
+          // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+          // то обнуляем место действия распоряжения
+          if (state.showOnGID.value === true) {
+            state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: null };
+          }
+        }
+      };
       if (stationElement.value) {
         const stationId = store.getters.getSectorStationIdByTitle(stationElement.value);
         if (stationId) {
           // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
           // то определяется место действия распоряжения
-          if (state.showOnGID.value === true) {
+          if (state.showOnGID.value === true && index === 0) {
             state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: stationId };
             placeSet = true;
           }
           // Для отображения станции в списке "Кому" необходимо ее туда добавить, если ее там еще нет
-          sendOrderOriginalToStation(stationId);
+          stationsToSendOrder.push(stationId);
+        } else {
+          resetOrderPlace();
         }
       } else {
-        // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
-        // то обнуляем место действия распоряжения
-        if (state.showOnGID.value === true) {
-          state.orderPlace = { place: ORDER_PLACE_VALUES.station, value: null };
-        }
+        resetOrderPlace();
       }
-    }
+    });
+    
     // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
     // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
     // распоряжения (если установлен соответствующий флаг). Но только при условии что ранее (см. выше)
     // не было установлено место действия при анализе поля станции!
-    // В любом случае, определяются станции-получатели документа (секция "Кому")
-    const blockElement = event.orderText.find((el) =>
+    // В любом случае, определяются станции-получатели документа (секция "Кому") - это все станции в полях
+    // 'Перегон', 'Перегон станции отправления'.
+    const blockElements = event.orderText.filter((el) =>
       [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
 
-    if (blockElement) {
+    blockElements.forEach((blockElement, index) => {
+      const resetOrderPlace = () => {
+        if (index === 0) {
+          // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
+          // при этом место действия распоряжения ранее не было определено, то обнуляем место действия распоряжения
+          if (state.showOnGID.value === true && !placeSet) {
+            state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: null };
+          }
+        }
+      };
       if (blockElement.value) {
         const blockId = store.getters.getSectorBlockIdByTitle(blockElement.value);
         if (blockId) {
           // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
           // при этом место действия распоряжения ранее не было определено, то определяется место действия распоряжения
-          if (state.showOnGID.value === true && !placeSet) {
+          if (state.showOnGID.value === true && !placeSet && index === 0) {
             state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: blockId };
             placeSet = true;
           }
@@ -217,17 +228,24 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
           // если их там еще нет
           const stationsIds = store.getters.getSectorBlockStationsIds(blockId);
           if (stationsIds) {
-            sendOrderOriginalToStation(stationsIds[0]);
-            sendOrderOriginalToStation(stationsIds[1]);
+            stationsToSendOrder.push(...stationsIds);
           }
+        } else {
+          resetOrderPlace();
         }
       } else {
-        // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
-        // при этом место действия распоряжения ранее не было определено, то обнуляем место действия распоряжения
-        if (state.showOnGID.value === true && !placeSet) {
-          state.orderPlace = { place: ORDER_PLACE_VALUES.span, value: null };
-        }
+        resetOrderPlace();
       }
+    });
+
+    if (stationsToSendOrder.length) {
+      // Отменяем отправку документа всем станциям, которые до этого были назначены
+      store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
+      // Формируем список станций-адресатов документа заново
+      stationsToSendOrder.forEach((stationId) => {
+        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
+          { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+      });
     }
 
     // Если установлен флаг определения времени действия распоряжения, то при изменении ряда полей

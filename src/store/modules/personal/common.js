@@ -175,23 +175,34 @@ export const common = {
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
      */
     applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
+      const getAppSendOriginalStatusFrom = (status) => {
+        if (typeof status === 'boolean')
+          return status ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
+        return status;
+      };
+
       if (dspToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.STATION,
-          sectorsGetOrderStatuses: dspToSend,
+          sectorsGetOrderStatuses: dspToSend.map((el) =>
+            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
         });
       if (dncToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
-          sectorsGetOrderStatuses: dncToSend,
+          sectorsGetOrderStatuses: dncToSend.map((el) =>
+            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
         });
       if (ecdToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
-          sectorsGetOrderStatuses: ecdToSend,
+          sectorsGetOrderStatuses: ecdToSend.map((el) =>
+            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
         });
       if (otherToSend)
-        context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend);
+        context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend.map((el) =>
+          ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) }))
+        );
     },
   },
 }

@@ -210,10 +210,10 @@
       Если текст документа необходимо сформировать на основании шаблона, то этот шаблон необходимо предварительно
       выбрать в соответствующем списке. Поля шаблона делятся на статические (тест и перенос строки) и
       динамические (поля, предназначенные для ввода значения пользователем).
-      За динамически полем может быть закреплено смысловое значение (отображается при наведении на поле ввода),
+      За динамическим полем может быть закреплено <b><i>смысловое значение</i></b> (отображается при наведении на поле ввода),
       которое определяет, какая конкретно информация содержится (должна содержаться) в данном поле.
       Виды динамических полей, возможные их смысловые значения, способы заполнения полей и влияние их на
-      другие динамические поля шаблона представлены в таблице 2.
+      другие динамические поля шаблона (и иные поля создаваемого документа) представлены в таблице 2.
     </p>
     <br />
     <DataTable
@@ -238,8 +238,38 @@
       <Column :field="DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill" header="Комментарий к заполнению поля" style="width:30%"></Column>
     </DataTable>
     <br />
+    <p class="dy58-help-paragraph">
+      Поля <i><b>правого блока</b></i>:
+    </p>
+    <p class="dy58-help-paragraph">
+      - <i><b>Кому адресовать</b></i> - список адресатов создаваемого документа.
+      Данный блок оформлен в виде секций "ДСП", "ДНЦ", "ЭЦД", "Иные адресаты".
+      Каждая секция представляет собой панель с возможностью разворачивания / сворачивания содержимого.
+      Содержимое каждой панели - таблица адресатов, определяемых соответствующим наименованием панели.
+      Адресаты из числа ДСП, ДНЦ, ЭЦД (т.е. соответствующие рабочие полигоны), которым адресован документ, получат
+      экземпляр созданного документа при условии наличия на данном рабочем полигоне рабочего места с ДУ-58.
+      Адресаты их числа "Иных адресатов" не получат экземпляр созданного документа, т.к. системой ДУ-58 не предусмотрены
+      соответствующие рабочие места. Эти адресаты будут фигурировать лишь в тексте документа.
+    </p>
+    <p class="dy58-help-paragraph">
+      Каждая таблица адресатов делится на строки, количество которых соответствует числу возможных адресатов.
+      Последний столбец таблицы - кнопки, позволяющие определить, отправлять соответствующему адресату оригинал, копию
+      создаваемого документа или не отправлять его этому адресату. По умолчанию создаваемый документ никому не адресуется.
+      Под таблицей присутствуют кнопки, позволяющие отправить копию / оригинал / отменить отправку документа всем / оставшимся адресатам.
+      Если таблица ДСП делится на поездные участки, то действие данных кнопок распространяется на выбранные поездные участки
+      либо на все, если ни один из них не выбран.
+    </p>
+    <p class="dy58-help-paragraph">
+      Таблица "иных" адресатов формируется "вручную": можно произвольным образом добавлять, редактировать и удалять из нее записи.
+      Для ЭЦД таблица "иных" адресатов может заполняться также путем выбора записей о структурных подразделениях.
+    </p>
+    <p class="dy58-help-paragraph">
+      Полный список возможных адресатов зависит от типа создаваемого документа и представлен в нижеследующей таблице. 
+    </p>
     <DataTable
-      :value="createOrderElementsConnectionsTableData"
+      :value="orderReceiversTableData"
+      rowGroupMode="rowspan"
+      :groupRowsBy="ORDER_RECEIVERS_TABLE_COLUMNS.orderCreator"
       class="p-datatable-sm"
     >
       <template #header>
@@ -254,17 +284,18 @@
     </DataTable>
     <br />
     <DataTable
-      :value="orderReceiversTableData"
-      rowGroupMode="rowspan"
-      :groupRowsBy="ORDER_RECEIVERS_TABLE_COLUMNS.orderCreator"
+      :value="createOrderActionsTableData"
       class="p-datatable-sm"
     >
       <template #header>
         <div>Таблица 4</div>
       </template>
-      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.element" header="Элемент"></Column>
-      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.defaultValue" header="Значение по умолчанию"></Column>
-      <Column :field="CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.affectedElements" header="На что влияет при изменении"></Column>
+      <Column :field="CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action" header="Действие"></Column>
+      <Column :field="CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects" header="Последствия">
+        <template #body="slotProps">
+          <div v-html="slotProps.data.effects"></div>
+        </template>
+      </Column>
     </DataTable>
     <br />
     <p class="dy58-help-paragraph">
@@ -278,7 +309,7 @@
   import { ORDER_CONNECTIONS_TABLE_COLUMNS, orderConnectionsTableData } from './Tables/orderConnectionsTable';
   import { DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS, dynamicOrderPatternFieldsTableData } from './Tables/dynamicOrderPatternFieldsTable';
   import { ORDER_RECEIVERS_TABLE_COLUMNS, orderReceiversTableData } from './Tables/orderReceiversTable';
-  import { CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS, createOrderElementsConnectionsTableData } from './Tables/createOrderElementsConnectionsTable';
+  import { CREATE_ORDER_ACTIONS_TABLE_COLUMNS, createOrderActionsTableData } from './Tables/createOrderElementsConnectionsTable';
 
   export default {
     name: 'dy58-create-order-page-description',
@@ -288,11 +319,11 @@
         ORDER_CONNECTIONS_TABLE_COLUMNS,
         DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS,
         ORDER_RECEIVERS_TABLE_COLUMNS,
-        CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS,
+        CREATE_ORDER_ACTIONS_TABLE_COLUMNS,
         orderConnectionsTableData,
         dynamicOrderPatternFieldsTableData,
         orderReceiversTableData,
-        createOrderElementsConnectionsTableData,
+        createOrderActionsTableData,
       };
     }
   }

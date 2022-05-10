@@ -14,25 +14,26 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  * Определяет допустимые связи между документами (при их создании) для разных категорий пользователей системы.
  * initialDocType - тип документа (исходный документ), на основании которого можно создать новый документ
  * initialDocSpecialMarks - специальные отметки, которые должны быть у исходного документа
+ * excludeInitialDocSpecialMarks - специальные отметки, которых не должно быть у исходного документа
  * userCredentials - полномочия текущего пользователя
  * possibleNewDocTypes - типы документов, которые текущий пользователь может создать на основании исходного документа
  * ! исходный документ должен быть действующим
- * Допустимые взаимосвязи документов:
- *   Издатель        Исходный документ             Связанный документ
- *     ДНЦ             Распоряжение        Распоряжение, Заявка, Уведомление
- *     ДСП             Распоряжение        Заявка, Уведомление
- *     ЭЦД             Распоряжение        Запрещение
- *     ДНЦ             Заявка (ДСП)        Распоряжение, Заявка, Уведомление
- *     ДСП             Заявка (ДСП)        Заявка, Уведомление
- *     ЭЦД             Заявка (ДСП)        -
- *     ДНЦ             Уведомление (ДСП)   Распоряжение
- *     ДСП             Уведомление (ДСП)   -
- *     ДНЦ             Приказ ЭЦД          -
- *     ДСП             Приказ ЭЦД          -
- *     ЭЦД             Приказ ЭЦД          Уведомление ЭЦД об отмене приказа ЭЦД
- *     ДНЦ             Запрещение ЭЦД      -
- *     ДСП             Запрещение ЭЦД      -
- *     ЭЦД             Запрещение ЭЦД      Уведомление ЭЦД об отмене запрещения ЭЦД
+ * Допустимые взаимосвязи документов: 
+ *   Издатель                  Исходный документ                        Связанный документ
+ *     ДНЦ             Распоряжение на закрытие перегона        Распоряжение, Заявка, Уведомление
+ *     ДСП             Распоряжение на закрытие перегона        Заявка, Уведомление
+ *     ЭЦД             Распоряжение на закрытие перегона        Запрещение
+ *     ДНЦ             Заявка (ДСП)                             Распоряжение, Заявка, Уведомление
+ *     ДСП             Заявка (ДСП)                             Заявка, Уведомление
+ *     ЭЦД             Заявка (ДСП)                             -
+ *     ДНЦ             Уведомление (ДСП)                        Распоряжение
+ *     ДСП             Уведомление (ДСП)                        -
+ *     ДНЦ             Приказ ЭЦД                               -
+ *     ДСП             Приказ ЭЦД                               -
+ *     ЭЦД             Приказ ЭЦД                               Уведомление ЭЦД об отмене приказа ЭЦД
+ *     ДНЦ             Запрещение ЭЦД                           -
+ *     ДСП             Запрещение ЭЦД                           -
+ *     ЭЦД             Запрещение ЭЦД                           Уведомление ЭЦД об отмене запрещения ЭЦД
  */
 const possibleDocsConnections = [
   {
@@ -77,6 +78,7 @@ const possibleDocsConnections = [
   },
   {
     initialDocType: ORDER_PATTERN_TYPES.ECD_ORDER,
+    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN],
     newDocsInfo: [
       {
         userCredentials: [APP_CREDENTIALS.ECD_FULL],
@@ -216,6 +218,11 @@ export const activeOrders = {
             return [];
           }
         }
+        if (possibleDocs.excludeInitialDocSpecialMarks && possibleDocs.excludeInitialDocSpecialMarks.length) {
+          if (specialOrderMarks && specialOrderMarks.find((mark) => possibleDocs.excludeInitialDocSpecialMarks.includes(mark))) {
+            return [];
+          }
+        }
         const currentUserCredentials = getters.getUserCredential;
         const userInfo = possibleDocs.newDocsInfo.find((el) => el.userCredentials.includes(currentUserCredentials));
         if (!userInfo) {
@@ -240,6 +247,7 @@ export const activeOrders = {
         ).map((el) => ({
           initialDocType: el.initialDocType,
           initialDocSpecialMarks: el.initialDocSpecialMarks,
+          excludeInitialDocSpecialMarks: el.excludeInitialDocSpecialMarks,
         }));
       };
     },
@@ -275,6 +283,11 @@ export const activeOrders = {
               return;
             }
             if (possibleBaseOrderInfo.initialDocSpecialMarks.find((mark) => !order.specialTrainCategories.includes(mark))) {
+              return;
+            }
+          }
+          if (possibleBaseOrderInfo.excludeInitialDocSpecialMarks && possibleBaseOrderInfo.excludeInitialDocSpecialMarks.length) {
+            if (order.specialTrainCategories && possibleBaseOrderInfo.excludeInitialDocSpecialMarks.find((mark) => order.specialTrainCategories.includes(mark))) {
               return;
             }
           }

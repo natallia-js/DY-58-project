@@ -36,7 +36,7 @@ export const orderConnectionsTableData = [
     [ORDER_CONNECTIONS_TABLE_COLUMNS.childOrder]: 'распоряжение',
   },
   {
-    [ORDER_CONNECTIONS_TABLE_COLUMNS.baseOrder]: 'приказ ЭЦД',
+    [ORDER_CONNECTIONS_TABLE_COLUMNS.baseOrder]: 'приказ ЭЦД (кроме циркулярного)',
     [ORDER_CONNECTIONS_TABLE_COLUMNS.whoCanCreate]: 'ЭЦД',
     [ORDER_CONNECTIONS_TABLE_COLUMNS.childOrder]: 'уведомление ЭЦД',
   },

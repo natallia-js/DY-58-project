@@ -827,7 +827,7 @@
         getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
-      useWatchRelatedOrder({ props, emit, store, relatedOrderId, setRelatedOrderNumberInOrderText });
+      useWatchRelatedOrder({ props, emit, store, relatedOrderId, relatedOrderObject, setRelatedOrderNumberInOrderText });
 
       const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields, selectedOkno });
 

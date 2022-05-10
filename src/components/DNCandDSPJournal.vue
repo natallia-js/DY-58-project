@@ -149,6 +149,8 @@
   import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+  import isElectron from '@/additional/isElectron';
+  //import { ipcRenderer } from 'electron';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -274,12 +276,14 @@
         loadLazyData();
       });
 
+      let printWindow;
+      let params;
       watch(() => props.printParams, (newVal) => {
         if (!newVal) {
           return;
         }
         // open print preview window
-        const params = selectedRecords.value ?
+        params = selectedRecords.value ?
           {
             selectedRecords: selectedRecords.value,
           } :
@@ -295,11 +299,17 @@
           name: 'PrintDNC_DSPJournalPreviewPage',
           params: null,
         });
-        const newWindow = window.open(route.href, '_blank');
-        newWindow.addEventListener('ready', () => {
-          const event = new CustomEvent('data', { detail: JSON.stringify(params) });
-          newWindow.dispatchEvent(event);
-        });
+        printWindow = window.open(route.href, '_blank', 'nodeIntegration=yes');
+        if (!isElectron()) {
+          printWindow.addEventListener('ready', () => {
+            const event = new CustomEvent('data', { detail: JSON.stringify(params) });
+            printWindow.dispatchEvent(event);
+          });
+        } else {
+          window.printJournalWindowReady = () => {
+            printWindow.eval(`printJournal(${JSON.stringify(params)})`);
+          };
+        }
       });
 
       watch(() => props.checkDocs, (newVal) => {

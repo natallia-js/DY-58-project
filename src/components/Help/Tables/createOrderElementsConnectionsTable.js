@@ -1,13 +1,37 @@
-export const CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS = {
-  element: 'element',
-  defaultValue: 'defaultValue',
-  affectedElements: 'affectedElements',
+export const CREATE_ORDER_ACTIONS_TABLE_COLUMNS = {
+  action: 'action',
+  effects: 'effects',
 };
 
-export const createOrderElementsConnectionsTableData = [
+export const createOrderActionsTableData = [
   {
-    [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.element]: '',
-    [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.defaultValue]: '',
-    [CREATE_ORDER_ELEMENTS_CONNECTIONS_TABLE_COLUMNS.affectedElements]: '',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action]: 'Создание нового документа ДНЦ / ЭЦД',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects]:
+      '1) установка возможных адресатов из числа ДСП, фигурировавших при издании последнего циркулярного распоряжения ТЕКУЩИМ пользователем;<br />' +
+      '2) только для ЭЦД: установка списка "иных" адресатов путем его копирования из последнего циркулярного распоряжения, изданного ТЕКУЩИМ пользователем;',
+  },
+  {
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action]: 'Выбор "связанного" документа (привязка к цепочке документов)',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects]:
+      '1) установка номера "связанного" документа в тексте создаваемого шаблонного документа;<br />' +
+      '2) установка списка "иных" адресатов путем его копирования из первого документа цепочки;',
+  },
+  {
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action]: 'Выбор "окна" при создании заявки',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects]:
+      '1) обновление значений полей шаблона заявки путем установки в них соответствующих значений полей "окна";<br />' +
+      '2) отмена отправки заявки всем выбранным ДСП;',
+  },
+  {
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action]: 'Выбор черновика документа',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects]:
+      '1) установка значений полей данных;<br />' +
+      '2) установка адресатов;',
+  },
+  {
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.action]: 'Смена шаблона документа (при его создании)',
+    [CREATE_ORDER_ACTIONS_TABLE_COLUMNS.effects]:
+      '1) установка номера "связанного" документа в тексте создаваемого шаблонного документа (если таковой выбран);<br />' +
+      '2) если создается шаблонная заявка и выбрано "окно", то поля заявки заполняются соответствующими значениями полей выбранного "окна";',
   },
 ];
