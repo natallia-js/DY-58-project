@@ -1,31 +1,39 @@
-import { watch } from 'vue';
-import { SET_DEFAULT_DSP_ADDRESSES } from '@/store/mutation-types';
+import { watch, computed } from 'vue';
+import { SET_DEFAULT_DSP_ADDRESSES, SET_OTHER_SHIFT_FOR_SENDING_DATA } from '@/store/mutation-types';
 
 
 export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
+  const existingDNC_ECDTakeDutyOrder = computed(() => store.getters.getExistingDNC_ECDTakeDutyOrder);
+  const existingDNC_ECDTakeDutyOrderDateTime = computed(() => existingDNC_ECDTakeDutyOrder.value ? existingDNC_ECDTakeDutyOrder.value.createDateTime.getTime() : null);
+
   /**
    * Для ДНЦ/ЭЦД при издании любого нового документа подгружаем список ДСП из последнего
    * циркулярного распоряжения, но только в том случае, если этот ДНЦ/ЭЦД - автор этого
    * циркулярного распоряжения.
    * Кроме этого, для ЭЦД при создании любого нового документа подгружаем список "иных"
    * адресатов из последнего циркулярного распоряжения, изданного текущим пользователем.
+   * 
+   * Здесь отслеживается именно время (в мс) издания последнего циркулярного распоряжения, т.к. при
+   * отслеживании самого объекта циркулярного распоряжения данный watch будет срабатывать каждый раз при
+   * обновлении списка распоряжений. И установленные адресаты, соответственно, будут "затираться".
    */
-  watch(() => store.getters.getExistingDNC_ECDTakeDutyOrder, (circularOrder) => {
+  watch(existingDNC_ECDTakeDutyOrderDateTime, (newVal) => {
     if (
-      circularOrder &&
+      newVal && existingDNC_ECDTakeDutyOrder.value &&
       (isDNC.value || isECD.value) &&
-      (circularOrder.dspToSend || circularOrder.otherToSend) &&
-      circularOrder.creator && circularOrder.creator.id === store.getters.getUserId
+      (existingDNC_ECDTakeDutyOrder.value.dspToSend || existingDNC_ECDTakeDutyOrder.value.otherToSend) &&
+      existingDNC_ECDTakeDutyOrder.value.creator &&
+      existingDNC_ECDTakeDutyOrder.value.creator.id === store.getters.getUserId
     ) {
-      if (circularOrder.dspToSend) {
-        store.commit(SET_DEFAULT_DSP_ADDRESSES, circularOrder.dspToSend.map((el) => ({
+      if (existingDNC_ECDTakeDutyOrder.value.dspToSend) {
+        store.commit(SET_DEFAULT_DSP_ADDRESSES, existingDNC_ECDTakeDutyOrder.value.dspToSend.map((el) => ({
           stationId: el.id,
           post: el.post,
           fio: el.fio,
         })));
       }
       if (isECD.value) {
-        store.dispatch('applyPersonalForSendingData', { otherToSend: circularOrder.otherToSend });
+        store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, existingDNC_ECDTakeDutyOrder.value.otherToSend);
       }
     }
   }, { immediate: true }); // это обязательно, т.к. нужно, чтобы код в watch выполнялся каждый раз при

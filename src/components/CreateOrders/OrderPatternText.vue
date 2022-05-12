@@ -304,20 +304,12 @@
         let elementToChangeValue;
         let tmp;
 
-        /*const getAppSendOriginalStatusFromBoolean = (boolStatus) => {
-          return boolStatus ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
-        };*/
-
         const applyPersonalForSendingData = (tmp) => {
           this.$store.dispatch('applyPersonalForSendingData', {
-            dspToSend: /*!tmp.dspToSend ? [] : tmp.dspToSend.map((el) =>
-              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),*/ tmp.dspToSend,
-            dncToSend: /*!tmp.dncToSend ? [] : tmp.dncToSend.map((el) =>
-              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),*/ tmp.dncToSend,
-            ecdToSend: /*!tmp.ecdToSend ? [] : tmp.ecdToSend.map((el) =>
-              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),*/ tmp.ecdToSend,
-            otherToSend: /*!tmp.otherToSend ? [] : tmp.otherToSend.map((el) =>
-              ({ ...el, sendOriginal: getAppSendOriginalStatusFromBoolean(el.sendOriginal) })),*/ tmp.otherToSend,
+            dspToSend: tmp.dspToSend,
+            dncToSend: tmp.dncToSend,
+            ecdToSend: tmp.ecdToSend,
+            otherToSend: tmp.otherToSend,
           });
         };
 

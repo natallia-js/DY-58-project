@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import AuthPage from '@/views/AuthPage';
 import SectorStructurePage from '@/views/SectorStructurePage';
 import ConfirmAuthDataPage from '@/views/ConfirmAuthDataPage';
@@ -11,6 +11,7 @@ import PrintDNC_DSPJournalPreviewPage from '@/views/PrintDNC_DSPJournalPreviewPa
 import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
+import isElectron from '@/additional/isElectron';
 
 const routes = [
   {
@@ -104,8 +105,16 @@ const routes = [
 ];
 
 
+// The hash history mode is created with createWebHashHistory().
+// It uses a hash character (#) before the actual URL that is internally passed.
+// Because this section of the URL is never sent to the server, it doesn't require any special treatment on the server level.
+// This case we'll use for electron version of the application because Electron is a file-based environment!
+//
+// The HTML5 mode is created with createWebHistory() and is the recommended mode.
+// When using createWebHistory(), the URL will look "normal," e.g. https://example.com/user/id.
+// This case we'll use for browser version of the application.
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: isElectron() ? createWebHashHistory(process.env.BASE_URL) : createWebHistory(process.env.BASE_URL),
   routes,
 });
 

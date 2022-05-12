@@ -175,6 +175,7 @@ export const common = {
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
      */
     applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
+      // Позволяет определить, отослать оригинал либо копию документа
       const getAppSendOriginalStatusFrom = (status) => {
         if (typeof status === 'boolean')
           return status ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
@@ -185,24 +186,39 @@ export const common = {
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.STATION,
           sectorsGetOrderStatuses: dspToSend.map((el) =>
-            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
+            ({
+              ...el,
+              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+            })
+          ),
         });
       if (dncToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.DNC_SECTOR,
           sectorsGetOrderStatuses: dncToSend.map((el) =>
-            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
+            ({
+              ...el,
+              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+            })
+          ),
         });
       if (ecdToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
           poligonsType: WORK_POLIGON_TYPES.ECD_SECTOR,
           sectorsGetOrderStatuses: ecdToSend.map((el) =>
-            ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) })),
+            ({
+              ...el,
+              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+            })
+          ),
         });
       if (otherToSend)
         context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend.map((el) =>
-          ({ ...el, sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal) }))
-        );
+          ({
+            ...el,
+            sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+          })
+        ));
     },
   },
 }

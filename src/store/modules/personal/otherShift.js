@@ -35,10 +35,17 @@ export const otherShift = {
 
   mutations: {
     /**
-     *
+     * Добавляет запись в список иных адресатов.
+     * При добавлении не допускает дубликатов записей в таблице.
      */
     [ADD_OTHER_GET_ORDER_RECORD] (state, props) {
-      const { additionalId, placeTitle, post, fio, sendOriginal = CurrShiftGetOrderStatus.doNotSend } = props;
+      const {
+        additionalId,
+        placeTitle,
+        post,
+        fio,
+        sendOriginal = CurrShiftGetOrderStatus.doNotSend,
+      } = props;
 
       if (!state.sectorPersonal) {
         state.sectorPersonal = {};
@@ -70,7 +77,7 @@ export const otherShift = {
     },
 
     /**
-     *
+     * Редактирует запись с указанным id в списке иных адресатов.
      */
     [EDIT_OTHER_GET_ORDER_RECORD] (state, { _id, placeTitle, post, fio } ) {
       if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
@@ -89,13 +96,12 @@ export const otherShift = {
     },
 
     /**
-     *
+     * Удаляет запись с указанным id из списка иных адресатов.
      */
     [DEL_OTHER_GET_ORDER_RECORD] (state, id) {
-      if (!state.sectorPersonal || !state.sectorPersonal.otherShift) {
-        return;
+      if (state.sectorPersonal && state.sectorPersonal.otherShift) {
+        state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
       }
-      state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
     },
 
     /**
@@ -107,7 +113,6 @@ export const otherShift = {
         state.sectorPersonal.otherShift = newData || [];
       }
     },
-
 
     /**
      * Оригинал/Копия/Ничего всем виртуальным получателям распоряжения.

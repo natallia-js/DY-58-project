@@ -128,12 +128,6 @@
           });
         }
       };
-      
-      if (isElectron()) {
-        window.printJournal = (params) => {
-          viewJournal(params);
-        };
-      }
 
       onMounted(() => {
         // Не хотим отображения главного меню и футера
@@ -149,6 +143,9 @@
           // Сообщаем о готовности к отображению данных
           const event = new CustomEvent('ready');
           window.dispatchEvent(event);
+        } else {
+          window.printJournal = (params) => { console.log(params); viewJournal(params) };
+          window.opener.eval('printJournalWindowReady()');
         }
       });
 

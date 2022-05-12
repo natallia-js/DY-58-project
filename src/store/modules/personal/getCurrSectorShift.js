@@ -182,7 +182,15 @@ export const getCurrSectorShift = {
     },
 
     [SET_SECTOR_PERSONAL] (state, shiftPersonal) {
-      state.sectorPersonal = shiftPersonal || {};
+      // Здесь не делаю "state.sectorPersonal = shiftPersonal || {}" потому, что при перегазрузке страницы
+      // информация об иных адресатах может подгрузиться раньше из циркулярного распоряжения, нежели остальная
+      // информация будет установлена здесь. И этот код просто сотрет все что было загружено из циркуляра.
+      if (!state.sectorPersonal) {
+        state.sectorPersonal = {};
+      }
+      state.sectorPersonal.DNCSectorsShift = shiftPersonal && shiftPersonal.DNCSectorsShift ? shiftPersonal.DNCSectorsShift : [];
+      state.sectorPersonal.ECDSectorsShift = shiftPersonal && shiftPersonal.ECDSectorsShift ? shiftPersonal.ECDSectorsShift : [];
+      state.sectorPersonal.sectorStationsShift = shiftPersonal && shiftPersonal.sectorStationsShift ? shiftPersonal.sectorStationsShift : [];
     },
   },
 

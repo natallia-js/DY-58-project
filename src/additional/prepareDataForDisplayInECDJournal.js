@@ -8,6 +8,7 @@ import {
   getExtendedOrderTitle,
 } from '@/additional/formOrderText';
 import { SPECIAL_TELECONTROL_ORDER_SIGN } from '@/constants/orderPatterns';
+import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
 
 const orderDispatchedOnThisWorkPoligon = (order) => {
@@ -88,7 +89,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         toWhom: toWhomString, //formToWhomString(order),
         // дата-время утверждения распоряжения
         assertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
-        number: order.number,
+        number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
         orderContent: `${getExtendedOrderTitle(order)}<br/>${orderTextData.text}`,
         orderAcceptor: formAcceptorsStrings({
           dncToSend: order.dncToSend,

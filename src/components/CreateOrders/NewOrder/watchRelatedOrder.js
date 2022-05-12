@@ -2,9 +2,17 @@ import { watch } from 'vue';
 
 
 export const useWatchRelatedOrder = (inputVals) => {
-  const { props, emit, store, relatedOrderId, relatedOrderObject, setRelatedOrderNumberInOrderText } = inputVals;
+  const {
+    props,
+    emit,
+    store,
+    relatedOrderId,
+    relatedOrderObject,
+    setRelatedOrderNumberInOrderText,
+  } = inputVals;
 
   watch(relatedOrderId, (newVal) => {
+    // Установка номера связанного документа в тексте создаваемого шаблонного распоряжения
     setRelatedOrderNumberInOrderText();
 
     // Если выбрано связанное распоряжение и у самого первого распоряжения в его цепочке есть список "иных"

@@ -81,7 +81,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       // дата-время создания и утверждения распоряжения
       assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
         order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
-      number: order.number,
+      number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
       orderContent: getExtendedOrderTitle(order) + '<br/>' +
         formOrderText({
           orderTextArray: order.orderText.orderText,

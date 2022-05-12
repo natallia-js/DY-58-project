@@ -10,10 +10,8 @@ import isNumber from '@/additional/isNumber';
  */
 export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject */ }) => {
 
-  const endDateNoLessStartDate = (value) => {
-    return !value ? true :
-      !state.timeSpan.start ? true : (isValidDateTime(value) && value >= state.timeSpan.start);
-  };
+  const endDateNoLessStartDate = (value) => !value ? true :
+    !state.timeSpan.start ? true : (isValidDateTime(value) && value >= state.timeSpan.start);
 
   const cancelOrEndDate = (value) => value || state.timeSpan.end;
 

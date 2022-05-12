@@ -13,10 +13,10 @@
       <main-menu-description />
       <footer-description />
       <main-page-description />
+      <create-order-page-description />
+      <journal-page-description />
       <work-poligon-page-description />
       <personal-page-description />
-      <journal-page-description />
-      <create-order-page-description />
       <order-patterns-page-description />
       <system-exit-description />
     </div>
@@ -87,13 +87,8 @@
           ],
         },
         {
-          label: 'Страница "Рабочий полигон"',
-          url: '#work-poligon-page-description',
-          items: [],
-        },
-        {
-          label: 'Страница "Персонал"',
-          url: '#personal-page-description',
+          label: 'Страница "Создать"',
+          url: '#create-order-page-description',
           items: [],
         },
         {
@@ -102,8 +97,13 @@
           items: [],
         },
         {
-          label: 'Страница "Создать"',
-          url: '#create-order-page-description',
+          label: 'Страница "Рабочий полигон"',
+          url: '#work-poligon-page-description',
+          items: [],
+        },
+        {
+          label: 'Страница "Персонал"',
+          url: '#personal-page-description',
           items: [],
         },
         {

@@ -31,9 +31,13 @@ export const useWatchOrderPatterns = (inputVals) => {
     } else {
       state.specialTrainCategories = store.getters.getOrderPatternSpecialTrainCategories(newVal);
     }
+    // флаг необходимости указывать место действия документа
     state.showOnGID = getUserDutyToDefineOrderPlace.value;
+    // флаг необходимости указывать время действия документа
     state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+    // Установка номера связанного документа в тексте создаваемого шаблонного распоряжения
     setRelatedOrderNumberInOrderText();
+    // Для формируемой заявки устанавливаем значения полей шаблона, если выбрано "окно"
     setRequestOrderTextFields();
   });
 };
