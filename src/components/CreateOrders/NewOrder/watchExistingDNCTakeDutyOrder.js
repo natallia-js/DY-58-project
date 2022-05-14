@@ -1,5 +1,6 @@
 import { watch, computed } from 'vue';
 import { SET_DEFAULT_DSP_ADDRESSES, SET_OTHER_SHIFT_FOR_SENDING_DATA } from '@/store/mutation-types';
+import { CurrShiftGetOrderStatus } from '@/constants/orders';
 
 
 export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
@@ -33,7 +34,15 @@ export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
         })));
       }
       if (isECD.value) {
-        store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, existingDNC_ECDTakeDutyOrder.value.otherToSend);
+        store.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA,
+          existingDNC_ECDTakeDutyOrder.value.otherToSend
+            ? existingDNC_ECDTakeDutyOrder.value.otherToSend.map((el) => ({
+                ...el,
+                sendOriginal: CurrShiftGetOrderStatus.doNotSend,
+                confirmDateTime: null, // это нужно для того чтобы создаваемый документ не был на момент создания подтвержден
+              }))
+            : null
+        );
       }
     }
   }, { immediate: true }); // это обязательно, т.к. нужно, чтобы код в watch выполнялся каждый раз при

@@ -120,14 +120,14 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
     }
 
     // перегон
-    changeOrderPatternElementValue(OrderPatternElementType.INPUT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+    changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
       store.getters.getBlockTitleByStationsUNMCs(selectedOkno.value.sta1, selectedOkno.value.sta2));
 
-    // в качестве руководителя работ устанавливаем основного руководителя, остальные (дополнительные)
+    // в качестве руководителя работ устанавливаем первого из основных руководителей, остальные (основные и дополнительные)
     // будут в соответствующем списке выбора
-    if (selectedOkno.value) {
+    if (selectedOkno.value && selectedOkno.value.mainPerf && selectedOkno.value.mainPerf.length) {
       changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS,
-        `${selectedOkno.value.postPerf} ${selectedOkno.value.fioPerf}`);
+        `${selectedOkno.value.mainPerf[0].post} ${selectedOkno.value.mainPerf[0].fio}`);
     }
 
     // продолжительность "окна"

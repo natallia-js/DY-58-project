@@ -173,6 +173,7 @@ export const common = {
   actions: {
     /**
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
+     * Причем установка персонала производится с установкой статуса отправки оригинала / копии документа.
      */
     applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
       // Позволяет определить, отослать оригинал либо копию документа
@@ -189,6 +190,7 @@ export const common = {
             ({
               ...el,
               sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              confirmDateTime: null,
             })
           ),
         });
@@ -199,6 +201,7 @@ export const common = {
             ({
               ...el,
               sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              confirmDateTime: null,
             })
           ),
         });
@@ -209,6 +212,7 @@ export const common = {
             ({
               ...el,
               sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              confirmDateTime: null,
             })
           ),
         });
@@ -217,6 +221,7 @@ export const common = {
           ({
             ...el,
             sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+            confirmDateTime: null,
           })
         ));
     },

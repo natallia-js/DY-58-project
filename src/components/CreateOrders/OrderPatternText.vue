@@ -208,13 +208,15 @@
             case FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS:
               return !this.getSelectedOkno
                 ? null
-                : [{
-                    label: `${this.getSelectedOkno.postPerf} ${this.getSelectedOkno.fioPerf}`,
-                    value: `${this.getSelectedOkno.postPerf} ${this.getSelectedOkno.fioPerf}`,
-                  }].concat(!this.getSelectedOkno.dopPerf
-                    ? []
-                    : this.getSelectedOkno.dopPerf.map((p) => ({ label: `${p.post} ${p.fio}`, value: `${p.post} ${p.fio}` }))
-                  );
+                : [...new Set(
+                    (this.getSelectedOkno.mainPerf
+                      ? this.getSelectedOkno.mainPerf.map((p) => `${p.post} ${p.fio}`)
+                      : []
+                    ).concat(!this.getSelectedOkno.dopPerf
+                      ? []
+                      : this.getSelectedOkno.dopPerf.map((p) => `${p.post} ${p.fio}`)
+                    )
+                  )].map((personString) => ({ label: personString, value: personString }));
             default:
               return [];
           }

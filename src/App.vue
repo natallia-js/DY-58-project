@@ -35,6 +35,7 @@
     DEL_ALL_WS_SERVER_MESSAGES,
     DEL_ORDERS_DRAFTS,
     DELETE_ALL_SYSTEM_MESSAGES,
+    SET_SELECTED_OKNO,
   } from '@/store/mutation-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
@@ -109,7 +110,7 @@
             store.commit(DO_NOT_RETRY_ON_CLOSE_WS_CONNECTION);
             wsClient.stopWork();
           }
-          // Удаляем все данные приложения, загруженные с сервера
+          // Удаляем все данные приложения, загруженные с сервера и сгенерированные в самой программе
           store.commit(DEL_CURR_WORK_POLIGON_DATA);
           store.commit(DEL_CURR_ORDER_PATTERN_DATA);
           store.commit(DEL_ORDER_PATTERNS_ELEMENTS_REFS);
@@ -120,6 +121,7 @@
           store.commit(DEL_WORK_ORDERS);
           store.commit(DEL_ORDERS_DRAFTS);
           store.commit(DELETE_ALL_SYSTEM_MESSAGES);
+          store.commit(SET_SELECTED_OKNO, { okno: null });
         }
       });
 

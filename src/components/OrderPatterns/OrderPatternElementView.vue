@@ -39,6 +39,7 @@
       v-model="state.elementModelValue"
       v-tooltip="element.ref"
       :placeholder="element.ref"
+      :editable="isDropdownEditable"
     />
   </div>
 
@@ -813,6 +814,12 @@
         }
       };
 
+      const isDropdownEditable = computed(() =>
+        props.element &&
+        props.element.type === OrderPatternElementType.SELECT &&
+        props.element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS
+      );
+
       return {
         state,
         selectedDRTableRecord,
@@ -850,6 +857,7 @@
         getLocaleTimeString,
         checkArrivalDepartureTime,
         handleSubmitNewDRRecord,
+        isDropdownEditable,
       };
     },
   };
