@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
-import { getRequestAuthorizationHeader } from './common';
 
 export const getAllDNCSectorsShortData = async () => {
   const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.getAllDNCSectorsShortData,
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -12,7 +11,7 @@ export const getAllDNCSectorsShortData = async () => {
 export const getDNCSectorsShortData = async ({ dncSectorIds }) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsShortData,
     { dncSectorIds },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -20,7 +19,7 @@ export const getDNCSectorsShortData = async ({ dncSectorIds }) => {
 export const getDefinitDNCSectorData = async (sectorId) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitDNCSectorData,
     { sectorId },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -28,7 +27,7 @@ export const getDefinitDNCSectorData = async (sectorId) => {
 export const getAdjacentDNCSectorsShortDefinitData = async (sectorId) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getAdjacentDNCSectorsShortDefinitData,
     { sectorId },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -36,7 +35,7 @@ export const getAdjacentDNCSectorsShortDefinitData = async (sectorId) => {
 export const getNearestECDSectorsShortDefinitData = async (sectorId) => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getNearestECDSectorsShortDefinitData,
     { sectorId },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };

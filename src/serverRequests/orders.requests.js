@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
-import { getRequestAuthorizationHeader } from './common';
 
 export const getLastOrdersParams = async () => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
     {},
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -13,7 +12,7 @@ export const getLastOrdersParams = async () => {
 export const getOrdersAddressedToThisPoligonFromGivenDate = async ({ datetime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersAddressedToThisPoligonFromGivenDate,
     { datetime },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -21,7 +20,7 @@ export const getOrdersAddressedToThisPoligonFromGivenDate = async ({ datetime })
 export const confirmOrderForMyself = async ({ id, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
     { id, confirmDateTime },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -29,7 +28,7 @@ export const confirmOrderForMyself = async ({ id, confirmDateTime }) => {
 export const confirmOrdersForOthers = async ({ confirmWorkPoligons, orderId, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
     { confirmWorkPoligons, orderId, confirmDateTime },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -37,7 +36,7 @@ export const confirmOrdersForOthers = async ({ confirmWorkPoligons, orderId, con
 export const confirmOrderForOtherReceivers = async ({ orderId, confirmDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrderForOtherReceivers,
     { orderId, confirmDateTime },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -45,7 +44,7 @@ export const confirmOrderForOtherReceivers = async ({ orderId, confirmDateTime }
 export const delConfirmedOrdersFromChain = async ({ chainId }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
     { chainId },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -53,7 +52,7 @@ export const delConfirmedOrdersFromChain = async ({ chainId }) => {
 export const getWorkOrdersFromServer = async ({ startDate }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
     { startDate },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -61,7 +60,7 @@ export const getWorkOrdersFromServer = async ({ startDate }) => {
 export const reportServerOnOrdersDelivery = async ({ orderIds, deliverDateTime }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
     { orderIds, deliverDateTime },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -110,7 +109,7 @@ export const dispatchOrderToServer = async (params) => {
       idOfTheOrderToCancel,
       draftId,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -127,7 +126,7 @@ export const editDispatchedOrderOnServer = async (params) => {
       timeSpan,
       orderText,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -135,7 +134,7 @@ export const editDispatchedOrderOnServer = async (params) => {
 export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delStationWorkPlaceReceiver,
     { orderId, workPlaceId },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -143,7 +142,7 @@ export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId
 export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeDocsCriteria }) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrders,
     { datetimeStart, datetimeEnd, includeDocsCriteria },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -160,7 +159,7 @@ export const getJournalOrdersFromServer = async (props) => {
   } = props;
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getJournalOrders,
     { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, filterFields, page, docsCount },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };

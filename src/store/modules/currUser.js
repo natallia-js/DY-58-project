@@ -1,7 +1,6 @@
 import {
   APP_CODE_NAME,
   APP_CREDENTIALS,
-  USER_CREDENTIALS_LOCAL_STORAGE_NAME,
   WORK_POLIGON_TYPES,
 } from '@/constants/appCredentials';
 import {
@@ -25,8 +24,10 @@ import {
   takeDutyUser,
   logoutUser,
   logoutWithDutyPass,
+  whoAmI,
 } from '@/serverRequests/auth.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
 import { getUserFIOString, getUserPostFIOString } from '@/store/modules/personal/transformUserData';
 
 
@@ -279,65 +280,41 @@ export const currUser = {
 
   mutations: {
     /**
-     * Сохраняет полномочия пользователя (строка credential), в т.ч. в LocalStorage.
+     * Сохраняет полномочия пользователя (строка credential)
      */
     [SET_USER_CREDENTIAL] (state, credential) {
       state.credential = credential;
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-      locStorUserData.lastCredential = credential;
-      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
     },
 
     /**
-     * Сохраняет рабочий полигон пользователя, в т.ч. в LocalStorage.
+     * Сохраняет рабочий полигон пользователя.
      * workPoligon - объект с полями type, code, subCode
      */
     [SET_USER_WORK_POLIGON] (state, workPoligon) {
       state.workPoligon = workPoligon;
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-      locStorUserData.lastWorkPoligon = workPoligon;
-      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
     },
 
     /**
-     * Сохраняет token пользователя (строка token), в т.ч. в LocalStorage.
+     * Сохраняет token пользователя (строка token).
      */
-    [SET_USER_TOKEN] (state, { token, saveInLocalStorage }) {
+    [SET_USER_TOKEN] (state, { token }) {
       state.token = token;
-
-      if (saveInLocalStorage) {
-        const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-        locStorUserData.userToken = token;
-        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
-      }
     },
 
     /**
-     * Сохраняет дату и время последней сдачи дежурства пользователем (строка lastPassDutyTime),
-     * в т.ч. в LocalStorage.
+     * Сохраняет дату и время последней сдачи дежурства пользователем (строка lastPassDutyTime).
      */
      [SET_USER_PASS_DUTY_TIME] (state, { lastPassDutyTime }) {
       state.lastPassDutyTime = lastPassDutyTime;
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-      locStorUserData.lastPassDutyTime = lastPassDutyTime;
-      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
     },
 
     /**
      * Сохраняет даты и время последнего принятия и сдачи дежурства пользователем (строки
-     * lastTakeDutyTime и lastPassDutyTime), в т.ч. в LocalStorage.
+     * lastTakeDutyTime и lastPassDutyTime).
      */
     [SET_USER_TAKE_PASS_DUTY_TIMES] (state, { lastTakeDutyTime, lastPassDutyTime }) {
       state.lastTakeDutyTime = lastTakeDutyTime;
       state.lastPassDutyTime = lastPassDutyTime;
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-      locStorUserData.lastTakeDutyTime = lastTakeDutyTime;
-      locStorUserData.lastPassDutyTime = lastPassDutyTime;
-      localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify(locStorUserData));
     },
 
     [CLEAR_LOGIN_RESULT] (state) {
@@ -425,8 +402,6 @@ export const currUser = {
       state.lastTakeDutyTime = null;
       state.lastPassDutyTime = null;
 
-      localStorage.removeItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME);
-
       state.isAuthenticated = false;
       state.loginDateTime = null;
     },
@@ -451,14 +426,14 @@ export const currUser = {
       } = payload;
 
       // Без этой строчки не пойдут запросы на сервер в текущей функции
-      context.commit(SET_USER_TOKEN, { token: jtwToken, saveInLocalStorage: false });
+      context.commit(SET_USER_TOKEN, { token: jtwToken });
 
       context.commit(CLEAR_LOGIN_RESULT);
       context.state.loginProcessIsUnderway = true;
 
       try {
         // Проверяем полученную информацию, предназначенную для входа пользователя в систему
-        const userCredsWithPoligons = checkUserAuthData(payload);
+        const userCredsWithPoligons = checkUserAuthData({ userId, jtwToken, userInfo, credentials, workPoligons });
 
         // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon (это происходит
         // при входе в систему с данными, подгруженными из Local Storage), проверяем,
@@ -528,18 +503,6 @@ export const currUser = {
           _lastPassDutyTime = responseData.lastPassDutyTime;
         }
 
-        localStorage.setItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME, JSON.stringify({
-          userId,
-          userToken,
-          userInfo,
-          userCredentials: credentials, // именно все полномочия во всех приложениях ГИД НЕМАН!
-          userWorkPoligons: workPoligons,
-          lastTakeDutyTime: _lastTakeDutyTime,
-          lastPassDutyTime: _lastPassDutyTime,
-          lastCredential: userCredential, // полномочие ДСП, Оператора при ДСП, ДНЦ либо ЭЦД
-          lastWorkPoligon: userWorkPoligon,
-        }));
-
         context.commit(SET_USER_DATA_ON_LOGIN, {
           userId,
           userToken,
@@ -564,34 +527,40 @@ export const currUser = {
       }
     },
 
+
     /**
-     * Пытается авторизовать пользователя через LocalStorage браузера.
+     * Пытается авторизовать пользователя через сессию на сервере.
      */
-    async tryLoginViaLocalStorage(context) {
+    async tryLoginViaSession(context) {
       if (context.state.isAuthenticated) {
         return;
       }
-
-      const locStorUserData = JSON.parse(localStorage.getItem(USER_CREDENTIALS_LOCAL_STORAGE_NAME));
-
-      if (!locStorUserData || !locStorUserData.userId || !locStorUserData.userToken ||
-        !locStorUserData.userInfo || !locStorUserData.userCredentials || !locStorUserData.userWorkPoligons) {
-        return;
+      try {
+        const responseData = await whoAmI();
+        if (responseData.token) {
+          await context.dispatch('login', {
+            userId: responseData.userId,
+            jtwToken: responseData.token,
+            userInfo: responseData.userInfo,
+            lastTakeDutyTime: responseData.lastTakeDutyTime,
+            lastPassDutyTime: responseData.lastPassDutyTime,
+            credentials: responseData.credentials,
+            workPoligons: getUserWorkPoligonsArray(responseData),
+            // Login из Local Storage не подразумевает вход в систему с дополнительным принятием дежурства
+            takeDuty: false,
+            lastCredential: responseData.lastCredential && responseData.lastCredential.length ? responseData.lastCredential[0] : null,
+            lastWorkPoligon: responseData.lastWorkPoligon
+              ? {
+                type: responseData.lastWorkPoligon.type,
+                code: responseData.lastWorkPoligon.id,
+                subCode: responseData.lastWorkPoligon.workPlaceId,
+              } : null,
+          });
+        }
+      } catch (error) {
+        // ничего не делаем при неудачной попытке аутентифицироваться автоматически через сессию,
+        // пользователю будет просто предложено снова войти в систему
       }
-
-      await context.dispatch('login', {
-        userId: locStorUserData.userId,
-        jtwToken: locStorUserData.userToken,
-        userInfo: locStorUserData.userInfo,
-        lastTakeDutyTime: locStorUserData.lastTakeDutyTime,
-        lastPassDutyTime: locStorUserData.lastPassDutyTime,
-        credentials: locStorUserData.userCredentials,
-        workPoligons: locStorUserData.userWorkPoligons,
-        // Login из Local Storage не подразумевает вход в систему с дополнительным принятием дежурства
-        takeDuty: false,
-        lastCredential: locStorUserData.lastCredential,
-        lastWorkPoligon: locStorUserData.lastWorkPoligon,
-      });
     },
 
     /**
@@ -606,11 +575,10 @@ export const currUser = {
         let responseData;
         if (context.state.logoutWithDutyPass) {
           responseData = await logoutWithDutyPass();
-          context.commit(SET_USER_PASS_DUTY_TIME, responseData.lastPassDutyTime);
         } else {
           responseData = await logoutUser();
         }
-        context.commit(SET_USER_TOKEN, { token: responseData.token, saveInLocalStorage: true });
+        context.commit(SET_USER_TOKEN, { token: responseData.token });
       }
       catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка выхода из системы');

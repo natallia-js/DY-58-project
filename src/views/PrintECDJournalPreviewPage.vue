@@ -144,7 +144,7 @@
           const event = new CustomEvent('ready');
           window.dispatchEvent(event);
         } else {
-          window.printJournal = (params) => { console.log(params); viewJournal(params) };
+          window.printJournal = (params) => viewJournal(params);
           window.opener.eval('printJournalWindowReady()');
         }
       });

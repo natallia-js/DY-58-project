@@ -325,7 +325,7 @@
             printWindow.dispatchEvent(event);
           });
         } else {
-          window.printJournalWindowReady = () => { console.log('printWindow',printWindow)
+          window.printJournalWindowReady = () => {
             printWindow.eval(`printJournal(${JSON.stringify(params)})`);
           };
         }

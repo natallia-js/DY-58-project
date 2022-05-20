@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
-import { getRequestAuthorizationHeader } from './common';
 
 export const getOrderDraftsFromServer = async () => {
   const response = await axios.get(DY58_SERVER_ACTIONS_PATHS.getOrdersDrafts,
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -39,7 +38,7 @@ export const saveOrderDraftOnServer = async (params) => {
       createdOnBehalfOf,
       showOnGID,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -72,7 +71,7 @@ export const editOrderDraftOnServer = async (params) => {
       createdOnBehalfOf,
       showOnGID,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -80,7 +79,7 @@ export const editOrderDraftOnServer = async (params) => {
 export const delOrderDraftOnServer = async (id) => {
   const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delOrderDraft,
     { id },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };

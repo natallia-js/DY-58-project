@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { APP_CODE_NAME } from '@/constants/appCredentials';
-import { getRequestAuthorizationHeader } from './common';
 
 export const applyForRegistration = async (props) => {
   const {
@@ -13,7 +12,7 @@ export const applyForRegistration = async (props) => {
       login, password, name, fatherName, surname, post, contactData,
       service, roles, stations, dncSectors, ecdSectors,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -25,10 +24,15 @@ export const authUser = async ({ login, password }) => {
       password,
       applicationAbbreviation: APP_CODE_NAME,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
+
+export const whoAmI = async () => {
+  const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.whoAmI, { withCredentials: true });
+  return response.data;
+}
 
 export const startWorkWithoutTakingDuty = async (props) => {
   const { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials } = props;
@@ -40,7 +44,7 @@ export const startWorkWithoutTakingDuty = async (props) => {
       specialCredentials,
       applicationAbbreviation: APP_CODE_NAME,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -55,7 +59,7 @@ export const takeDutyUser = async (props) => {
       specialCredentials,
       applicationAbbreviation: APP_CODE_NAME,
     },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -63,7 +67,7 @@ export const takeDutyUser = async (props) => {
 export const logoutUser = async () => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logout,
     { applicationAbbreviation: APP_CODE_NAME },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
@@ -71,7 +75,7 @@ export const logoutUser = async () => {
 export const logoutWithDutyPass = async () => {
   const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass,
     { applicationAbbreviation: APP_CODE_NAME },
-    { headers: getRequestAuthorizationHeader() }
+    { withCredentials: true }
   );
   return response.data;
 };
