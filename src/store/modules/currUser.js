@@ -566,26 +566,31 @@ export const currUser = {
     /**
      * Позволяет выйти из системы как со сдачей, так и без сдачи дежурства.
      */
-    async logout(context) {
+    async logout(context, { onlyLocally }) {
       if (!context.state.isAuthenticated) {
         return;
       }
       context.commit(START_LOGOUT_PROCESS);
-      try {
-        let responseData;
-        if (context.state.logoutWithDutyPass) {
-          responseData = await logoutWithDutyPass();
-        } else {
-          responseData = await logoutUser();
+      if (!onlyLocally) {
+        try {
+          let responseData;
+          if (context.state.logoutWithDutyPass) {
+            responseData = await logoutWithDutyPass();
+          } else {
+            responseData = await logoutUser();
+          }
+          context.commit(SET_USER_TOKEN, { token: responseData.token });
         }
-        context.commit(SET_USER_TOKEN, { token: responseData.token });
-      }
-      catch (error) {
-        const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка выхода из системы');
-        context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
-        return;
+        catch (error) {
+          const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка выхода из системы');
+          context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
+          return;
+        }
       }
       context.commit(LOGOUT_FINISHED_WITHOUT_ERROR);
+      if (onlyLocally) {
+        context.commit(SET_USER_TOKEN, { token: null });
+      }
       context.commit(CLEAR_USER_DATA_ON_LOGOUT);
     },
   },

@@ -583,6 +583,7 @@
               stations: state.stations,
               dncSectors: state.dncSectors,
               ecdSectors: state.ecdSectors,
+              redirectOnError: false,
             })
             .then((responseData) => {
               state.waitingForServerResponse = false;

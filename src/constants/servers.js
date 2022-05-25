@@ -64,7 +64,6 @@ export const AUTH_SERVER_ACTIONS_PATHS = Object.freeze({
 });
 
 export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
-  getOrders: `${DY58_SERVER_ADDRESS}/api/orders/data`,
   getJournalOrders: `${DY58_SERVER_ADDRESS}/api/orders/journalData`,
   getOrdersAddressedToThisPoligonFromGivenDate: `${DY58_SERVER_ADDRESS}/api/orders/ordersAddressedToGivenWorkPoligonFromGivenDate`,
   getLastOrdersParams: `${DY58_SERVER_ADDRESS}/api/lastOrdersParams/data`,

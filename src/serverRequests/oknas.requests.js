@@ -1,7 +1,11 @@
-import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
+import { makeServerRequest } from './common';
 
 export const getOknas = async (stationsCodes) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOknas, { stationsCodes });
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getOknas,
+    method: 'POST',
+    params: { stationsCodes },
+  });
   return response.data;
 };

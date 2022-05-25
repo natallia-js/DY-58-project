@@ -1,81 +1,84 @@
-import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
-import { APP_CODE_NAME } from '@/constants/appCredentials';
+import { makeServerRequest } from './common';
 
 export const applyForRegistration = async (props) => {
   const {
     login, password, name, fatherName, surname, post, contactData,
     service, roles, stations, dncSectors, ecdSectors,
   } = props;
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.applyForRegistration,
-    {
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.applyForRegistration,
+    method: 'POST',
+    params: {
       login, password, name, fatherName, surname, post, contactData,
       service, roles, stations, dncSectors, ecdSectors,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
 export const authUser = async ({ login, password }) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.login,
-    {
-      login,
-      password,
-      applicationAbbreviation: APP_CODE_NAME,
-    },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.login,
+    method: 'POST',
+    params: { login, password },
+  });
   return response.data;
 };
 
 export const whoAmI = async () => {
-  const response = await axios.get(AUTH_SERVER_ACTIONS_PATHS.whoAmI, { withCredentials: true });
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.whoAmI,
+    method: 'POST',
+    params: {},
+  });
   return response.data;
 }
 
 export const startWorkWithoutTakingDuty = async (props) => {
   const { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials } = props;
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.startWorkWithoutTakingDuty,
-    {
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.startWorkWithoutTakingDuty,
+    method: 'POST',
+    params: {
       workPoligonType,
       workPoligonId,
       workSubPoligonId,
       specialCredentials,
-      applicationAbbreviation: APP_CODE_NAME,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
 export const takeDutyUser = async (props) => {
   const { workPoligonType, workPoligonId, workSubPoligonId, specialCredentials } = props;
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.takeDuty,
-    {
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.takeDuty,
+    method: 'POST',
+    params: {
       workPoligonType,
       workPoligonId,
       workSubPoligonId,
       specialCredentials,
-      applicationAbbreviation: APP_CODE_NAME,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
 export const logoutUser = async () => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logout,
-    { applicationAbbreviation: APP_CODE_NAME },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.logout,
+    method: 'POST',
+    params: {},
+  });
   return response.data;
 };
 
 export const logoutWithDutyPass = async () => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass,
-    { applicationAbbreviation: APP_CODE_NAME },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.logoutWithDutyPass,
+    method: 'POST',
+    params: {},
+  });
   return response.data;
 };

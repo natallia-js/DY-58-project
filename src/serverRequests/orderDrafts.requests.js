@@ -1,10 +1,12 @@
-import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
+import { makeServerRequest } from './common';
 
 export const getOrderDraftsFromServer = async () => {
-  const response = await axios.get(DY58_SERVER_ACTIONS_PATHS.getOrdersDrafts,
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getOrdersDrafts,
+    method: 'POST',
+    params: {},
+  });
   return response.data;
 };
 
@@ -23,8 +25,10 @@ export const saveOrderDraftOnServer = async (params) => {
     createdOnBehalfOf,
     showOnGID,
   } = params;
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.saveOrderDraft,
-    {
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.saveOrderDraft,
+    method: 'POST',
+    params: {
       type,
       createDateTime,
       place,
@@ -38,8 +42,7 @@ export const saveOrderDraftOnServer = async (params) => {
       createdOnBehalfOf,
       showOnGID,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
@@ -57,8 +60,10 @@ export const editOrderDraftOnServer = async (params) => {
     createdOnBehalfOf,
     showOnGID,
   } = params;
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.editOrderDraft,
-    {
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.editOrderDraft,
+    method: 'POST',
+    params: {
       id,
       place,
       timeSpan,
@@ -71,15 +76,15 @@ export const editOrderDraftOnServer = async (params) => {
       createdOnBehalfOf,
       showOnGID,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
 export const delOrderDraftOnServer = async (id) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delOrderDraft,
-    { id },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.delOrderDraft,
+    method: 'POST',
+    params: { id },
+  });
   return response.data;
 };

@@ -14,7 +14,7 @@
       const store = useStore();
       const router = useRouter();
 
-      store.dispatch('logout');
+      store.dispatch('logout', { onlyLocally: false });
       router.push({ name: 'AuthPage' });
     },
   };

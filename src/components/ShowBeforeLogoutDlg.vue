@@ -73,7 +73,7 @@
 
     methods: {
       handleConfirmLogout() {
-        this.$store.dispatch('logout');
+        this.$store.dispatch('logout', { onlyLocally: false });
       },
 
       handleCloseDialog() {

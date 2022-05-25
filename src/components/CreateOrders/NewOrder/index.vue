@@ -430,6 +430,7 @@
   import { useWatchRelatedOrder } from './watchRelatedOrder';
   import { useOkna } from './okna';
   import { useWatchExistingDNCTakeDutyOrder } from './watchExistingDNCTakeDutyOrder';
+  import { SET_SELECTED_OKNO } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-new-order-block',
@@ -607,6 +608,8 @@
         state.showOnGID = getUserDutyToDefineOrderPlace.value;
         // флаг необходимости явно определить время действия документа
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+        // Удаляем (если есть) выбранное "окно"
+        store.commit(SET_SELECTED_OKNO, { okno: null });
       });
 
       useWatchExistingDNCTakeDutyOrder({ store, isDNC, isECD });

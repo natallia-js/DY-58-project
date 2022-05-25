@@ -1,42 +1,47 @@
-import axios from 'axios';
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
+import { makeServerRequest } from './common';
 
 export const getStationsWorkPlacesData = async ({ stationIds }) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPlacesData,
-    { stationIds },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPlacesData,
+    method: 'POST',
+    params: { stationIds },
+  });
   return response.data;
 };
 
 export const getDefinitStationData = async (stationId) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getDefinitStationData,
-    { stationId },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.getDefinitStationData,
+    method: 'POST',
+    params: { stationId },
+  });
   return response.data;
 };
 
 export const getStationBlocksData = async (stationId) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationBlocksData,
-    { stationId },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.getStationBlocksData,
+    method: 'POST',
+    params: { stationId },
+  });
   return response.data;
 };
 
 export const getStationDNCSectorsData = async (stationId) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationDNCSectorsData,
-    { stationId },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.getStationDNCSectorsData,
+    method: 'POST',
+    params: { stationId },
+  });
   return response.data;
 };
 
 export const getStationECDSectorsData = async (stationId) => {
-  const response = await axios.post(AUTH_SERVER_ACTIONS_PATHS.getStationECDSectorsData,
-    { stationId },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: AUTH_SERVER_ACTIONS_PATHS.getStationECDSectorsData,
+    method: 'POST',
+    params: { stationId },
+  });
   return response.data;
 };

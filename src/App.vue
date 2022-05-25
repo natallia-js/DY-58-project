@@ -13,6 +13,7 @@
 <script>
   import { watch, computed, reactive } from 'vue';
   import { useStore } from 'vuex';
+  import router from '@/router';
   import NavBar from '@/components/NavBar';
   import FooterBar from '@/components/FooterBar';
   import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
@@ -122,6 +123,10 @@
           store.commit(DEL_ORDERS_DRAFTS);
           store.commit(DELETE_ALL_SYSTEM_MESSAGES);
           store.commit(SET_SELECTED_OKNO, { okno: null });
+          // Если пользователь еще не на странице авторизации, то его необходимо туда перенаправить
+          if (router.currentRoute.value.name !== 'AuthPage') {
+            router.push({ name: 'AuthPage' });
+          }
         }
       });
 

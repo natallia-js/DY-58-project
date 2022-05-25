@@ -5,7 +5,7 @@ export const checkUserAuthority = {
      * рабочим полигоном и имеющий конкретные полномочия в системе.
      */
     canUserWorkWithSystem(_state, getters) {
-      return getters.isUserAuthenticated && getters.getUserCredential && getters.getUserWorkPoligon;
+      return getters.isUserAuthenticated && getters.getUserCredential && getters.getUserWorkPoligon ? true : false;
     },
 
     /**
@@ -15,7 +15,7 @@ export const checkUserAuthority = {
     canUserGetIncomingOrdersPerShift(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -25,7 +25,7 @@ export const checkUserAuthority = {
     canUserReportOnOrdersDelivery(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -35,7 +35,7 @@ export const checkUserAuthority = {
     canUserConfirmOrder(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -46,7 +46,7 @@ export const checkUserAuthority = {
     canUserDelConfirmedOrdersChains(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -56,7 +56,7 @@ export const checkUserAuthority = {
     canUserConfirmOrderForOthers(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -66,21 +66,21 @@ export const checkUserAuthority = {
     canUserDispatchOrders(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
      * Создавать записи о проверке Журнала может лишь принявший дежурство ревизор.
      */
     canUserCreateCheckOrders(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty ? true : false;
     },
 
     /**
      * Создавать записи о проверке распоряжений может лишь ревизор, принявший дежурство.
      */
     canUserDispatchControlRecords(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty;
+      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -89,7 +89,7 @@ export const checkUserAuthority = {
      * Значение false возвращается в противном случае.
      */
     canUserDispatchDNCTakeDutyOrder(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDNC;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDNC ? true : false;
     },
 
     /**
@@ -98,7 +98,7 @@ export const checkUserAuthority = {
      * Значение false возвращается в противном случае.
      */
     canUserDispatchECDTakeDutyOrder(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isECD;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isECD ? true : false;
     },
 
     /**
@@ -107,7 +107,7 @@ export const checkUserAuthority = {
      * Значение false возвращается в противном случае.
      */
     canUserDispatchDSPTakeDutyOrder(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP ? true : false;
     },
 
     /**
@@ -115,14 +115,14 @@ export const checkUserAuthority = {
      * лиц на станции (такое право есть у ДСП и Операторов ДСП в отношении всех рабочих мест на их станции).
      */
     canUserConfirmOrdersForOthersOnStationWorkPlaces(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator ? true : false;
     },
 
     /**
      * Возвращает true, если текущий пользователь имеет право удалять получателей распоряжения на станции.
      */
     canUserDeleteOrderStationReceivers(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator ? true : false;
     },
 
     /**
@@ -131,7 +131,7 @@ export const checkUserAuthority = {
      */
     canUserGetLastOrdersParams(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD);
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
     },
 
     /**
@@ -140,7 +140,7 @@ export const checkUserAuthority = {
      */
     canUserGetOrderDrafts(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD);
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
     },
 
     /**
@@ -150,7 +150,7 @@ export const checkUserAuthority = {
     canUserWorkWithOrderDrafts(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
-        getters.isUserOnDuty;
+        getters.isUserOnDuty ? true : false;
     },
 
     /**
@@ -158,7 +158,7 @@ export const checkUserAuthority = {
      */
     canUserGetOrderPatterns(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD);
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
     },
 
     /**
@@ -167,7 +167,7 @@ export const checkUserAuthority = {
      */
     canUserWorkWithOrderPatterns(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD);
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
     },
   },
 };

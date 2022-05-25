@@ -1,67 +1,75 @@
-import axios from 'axios';
 import { DY58_SERVER_ACTIONS_PATHS } from '@/constants/servers';
+import { makeServerRequest } from './common';
 
 export const getLastOrdersParams = async () => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
-    {},
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getLastOrdersParams,
+    method: 'POST',
+    params: {},
+  });
   return response.data;
 };
 
 export const getOrdersAddressedToThisPoligonFromGivenDate = async ({ datetime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrdersAddressedToThisPoligonFromGivenDate,
-    { datetime },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getOrdersAddressedToThisPoligonFromGivenDate,
+    method: 'POST',
+    params: { datetime },
+  });
   return response.data;
 };
 
 export const confirmOrderForMyself = async ({ id, confirmDateTime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrder,
-    { id, confirmDateTime },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.confirmOrder,
+    method: 'POST',
+    params: { id, confirmDateTime },
+  });
   return response.data;
 };
 
 export const confirmOrdersForOthers = async ({ confirmWorkPoligons, orderId, confirmDateTime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
-    { confirmWorkPoligons, orderId, confirmDateTime },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.confirmOrdersForOthers,
+    method: 'POST',
+    params: { confirmWorkPoligons, orderId, confirmDateTime },
+  });
   return response.data;
 };
 
 export const confirmOrderForOtherReceivers = async ({ orderId, confirmDateTime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.confirmOrderForOtherReceivers,
-    { orderId, confirmDateTime },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.confirmOrderForOtherReceivers,
+    method: 'POST',
+    params: { orderId, confirmDateTime },
+  });
   return response.data;
 };
 
 export const delConfirmedOrdersFromChain = async ({ chainId }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
-    { chainId },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.delConfirmedOrdersFromChain,
+    method: 'POST',
+    params: { chainId },
+  });
   return response.data;
 };
 
 export const getWorkOrdersFromServer = async ({ startDate }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
-    { startDate },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getWorkOrders,
+    method: 'POST',
+    params: { startDate },
+  });
   return response.data;
 };
 
 export const reportServerOnOrdersDelivery = async ({ orderIds, deliverDateTime }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
-    { orderIds, deliverDateTime },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.reportOnOrdersDelivery,
+    method: 'POST',
+    params: { orderIds, deliverDateTime },
+  });
   return response.data;
 };
 
@@ -87,8 +95,10 @@ export const dispatchOrderToServer = async (params) => {
     idOfTheOrderToCancel,
     draftId,
   } = params;
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
-    {
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
+    method: 'POST',
+    params: {
       type,
       orderNumSaveType,
       number,
@@ -109,41 +119,26 @@ export const dispatchOrderToServer = async (params) => {
       idOfTheOrderToCancel,
       draftId,
     },
-    { withCredentials: true }
-  );
+  });
   return response.data;
 };
 
 export const editDispatchedOrderOnServer = async (params) => {
-  const {
-    id,
-    timeSpan,
-    orderText,
-  } = params;
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.editDispatchedOrder,
-    {
-      id,
-      timeSpan,
-      orderText,
-    },
-    { withCredentials: true }
-  );
+  const { id, timeSpan, orderText } = params;
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.editDispatchedOrder,
+    method: 'POST',
+    params: { id, timeSpan, orderText },
+  });
   return response.data;
 };
 
 export const delStationWorkPlaceReceiverOnServer = async ({ orderId, workPlaceId }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.delStationWorkPlaceReceiver,
-    { orderId, workPlaceId },
-    { withCredentials: true }
-  );
-  return response.data;
-};
-
-export const getOrdersFromServer = async ({ datetimeStart, datetimeEnd, includeDocsCriteria }) => {
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getOrders,
-    { datetimeStart, datetimeEnd, includeDocsCriteria },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.delStationWorkPlaceReceiver,
+    method: 'POST',
+    params: { orderId, workPlaceId },
+  });
   return response.data;
 };
 
@@ -157,9 +152,18 @@ export const getJournalOrdersFromServer = async (props) => {
     page = null,
     docsCount = null,
   } = props;
-  const response = await axios.post(DY58_SERVER_ACTIONS_PATHS.getJournalOrders,
-    { datetimeStart, datetimeEnd, includeDocsCriteria, sortFields, filterFields, page, docsCount },
-    { withCredentials: true }
-  );
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.getJournalOrders,
+    method: 'POST',
+    params: {
+      datetimeStart,
+      datetimeEnd,
+      includeDocsCriteria,
+      sortFields,
+      filterFields,
+      page,
+      docsCount,
+    },
+  });
   return response.data;
 };

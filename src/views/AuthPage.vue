@@ -116,7 +116,7 @@
       // данные, которые относились к предыдущей учетке. Все это происходит потому, что повторный вход реально
       // не осуществляется, т.к. не было выхода из системы.
       onMounted(() => {
-        //store.dispatch('logout');
+        //store.dispatch('logout', { onlyLocally: false });
       });
 
       const canUserWorkWithSystem = computed(() => store.getters.canUserWorkWithSystem);
@@ -167,6 +167,7 @@
           responseData = await authUser({
             login: state.userName,
             password: state.password,
+            redirectOnError: false,
           });
         } catch (error) {
           state.waitingForServerResponse = false;
