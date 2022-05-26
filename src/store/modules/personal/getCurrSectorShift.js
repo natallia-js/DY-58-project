@@ -12,6 +12,12 @@ import {
   SET_SECTOR_PERSONAL,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import {
+  LOAD_SHIFT_DATA_FOR_DSP_ACTION,
+  LOAD_SHIFT_DATA_FOR_DNC_ACTION,
+  LOAD_SHIFT_DATA_FOR_ECD_ACTION,
+  LOAD_CURR_SECTORS_SHIFT_ACTION,
+} from '@/store/action-types';
 
 
 function initialECDSectorsPersonalData(ecdSectors) {
@@ -198,7 +204,7 @@ export const getCurrSectorShift = {
     /**
      * Подгружает информацию обо всем персонале участка ДСП.
      */
-    async loadShiftDataForDSP(context) {
+    async [LOAD_SHIFT_DATA_FOR_DSP_ACTION] (context) {
       // id участков ДНЦ
       const dncSectorsIds = context.getters.getStationDNCSectors.map((sector) => sector.DNCS_ID);
       // id участков ЭЦД
@@ -239,7 +245,7 @@ export const getCurrSectorShift = {
     /**
      * Подгружает информацию обо всем персонале участка ДНЦ.
      */
-    async loadShiftDataForDNC(context) {
+    async [LOAD_SHIFT_DATA_FOR_DNC_ACTION] (context) {
       // id смежных участков ДНЦ
       const adjacentSectorsIds = context.getters.getAdjacentDNCSectors.map((sector) => sector.DNCS_ID);
       // id станций участка ДНЦ
@@ -288,7 +294,7 @@ export const getCurrSectorShift = {
     /**
      * Подгружает информацию обо всем персонале участка ЭЦД.
      */
-    async loadShiftDataForECD(context) {
+    async [LOAD_SHIFT_DATA_FOR_ECD_ACTION] (context) {
       // id смежных участков ЭЦД
       const adjacentSectorsIds = context.getters.getAdjacentECDSectors.map((sector) => sector.ECDS_ID);
       // id станций участка ЭЦД
@@ -339,7 +345,7 @@ export const getCurrSectorShift = {
      * Позволяет извлечь из БД информацию о всем персонале рабочего полигона.
      * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя.
      */
-    async loadCurrSectorsShift(context) {
+    async [LOAD_CURR_SECTORS_SHIFT_ACTION] (context) {
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'У вас нет права на получение информации о персонале рабочего полигона';
         context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);
@@ -364,13 +370,13 @@ export const getCurrSectorShift = {
       try {
         switch (workPoligon.type) {
           case WORK_POLIGON_TYPES.STATION:
-            await context.dispatch('loadShiftDataForDSP');
+            await context.dispatch(LOAD_SHIFT_DATA_FOR_DSP_ACTION);
             break;
           case WORK_POLIGON_TYPES.DNC_SECTOR:
-            await context.dispatch('loadShiftDataForDNC');
+            await context.dispatch(LOAD_SHIFT_DATA_FOR_DNC_ACTION);
             break;
           case WORK_POLIGON_TYPES.ECD_SECTOR:
-            await context.dispatch('loadShiftDataForECD');
+            await context.dispatch(LOAD_SHIFT_DATA_FOR_ECD_ACTION);
             break;
         }
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружен список персонала участка' });

@@ -1,4 +1,9 @@
 import { computed } from 'vue';
+import {
+  APPLY_PERSONAL_FOR_SENDING_DATA_ACTION,
+  SAVE_ORDER_DRAFT_ACTION,
+  EDIT_ORDER_DRAFT_ACTION,
+} from '@/store/action-types';
 
 
 /**
@@ -26,7 +31,7 @@ import { computed } from 'vue';
     if (!currentOrderDraft.value) {
       return;
     }
-    store.dispatch('applyPersonalForSendingData', {
+    store.dispatch(APPLY_PERSONAL_FOR_SENDING_DATA_ACTION, {
       dspToSend: currentOrderDraft.value.dspToSend,
       dncToSend: currentOrderDraft.value.dncToSend,
       ecdToSend: currentOrderDraft.value.ecdToSend,
@@ -85,7 +90,7 @@ import { computed } from 'vue';
       accept: () => {
         if (!currentOrderDraft.value) {
           // Создание нового черновика
-          store.dispatch('saveOrderDraft', {
+          store.dispatch(SAVE_ORDER_DRAFT_ACTION, {
             type: props.orderType,
             createDateTime: state.createDateTime,
             place: state.orderPlace,
@@ -116,7 +121,7 @@ import { computed } from 'vue';
           });
         } else {
           // Редактирование существующего черновика
-          store.dispatch('editOrderDraft', {
+          store.dispatch(EDIT_ORDER_DRAFT_ACTION, {
             id: currentOrderDraft.value._id,
             type: props.orderType,
             place: state.orderPlace,

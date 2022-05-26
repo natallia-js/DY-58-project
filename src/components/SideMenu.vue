@@ -94,6 +94,7 @@
   import AppSettings from '@/components/AppSettings';
   import CreateDSPTakeDutyOrderDlg from '@/components/CreateOrders/CreateDSPTakeDutyOrderDlg';
   import { SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG } from '@/store/mutation-types';
+  import { DEL_ORDER_DRAFT_ACTION } from '@/store/action-types';
   import showMessage from '@/hooks/showMessage.hook';
 
   export default {
@@ -160,7 +161,7 @@
           message: 'Удалить черновик документа?',
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
-            store.dispatch('delOrderDraft', {
+            store.dispatch(DEL_ORDER_DRAFT_ACTION, {
               id: orderDraftId,
               type: orderType,
             });

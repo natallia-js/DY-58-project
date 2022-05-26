@@ -50,6 +50,7 @@
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
     SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
   } from '@/store/mutation-types';
+  import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-order-pattern-preview',
@@ -307,7 +308,7 @@
         let tmp;
 
         const applyPersonalForSendingData = (tmp) => {
-          this.$store.dispatch('applyPersonalForSendingData', {
+          this.$store.dispatch(APPLY_PERSONAL_FOR_SENDING_DATA_ACTION, {
             dspToSend: tmp.dspToSend,
             dncToSend: tmp.dncToSend,
             ecdToSend: tmp.ecdToSend,

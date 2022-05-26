@@ -365,6 +365,11 @@
     SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
     CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
+  import {
+    CONFIRM_ORDER_FOR_OTHERS_ACTION,
+    CONFIRM_ORDER_FOR_OTHER_RECEIVERS_ACTION,
+    DEL_STATION_WORK_PLACE_RECEIVER_ACTION,
+  } from '@/store/action-types';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
   export default {
@@ -431,7 +436,7 @@
             message: `Подтвердить ${confirmWorkPoligons.length === 1 ? '' : 'неподтвержденные записи'}?`,
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
-              store.dispatch('confirmOrderForOthers', { orderId, confirmWorkPoligons });
+              store.dispatch(CONFIRM_ORDER_FOR_OTHERS_ACTION, { orderId, confirmWorkPoligons });
             },
           });
         }
@@ -447,7 +452,7 @@
           message: 'Подтвердить за иных адресатов?',
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
-            store.dispatch('confirmOrderForOtherReceivers', orderId);
+            store.dispatch(CONFIRM_ORDER_FOR_OTHER_RECEIVERS_ACTION, orderId);
           },
         });
       };
@@ -504,7 +509,7 @@
           message: 'Удалить запись?',
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
-            store.dispatch('delStationWorkPlaceReceiver', { orderId, workPlaceId });
+            store.dispatch(DEL_STATION_WORK_PLACE_RECEIVER_ACTION, { orderId, workPlaceId });
           },
         });
       };

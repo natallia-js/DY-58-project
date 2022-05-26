@@ -9,6 +9,7 @@ import {
   SET_LOADING_LAST_ORDERS_PARAMS_STATUS,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { LOAD_LAST_ORDERS_PARAMS_ACTION } from '@/store/action-types';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
 
@@ -115,7 +116,7 @@ export const lastOrdersParams = {
      * Подгружает информацию о параметрах последних изданных распоряжений в рамках глобального
      * полигона управления.
      */
-    async loadLastOrdersParams(context) {
+    async [LOAD_LAST_ORDERS_PARAMS_ACTION] (context) {
       if (!context.getters.canUserGetLastOrdersParams) {
         const errMessage = 'У вас не права получать параметры последних изданных документов';
         context.commit(SET_LOADING_LAST_ORDERS_RESULT, { error: true, message: errMessage });

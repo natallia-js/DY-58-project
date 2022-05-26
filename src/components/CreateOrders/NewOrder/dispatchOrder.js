@@ -1,6 +1,7 @@
 import { computed } from 'vue';
 import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
+import { DISPATCH_ORDER_ACTION } from '@/store/action-types';
 
 
 /**
@@ -80,7 +81,7 @@ export const useDispatchOrder = (inputVals) => {
    * Издание распоряжения (отправка на сервер и передача всем причастным).
    */
   const dispatchOrder = ({ orderDraftIdToDelete }) => {
-    store.dispatch('dispatchOrder', {
+    store.dispatch(DISPATCH_ORDER_ACTION, {
       type: props.orderType,
       number: +state.number,
       createDateTime: state.createDateTime,

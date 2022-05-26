@@ -38,6 +38,16 @@
     DELETE_ALL_SYSTEM_MESSAGES,
     SET_SELECTED_OKNO,
   } from '@/store/mutation-types';
+  import {
+    LOAD_CURR_SECTORS_SHIFT_ACTION,
+    LOAD_WORK_ORDERS_ACTION,
+    LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION,
+    LOAD_CURR_WORK_POLIGON_DATA_ACTION,
+    LOAD_LAST_ORDERS_PARAMS_ACTION,
+    LOAD_ORDER_DRAFTS_ACTION,
+    LOAD_ORDER_PATTERNS_ACTION,
+    LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION,
+  } from '@/store/action-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
     UPDATE_CURR_DATE_TIME_INTERVAL,
@@ -88,7 +98,7 @@
           }
           //
           if (!updateDataTimerId) {
-            updateDataTimerId = setInterval(() => store.dispatch('loadWorkOrders'), REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL);
+            updateDataTimerId = setInterval(() => store.dispatch(LOAD_WORK_ORDERS_ACTION), REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL);
           }
           //
           if (wsClient) {
@@ -158,10 +168,10 @@
        */
       watch(() => store.getters.getUserWorkPoligon, (workPoligonNew) => {
         if (workPoligonNew) {
-          store.dispatch('loadCurrWorkPoligonData');
-          store.dispatch('loadOrderPatterns');
-          store.dispatch('loadOrderPatternsElementsRefs');
-          store.dispatch('loadIncomingOrdersPerShift');
+          store.dispatch(LOAD_CURR_WORK_POLIGON_DATA_ACTION);
+          store.dispatch(LOAD_ORDER_PATTERNS_ACTION);
+          store.dispatch(LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION);
+          store.dispatch(LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION);
         }
       });
 
@@ -174,11 +184,11 @@
        */
       watch(() => store.getters.getUserWorkPoligonData, (workPoligonDataNew) => {
         if (workPoligonDataNew) {
-          store.dispatch('loadCurrSectorsShift');
-          store.dispatch('loadLastOrdersParams');
+          store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
+          store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
           if (store.getters.isECD)
-            store.dispatch('loadOrderDrafts');
-          store.dispatch('loadWorkOrders');
+            store.dispatch(LOAD_ORDER_DRAFTS_ACTION);
+          store.dispatch(LOAD_WORK_ORDERS_ACTION);
         }
       });
 

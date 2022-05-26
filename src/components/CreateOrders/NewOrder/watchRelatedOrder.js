@@ -1,4 +1,5 @@
 import { watch } from 'vue';
+import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
 
 
 export const useWatchRelatedOrder = (inputVals) => {
@@ -20,7 +21,7 @@ export const useWatchRelatedOrder = (inputVals) => {
     if (newVal && relatedOrderObject.value) {
       const firstOrderInChain = store.getters.getFirstOrderInChain(relatedOrderObject.value.orderChainId);
       if (firstOrderInChain) {
-        store.dispatch('applyPersonalForSendingData', { otherToSend: firstOrderInChain.otherToSend });
+        store.dispatch(APPLY_PERSONAL_FOR_SENDING_DATA_ACTION, { otherToSend: firstOrderInChain.otherToSend });
       }
     }
     emit('changeProps', {

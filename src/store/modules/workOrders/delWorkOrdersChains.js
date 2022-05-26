@@ -8,6 +8,7 @@ import {
   DELETE_CONFIRMED_ORDERS_CHAIN,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION } from '@/store/action-types';
 import { delConfirmedOrdersFromChain } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -117,7 +118,7 @@ export const delWorkOrdersChains = {
      * Позволяет удалить из цепочки рапоряжений с заданным id подтвержденные распоряжения.
      * Данные удаляются лишь из таблицы рабочих распоряжений у заданного полигона управления.
      */
-    async delConfirmedOrdersFromChain(context, chainId) {
+    async [DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION] (context, chainId) {
       if (!context.getters.canUserDelConfirmedOrdersChains) {
         const errMessage = 'У вас нет права удалять документы / цепочки документов';
         context.commit(SET_DELETE_ORDERS_CHAIN_RESULT, { chainId, error: true, message: errMessage });

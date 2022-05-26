@@ -1,5 +1,6 @@
 import router from '@/router';
 import { store } from '@/store';
+import { DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION } from '@/store/action-types';
 
 
 /**
@@ -24,7 +25,7 @@ export const contextMenus = {
           icon: 'pi pi-exclamation-circle',
           defaultFocus: 'reject',
           accept: () => {
-            store.dispatch('delConfirmedOrdersFromChain', chainId);
+            store.dispatch(DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION, chainId);
           },
         });
       };

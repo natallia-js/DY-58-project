@@ -12,6 +12,7 @@ import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
 import isElectron from '@/additional/isElectron';
+import { TRY_LOGIN_VIA_SESSION_ACTION } from '@/store/action-types';
 
 const routes = [
   {
@@ -126,7 +127,7 @@ router.beforeEach(async (to, from, next) => {
     // Нет -> пытаемся аутентифицировать пользователя через сессию
     // (такое, в частности, возможно при перезагрузке страницы).
     // Успешная аутентификация через сессию может привести к полной аутентификации в системе.
-    await store.dispatch('tryLoginViaSession');
+    await store.dispatch(TRY_LOGIN_VIA_SESSION_ACTION);
   }
 
   // Если пользователь полностью аутентифицирован, то он не может попасть на страницы, требующие

@@ -86,6 +86,7 @@
     SPECIAL_REVISOR_RECORD_TITLE,
     OrderPatternElementType,
   } from '@/constants/orderPatterns';
+  import { DISPATCH_ORDER_ACTION } from '@/store/action-types';
   import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import { useWatchCurrentDateTime } from '@/components/CreateOrders/NewOrder/watchCurrentDateTime';
   import isValidDateTime from '@/additional/isValidDateTime';
@@ -174,7 +175,7 @@
        * Издание распоряжения (отправка на сервер).
        */
       const dispatchOrder = () => {
-        store.dispatch('dispatchOrder', {
+        store.dispatch(DISPATCH_ORDER_ACTION, {
           type: orderType,
           number: 1,
           createDateTime: state.createDateTime,

@@ -16,6 +16,12 @@ import {
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
+  LOAD_ORDER_DRAFTS_ACTION,
+  SAVE_ORDER_DRAFT_ACTION,
+  EDIT_ORDER_DRAFT_ACTION,
+  DEL_ORDER_DRAFT_ACTION,
+} from '@/store/action-types';
+import {
   getOrderDraftsFromServer,
   saveOrderDraftOnServer,
   editOrderDraftOnServer,
@@ -230,7 +236,7 @@ export const orderDrafts = {
      * (полигон управления - не глобальный, т.е. пользователи на рабочих местах на станции не получат
      * черновики с других рабочих мест этой же станции).
      */
-    async loadOrderDrafts(context) {
+    async [LOAD_ORDER_DRAFTS_ACTION] (context) {
       if (!context.getters.canUserGetOrderDrafts) {
         const errMessage = 'У вас нет прав на просмотр черновиков документов';
         context.commit(SET_LOADING_ORDER_DRAFTS_RESULT, { error: true, message: errMessage });
@@ -258,7 +264,7 @@ export const orderDrafts = {
     /**
      * Делает запрос на сервер с целью сохранения созданного черновика распоряжения.
      */
-    async saveOrderDraft(context, params) {
+    async [SAVE_ORDER_DRAFT_ACTION] (context, params) {
       const {
         type,
         createDateTime,
@@ -314,7 +320,7 @@ export const orderDrafts = {
     /**
      * Делает запрос на сервер с целью редактирования существующего черновика распоряжения.
      */
-     async editOrderDraft(context, params) {
+     async [EDIT_ORDER_DRAFT_ACTION] (context, params) {
       const {
         id,
         type,
@@ -369,7 +375,7 @@ export const orderDrafts = {
     /**
      * Делает запрос на сервер с целью удаления существующего черновика распоряжения.
      */
-     async delOrderDraft(context, { id, type }) {
+     async [DEL_ORDER_DRAFT_ACTION] (context, { id, type }) {
       if (!context.getters.canUserWorkWithOrderDrafts) {
         const errMessage = 'У вас нет права на удаление черновиков документов';
         context.commit(SET_DEL_ORDER_DRAFT_RESULT, { error: true, orderType: type, message: errMessage });

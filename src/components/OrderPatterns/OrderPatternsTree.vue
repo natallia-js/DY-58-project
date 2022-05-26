@@ -160,7 +160,12 @@
   import { mapGetters } from 'vuex';
   import { OrderPatternsNodeType, SPECIAL_TRAIN_CATEGORIES } from '@/constants/orderPatterns';
   import objectId from '@/additional/objectId.generator';
-  import { DEL_ORDER_PATTERN, MOD_ORDER_PATTERN } from '@/store/mutation-types';
+  import {
+    LOAD_ORDER_PATTERNS_ACTION,
+    EDIT_ORDER_CATEGORY_TITLE_ACTION,
+    DEL_ORDER_PATTERN_ACTION,
+    MOD_ORDER_PATTERN_ACTION,
+  } from '@/store/action-types';
   import OrderPatternPreview from './OrderPatternPreview';
   import EditOrderPattern from './EditOrderPattern';
   import EditOrderPatternElement from './EditOrderPatternElement';
@@ -307,7 +312,7 @@
        *
        */
       refreshOrderPatterns() {
-        this.$store.dispatch('loadOrderPatterns');
+        this.$store.dispatch(LOAD_ORDER_PATTERNS_ACTION);
         this.selectedNode = null;
         this.selectedOrderCategory = null;
         this.editedOrderCategoryTitle = null;
@@ -419,7 +424,7 @@
         if (!this.editedOrderCategoryTitle) {
           return;
         }
-        this.$store.dispatch('editOrderCategoryTitle', {
+        this.$store.dispatch(EDIT_ORDER_CATEGORY_TITLE_ACTION, {
           service: this.selectedOrderCategory.service,
           orderType: this.selectedOrderCategory.orderType,
           title: this.selectedOrderCategory.category,
@@ -440,7 +445,7 @@
             if (!this.selectedPattern || !this.selectedPattern.key) {
               return;
             }
-            this.$store.dispatch(DEL_ORDER_PATTERN, this.selectedPattern.key);
+            this.$store.dispatch(DEL_ORDER_PATTERN_ACTION, this.selectedPattern.key);
           },
         });
       },
@@ -593,7 +598,7 @@
         if (!this.editedPattern) {
           return;
         }
-        this.$store.dispatch(MOD_ORDER_PATTERN, {
+        this.$store.dispatch(MOD_ORDER_PATTERN_ACTION, {
           id: this.selectedPattern.key,
           title: this.editedPattern.title,
           specialTrainCategories: this.editedPattern.specialTrainCategories,

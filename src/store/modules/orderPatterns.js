@@ -28,6 +28,13 @@ import {
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
+  LOAD_ORDER_PATTERNS_ACTION,
+  EDIT_ORDER_CATEGORY_TITLE_ACTION,
+  DEL_ORDER_PATTERN_ACTION,
+  MOD_ORDER_PATTERN_ACTION,
+  CREATE_ORDER_PATTERN_ACTION,
+} from '@/store/action-types';
+import {
   getOrderPatterns,
   modOrderCategoryTitle,
   deleteOrderPattern,
@@ -394,7 +401,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async loadOrderPatterns(context) {
+    async [LOAD_ORDER_PATTERNS_ACTION] (context) {
       if (!context.getters.canUserGetOrderPatterns) {
         const errMessage = 'У вас нет права просматривать шаблоны документов';
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });
@@ -434,7 +441,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async editOrderCategoryTitle(context, { service, orderType, title, newTitle }) {
+    async [EDIT_ORDER_CATEGORY_TITLE_ACTION] (context, { service, orderType, title, newTitle }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
         const errMessage = 'У вас нет права редактировать наименования категорий документов';
         context.commit(SET_MODIFY_ORDER_CATEGORY_TITLE_RESULT, { error: true, message: errMessage, newTitle: null });
@@ -470,7 +477,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async delOrderPattern(context, orderPatternId) {
+    async [DEL_ORDER_PATTERN_ACTION] (context, orderPatternId) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
         const errMessage = 'У вас нет права удалять шаблоны документов';
         context.commit(SET_DEL_ORDER_PATTERN_RESULT, { error: true, message: errMessage });
@@ -498,7 +505,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async modOrderPattern(context, { id, title, specialTrainCategories, elements }) {
+    async [MOD_ORDER_PATTERN_ACTION] (context, { id, title, specialTrainCategories, elements }) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
         const errMessage = 'У вас нет права на редактирование шаблонов документов';
         context.commit(SET_MOD_ORDER_PATTERN_RESULT, { error: true, message: errMessage, orderPattern: null });
@@ -532,7 +539,7 @@ export const orderPatterns = {
     /**
      *
      */
-    async createOrderPattern(context, props) {
+    async [CREATE_ORDER_PATTERN_ACTION] (context, props) {
       if (!context.getters.canUserWorkWithOrderPatterns) {
         const errMessage = 'У вас нет права на создание шаблонов документов';
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: true, message: errMessage });

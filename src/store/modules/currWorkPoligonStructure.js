@@ -7,6 +7,12 @@ import {
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
+  LOAD_STATION_DATA_ACTION,
+  LOAD_DNC_SECTOR_DATA_ACTION,
+  LOAD_ECD_SECTOR_DATA_ACTION,
+  LOAD_CURR_WORK_POLIGON_DATA_ACTION,
+} from '@/store/action-types';
+import {
   getDefinitStationData,
   getStationBlocksData,
   getStationDNCSectorsData,
@@ -525,7 +531,7 @@ export const currWorkPoligonStructure = {
     /**
      * Подгружает с сервера информацию о полигоне управления "Станция".
      */
-    async loadStationData(context, { stationId }) {
+    async [LOAD_STATION_DATA_ACTION] (context, { stationId }) {
       const responseData = await getDefinitStationData(stationId);
       const blocksResponseData = await getStationBlocksData(stationId);
       const dncSectorsResponseData = await getStationDNCSectorsData(stationId);
@@ -541,7 +547,7 @@ export const currWorkPoligonStructure = {
     /**
      * Подгружает с сервера информацию о полигоне управления "Участок ДНЦ".
      */
-    async loadDNCSectorData(context, { sectorId }) {
+    async [LOAD_DNC_SECTOR_DATA_ACTION] (context, { sectorId }) {
       const responseData = await getDefinitDNCSectorData(sectorId);
       const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData(sectorId);
       const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData(sectorId);
@@ -555,7 +561,7 @@ export const currWorkPoligonStructure = {
     /**
      * Подгружает с сервера информацию о полигоне управления "Участок ЭЦД".
      */
-    async loadECDSectorData(context, { sectorId }) {
+    async [LOAD_ECD_SECTOR_DATA_ACTION] (context, { sectorId }) {
       const responseData = await getDefinitECDSectorData(sectorId);
       const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData(sectorId);
       const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData(sectorId);
@@ -570,7 +576,7 @@ export const currWorkPoligonStructure = {
      * В зависимости от полигона управления пользователя запускает операцию подгрузки
      * с сервера информации о данном полигоне управления.
      */
-    async loadCurrWorkPoligonData(context) {
+    async [LOAD_CURR_WORK_POLIGON_DATA_ACTION] (context) {
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'У вас нет права на получение информации о рабочем полигоне';
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
@@ -589,13 +595,13 @@ export const currWorkPoligonStructure = {
       try {
         switch (workPoligon.type) {
           case WORK_POLIGON_TYPES.STATION:
-            await context.dispatch('loadStationData', { stationId: workPoligon.code });
+            await context.dispatch(LOAD_STATION_DATA_ACTION, { stationId: workPoligon.code });
             break;
           case WORK_POLIGON_TYPES.DNC_SECTOR:
-            await context.dispatch('loadDNCSectorData', { sectorId: workPoligon.code });
+            await context.dispatch(LOAD_DNC_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
             break;
           case WORK_POLIGON_TYPES.ECD_SECTOR:
-            await context.dispatch('loadECDSectorData', { sectorId: workPoligon.code });
+            await context.dispatch(LOAD_ECD_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
             break;
         }
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о рабочем полигоне' });

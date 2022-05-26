@@ -6,6 +6,7 @@ import {
   DEL_ORDER_PATTERNS_ELEMENTS_REFS,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION } from '@/store/action-types';
 import { getOrderPatternsElementsRefs } from '@/serverRequests/orderPatterns.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -83,7 +84,7 @@ export const orderPatternsElementsRefs = {
     /**
      * Подгружает информацию о возможных смысловых значениях элементов шаблонов распоряжений.
      */
-    async loadOrderPatternsElementsRefs(context) {
+    async [LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION] (context) {
       if (!context.getters.canUserGetOrderPatterns) {
         const errMessage = 'У вас нат права получать информацию о смысловых значениях элементов шаблонов документов';
         context.commit(SET_LOADING_REFS_RESULT, { error: true, message: errMessage });

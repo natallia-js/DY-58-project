@@ -58,6 +58,7 @@
 <script>
   import { computed, reactive, ref, watch } from 'vue';
   import { useStore } from 'vuex';
+  import { LOAD_LAST_ORDERS_PARAMS_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-order-number',
@@ -98,7 +99,7 @@
       // Обновление номеров ВСЕХ типов распоряжений путем выполнения запроса на сервер
       // с целью получения последних сведений о номерах распоряжений.
       const refreshOrderNumber = () => {
-        store.dispatch('loadLastOrdersParams');
+        store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
       };
 
       return {

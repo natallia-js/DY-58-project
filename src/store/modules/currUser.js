@@ -20,6 +20,11 @@ import {
   SET_LOGIN_RESULT,
 } from '@/store/mutation-types';
 import {
+  LOGIN_ACTION,
+  TRY_LOGIN_VIA_SESSION_ACTION,
+  LOGOUT_ACTION,
+} from '@/store/action-types';
+import {
   startWorkWithoutTakingDuty,
   takeDutyUser,
   logoutUser,
@@ -411,7 +416,7 @@ export const currUser = {
     /**
      * Позволяет осуществить вход в систему.
      */
-    async login(context, payload) {
+    async [LOGIN_ACTION] (context, payload) {
       const {
         userId,
         jtwToken,
@@ -531,14 +536,14 @@ export const currUser = {
     /**
      * Пытается авторизовать пользователя через сессию на сервере.
      */
-    async tryLoginViaSession(context) {
+    async [TRY_LOGIN_VIA_SESSION_ACTION] (context) {
       if (context.state.isAuthenticated) {
         return;
       }
       try {
         const responseData = await whoAmI();
         if (responseData.token) {
-          await context.dispatch('login', {
+          await context.dispatch(LOGIN_ACTION, {
             userId: responseData.userId,
             jtwToken: responseData.token,
             userInfo: responseData.userInfo,
@@ -566,7 +571,7 @@ export const currUser = {
     /**
      * Позволяет выйти из системы как со сдачей, так и без сдачи дежурства.
      */
-    async logout(context, { onlyLocally }) {
+    async [LOGOUT_ACTION] (context, { onlyLocally }) {
       if (!context.state.isAuthenticated) {
         return;
       }

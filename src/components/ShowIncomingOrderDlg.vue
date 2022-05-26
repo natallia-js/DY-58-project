@@ -52,6 +52,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import { CONFIRM_ORDER_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-show-incoming-order-dialog',
@@ -115,7 +116,7 @@
     methods: {
       confirmOrder() {
         if (this.order && this.orderNeedsToBeConfirmed && !this.orderIsBeingConfirmed) {
-          this.$store.dispatch('confirmOrder', { orderId: this.order.id });
+          this.$store.dispatch(CONFIRM_ORDER_ACTION, { orderId: this.order.id });
         }
         this.closeDialog();
       },

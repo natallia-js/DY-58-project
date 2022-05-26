@@ -76,6 +76,7 @@
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
+  import { LOGIN_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-auth-page',
@@ -176,7 +177,7 @@
           return;
         }
 
-        await store.dispatch('login', {
+        await store.dispatch(LOGIN_ACTION, {
           userId: responseData.userId,
           jtwToken: responseData.token,
           userInfo: responseData.userInfo,

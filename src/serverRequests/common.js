@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { store } from '@/store';
 import { APP_CODE_NAME } from '@/constants/appCredentials';
+import { LOGOUT_ACTION } from '@/store/action-types';
 
 export async function makeServerRequest({ url, method, params }) {
   let response;
@@ -25,7 +26,7 @@ export async function makeServerRequest({ url, method, params }) {
     // токена текущего пользователя и остальных его данных, автоматически перейдет на
     // страницу авторизации
     if (error?.response?.status === 410) {
-      store.dispatch('logout', { onlyLocally: true });
+      store.dispatch(LOGOUT_ACTION, { onlyLocally: true });
     }
     throw error;
   }

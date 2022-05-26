@@ -11,6 +11,7 @@ import {
   DEL_WORK_ORDERS,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { LOAD_WORK_ORDERS_ACTION, REPORT_ON_ORDERS_DELIVERY_ACTION } from '@/store/action-types';
 import { getWorkOrdersFromServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import { getWorkOrderObject } from './getWorkOrderObject';
@@ -489,7 +490,7 @@ export const getWorkOrders = {
     /**
      * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
      */
-    async loadWorkOrders(context) {
+    async [LOAD_WORK_ORDERS_ACTION] (context) {
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'Не могу загрузить рабочие распоряжения: у вас нет прав на работу с системой';
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });
@@ -509,7 +510,7 @@ export const getWorkOrders = {
           lastTakeDutyTime: context.getters.getLastTakeDutyTime,
           currentWorkPoligon: context.getters.getUserWorkPoligon,
         });
-        context.dispatch('reportOnOrdersDelivery', responseData);
+        context.dispatch(REPORT_ON_ORDERS_DELIVERY_ACTION, responseData);
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка получения информации о рабочих распоряжениях');

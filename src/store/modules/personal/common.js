@@ -8,6 +8,7 @@ import {
   SET_USER_CHOSEN_STATUS,
   DEL_CURR_SECTORS_SHIFT,
 } from '@/store/mutation-types';
+import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
 
 
 /**
@@ -175,7 +176,7 @@ export const common = {
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
      * Причем установка персонала производится с установкой статуса отправки оригинала / копии документа.
      */
-    applyPersonalForSendingData(context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
+    [APPLY_PERSONAL_FOR_SENDING_DATA_ACTION] (context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
       // Позволяет определить, отослать оригинал либо копию документа
       const getAppSendOriginalStatusFrom = (status) => {
         if (typeof status === 'boolean')

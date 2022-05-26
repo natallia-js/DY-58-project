@@ -9,6 +9,7 @@ import {
   DEL_ORDER_DRAFT,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { DISPATCH_ORDER_ACTION } from '@/store/action-types';
 import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
@@ -91,7 +92,7 @@ import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
     /**
      * Делает запрос на сервер с целью сохранения издаваемого распоряжения и передачи его причастным.
      */
-    async dispatchOrder(context, params) {
+    async [DISPATCH_ORDER_ACTION] (context, params) {
       const {
         type,
         number,

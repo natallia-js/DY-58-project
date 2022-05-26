@@ -5,6 +5,7 @@ import {
   SET_REPORTING_ON_ORDER_DELIVERY_STATUS,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { REPORT_ON_ORDERS_DELIVERY_ACTION } from '@/store/action-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { reportServerOnOrdersDelivery } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
@@ -139,7 +140,7 @@ export const reportOnOrdersDelivery = {
      * Для распоряжений, для которых ранее не сообщалось серверу об их доставке на данный
      * полигон управления, сообщает о том, что они доставлены.
      */
-    async reportOnOrdersDelivery(context, orders) {
+    async [REPORT_ON_ORDERS_DELIVERY_ACTION] (context, orders) {
       if (!context.getters.canUserReportOnOrdersDelivery) {
         const errMessage = 'Для работы с документами необходимо быть на дежурстве и обладать соответствующими правами';
         context.commit(SET_REPORT_ON_ORDERS_DELIVERY_RESULT, { error: true, message: errMessage });

@@ -6,6 +6,7 @@
 <script>
   import { useStore } from 'vuex';
   import { useRouter } from 'vue-router';
+  import { LOGOUT_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-logout',
@@ -14,7 +15,7 @@
       const store = useStore();
       const router = useRouter();
 
-      store.dispatch('logout', { onlyLocally: false });
+      store.dispatch(LOGOUT_ACTION, { onlyLocally: false });
       router.push({ name: 'AuthPage' });
     },
   };

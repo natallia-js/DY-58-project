@@ -288,6 +288,7 @@
   import { getUserPostFIOString } from '@/store/modules/personal/transformUserData';
   import OrderNumber from '@/components/CreateOrders/OrderNumber';
   import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCode';
+  import { DISPATCH_ORDER_ACTION, EDIT_DISPATCHED_ORDER_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-create-dsp-take-duty-order-dialog',
@@ -723,7 +724,7 @@
       const dispatchOrder = () => {
         if (!editExistingTakeDutyOrder.value) {
           // Издание нового распоряжения
-          store.dispatch('dispatchOrder', {
+          store.dispatch(DISPATCH_ORDER_ACTION, {
             type: orderType,
             number: +state.number,
             createDateTime: state.createDateTime,
@@ -742,7 +743,7 @@
           });
         } else if (existingDSPTakeDutyOrder.value) {
           // Редактирование распоряжения
-          store.dispatch('editDispatchedOrder', {
+          store.dispatch(EDIT_DISPATCHED_ORDER_ACTION, {
             type: orderType,
             id: existingDSPTakeDutyOrder.value._id,
             timeSpan: { start: state.takeDutyDateTime, end: null, tillCancellation: true },

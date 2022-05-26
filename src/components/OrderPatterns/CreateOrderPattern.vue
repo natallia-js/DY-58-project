@@ -144,6 +144,7 @@
   import EditOrderPatternElement from './EditOrderPatternElement';
   import EditOrderPattern from './EditOrderPattern';
   import OrderPatternPreview from './OrderPatternPreview';
+  import { CREATE_ORDER_PATTERN_ACTION } from '@/store/action-types';
 
   export default {
     name: 'dy58-create-order-pattern',
@@ -222,7 +223,7 @@
           showErrMessage('Не могу отправить созданный шаблон на сервер: не заполнены / неверно заполнены его поля');
           return;
         }
-        store.dispatch('createOrderPattern', {
+        store.dispatch(CREATE_ORDER_PATTERN_ACTION, {
           service: state.service,
           type: state.orderType,
           category: state.orderCategory,

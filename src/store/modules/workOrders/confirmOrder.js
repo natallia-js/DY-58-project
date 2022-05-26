@@ -19,6 +19,11 @@ import {
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
+  CONFIRM_ORDER,
+  CONFIRM_ORDER_FOR_OTHERS,
+  CONFIRM_ORDER_FOR_OTHER_RECEIVERS_ACTION,
+} from '@/store/action-types';
+import {
   confirmOrderForMyself,
   confirmOrdersForOthers,
   confirmOrderForOtherReceivers,
@@ -381,7 +386,7 @@ export const confirmOrder = {
     /**
      * Позволяет для данного входящего уведомления выставить статус "подтверждено" на сервере.
      */
-    async confirmOrder(context, { orderId }) {
+    async [CONFIRM_ORDER] (context, { orderId }) {
       if (!context.getters.canUserConfirmOrder) {
         const errMessage = 'У вас нат прав на подтверждение распоряжения';
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
@@ -428,7 +433,7 @@ export const confirmOrder = {
      * Позволяет для данного рабочего распоряжения выставить статус "подтверждено" на сервере
      * за ряд рабочих полигонов.
      */
-    async confirmOrderForOthers(context, { orderId, confirmWorkPoligons }) {
+    async [CONFIRM_ORDER_FOR_OTHERS] (context, { orderId, confirmWorkPoligons }) {
       if (!orderId) {
         return;
       }
@@ -496,7 +501,7 @@ export const confirmOrder = {
      * Позволяет для данного рабочего распоряжения выставить статус "подтверждено" на сервере
      * за все "иные" рабочие полигоны.
      */
-    async confirmOrderForOtherReceivers(context, orderId) {
+    async [CONFIRM_ORDER_FOR_OTHER_RECEIVERS_ACTION] (context, orderId) {
       if (!orderId) {
         return;
       }

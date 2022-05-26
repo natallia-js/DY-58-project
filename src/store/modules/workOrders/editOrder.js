@@ -15,6 +15,10 @@ import {
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
 import {
+  EDIT_DISPATCHED_ORDER_ACTION,
+  DEL_STATION_WORK_PLACE_RECEIVER_ACTION,
+} from '@/store/action-types';
+import {
   editDispatchedOrderOnServer,
   delStationWorkPlaceReceiverOnServer,
 } from '@/serverRequests/orders.requests';
@@ -194,7 +198,7 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
      * Делает запрос на сервер с целью редактирования существующего распоряжения.
      * В настоящее время отредактировать можно только запись о принятии дежурства на станции.
      */
-     async editDispatchedOrder(context, params) {
+     async [EDIT_DISPATCHED_ORDER_ACTION] (context, params) {
       const { type, id, timeSpan, orderText } = params;
 
       if (!context.getters.canUserDispatchOrders) {
@@ -228,7 +232,7 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
     /**
      * Делает запрос на сервер с целью удаления адресата на станции у существующего распоряжения.
      */
-    async delStationWorkPlaceReceiver(context, { orderId, workPlaceId }) {
+    async [DEL_STATION_WORK_PLACE_RECEIVER_ACTION] (context, { orderId, workPlaceId }) {
       if (!context.getters.canUserDeleteOrderStationReceivers) {
         const errMessage = 'У вас нет права на удаление адресата распоряжения на станции';
         context.commit(SET_DEL_STATION_WORK_PLACE_RECEIVER_RESULT, { error: true, message: errMessage });

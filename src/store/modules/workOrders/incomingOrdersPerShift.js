@@ -6,6 +6,7 @@ import {
   SET_GETTING_INCOMING_ORDERS_PER_SHIFT_STATUS,
   SET_SYSTEM_MESSAGE,
 } from '@/store/mutation-types';
+import { LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION } from '@/store/action-types';
 import { getOrdersAddressedToThisPoligonFromGivenDate } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 
@@ -78,7 +79,7 @@ export const incomingOrdersPerShift = {
      * соответствующему ДСП (по-другому никак: информация извлекается из общей таблицы распоряжений,
      * в которой фиксируются лишь получатели-станции и ДСП этих станций).
      */
-    async loadIncomingOrdersPerShift(context) {
+    async [LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION] (context) {
       if (!context.getters.canUserGetIncomingOrdersPerShift) {
         const errMessage = 'У вас нет права получать количество входящий документов за смену либо вы не на дежурстве';
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });

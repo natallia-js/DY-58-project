@@ -89,6 +89,7 @@
     SET_USER_TOKEN,
     SET_USER_TAKE_PASS_DUTY_TIMES,
   } from '@/store/mutation-types';
+  import { LOGOUT_ACTION } from '@/store/action-types';
   import showMessage from '@/hooks/showMessage.hook';
 
   export default {
@@ -163,7 +164,7 @@
         // При переходе на главную страницу необходимо обнулить все данные, которые были загружены
         // до прихода на эту страницу, иначе они могут снова подгрузиться, даже если будет входить
         // в систему пользователь с совсем другого полигона
-        store.dispatch('logout', { onlyLocally: false });
+        store.dispatch(LOGOUT_ACTION, { onlyLocally: false });
         router.push({ name: 'AuthPage' });
       }
 
