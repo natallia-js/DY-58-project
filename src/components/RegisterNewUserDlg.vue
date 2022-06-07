@@ -24,10 +24,13 @@
           :class="{'p-invalid':(v$.login.$invalid && submitted) || state.fieldsErrorsFromServer.login}"
         />
         <small
-          v-if="(v$.login.$invalid && submitted) || v$.login.$pending.$response || state.fieldsErrorsFromServer.login"
+          v-if="(v$.login.$invalid && submitted) || v$.login.$pending.$response"
           class="p-error"
         >
-          {{ state.fieldsErrorsFromServer.login || 'Не задан логин' }}
+          {{ v$.login.$errors.length ? v$.login.$errors[0].$message : 'Неверно указан логин' }}
+        </small>        
+        <small v-if="state.fieldsErrorsFromServer.login" class="p-error">
+          {{ state.fieldsErrorsFromServer.login }}
         </small>
       </div>
 
@@ -40,16 +43,21 @@
         >
           <span class="p-text-bold"><span class="dy58-required-field">*</span> Пароль</span>
         </label>
-        <InputText
+        <Password
           id="new-user-password"
           v-model="v$.password.$model"
+          inputStyle="width:100%"
           :class="{'p-invalid':(v$.password.$invalid && submitted) || state.fieldsErrorsFromServer.password}"
+          toggleMask
         />
         <small
-          v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response || state.fieldsErrorsFromServer.password"
+          v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response"
           class="p-error"
         >
-          {{ state.fieldsErrorsFromServer.password || 'Не задан пароль' }}
+          {{ v$.password.$errors.length ? v$.password.$errors[0].$message : 'Неверно указан пароль' }}
+        </small>        
+        <small v-if="state.fieldsErrorsFromServer.password" class="p-error">
+          {{ state.fieldsErrorsFromServer.password }}
         </small>
       </div>
 
@@ -347,7 +355,7 @@
 <script>
   import { onMounted, reactive, ref, watch } from 'vue';
   import { useVuelidate } from '@vuelidate/core';
-  import { required } from '@vuelidate/validators';
+  import { helpers, required } from '@vuelidate/validators';
   import { useConfirm } from 'primevue/useconfirm';
   import showMessage from '@/hooks/showMessage.hook';
   import { getAllPostsFromServer } from '@/serverRequests/posts.requests';
@@ -359,6 +367,7 @@
   import { applyForRegistration } from '@/serverRequests/auth.requests';
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import compareStrings from '@/additional/compareStrings';
+  import checkAuthString from '@/additional/checkAuthString';
 
   export default {
     name: 'dy58-register-new-user-dialog',
@@ -535,8 +544,14 @@
       });
 
       const rules = reactive({
-        login: { required },
-        password: { required },
+        login: {
+          required: helpers.withMessage('Введите логин', required),
+          checkAuthString: helpers.withMessage('Логин должен состоять из символов латинского алфавита, цифр и знака нижнего подчеркивания', checkAuthString),
+        },
+        password: {
+          required: helpers.withMessage('Введите пароль', required),
+          checkAuthString: helpers.withMessage('Пароль должен состоять из символов латинского алфавита, цифр и знака нижнего подчеркивания', checkAuthString),
+        },
         name: { required },
         fatherName: {},
         surname: { required },

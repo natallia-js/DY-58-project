@@ -18,18 +18,11 @@
       (Активно/Не активно + дата и время последнего перехода в данное состояние). Кроме того, отображаются
       последние сообщения, полученные от сервера (в обратном хронологическом порядке).
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-footer-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

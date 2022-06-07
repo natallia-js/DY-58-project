@@ -352,19 +352,12 @@
       но под документами в данном случае понимаются лишь те их них, которые являются началом соответствующей цепочки
       документов (в рамках цепочки документы сортируются в прямом хронологическом порядке).
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-main-page-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>
 

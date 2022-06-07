@@ -14,18 +14,11 @@
       скрываются те узлы дерева, в названии которых (а также в названии подузлов которых) не содержится указанная
       строка. Поиск не чувствителен к регистру вводимых симоволов.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-order-patterns-page-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

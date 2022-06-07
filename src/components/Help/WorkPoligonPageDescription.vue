@@ -7,18 +7,11 @@
       используется ДУ-58 для формирования списков адресатов издаваемых документов, выпадающих списков с
       перечнями станций / перегонов / ... в шаблонах документов.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-work-poligon-page-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

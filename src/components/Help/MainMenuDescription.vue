@@ -38,18 +38,11 @@
       Если блок с краткой информацией о текущем пользователе в главном меню серый, значит, текущий
       пользователь находится на дежурстве. Если оранжевый, то пользователь не на дежурстве.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-main-menu-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

@@ -49,18 +49,11 @@
       Если пользователь имеет право работать на нескольких рабочих полигонах, то после процедуры успешной
       аутентификации система предложит ему выбрать рабочий полигон.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-system-enter-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

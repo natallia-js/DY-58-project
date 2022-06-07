@@ -22,18 +22,11 @@
       Если пользователь выбирает подпункт <i><b>"Со сдачей дежурства"</b></i>, то осуществляется выход из
       системы с отметкой на сервере факта сдачи дежурства.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-system-exit-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

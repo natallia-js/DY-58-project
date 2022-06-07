@@ -121,7 +121,7 @@
       <Fieldset legend="структурные подразделения" :toggleable="true">
         <div v-if="sectorObj.TECDStructuralDivisions && sectorObj.TECDStructuralDivisions.length">
           <p v-for="(division, index) of sortedStructuralDivisions(sectorObj.TECDStructuralDivisions)" :key="division.ECDSD_ID" class="p-ml-4">
-            {{ `${index + 1}. &#160; ${division.ECDSD_Title} / ${division.ECDSD_Post} / ${division.ECDSD_FIO}` }}
+            {{ `${index + 1}. &#160; ${division.ECDSD_Title} / ${division.ECDSD_Post || '-'} / ${division.ECDSD_FIO || '-'}` }}
           </p>
         </div>
         <div v-else>

@@ -16,18 +16,11 @@
       Пользователи системы из числа ДНЦ, ЭЦД, ДСП, Операторов при ДСП используются в ДУ-58 для формирования списков
       адресатов документов, а также при формировании распоряжений о приеме-сдаче дежурства ДСП.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-personal-page-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

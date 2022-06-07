@@ -71,18 +71,11 @@
       Для появления записи на странице в Журнале необходимо инициировать поиск информации.
       Запись ревизора выделяется в Журнале синим цветом, на печати - черным.
     </p>
-    <to-help-start-block />
   </div>
 </template>
 
 <script>
-  import ToHelpStartBlock from './ToHelpStartBlock';
-
   export default {
     name: 'dy58-journal-page-description',
-
-    components: {
-      ToHelpStartBlock,
-    },
   }
 </script>

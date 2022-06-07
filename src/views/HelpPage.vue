@@ -10,15 +10,25 @@
     <div class="p-col">
       <h2 class="p-text-center p-mt-3 p-mb-2" id="user-manual-start">Руководство пользователя</h2>
       <system-enter-description />
+      <to-help-start-block />
       <main-menu-description />
+      <to-help-start-block />
       <footer-description />
+      <to-help-start-block />
       <main-page-description />
+      <to-help-start-block />
       <create-order-page-description />
+      <to-help-start-block />
       <journal-page-description />
+      <to-help-start-block />
       <work-poligon-page-description />
+      <to-help-start-block />
       <personal-page-description />
+      <to-help-start-block />
       <order-patterns-page-description />
+      <to-help-start-block />
       <system-exit-description />
+      <to-help-start-block />
     </div>
   </div>
 </template>
@@ -38,6 +48,7 @@
   import OrderPatternsPageDescription from '@/components/Help/OrderPatternsPageDescription';
   import SystemExitDescription from '@/components/Help/SystemExitDescription';
   import FooterDescription from '@/components/Help/FooterDescription';
+  import ToHelpStartBlock from '@/components/Help/ToHelpStartBlock';
 
   export default {
     name: 'dy58-help-page',
@@ -53,6 +64,7 @@
       OrderPatternsPageDescription,
       SystemExitDescription,
       FooterDescription,
+      ToHelpStartBlock,
     },
 
     setup() {

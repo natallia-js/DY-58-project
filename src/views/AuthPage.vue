@@ -26,24 +26,26 @@
             v-if="(v$.userName.$invalid && state.submitted) || v$.userName.$pending.$response"
             class="p-error"
           >
-            Введите имя пользователя
+            {{ v$.userName.$errors.length ? v$.userName.$errors[0].$message : 'Неверно указано имя пользователя' }}
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
           <label for="password" :class="{'p-error':v$.password.$invalid && state.submitted}">
             <span class="dy58-required-field">*</span> Пароль
           </label>
-          <InputText
+          <Password
             id="password"
-            type="password"
             v-model="v$.password.$model"
+            inputStyle="width:100%"
             :class="{'p-invalid':v$.password.$invalid && state.submitted}"
+            :feedback="false"
+            toggleMask
           />
           <small
             v-if="(v$.password.$invalid && state.submitted) || v$.password.$pending.$response"
             class="p-error"
           >
-            Введите пароль
+            {{ v$.password.$errors.length ? v$.password.$errors[0].$message : 'Неверно указан пароль' }}
           </small>
         </div>
         <div class="p-field p-col-12 p-d-flex p-flex-column">
@@ -68,7 +70,7 @@
 <script>
   import { computed, onMounted, reactive } from 'vue';
   import { useStore } from 'vuex';
-  import { required } from '@vuelidate/validators';
+  import { helpers, required } from '@vuelidate/validators';
   import { useVuelidate } from '@vuelidate/core';
   import { useRouter } from 'vue-router';
   import { authUser } from '@/serverRequests/auth.requests';
@@ -77,6 +79,7 @@
   import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
   import { LOGIN_ACTION } from '@/store/action-types';
+  import checkAuthString from '@/additional/checkAuthString';
 
   export default {
     name: 'dy58-auth-page',
@@ -101,10 +104,12 @@
 
       const rules = {
         userName: {
-          required,
+          required: helpers.withMessage('Введите имя пользователя', required),
+          checkAuthString: helpers.withMessage('Имя пользователя должно состоять из символов латинского алфавита, цифр и знака нижнего подчеркивания', checkAuthString),
         },
         password: {
-          required,
+          required: helpers.withMessage('Введите пароль', required),
+          checkAuthString: helpers.withMessage('Пароль должен состоять из символов латинского алфавита, цифр и знака нижнего подчеркивания', checkAuthString),
         },
       };
 
@@ -151,7 +156,7 @@
       /**
        * Обрабатывает запрос на вход в систему.
        */
-      const handleSubmit = async (isFormValid) => {
+      const handleSubmit = async (isFormValid) => { console.log(isFormValid, v$);
         state.submitted = true;
         if (!isFormValid) {
           showErrMessage('Не указаны либо неверно указаны данные для входа в систему');

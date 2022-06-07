@@ -53,6 +53,7 @@ import Textarea from 'primevue/textarea';
 import MegaMenu from 'primevue/megamenu';
 import Menu from 'primevue/menu';
 import InputMask from 'primevue/inputmask';
+import Password from 'primevue/password';
 
 const app = createApp(App);
 
@@ -103,5 +104,6 @@ app.component('Textarea', Textarea);
 app.component('MegaMenu', MegaMenu);
 app.component('Menu', Menu);
 app.component('InputMask', InputMask);
+app.component('Password', Password);
 
 app.mount('#app');
