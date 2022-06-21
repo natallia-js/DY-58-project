@@ -312,14 +312,18 @@
               />
             </div>
           </div>
-          <div class="p-as-stretch p-d-flex p-ai-center p-flex-row p-flex-wrap" style="width:30%">
-            <Button type="submit" label="Просмотреть и издать" class="p-mb-2" />
-            <Button v-if="isECD" label="Сохранить черновик" class="p-button-secondary" @click="handleSaveOrderDraft($event)" />
+          <div class="p-grid" style="width:30%">
+            <div class="p-col-12">
+              <Button type="submit" label="Просмотреть и издать" class="p-mb-2" />
+            </div>
+            <div class="p-col-12">
+              <Button v-if="isECD" label="Сохранить черновик" class="p-button-secondary" @click="handleSaveOrderDraft($event)" />
+            </div>
           </div>
         </div>
       </form>
     </div>
-
+<!--class="p-as-stretch p-d-flex p-ai-center p-flex-row p-flex-wrap"-->
     <!-- АДРЕСАТЫ -->
 
     <div class="dy58-create-order-subblock">
@@ -419,6 +423,7 @@
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useWatchOrderNumber } from './watchOrderNumber';
   import { useWatchOrderPatterns } from './watchOrderPatterns';
+  import { useWatchSectorPersonal } from './watchSectorPersonal';
   import { useWatchOrderDrafts } from './watchOrderDrafts';
   import { useWatchOperationsResults } from './watchOperationsResults';
   import { useDispatchOrder } from './dispatchOrder';
@@ -612,7 +617,7 @@
         store.commit(SET_SELECTED_OKNO, { okno: null });
       });
 
-      useWatchExistingDNCTakeDutyOrder({ store, isDNC, isECD });
+      const { displayLastCircularOrderDSP } = useWatchExistingDNCTakeDutyOrder({ store, isDNC, isECD });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -700,10 +705,8 @@
       });
 */
 
-      useWatchOrderDrafts({
-        state, store, props, emit, currentOrderDraft,
-        applySelectedOrderDraft, applySelectedOrderDraftPersonal,
-      });
+      useWatchSectorPersonal({ store, applySelectedOrderDraftPersonal, displayLastCircularOrderDSP });
+      useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, applySelectedOrderDraft });
       useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
 
       const {

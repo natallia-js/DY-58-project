@@ -65,7 +65,12 @@
               :model="createRelativeOrderContextMenuItems"
               :popup="true"
               id="overlay_tmenu"
-            />
+            >
+              <template #item="{item}">
+                <a v-if="!item.isChild" class="dy58-tiered-menu-item" @click="item.command">{{ item.label }}</a>
+                <a v-else class="dy58-tiered-menu-subitem" @click="item.command">{{ item.label }}</a>
+              </template>
+            </TieredMenu>
             <Button
               icon="pi pi-file"
               class="p-button-success p-button dy58-order-action-button"

@@ -202,13 +202,41 @@ export const orderPatterns = {
       return state.patterns.find((pattern) => pattern._id === patternId);
     },
 
-    getOrderPatternIdBySpecialSign(state) {
-      return (specialSign) => {
-        if (!specialSign) {
+    getOrderPatternChildPatterns(_state, getters) {
+      return (patternId) => {
+        const orderPattern = getters.getOrderPatternById(patternId);
+        if (!orderPattern || !orderPattern.childPatterns || !orderPattern.childPatterns.length) {
+          return [];
+        }
+        return orderPattern.childPatterns.map((el) => {
+          const pattern = getters.getOrderPatternById(el.childPatternId);
+          return {
+            id: el.childPatternId,
+            title: pattern ? pattern.title : null,
+            type: pattern ? pattern.type : null,
+          }
+        }).filter((el) => el.title && el.type);
+      };
+    },
+
+    /**
+     * Позволяет найти id шаблона распоряжения указанного типа и имеющего указанный специальный признак
+     * либо убедиться, что подобное распоряжение с указанным id существует.
+     * Из всех шаблонов извлекается и проверяется только первый шаблон, удовлетворяющий заданным значениям!
+     */
+    getSpecialOrderPatternId(state) {
+      return (orderType, orderPatternId, specialSign) => {
+        if (!orderType || (!orderPatternId && !specialSign)) {
           return null;
         }
         const orderPattern = state.patterns.find((pattern) =>
-          pattern.specialTrainCategories && pattern.specialTrainCategories.includes(specialSign));
+          pattern.type === orderType &&
+          (!orderPatternId || pattern._id === orderPatternId) &&
+          (
+            !specialSign ||
+            (pattern.specialTrainCategories && pattern.specialTrainCategories.includes(specialSign))
+          )
+        );
         return orderPattern ? orderPattern._id : null;
       };
     },

@@ -156,6 +156,7 @@
             name: 'NewOrderPage',
             params: {
               orderType: getOrderTypeByTabIndex(activeIndex.value),
+              orderPatternId: null,
               orderPatternSpecialSign: null,
               prevOrderId: null,
               orderDraftId: null,
@@ -184,6 +185,7 @@
           name: 'NewOrderPage',
           params: {
             orderType: getOrderTypeByTabIndex(event.index),
+            orderPatternId: null,
             orderPatternSpecialSign: null,
             prevOrderId: null,
             orderDraftId: null,
@@ -196,8 +198,15 @@
       };
 
       const getOrderPatternIdPropValue = (orderType) =>
-        (route.params.orderType === orderType && route.params.orderPatternSpecialSign !== 'null') ?
-        store.getters.getOrderPatternIdBySpecialSign(route.params.orderPatternSpecialSign) : null;
+        (
+          (route.params.orderType === orderType) &&
+          (route.params.orderPatternId !== 'null' || route.params.orderPatternSpecialSign !== 'null')
+        )
+        ? store.getters.getSpecialOrderPatternId(
+          orderType,
+          route.params.orderPatternId === 'null' ? null : route.params.orderPatternId,
+          route.params.orderPatternSpecialSign === 'null' ? null : route.params.orderPatternSpecialSign)
+        : null;
 
       const getPrevOrderIdPropValue = (orderType) =>
         (route.params.orderType === orderType && route.params.prevOrderId !== 'null') ? route.params.prevOrderId : null;

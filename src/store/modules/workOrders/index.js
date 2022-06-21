@@ -10,6 +10,7 @@ import { editOrder } from './editOrder';
 import { delWorkOrdersChains } from './delWorkOrdersChains';
 import { contextMenus } from './contextMenus';
 import { checkIfOrderActionCanBePerformed } from './checkIfOrderActionCanBePerformed';
+import { checkClipboard } from './checkClipboard';
 import { okna } from './okna';
 
 
@@ -70,6 +71,9 @@ export const workOrders = {
 
     // текущее выбранное "окно"
     selectedOkno: null,
+
+    // последние данные о поезде ДР, извлеченные из буфера обмена
+    dataForDROrderFromClipboard: null,
   },
 
   getters: {
@@ -86,6 +90,7 @@ export const workOrders = {
     ...editOrder.getters,
     ...checkIfOrderActionCanBePerformed.getters,
     ...okna.getters,
+    ...checkClipboard.getters,
   },
 
   mutations: {
@@ -98,6 +103,7 @@ export const workOrders = {
     ...dispatchOrder.mutations,
     ...editOrder.mutations,
     ...okna.mutations,
+    ...checkClipboard.mutations,
   },
 
   actions: {
@@ -108,5 +114,6 @@ export const workOrders = {
     ...delWorkOrdersChains.actions,
     ...dispatchOrder.actions,
     ...editOrder.actions,
+    ...checkClipboard.actions,
   },
 };

@@ -25,7 +25,8 @@
         />
       </div>
       <div class="p-grid">
-        <div v-if="[getOrderPatternElementTypesObject.INPUT, getOrderPatternElementTypesObject.SELECT].includes(selectedPatternElement.type)"
+        <div v-if="[getOrderPatternElementTypesObject.INPUT, getOrderPatternElementTypesObject.SELECT,
+          getOrderPatternElementTypesObject.MULTIPLE_SELECT].includes(selectedPatternElement.type)"
           class="p-col-fixed"
           style="width:200px"
         >
@@ -148,7 +149,7 @@
           let elementSize = null;
           if (this.element && this.element.size) {
             elementSize = this.element.size;
-          } else if (elType === OrderPatternElementType.INPUT || elType === OrderPatternElementType.SELECT) {
+          } else if ([OrderPatternElementType.INPUT, OrderPatternElementType.SELECT, OrderPatternElementType.MULTIPLE_SELECT].includes(elType)) {
             elementSize = PossibleElementSizes.SMALL;
           } else {
             elementSize = PossibleElementSizes.AUTO;

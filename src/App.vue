@@ -47,12 +47,15 @@
     LOAD_ORDER_DRAFTS_ACTION,
     LOAD_ORDER_PATTERNS_ACTION,
     LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION,
+    CHECK_CLIPBOARD,
   } from '@/store/action-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
     UPDATE_CURR_DATE_TIME_INTERVAL,
     REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL,
   } from '@/constants/appSettings';
+  import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
+  import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
 
   export default {
     name: 'dy-58-app',
@@ -77,7 +80,8 @@
 
       // для отображения текущих даты и времени
       let timerId;
-      // для запроса новой информации о распоряжениях с сервера
+      // для запроса новой информации о распоряжениях с сервера +
+      // для ДНЦ: для проверки буфера обмена на содержание в нем таблицы для создания распоряжения о поезде ДР
       let updateDataTimerId;
 
       const state = reactive({
@@ -98,7 +102,13 @@
           }
           //
           if (!updateDataTimerId) {
-            updateDataTimerId = setInterval(() => store.dispatch(LOAD_WORK_ORDERS_ACTION), REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL);
+            updateDataTimerId = setInterval(() => {
+              store.dispatch(LOAD_WORK_ORDERS_ACTION);
+              if (store.getters.isDNC) {
+                store.dispatch(CHECK_CLIPBOARD);
+              }
+            },
+            REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL);
           }
           //
           if (wsClient) {
@@ -195,6 +205,12 @@
       watch(() => store.getters.getStartLogout, (startLogoutVal) => {
         if (startLogoutVal) {
           state.showBeforeLogoutDlg = true;
+        }
+      });
+
+      watch(() => store.getters.getDataForDROrderFromClipboard, (newDRTrainData) => {
+        if (newDRTrainData) {
+          createOrderOfGivenType(SPECIAL_DR_ORDER_SIGN);
         }
       });
 

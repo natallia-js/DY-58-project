@@ -97,7 +97,7 @@
 
       <div v-if="editedPattern && editedPattern.elements" class="dy58-order-pattern-border p-p-2">
         <div class="dy58-title-small p-mb-3 p-text-center">
-          Редактирование шаблона документа
+          Редактирование информации о шаблоне документа
         </div>
         <div class="p-text-bold p-mb-2">Наименование шаблона документа</div>
         <div class="p-mb-2">

@@ -17,6 +17,10 @@ import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCod
  */
 export const dsp = {
   getters: {
+    getSectorStationsShiftNumber(state) {
+      return state?.sectorPersonal?.sectorStationsShift?.length || 0;
+    },
+
     /**
      * Возвращает массив ДСП (Операторов при ДСП) текущего рабочего места полигона управления "Станция".
      * Т.е. возвращаются не все пользователи ДСП и Операторы при ДСП станции, а только те, кто зарегистрирован

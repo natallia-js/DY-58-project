@@ -215,7 +215,7 @@ export const dynamicOrderPatternFieldsTableData = () => {
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'ДУ-58 позволяет не заполнять данное поле',
   });
-  fieldType = 'Выпадающий список';
+  fieldType = 'Нередактируемый список одиночного выбора';
   description = 'Предполагает выбор со стороны пользователя одного из значений, содержащихся в списке выбора. ' +
     'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
     'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
@@ -374,9 +374,43 @@ export const dynamicOrderPatternFieldsTableData = () => {
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Список строк "станция", "подстанция", "подстанции", "перегон", "контактная сеть", "ВЛ", "КЛ"',
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение обязательно',
   });
+  fieldType = 'Редактируемый список множественного выбора';
+  description = 'Предполагает выбор со стороны пользователя одного либо более значений, содержащихся в списке выбора. ' +
+    'Позволяет добавлять новые значения. ' +
+    'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
+    'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
+  tableData.push(
+  {
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Объект работ',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Список строк "контактной сети", "ВЛ ДПР", "ВЛ АБ", "Волноводе", "ВЛ освещения", "КЛ освещения"',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение не обязательно',
+  },
+  {
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Перегон',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Список строк с наименованиями перегонов полигона управления',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение не обязательно',
+  },
+  {
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'Станция',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Список строк с наименованиями станций полигона управления',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение не обязательно',
+  },
+  {
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: 'С чего производится работа',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: 'Список строк "АДМ", "лестница", "лейтер", "без подъема на высоту", "лазов", "вышки МШТС"',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение не обязательно',
+  });
   fieldType = 'Дата';
   description = 'Предполагает выбор значения из календаря либо ввод вручную пользователем. ' +
-    'Формат значения: дд.мм.гггг'
+    'Формат значения: дд.мм.гггг. ' +
     'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
     'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
   tableData.push(
@@ -429,7 +463,7 @@ export const dynamicOrderPatternFieldsTableData = () => {
   });
   fieldType = 'Время';
   description = 'Предполагает выбор значения из календаря либо ввод вручную пользователем. ' +
-    'Формат значения: чч.мм'
+    'Формат значения: чч.мм. ' +
     'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
     'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
   tableData.push(
@@ -440,9 +474,22 @@ export const dynamicOrderPatternFieldsTableData = () => {
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
     [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение обязательно. Значение по умолчанию - текущее время',
   });
+  fieldType = 'Время / до уведомления';
+  description = 'Предполагает выбор значения времени из календаря или ввод времени вручную пользователем, либо установку флага "уведомления". ' +
+    'Формат значения времени: чч.мм. ' +
+    'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
+    'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
+  tableData.push(
+  {
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.fieldType]: fieldType,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.description]: description,
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValues]: '-',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.senceValueDescription]: '-',
+    [DYNAMIC_ORDER_PATTERN_FIELDS_TABLE_COLUMNS.autofill]: 'Заполнение обязательно (либо время, либо флаг "уведомления")',
+  });
   fieldType = 'Дата-время';
   description = 'Предполагает выбор значения из календаря либо ввод вручную пользователем. ' +
-    'Формат значения: дд.мм.гггг чч.мм'
+    'Формат значения: дд.мм.гггг чч.мм. ' +
     'Автоматически заполняется значением "связанного" поля (если есть) выбранного предшествующего ' +
     'документа в цепочке (см. выше описание поля "На документ / На приказ/запрещение")';
   tableData.push(

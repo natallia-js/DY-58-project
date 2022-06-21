@@ -13,6 +13,7 @@
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
     :placeholder="element.ref"
+    @keydown="this.style.width = ((this.value.length + 1) * 8) + 'px';"
   />
 
   <!-- Элемент "Текстовая область" -->
@@ -28,7 +29,7 @@
     :placeholder="element.ref"
   />
 
-  <!-- Элемент "Выпадающий список" -->
+  <!-- Элемент "Нередактируемый список одиночного выбора" -->
 
   <div v-else-if="element.type === OrderPatternElementType.SELECT" v-tooltip="element.ref">
     <Dropdown
@@ -43,6 +44,28 @@
     />
   </div>
 
+  <!-- Элемент "Редактируемый список множественного выбора" -->
+
+  <div v-else-if="element.type === OrderPatternElementType.MULTIPLE_SELECT" v-tooltip="element.ref">
+    <MultiSelect
+      :style="{ width: getElementSizesCorrespondence[element.size] }"
+      :options="state.multipleValuesForSelection"
+      optionLabel="label"
+      optionValue="value"
+      dataKey="value"
+      v-model="state.elementModelValue"
+      v-tooltip="element.ref"
+      :placeholder="element.ref"
+    >
+      <template #header>
+        <div class="p-d-flex p-jc-between dy58-multiselect-header">
+          <InputText type="text" v-model="state.newMultipleValue" class="p-mr-2" />
+          <Button type="button" @click="addNewMultipleValue" icon="pi pi-plus" class="p-button-rounded p-button-secondary" />
+        </div>
+      </template>
+    </MultiSelect>
+  </div>
+
   <!-- Элемент "Дата" -->
 
   <Calendar
@@ -53,6 +76,7 @@
     :manualInput="true"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
+    class="dy58-datetime-element"
   >
     <template #footer>
       <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
@@ -61,7 +85,7 @@
     </template>
   </Calendar>
 
-  <!-- Элемент "Таблица "Время" -->
+  <!-- Элемент "Время" -->
 
   <Calendar
     v-else-if="element.type === OrderPatternElementType.TIME"
@@ -73,6 +97,7 @@
     :placeholder="element.ref || 'время'"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
+    class="dy58-datetime-element"
   >
     <template #footer>
       <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
@@ -80,6 +105,16 @@
       </Button>
     </template>
   </Calendar>
+
+  <!-- Элемент "Время / до уведомления" -->
+
+  <TimeOrTillNoticeComponent
+    v-else-if="element.type === OrderPatternElementType.TIMETIME_OR_TILL_NOTICE"
+    :placeholder="element.ref || 'время'"
+    v-tooltip="element.ref"
+    :value="state.elementModelValue"
+    @input="state.elementModelValue = $event"
+  />
 
   <!-- Элемент "Дата-время" -->
 
@@ -92,6 +127,7 @@
     :manualInput="true"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
+    class="dy58-datetime-element"
   >
     <template #footer>
       <Button @click="state.elementModelValue = new Date()" class="p-mb-2 p-ml-2">
@@ -105,6 +141,7 @@
   <div
     v-else-if="element.type === OrderPatternElementType.DR_TRAIN_TABLE"
     class="dy58-dy-train-table-block"
+    style="width:100%"
   >
     <Toast />
     <ConfirmPopup group="confirmDelAllTableRecords"></ConfirmPopup>
@@ -200,6 +237,7 @@
         dataKey="St_ID"
         :filter="true"
         placeholder="Выберите станции из списка"
+        scrollHeight="400px"
       >
         <template #option="slotProps">
           <div style="overflow:auto">
@@ -304,7 +342,7 @@
 
 
 <script>
-  import { watch, computed, reactive, ref } from 'vue';
+  import { watch, computed, onMounted, reactive, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useConfirm } from 'primevue/useconfirm';
   import { required } from '@vuelidate/validators';
@@ -324,6 +362,8 @@
   import showMessage from '@/hooks/showMessage.hook';
   import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
   import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
+  import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
+  //import { CLEAR_DATA_FOR_DR_ORDER_GOT_FROM_CLIPBOARD } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-order-pattern-element-view',
@@ -337,6 +377,14 @@
         type: Array,
         required: false,
       },
+      selectMultipleValues: {
+        type: Array,
+        required: false,
+      },
+    },
+
+    components: {
+      TimeOrTillNoticeComponent,
     },
 
     emits: ['input'],
@@ -371,6 +419,8 @@
             default:
               return props.element.value;
           }
+        } else if (props.element.type === OrderPatternElementType.MULTIPLE_SELECT) {
+          return props.element.value || [];
         } else if (props.element.type === OrderPatternElementType.DATETIME) {
           switch (props.element.ref) {
             // Дата-время сдачи дежурства одним человеком = дата-время принятия дежурства другим человеком
@@ -402,7 +452,22 @@
 
       const state = reactive({
         elementModelValue: getDefaultElementModelValue(),
+        multipleValuesForSelection: props.selectMultipleValues || [],
+        newMultipleValue: null,
       });
+
+      const addNewMultipleValue = () => {
+        if (state.newMultipleValue && !state.multipleValuesForSelection.find((el) => el.value === state.newMultipleValue)) {
+          state.multipleValuesForSelection.push({
+            label: state.newMultipleValue,
+            value: state.newMultipleValue,
+          });
+          if (!state.elementModelValue)
+            state.elementModelValue = [{ 0: state.newMultipleValue }];
+          else
+            state.elementModelValue[Object.keys(state.elementModelValue).length] = state.newMultipleValue;
+        }
+      };
 
       // для отслеживания изменения значения поля value объекта element в родительском компоненте
       // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
@@ -568,46 +633,76 @@
         });
       };
 */
+
+      function fillDRTrainTableWithClipboardData(obj) {
+        const trainTimeTable = [];
+        let nonExistingStationItemId = -1;
+        for (let el of obj) {
+          // Определяем объект станции по коду станции, считанному из буфера обмена
+          const stationObject = store.getters.getSectorStationByESRCode(el.Station);
+          // Если объект станции известен, то отображаем наименование станции, в противном случае
+          // отобразим считанный из буфера обмена код станции
+          const dispStationNameCode = (stationObject && stationObject.St_Title)
+            ? `${stationObject.St_Title}`
+            : el.Station;
+
+          if (!trainTimeTable.length || trainTimeTable[trainTimeTable.length - 1].station !== dispStationNameCode) {
+            trainTimeTable.push({
+              stationId: stationObject ? stationObject.St_ID : nonExistingStationItemId,
+              station: dispStationNameCode,
+              departureTime:
+                String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
+                ? getLocaleTimeString(new Date(el.Time)) : null,
+              arrivalTime:
+                String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
+                ? getLocaleTimeString(new Date(el.Time)) : null,
+            });
+            if (!stationObject) {
+              nonExistingStationItemId += -1;
+            }
+          } else {
+            //
+            if (String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
+              trainTimeTable[trainTimeTable.length - 1].departureTime = getLocaleTimeString(new Date(el.Time));
+            } else if (String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
+              trainTimeTable[trainTimeTable.length - 1].arrivalTime = getLocaleTimeString(new Date(el.Time));
+            }
+          }
+        }
+        //if (!state.elementModelValue) {
+        //  state.elementModelValue = [];
+        //}
+        //state.elementModelValue.push(...trainTimeTable);
+
+        // Новые данные для таблицы ДР удаляют из нее всю имеющуюся информацию!
+        state.elementModelValue = trainTimeTable;
+        //emitDRTable();
+      }
+
+      onMounted(() => {
+        if (props.element.type === OrderPatternElementType.DR_TRAIN_TABLE) {
+          const clipboardDRData = store.getters.getDataForDROrderFromClipboard;
+          if (clipboardDRData) {
+            fillDRTrainTableWithClipboardData(clipboardDRData);
+          }
+        }
+      });
+
+      watch(() => store.getters.getDataForDROrderFromClipboard, (newData) => {
+        if (newData && props.element.type === OrderPatternElementType.DR_TRAIN_TABLE) {
+          fillDRTrainTableWithClipboardData(newData);
+        }
+      });
+
       const pasteDRTrainTable = () => {
         navigator.clipboard.readText()
           .then((text) => {
             const obj = JSON.parse(text);
-            if (obj instanceof Array) {
-              const trainTimeTable = [];
-              for (let el of obj) {
-                //
-                const stationObject = store.getters.getSectorStationByESRCode(el.Station);
-                //
-                const dispStationNameCode = (stationObject && stationObject.St_Title)
-                  ? `${stationObject.St_Title}`
-                  : el.Station;
-
-                if (!trainTimeTable.length || trainTimeTable[trainTimeTable.length - 1].station !== dispStationNameCode) {
-                  //
-                  trainTimeTable.push({
-                    stationId: stationObject ? stationObject.St_ID : null,
-                    station: dispStationNameCode,
-                    departureTime:
-                      String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
-                      ? getLocaleTimeString(new Date(el.Time)) : null,
-                    arrivalTime:
-                      String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)
-                      ? getLocaleTimeString(new Date(el.Time)) : null,
-                  });
-                } else {
-                  //
-                  if (String(el.EvType) === String(GID_EVENT_TYPE.DEPARURE) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
-                    trainTimeTable[trainTimeTable.length - 1].departureTime = getLocaleTimeString(new Date(el.Time));
-                  } else if (String(el.EvType) === String(GID_EVENT_TYPE.ARRIVAL) || String(el.EvType) === String(GID_EVENT_TYPE.FOLLOWING)) {
-                    trainTimeTable[trainTimeTable.length - 1].arrivalTime = getLocaleTimeString(new Date(el.Time));
-                  }
-                }
-              }
-              if (!state.elementModelValue) {
-                state.elementModelValue = [];
-              }
-              state.elementModelValue.push(...trainTimeTable);
-              //emitDRTable();
+            if (
+              obj instanceof Array && obj.length > 0 &&
+              obj[0] instanceof Object && obj[0].Station
+            ) {
+              fillDRTrainTableWithClipboardData(obj);
             }
           })
           .catch((err) => {
@@ -693,7 +788,12 @@
           arrivalTime: drTableRec.value.arrivalTime,
           departureTime: drTableRec.value.departureTime,
         };
-        state.elementModelValue.splice(insertNewDRRecPos.value, 0, newElement);
+        // Делаю так для того чтобы была реакция на изменение значения
+        state.elementModelValue = [
+          ...state.elementModelValue.slice(0, insertNewDRRecPos.value),
+          newElement,
+          ...state.elementModelValue.slice(insertNewDRRecPos.value),
+        ];
         //emitDRTable();
 
         drTableRec.value = {};
@@ -755,6 +855,7 @@
             station: station.St_Title,
           });
         });
+        addDRTableStationsDialog.value = false;
         //emitDRTable();
       };
 
@@ -827,6 +928,7 @@
         v$,
         orderedStations,
         selectedStations,
+        addNewMultipleValue,
         addDRTableRecDlgTitle,
         drTableRec,
         addDRTableStationsDialog,
@@ -867,5 +969,9 @@
 <style lang="scss" scoped>
   .p-inputmask {
     width: 100%;
+  }
+  .dy58-multiselect-header {
+    background-color: var(--surface-b);
+    padding: 0.5rem 0.5rem 0 0.5rem;
   }
 </style>

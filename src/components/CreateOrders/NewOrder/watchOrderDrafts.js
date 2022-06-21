@@ -2,10 +2,7 @@ import { watch } from 'vue';
 
 
 export const useWatchOrderDrafts = (inputVals) => {
-  const {
-    state, store, props, emit, currentOrderDraft,
-    applySelectedOrderDraft, applySelectedOrderDraftPersonal,
-  } = inputVals;
+  const { state, store, props, emit, currentOrderDraft, applySelectedOrderDraft } = inputVals;
 
   watch(() => props.orderDraftId, () => {
     state.currentOrderDraftId = props.orderDraftId;
@@ -31,11 +28,5 @@ export const useWatchOrderDrafts = (inputVals) => {
     const tmp = state.currentOrderDraftId;
     state.currentOrderDraftId = null;
     state.currentOrderDraftId = tmp;
-  });
-
-  // В случае когда данные о персонале меняются позже чем доступна информация о черновике распоряжения
-  // (в частности, при перезагрузке страницы)
-  watch(() => store.getters.getSectorPersonal, () => {
-    applySelectedOrderDraftPersonal();
   });
 };

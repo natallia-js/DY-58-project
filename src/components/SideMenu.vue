@@ -141,6 +141,7 @@
           name: 'NewOrderPage',
           params: {
             orderType: orderType,
+            orderPatternId: null,
             orderPatternSpecialSign: null,
             prevOrderId: null,
             orderDraftId,

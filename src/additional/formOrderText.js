@@ -15,15 +15,30 @@ import {
 import { upperCaseFirst } from '@/additional/stringFunctions';
 
 
+/**
+ * Строковое значение элемента шаблона созданного ранее распоряжения
+ * (а оно именно в виде строки и хранится в БД)
+ * преобразует в нужный тип данных (в зависимости от типа элемента шаблона) и возвращает его.
+ */
 export function getOrderTextElementTypedValue(element) {
   if (!element) {
-    return;
+    return '';
   }
   switch (element.type) {
     case OrderPatternElementType.DATE:
     case OrderPatternElementType.TIME:
     case OrderPatternElementType.DATETIME:
       return element.value ? new Date(element.value) : '';
+    case OrderPatternElementType.TIMETIME_OR_TILL_NOTICE:
+      if (!element.value)
+        return '';
+      // строка element.value может быть как с булевым значением, так и со
+      // значением даты-времени
+      if (['true','false'].includes(element.value))
+        return element.value === 'true' ? true : false;
+      return new Date(element.value);
+    case OrderPatternElementType.MULTIPLE_SELECT:
+      return (JSON.parse(element.value) || []).join(', ');
     case OrderPatternElementType.DR_TRAIN_TABLE:
     case OrderPatternElementType_Future.OBJECT:
     case OrderPatternElementType_Future.OBJECTS_LIST:
@@ -40,16 +55,15 @@ export function getOrderTextElementTypedValue(element) {
 // Если распоряжение не из БД, а только создается, то значение входного параметра
 // может быть одним из заданного множества возможных значений.
 export const sendOriginal = (dataToCheck) => {
-  if (typeof dataToCheck === 'boolean') {
-    return dataToCheck;
-  }
-  if (dataToCheck === CurrShiftGetOrderStatus.sendOriginal) {
-    return true;
-  }
-  return false;
+  return (typeof dataToCheck === 'boolean')
+    ? dataToCheck
+    : (dataToCheck === CurrShiftGetOrderStatus.sendOriginal);
 };
 
 
+/**
+ * Позволяет сформировать подстроки, которые войдут в строку "Кому".
+ */
 const toSubstring = (array, substringFunction, separateRows = false) => {
   if (array.length) {
     const divider = separateRows ? ',<br/>' : ', ';
@@ -99,13 +113,22 @@ export function formOrderText(props) {
       case OrderPatternElementType.INPUT:
       case OrderPatternElementType.TEXT_AREA:
       case OrderPatternElementType.SELECT:
-        substring = currVal.value ? currVal.value : '';
+      case OrderPatternElementType.MULTIPLE_SELECT:
+        substring = currVal.value || '';
         break;
       case OrderPatternElementType.DATE:
         substring = getLocaleDateString(currVal.value);
         break;
       case OrderPatternElementType.TIME:
         substring = getLocaleTimeString(currVal.value);
+        break;
+      case OrderPatternElementType.TIMETIME_OR_TILL_NOTICE:
+        if (!currVal.value)
+          substring = '';
+        else if (currVal.value instanceof Date)
+          substring = getLocaleTimeString(currVal.value);
+        else
+          substring = 'уведомления';
         break;
       case OrderPatternElementType.DATETIME:
         substring = getLocaleDateTimeString(currVal.value, false);

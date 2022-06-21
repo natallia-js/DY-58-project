@@ -20,6 +20,7 @@
         <order-pattern-element-view
           :element="patternElement"
           :dropdownValues="getElementDropdownValues(patternElement.type, patternElement.ref)"
+          :selectMultipleValues="getElementMultipleSelectValues(patternElement.type, patternElement.ref)"
           @input="handleChangeElementValue"
         />
       </div>
@@ -42,9 +43,15 @@
     FILLED_ORDER_DATE_ELEMENTS,
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
+    FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
     SWITCH_OFF_ON_ITEMS,
     EXACT_PLACE_ITEMS,
     ACTIONS_ORDER_ITEMS,
+    WORK_CATEGORIES_ITEMS,
+    WHAT_SHOULD_BE_DONE_FOR_WORK_ITEMS,
+    WORK_IF_THERE_ARE_ITEMS,
+    WORKS_OBJECT_ITEMS,
+    WORK_DONE_FROM_ITEMS,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -193,6 +200,21 @@
                 label: item,
                 value: item,
               }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.WORK_CATEGORIES:
+              return WORK_CATEGORIES_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.WHAT_SHOULD_BE_DONE_FOR_WORK:
+              return WHAT_SHOULD_BE_DONE_FOR_WORK_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.WORK_IF_THERE_ARE:
+              return WORK_IF_THERE_ARE_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
               if (this.isDNC)
@@ -218,6 +240,38 @@
                       : this.getSelectedOkno.dopPerf.map((p) => `${p.post} ${p.fio}`)
                     )
                   )].map((personString) => ({ label: personString, value: personString }));
+            default:
+              return [];
+          }
+        };
+      },
+
+      getElementMultipleSelectValues() {
+        return (elementType, elementRef) => {
+          if (elementType !== OrderPatternElementType.MULTIPLE_SELECT) {
+            return null;
+          }
+          switch (elementRef) {
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION:
+              return this.getSectorStations.map((station) => ({
+                label: station.St_Title,
+                value: station.St_Title,
+              })).sort();
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK:
+              return this.getSectorBlocks.map((block) => ({
+                label: block.Bl_Title,
+                value: block.Bl_Title,
+              })).sort();
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORKS_OBJECT:
+              return WORKS_OBJECT_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORK_DONE_FROM:
+              return WORK_DONE_FROM_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
             default:
               return [];
           }

@@ -1414,10 +1414,15 @@
 .p-selectbutton .p-button:not(.p-disabled):not(.p-highlight):hover .p-button-icon-right {
   color: #ffffff;
 }
+.p-buttonset .p-button:not(:last-child) {
+  border-right: 1px solid #a9aeb3;
+}
 .p-selectbutton .p-button.p-highlight {
   background: var(--surface-b);
-  border-color: var(--surface-500);
-  color: #000; /* #ffffff; */
+  border-right: 1px solid;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 600;
 }
 .p-selectbutton .p-button.p-highlight .p-button-icon-left,
 .p-selectbutton .p-button.p-highlight .p-button-icon-right {
@@ -1426,7 +1431,7 @@
 .p-selectbutton .p-button.p-highlight:hover {
   background: var(--surface-400);
   border-color: var(--surface-500);
-  color: #000; /* #ffffff; */
+  color: var(--primary-color);
 }
 .p-selectbutton .p-button.p-highlight:hover .p-button-icon-left,
 .p-selectbutton .p-button.p-highlight:hover .p-button-icon-right {

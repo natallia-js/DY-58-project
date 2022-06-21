@@ -20,12 +20,23 @@
     v-else-if="element.type === getOrderPatternElementTypes.SELECT"
     :style="{width:getElementSizesCorrespondence[element.size]}"
   />
+  <MultiSelect
+    v-else-if="element.type === getOrderPatternElementTypes.MULTIPLE_SELECT"
+    :style="{width: getElementSizesCorrespondence[element.size]}"
+  />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATE"
     :showIcon="true"
     placeholder="дата"
     :manualInput="false"
-  />
+    class="dy58-datetime-element"
+  >
+    <template #footer>
+      <Button class="p-mb-2 p-ml-2">
+        Текущая дата
+      </Button>
+    </template>
+  </Calendar>
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.TIME"
     :showTime="true"
@@ -33,6 +44,17 @@
     :showIcon="true"
     placeholder="время"
     :manualInput="false"
+    class="dy58-datetime-element"
+  >
+    <template #footer>
+      <Button class="p-mb-2 p-ml-2">
+        Текущее время
+      </Button>
+    </template>
+  </Calendar>
+  <TimeOrTillNoticeComponent
+    v-else-if="element.type === getOrderPatternElementTypes.TIMETIME_OR_TILL_NOTICE"
+    :placeholder="'время'"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
@@ -40,7 +62,14 @@
     :showIcon="true"
     placeholder="дата-время"
     :manualInput="false"
-  />
+    class="dy58-datetime-element"
+  >
+    <template #footer>
+      <Button class="p-mb-2 p-ml-2">
+        Текущее время
+      </Button>
+    </template>
+  </Calendar>
   <DataTable
     v-else-if="element.type === getOrderPatternElementTypes.DR_TRAIN_TABLE"
     :value="[]"
@@ -70,6 +99,7 @@
     DRTrainTableColumns,
   } from '@/constants/orderPatterns';
   import AllowClearInputText from '@/components/AllowClearInputText';
+  import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
 
   export default {
     name: 'dy58-selected-pattern-element-view',
@@ -88,6 +118,7 @@
 
     components: {
       AllowClearInputText,
+      TimeOrTillNoticeComponent,
     },
 
     watch: {

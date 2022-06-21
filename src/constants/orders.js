@@ -85,6 +85,16 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   ACTIONS_ORDER: 'Порядок действий',
   PASS_DUTY: 'Дежурство сдал',
   TAKE_DUTY: 'Дежурство принял',
+  WHAT_SHOULD_BE_DONE_FOR_WORK: 'Для работы должно быть',
+  WORK_CATEGORIES: 'Категория работ',
+  WORK_IF_THERE_ARE: 'Работать при наличии',
+});
+
+export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
+  WORKS_OBJECT: 'Объект работ',
+  WORK_DONE_FROM: 'С чего производится работа',
+  STATION: 'Станция',
+  BLOCK: 'Перегон',
 });
 
 export const SWITCH_OFF_ON_ITEMS = [
@@ -97,6 +107,26 @@ export const EXACT_PLACE_ITEMS = [
 
 export const ACTIONS_ORDER_ITEMS = [
   'вручную', 'дистанционно', 'закрыть привод на замок', 'вывесить запрещающие плакаты',
+];
+
+export const WORK_CATEGORIES_ITEMS = [
+  'со снятием напряжения', 'под напряжением', 'вблизи частей, находящихся под напряжением', 'вдали от частей, находящихся под напряжением',
+];
+
+export const WHAT_SHOULD_BE_DONE_FOR_WORK_ITEMS = [
+  'отключено', 'включено', 'выведено',
+];
+
+export const WORK_IF_THERE_ARE_ITEMS = [
+  'переносных заземлений', 'двух шунтирующих штанг',
+];
+
+export const WORKS_OBJECT_ITEMS = [
+  'контактной сети', 'ВЛ ДПР', 'ВЛ АБ', 'Волноводе', 'ВЛ освещения', 'КЛ освещения',
+];
+
+export const WORK_DONE_FROM_ITEMS = [
+  'АДМ', 'лестница', 'лейтер', 'без подъема на высоту', 'лазов', 'вышки МШТС',
 ];
 
 export const GID_EVENT_TYPE = Object.freeze({

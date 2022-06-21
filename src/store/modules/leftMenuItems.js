@@ -1,5 +1,4 @@
 import { store } from '@/store';
-import router from '@/router';
 import {
   SHOW_APP_SETTINGS,
   SHOW_ORDER_DRAFTS,
@@ -8,7 +7,6 @@ import {
 } from '@/store/mutation-types';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import {
-  ORDER_PATTERN_TYPES,
   SPECIAL_CIRCULAR_ORDER_SIGN,
   SPECIAL_DR_ORDER_SIGN,
   SPECIAL_VM_ORDER_SIGN,
@@ -17,32 +15,7 @@ import {
   SPECIAL_PD_ORDER_SIGN,
   SPECIAL_PVPD_ORDER_SIGN,
 } from '@/constants/orderPatterns';
-
-
-const createOrderOfGivenType = (orderSign) => {
-  router.push({
-    name: 'NewOrderPage',
-    params: {
-      orderType: ORDER_PATTERN_TYPES.ORDER,
-      orderPatternSpecialSign: orderSign,
-      prevOrderId: null,
-      orderDraftId: null,
-    },
-  });
-};
-
-
-const createECDOrderOfGivenType = (orderSign) => {
-  router.push({
-    name: 'NewOrderPage',
-    params: {
-      orderType: ORDER_PATTERN_TYPES.ECD_ORDER,
-      orderPatternSpecialSign: orderSign,
-      prevOrderId: null,
-      orderDraftId: null,
-    },
-  });
-};
+import { createOrderOfGivenType, createECDOrderOfGivenType } from '@/additional/createOrderOfGivenType';
 
 
 export const leftMenuItems = {

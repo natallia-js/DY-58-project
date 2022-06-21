@@ -3,17 +3,24 @@ import { store } from '@/store';
 import { APP_CODE_NAME } from '@/constants/appCredentials';
 import { LOGOUT_ACTION } from '@/store/action-types';
 
-export async function makeServerRequest({ url, method, params }) {
+export async function makeServerRequest({ url, method, params = null, upload = false }) {
   let response;
   try {
+    const requestParams = { withCredentials: true };
+    // Для случая, когда необходимо закачать файл с сервера
+    if (upload)
+      requestParams.responseType = 'blob';
+
     if (method === 'POST') {
       const sendParams = !params
         ? { applicationAbbreviation: APP_CODE_NAME }
         : { ...params, applicationAbbreviation: APP_CODE_NAME };
-      response = await axios.post(url, sendParams, { withCredentials: true });
+      response = await axios.post(url, sendParams, requestParams);
+
     } else if (method === 'GET') {
-      response = await axios.get(url, { withCredentials: true });
+      response = await axios.get(url, requestParams);
     }
+
     return response;
   } catch (error) {
     // Если сервер на запрос пользователя выдает ошибку с кодом 410, то ДУ-58 должен

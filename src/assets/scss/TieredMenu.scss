@@ -1,0 +1,17 @@
+@mixin dy58-tiered-menu-item-common-styles {
+  color: blue;
+  cursor: pointer;
+  &:hover {
+    background-color: var(--surface-c);
+  }
+}
+
+.dy58-tiered-menu-item {
+  @include dy58-tiered-menu-item-common-styles();
+  margin: 0 1rem;
+}
+
+.dy58-tiered-menu-subitem {
+  @include dy58-tiered-menu-item-common-styles();
+  margin: 0 2rem;
+}

@@ -9,14 +9,8 @@ import {
 } from '@/additional/formOrderText';
 import { SPECIAL_TELECONTROL_ORDER_SIGN } from '@/constants/orderPatterns';
 import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import orderDispatchedOnThisWorkPoligon from '@/additional/orderDispatchedOnThisWorkPoligon';
 
-
-const orderDispatchedOnThisWorkPoligon = (order) => {
-  const userWorkPoligon = store.getters.getUserWorkPoligon;
-  return order && order.workPoligon && userWorkPoligon &&
-    order.workPoligon.type === userWorkPoligon.type &&
-    String(order.workPoligon.id) === String(userWorkPoligon.code);
-};
 
 /**
  * Позволяет сформировать массив данных для отображения в журнале ЭЦД.
@@ -80,23 +74,29 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         orderSender += `<br/>${order.connectedOrder.creator.post} ${order.connectedOrder.creator.fio}`;
       }
 
+      const orderWasCreatedOnThisWorkPoligon = orderDispatchedOnThisWorkPoligon(order);
+
       return {
         // dataKey в таблице
         id: order._id,
         type: order.type,
         seqNum: getOrderSeqNumberFunction(index),
         // кому адресовано распоряжение (соответствующие строки "Кому" и "Копия")
-        toWhom: toWhomString, //formToWhomString(order),
+        toWhom: toWhomString,
         // дата-время утверждения распоряжения
         assertDateTime: order.assertDateTime ? getLocaleDateTimeString(new Date(order.assertDateTime), false) : '',
         number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
         orderContent: `${getExtendedOrderTitle(order)}<br/>${orderTextData.text}`,
         orderAcceptor: formAcceptorsStrings({
-          dncToSend: order.dncToSend,
-          dspToSend: order.dspToSend,
-          ecdToSend: order.ecdToSend,
-          otherToSend: order.otherToSend,
-          stationWorkPlacesToSend: order.stationWorkPlacesToSend,
+          // ЭЦД в случае ВХОДЯЩЕГО документа нужна информация только по тому лицу в рамках своего участка ЭЦД,
+          // который подтвердил этот документ
+          dncToSend: orderWasCreatedOnThisWorkPoligon ? order.dncToSend : [],
+          dspToSend: orderWasCreatedOnThisWorkPoligon ? order.dspToSend : [],
+          ecdToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.ecdToSend
+            : order.ecdToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code),
+          otherToSend: orderWasCreatedOnThisWorkPoligon ? order.otherToSend : [],
+          stationWorkPlacesToSend: orderWasCreatedOnThisWorkPoligon ? order.stationWorkPlacesToSend : [],
           // для ряда приказов ЭЦД указывается особая отметка ТУ (для приказов, формируемых на
           // отключение/включение коммутационного аппарата по телеуправлению); эту отметку необходимо
           // отобразить в журнале в графе "Кто принял"

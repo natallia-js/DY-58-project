@@ -1,4 +1,5 @@
 export const APP_CODE_NAME = 'DY-58';
+export const DY58_CREDENTIALS_GROUP_NAME = 'DY-58';
 
 export const APP_CREDENTIALS = Object.freeze({
   DNC_FULL: 'DNC_FULL',
@@ -10,8 +11,8 @@ export const APP_CREDENTIALS = Object.freeze({
 
 export const APP_CREDENTIALS_TRANSLATIONS = Object.freeze({
   [APP_CREDENTIALS.DNC_FULL]: 'ДНЦ',
-  [APP_CREDENTIALS.DSP_FULL]: 'ДСП',
-  [APP_CREDENTIALS.DSP_Operator]: 'Оператор ДСП',
+  [APP_CREDENTIALS.DSP_FULL]: 'Ответственный на станции за ДУ-58',
+  [APP_CREDENTIALS.DSP_Operator]: 'Дополнительный пользователь на станции',
   [APP_CREDENTIALS.ECD_FULL]: 'ЭЦД',
   [APP_CREDENTIALS.REVISOR]: 'Ревизор',
 });

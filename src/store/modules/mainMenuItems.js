@@ -27,6 +27,7 @@ export const mainMenuItems = {
           name: 'NewOrderPage',
           params: {
             orderType: null,
+            orderPatternId: null,
             orderPatternSpecialSign: null,
             prevOrderId: null,
             orderDraftId: null,

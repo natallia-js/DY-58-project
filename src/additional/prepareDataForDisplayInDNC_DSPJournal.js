@@ -9,14 +9,8 @@ import {
 } from '@/additional/formOrderText';
 import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+import orderDispatchedOnThisWorkPoligon from '@/additional/orderDispatchedOnThisWorkPoligon';
 
-
-const orderDispatchedOnThisWorkPoligon = (order) => {
-  const userWorkPoligon = store.getters.getUserWorkPoligon;
-  return order && order.workPoligon && userWorkPoligon &&
-    order.workPoligon.type === userWorkPoligon.type &&
-    String(order.workPoligon.id) === String(userWorkPoligon.code);
-};
 
 /**
  * Позволяет сформировать массив данных для отображения в журнале ДНЦ/ДСП.
@@ -73,51 +67,63 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           })
       },
     }))
-    .map((order, index) => ({
-      // dataKey в таблице
-      id: order._id,
-      type: order.type,
-      seqNum: getOrderSeqNumberFunction(index),
-      // дата-время создания и утверждения распоряжения
-      assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
-        order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
-      number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
-      orderContent: getExtendedOrderTitle(order) + '<br/>' +
-        formOrderText({
-          orderTextArray: order.orderText.orderText,
-          dncToSend: order.dncToSend,
-          dspToSend: order.dspToSend,
-          ecdToSend: order.ecdToSend,
-          otherToSend: order.otherToSend,
-          insertEmptyLineBeforeText: true,
-        }) + '<br/>Передал: ' +
-        `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
-      orderAcceptor: formAcceptorsStrings({
-        // ДСП нужна информация только по своей станции
-        dncToSend: isDSP_or_DSPoperator ? [] : order.dncToSend,
-        dspToSend: isDSP_or_DSPoperator ? [] : order.dspToSend,
-        ecdToSend: isDSP_or_DSPoperator ? [] : order.ecdToSend,
-        otherToSend: isDSP_or_DSPoperator ? [] : order.otherToSend,
-        stationWorkPlacesToSend: order.stationWorkPlacesToSend,
-      }),
-      // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
-      // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,
-      // необходимо сделать дополнительные проверки (это распоряжение должно быть адресовано данному
-      // рабочему полигону, оттуда и берем признак "оригинал"/"копия")
-      sendOriginal: Boolean(
-        orderDispatchedOnThisWorkPoligon(order) ||
-        (
-          userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.STATION && order.dspToSend &&
-          order.dspToSend.find((el) =>
-            String(el.id) === String(userWorkPoligon.code) &&
-            sendOriginal(el.sendOriginal))
-        ) ||
-        (
-          userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR && order.dncToSend &&
-          order.dncToSend.find((el) =>
-            String(el.id) === String(userWorkPoligon.code) &&
-            sendOriginal(el.sendOriginal))
-        )
-      ),
-    }));
+    .map((order, index) => {
+      const orderWasCreatedOnThisWorkPoligon = orderDispatchedOnThisWorkPoligon(order);
+
+      return {
+        // dataKey в таблице
+        id: order._id,
+        type: order.type,
+        seqNum: getOrderSeqNumberFunction(index),
+        // дата-время создания и утверждения распоряжения
+        assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
+          order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
+        number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
+        orderContent: getExtendedOrderTitle(order) + '<br/>' +
+          formOrderText({
+            orderTextArray: order.orderText.orderText,
+            dncToSend: order.dncToSend,
+            dspToSend: order.dspToSend,
+            ecdToSend: order.ecdToSend,
+            otherToSend: order.otherToSend,
+            insertEmptyLineBeforeText: true,
+          }) + '<br/>Передал: ' +
+          `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
+        orderAcceptor: formAcceptorsStrings({
+          // ДСП нужна информация только по своей станции,
+          // ДНЦ в случае ВХОДЯЩЕГО документа нужна информация только по тому лицу в рамках своего участка ДНЦ,
+          // который подтвердил этот документ
+          dncToSend: isDSP_or_DSPoperator
+            ? []
+            : (
+                orderWasCreatedOnThisWorkPoligon
+                  ? order.dncToSend
+                  : order.dncToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
+              ),
+          dspToSend: (isDSP_or_DSPoperator || !orderWasCreatedOnThisWorkPoligon) ? [] : order.dspToSend,
+          ecdToSend: (isDSP_or_DSPoperator || !orderWasCreatedOnThisWorkPoligon) ? [] : order.ecdToSend,
+          otherToSend: (isDSP_or_DSPoperator || !orderWasCreatedOnThisWorkPoligon) ? [] : order.otherToSend,
+          stationWorkPlacesToSend: (isDSP_or_DSPoperator || orderWasCreatedOnThisWorkPoligon) ? order.stationWorkPlacesToSend : [],
+        }),
+        // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
+        // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,
+        // необходимо сделать дополнительные проверки (это распоряжение должно быть адресовано данному
+        // рабочему полигону, оттуда и берем признак "оригинал"/"копия")
+        sendOriginal: Boolean(
+          orderWasCreatedOnThisWorkPoligon ||
+          (
+            userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.STATION && order.dspToSend &&
+            order.dspToSend.find((el) =>
+              String(el.id) === String(userWorkPoligon.code) &&
+              sendOriginal(el.sendOriginal))
+          ) ||
+          (
+            userWorkPoligon && userWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR && order.dncToSend &&
+            order.dncToSend.find((el) =>
+              String(el.id) === String(userWorkPoligon.code) &&
+              sendOriginal(el.sendOriginal))
+          )
+        ),
+      };
+    });
 }

@@ -21,7 +21,8 @@
           'dy58-not-edited-order-pattern-element-block': patternElement._id !== editedPatternElementId,
           'dy58-edited-order-pattern-element-block': patternElement._id === editedPatternElementId,
         }"
-        :style="{width: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? 'auto' : '100%'}"
+        :style="{width: [getOrderPatternElementTypes.TEXT_AREA, getOrderPatternElementTypes.DR_TRAIN_TABLE].includes(patternElement.type) ?
+            '100%' : 'auto'}"
         @contextmenu="onShowOrderPatternElementContextMenu($event, patternElement)"
       >
         <order-pattern-element-view :element="patternElement" />
@@ -100,7 +101,7 @@
           {
             label: !this.orderPatternElementWithOpenContextMenu ||
                    this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId ?
-                   'Редактировать' : 'Отменить редактирование',
+                   'Редактировать' : 'Завершить редактирование',
             command: () => {
               if (this.orderPatternElementWithOpenContextMenu._id !== this.editedPatternElementId) {
                 this.editedPatternElementId = this.orderPatternElementWithOpenContextMenu._id;

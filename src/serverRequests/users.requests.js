@@ -1,5 +1,5 @@
 import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
-import { APP_CODE_NAME, APP_CREDENTIALS } from '@/constants/appCredentials';
+import { DY58_CREDENTIALS_GROUP_NAME, APP_CREDENTIALS } from '@/constants/appCredentials';
 import { makeServerRequest } from './common';
 
 export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) => {
@@ -9,7 +9,7 @@ export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) 
     params: {
       sectorIds,
       onlyOnline,
-      apps: [{ app: APP_CODE_NAME, creds: [APP_CREDENTIALS.DNC_FULL] }],
+      credsGroups: [{ credsGroup: DY58_CREDENTIALS_GROUP_NAME, creds: [APP_CREDENTIALS.DNC_FULL] }],
     },
   });
   return response.data;
@@ -22,7 +22,7 @@ export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline, inc
     params: {
       stationIds,
       onlyOnline,
-      apps: [{ app: APP_CODE_NAME, creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator] }],
+      credsGroups: [{ credsGroup: DY58_CREDENTIALS_GROUP_NAME, creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator] }],
       includeWorkPlaces,
     },
   });
@@ -36,7 +36,7 @@ export const getECDSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) 
     params: {
       sectorIds,
       onlyOnline,
-      apps: [{ app: APP_CODE_NAME, creds: [APP_CREDENTIALS.ECD_FULL] }],
+      credsGroups: [{ credsGroup: DY58_CREDENTIALS_GROUP_NAME, creds: [APP_CREDENTIALS.ECD_FULL] }],
     },
   });
   return response.data;

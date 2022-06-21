@@ -50,6 +50,7 @@ export const contextMenus = {
         if (!order) {
           return items;
         }
+        const childPatterns = order?.orderText?.patternId ? getters.getOrderPatternChildPatterns(order.orderText.patternId) : null;
 
         const possibleNewOrderTypes = getters.getPossibleNewOrderTypesForBaseOrder(order.type, order.specialTrainCategories);
         if (!possibleNewOrderTypes || !possibleNewOrderTypes.length) {
@@ -59,12 +60,12 @@ export const contextMenus = {
           items.push(
             {
               label: `Создать ${newOrderType.toUpperCase()}`,
-              icon: 'pi pi-file',
               command: () => {
                 router.push({
                   name: 'NewOrderPage',
                   params: {
                     orderType: newOrderType,
+                    orderPatternId: null,
                     orderPatternSpecialSign: null,
                     prevOrderId: orderId,
                     orderDraftId: null,
@@ -73,6 +74,30 @@ export const contextMenus = {
               },
             }
           );
+          if (childPatterns && childPatterns.length) {
+            childPatterns.forEach((childPattern) => {
+              if (childPattern.type === newOrderType) {
+                items.push(
+                  {
+                    label: childPattern.title,
+                    isChild: true,
+                    command: () => {
+                      router.push({
+                        name: 'NewOrderPage',
+                        params: {
+                          orderType: childPattern.type,
+                          orderPatternId: childPattern.id,
+                          orderPatternSpecialSign: null,
+                          prevOrderId: orderId,
+                          orderDraftId: null,
+                        },
+                      });
+                    },
+                  }
+                );
+              }
+            });
+          }
         });
         return items;
       };

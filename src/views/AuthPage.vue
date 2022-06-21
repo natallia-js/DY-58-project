@@ -61,6 +61,20 @@
         <div v-else class="p-col-12">
           <ProgressSpinner />
         </div>
+        <div v-if="!state.loadingUserManualsList" class="p-col-12">
+          <div v-if="state.userManualsListLoadError">
+            {{ userManualsListLoadError }}
+          </div>
+          <div v-else>
+            <div v-for="fileName of state.userManualsList" :key="fileName">
+              <a href="#" @click.prevent="uploadFile(fileName)" class="dy58-load-file-link">{{ fileName }}</a>
+            </div>
+          </div>
+        </div>
+        <div v-else class="p-col-12">
+          Идет загрузка списка руководств...
+        </div>
+        <!--<a href="../static/docs/filename.pdf" target="_blank">Download PDF</a>-->
       </form>
     </div>
   </div>
@@ -80,7 +94,9 @@
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
   import { LOGIN_ACTION } from '@/store/action-types';
   import checkAuthString from '@/additional/checkAuthString';
-
+  import { getUserManualsList, downloadDY58Manual } from '@/serverRequests/userManuals.requests';
+  import getExtensionFromFullFileName from '@/additional/getExtensionFromFullFileName';
+  
   export default {
     name: 'dy58-auth-page',
 
@@ -100,6 +116,9 @@
         submitted: false,
         waitingForServerResponse: false,
         showRegisterNewUserDlg: false,
+        loadingUserManualsList: false,
+        userManualsList: [],
+        userManualsListLoadError: null,
       });
 
       const rules = {
@@ -114,6 +133,15 @@
       };
 
       const v$ = useVuelidate(rules, state, { $scope: false });
+
+      // Загружаем список руководств пользователей ДУ-58
+      state.loadingUserManualsList = true;
+      getUserManualsList()
+        .then((data) => state.userManualsList = data.fileNamesList || [])
+        .catch((error) => {
+          state.userManualsListLoadError = formErrorMessageInCatchBlock(error, 'Ошибка загрузки списка руководств');
+        })
+        .finally(() => state.loadingUserManualsList = false);
 
       // Решает следующую проблему: если у пользователя несколько ролей и полигонов управления, то когда он
       // переходит после успешной авторизации на страницу выбора роли и полигона управления, а потом через
@@ -156,7 +184,7 @@
       /**
        * Обрабатывает запрос на вход в систему.
        */
-      const handleSubmit = async (isFormValid) => { console.log(isFormValid, v$);
+      const handleSubmit = async (isFormValid) => {
         state.submitted = true;
         if (!isFormValid) {
           showErrMessage('Не указаны либо неверно указаны данные для входа в систему');
@@ -213,6 +241,31 @@
         state.showRegisterNewUserDlg = false;
       };
 
+      /**
+       * Хотим подгрузить руководство пользователя в браузере (средствами браузера через папку загрузок).
+       */
+      const uploadFile = (fileName) => {
+        // first, we make a request to the server to get the file response data
+        downloadDY58Manual(fileName)
+          .then((responseData) => {
+            // then, we'll create a link from it (e.i. from response data) and click on it programmatically
+            // to download the file
+            const fileExtension = getExtensionFromFullFileName(fileName);
+            // create a Blob instance with the responseData which has the file contents,
+            // type is set to the MIME type of the file
+            const blob = new Blob([responseData], { type: `application/${fileExtension}` });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            // we call URL.revokeObjectURL to clear the URL resources
+            URL.revokeObjectURL(link.href);
+          })
+          .catch(() => {
+            showErrMessage('Ошибка загрузки руководства. Попробуйте снова');
+          });
+      };
+
       return {
         state,
         v$,
@@ -223,7 +276,20 @@
         handleRegisterUser,
         hideRegisterNewUserDlg,
         getUserFIO: computed(() => store.getters.getUserFIO),
+        uploadFile,
       };
     },
   }
 </script>
+
+
+<style scoped>
+  .dy58-load-file-link {
+    cursor: pointer;
+    color: var(--primary-color);
+  }
+  .dy58-load-file-link:hover {
+    background-color: var(--surface-400);
+    color: var(--text-color);
+  }
+</style>

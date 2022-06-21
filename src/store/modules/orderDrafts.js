@@ -29,7 +29,7 @@ import {
 } from '@/serverRequests/orderDrafts.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
+import getOrderDraftElementValue from '@/additional/getOrderDraftElementValue';
 
 
 function getOrderDraftObject(draft) {
@@ -46,7 +46,7 @@ function getOrderDraftObject(draft) {
         draft.orderText.orderText.map((el) => {
           return {
             ...el,
-            value: getOrderTextElementTypedValue(el),
+            value: getOrderDraftElementValue(el),
           };
         })
     },

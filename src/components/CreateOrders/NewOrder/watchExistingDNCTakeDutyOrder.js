@@ -13,14 +13,10 @@ export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
    * циркулярного распоряжения.
    * Кроме этого, для ЭЦД при создании любого нового документа подгружаем список "иных"
    * адресатов из последнего циркулярного распоряжения, изданного текущим пользователем.
-   * 
-   * Здесь отслеживается именно время (в мс) издания последнего циркулярного распоряжения, т.к. при
-   * отслеживании самого объекта циркулярного распоряжения данный watch будет срабатывать каждый раз при
-   * обновлении списка распоряжений. И установленные адресаты, соответственно, будут "затираться".
    */
-  watch(existingDNC_ECDTakeDutyOrderDateTime, (newVal) => {
+  const displayLastCircularOrderDSP = () => {
     if (
-      newVal && existingDNC_ECDTakeDutyOrder.value &&
+      existingDNC_ECDTakeDutyOrderDateTime.value && existingDNC_ECDTakeDutyOrder.value &&
       (isDNC.value || isECD.value) &&
       (existingDNC_ECDTakeDutyOrder.value.dspToSend || existingDNC_ECDTakeDutyOrder.value.otherToSend) &&
       existingDNC_ECDTakeDutyOrder.value.creator &&
@@ -45,6 +41,19 @@ export const useWatchExistingDNCTakeDutyOrder = ({ store, isDNC, isECD }) => {
         );
       }
     }
+  };
+
+  /**
+   * Здесь отслеживается именно время (в мс) издания последнего циркулярного распоряжения, т.к. при
+   * отслеживании самого объекта циркулярного распоряжения данный watch будет срабатывать каждый раз при
+   * обновлении списка распоряжений. И установленные адресаты, соответственно, будут "затираться".
+   */
+  watch(existingDNC_ECDTakeDutyOrderDateTime, () => {
+    displayLastCircularOrderDSP();
   }, { immediate: true }); // это обязательно, т.к. нужно, чтобы код в watch выполнялся каждый раз при
                            // переходе на страницу (!) и между закладками
-}
+
+  return {
+    displayLastCircularOrderDSP,
+  };
+};

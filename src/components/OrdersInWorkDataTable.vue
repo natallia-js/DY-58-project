@@ -125,7 +125,12 @@
                     :model="createRelativeOrderContextMenuItems(slotProps.data.id)"
                     :popup="true"
                     :id="`overlay_tmenu${slotProps.data.id}`"
-                  />
+                  >
+                    <template #item="{item}">
+                      <a v-if="!item.isChild" class="dy58-tiered-menu-item" @click="item.command">{{ item.label }}</a>
+                      <a v-else class="dy58-tiered-menu-subitem" @click="item.command">{{ item.label }}</a>
+                    </template>
+                  </TieredMenu>
                   <Button
                     icon="pi pi-file"
                     class="p-button-success p-button dy58-order-action-button"
@@ -241,7 +246,8 @@
             <!-- Блок с информацией о подтверждении распоряжения "Иными" адресатами-->
             <div v-if="getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length">
               <div>
-                Не подтверждено иными адресатами: {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}
+                Не подтверждено иными адресатами ({{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}):
+                {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).map((el) => `${el.placeTitle}${el.post ? ' ' + el.post : ''}${el.fio ? ' ' + el.fio : ''}`).join(', ') }}
               </div>
               <!-- Если распоряжение не может быть подтверждено ввиду его "занятости", отображаем состояние прогресса -->
               <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)" style="text-align:right">
@@ -602,11 +608,15 @@
 
 
 <style lang="scss" scoped>
+  .p-datatable-row-expansion {
+    background-color: var(--dy58-edit-order-pattern-element-block-color) !important;
+  }
+
   .dy58-additional-order-info-block {
     display: flex;
     flex-direction: row;
     width: 100%;
-    background-color: var(--dy58-expand-row-bg-color);
+    background-color: var(--dy58-edit-order-pattern-element-block-color);
     margin: 0;
     gap: 10px;
   }
