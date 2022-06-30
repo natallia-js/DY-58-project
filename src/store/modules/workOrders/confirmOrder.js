@@ -232,10 +232,12 @@ export const confirmOrder = {
     [SET_ORDER_CONFIRMED] (state, props) {
       const { orderId, orderTimeSpan, confirmDateTime, userPost, userFIO, userWorkPoligon } = props;
 
-      const order = state.data.find((el) => el._id === orderId);
-      if (!order || !confirmDateTime || !userWorkPoligon) {
+      const orderIndex = state.data.findIndex((el) => el._id === orderId);
+      if (orderIndex < 0 || !confirmDateTime || !userWorkPoligon) {
         return;
       }
+      const order = state.data[orderIndex];
+
       // подтверждаем само распоряжение (переносим его в рабочие распоряжения)
       order.confirmDateTime = confirmDateTime;
       order.timeSpan = orderTimeSpan;
@@ -293,6 +295,12 @@ export const confirmOrder = {
           });
         }
       }
+      // нужно для оперативного реагирования на изменение чего-либо в state.data
+      state.data = [
+        ...state.data.slice(0, orderIndex),
+        order,
+        ...state.data.slice(orderIndex + 1),
+      ];
     },
 
     /**
@@ -308,10 +316,11 @@ export const confirmOrder = {
         actualLocalConfirmWorkPoligonsInfo,
       } = props;
 
-      const order = state.data.find((el) => el._id === orderId);
-      if (!order) {
+      const orderIndex = state.data.findIndex((el) => el._id === orderId);
+      if (orderIndex < 0) {
         return;
       }
+      const order = state.data[orderIndex];
       order.timeSpan = orderTimeSpan;
 
       // подтверждение в секции "Кому" распоряжения
@@ -354,6 +363,12 @@ export const confirmOrder = {
           }
         });
       }
+      // нужно для оперативного реагирования на изменение чего-либо в state.data
+      state.data = [
+        ...state.data.slice(0, orderIndex),
+        order,
+        ...state.data.slice(orderIndex + 1),
+      ];
     },
 
     /**
@@ -361,23 +376,37 @@ export const confirmOrder = {
      * за "иные" полигоны управления.
      */
     [SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS] (state, { orderId, orderTimeSpan, confirmDateTime }) {
-      const order = state.data.find((el) => el._id === orderId);
-      if (!order || !order.otherToSend || !order.otherToSend.length) {
+      const orderIndex = state.data.findIndex((el) => el._id === orderId);
+      if (orderIndex < 0 || !order.otherToSend || !order.otherToSend.length) {
         return;
       }
+      const order = state.data[orderIndex];
       order.timeSpan = orderTimeSpan;
       order.otherToSend.forEach((el) => {
         el.confirmDateTime = confirmDateTime;
       });
+      // нужно для оперативного реагирования на изменение чего-либо в state.data
+      state.data = [
+        ...state.data.slice(0, orderIndex),
+        order,
+        ...state.data.slice(orderIndex + 1),
+      ];
     },
 
     /**
      * Для заданного распоряжения позволяет установить дату-время его утверждения.
      */
     [SET_ORDER_ASSERT_DATE_TIME] (state, { orderId, assertDateTime }) {
-      const order = state.data.find((el) => el._id === orderId);
-      if (order) {
+      const orderIndex = state.data.findIndex((el) => el._id === orderId);
+      if (orderIndex >= 0) {
+        const order = state.data[orderIndex];
         order.assertDateTime = assertDateTime;
+        // нужно для оперативного реагирования на изменение чего-либо в state.data
+        state.data = [
+          ...state.data.slice(0, orderIndex),
+          order,
+          ...state.data.slice(orderIndex + 1),
+        ];
       }
     },
   },

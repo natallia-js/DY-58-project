@@ -141,6 +141,7 @@
           placeTitle: state.placeTitle,
           post: state.post,
           fio: state.fio,
+          additionalId: props.user ? props.user.additionalId : null,
         });
       };
 

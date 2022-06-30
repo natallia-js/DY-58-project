@@ -75,10 +75,12 @@ export const reportOnOrdersDelivery = {
         return;
       }
       for (let orderId of orderIds) {
-        const order = state.data.find((el) => el._id === orderId);
-        if (!order) {
+        const orderIndex = state.data.findIndex((el) => el._id === orderId);
+        if (orderIndex < 0) {
           continue;
         }
+        const order = state.data[orderIndex];
+
         // подтверждаем доставку самого рабочего распоряжения
         order.deliverDateTime = deliverDateTime;
 
@@ -131,6 +133,12 @@ export const reportOnOrdersDelivery = {
             });
           }
         }
+        // нужно для оперативного реагирования на изменение чего-либо в state.data
+        state.data = [
+          ...state.data.slice(0, orderIndex),
+          order,
+          ...state.data.slice(orderIndex + 1),
+        ];
       }
     },
   },

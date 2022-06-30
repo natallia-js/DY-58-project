@@ -66,6 +66,8 @@ export function getWorkOrderGeneralInfoObject(order) {
         post: item.post,
         fio: item.fio,
         placeTitle: item.placeTitle,
+        position: item.position ? +item.position : null,
+        existingStructuralDivision: Boolean(item.existingStructuralDivision),
         sendOriginal: Boolean(item.sendOriginal),
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
       };

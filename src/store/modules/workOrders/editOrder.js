@@ -182,14 +182,21 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
     },
 
     [EDIT_ORDER_TEXT] (state, order) {
-      const objectToEdit = state.data.find((el) => String(el._id) === String(order._id));
-      if (!objectToEdit) {
+      const objectToEditIndex = state.data.findIndex((el) => String(el._id) === String(order._id));
+      if (!objectToEditIndex < 0) {
         return;
       }
       const dataToApply = getWorkOrderGeneralInfoObject(order);
+      const newObject = { ...state.data[objectToEditIndex] };
       for (let field in dataToApply) {
-        objectToEdit[field] = dataToApply[field];
+        newObject[field] = dataToApply[field];
       }
+      // нужно для оперативного реагирования на изменение чего-либо в state.data
+      state.data = [
+        ...state.data.slice(0, objectToEditIndex),
+        newObject,
+        ...state.data.slice(objectToEditIndex + 1),
+      ];
     },
   },
 

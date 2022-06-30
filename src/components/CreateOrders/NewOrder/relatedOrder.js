@@ -7,6 +7,7 @@ import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
  * (распоряжением, находящимся в той цепочке распоряжений, что и издаваемое).
  */
 export const useRelatedOrder = ({ state, store }) => {
+
   const relatedOrderId = computed(() => {
     const chosenRelatedOrderKey = state.prevRelatedOrder ? Object.keys(state.prevRelatedOrder)[0] : 'null';
     return chosenRelatedOrderKey !== 'null' ? chosenRelatedOrderKey : null;

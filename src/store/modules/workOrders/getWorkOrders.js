@@ -22,6 +22,10 @@ import { getWorkOrderObject } from './getWorkOrderObject';
  */
 export const getWorkOrders = {
   getters: {
+    getAllCurrentOrders(state) {
+      return state.data;
+    },
+
     getStartDateToGetData(state) {
       return state.startDateToGetData;
     },
@@ -445,11 +449,18 @@ export const getWorkOrders = {
           if (!order.deliverDateTime) {
             state.newIncomingOrders = true;
           }
-          state.data.push(getWorkOrderObject(order));
+          state.data = [
+            ...state.data,
+            getWorkOrderObject(order),
+          ];
         } else {
           const modifiedObject = getWorkOrderObject(order);
           if (JSON.stringify(state.data[existingOrderIndex]) !== JSON.stringify(modifiedObject)) {
-            state.data[existingOrderIndex] = modifiedObject;
+            state.data = [
+              ...state.data.slice(0, existingOrderIndex),
+              modifiedObject,
+              ...state.data.slice(existingOrderIndex + 1),
+            ];
           }
         }
       });

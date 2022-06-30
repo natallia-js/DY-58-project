@@ -84,7 +84,10 @@ import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
     },
 
     [ADD_ORDER] (state, newOrder) {
-      state.data.push(getWorkOrderObject(newOrder));
+      state.data = [
+        ...state.data,
+        getWorkOrderObject(newOrder),
+      ];
     },
   },
 

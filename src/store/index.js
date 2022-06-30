@@ -14,6 +14,7 @@ import { checkUserAuthority } from './modules/checkUserAuthority';
 import { sounds } from './modules/sounds';
 import { common } from './modules/common';
 import { orderDrafts } from './modules/orderDrafts';
+import { localStore } from './modules/localStore';
 
 export const store = createStore({
   modules: {
@@ -32,5 +33,6 @@ export const store = createStore({
     sounds,
     common,
     orderDrafts,
+    localStore,
   },
 });

@@ -23,9 +23,10 @@
         v-if="selectedUser && (!selectedPerson || selectedUser.id !== selectedPerson.id)"
         label="Выбрать"
         @click="chooseUser"
+        class="p-mt-2"
       />
-      <Button v-if="selectedPerson" label="Отменить текущий выбор" @click="unChooseUser" />
-      <Button label="Отмена" @click="closeDialog" />
+      <Button v-if="selectedPerson" label="Отменить текущий выбор" @click="unChooseUser" class="p-mt-2" />
+      <Button label="Отмена" @click="closeDialog" class="p-mt-2" />
     </template>
   </Dialog>
 </template>

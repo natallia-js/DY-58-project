@@ -121,7 +121,7 @@
       <Fieldset legend="структурные подразделения" :toggleable="true">
         <div v-if="sectorObj.TECDStructuralDivisions && sectorObj.TECDStructuralDivisions.length">
           <p v-for="(division, index) of sortedStructuralDivisions(sectorObj.TECDStructuralDivisions)" :key="division.ECDSD_ID" class="p-ml-4">
-            {{ `${index + 1}. &#160; ${division.ECDSD_Title} / ${division.ECDSD_Post || '-'} / ${division.ECDSD_FIO || '-'}` }}
+            {{ `${index + 1}. &#160; ${division.ECDSD_Title} / ${division.ECDSD_Post || '-'} / ${division.ECDSD_FIO || '-'} / позиция ${division.ECDSD_Position || '-'}` }}
           </p>
         </div>
         <div v-else>
@@ -147,7 +147,16 @@
 
     methods: {
       sortedStructuralDivisions(divisionsArray) {
-        return divisionsArray.sort((a, b) => compareStrings(a.ECDSD_Title.toLowerCase(), b.ECDSD_Title.toLowerCase()));
+        return divisionsArray.sort((a, b) => {
+          const compareRes = compareStrings(a.ECDSD_Title.toLowerCase(), b.ECDSD_Title.toLowerCase());
+          if (compareRes === 0) {
+            if (!a.ECDSD_Position || !b.ECDSD_Position)
+              return 1;
+            return a.ECDSD_Position - b.ECDSD_Position;
+          } else {
+            return compareRes;
+          }
+        });
       },
     },
   };

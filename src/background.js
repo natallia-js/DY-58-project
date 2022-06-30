@@ -32,7 +32,8 @@ async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    if (!process.env.IS_TEST)
+      win.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
@@ -52,7 +53,8 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  if (BrowserWindow.getAllWindows().length === 0)
+    createWindow()
 })
 
 // This method will be called when Electron has finished
@@ -84,26 +86,3 @@ if (isDevelopment) {
     })
   }
 }
-
-// ------------------------
-/*
-async function createPrintPreviewWindow() {
-  const modalPath = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8081/#/printDNC_DSPJournalPreviewPage'
-    : `file://${__dirname}/index.html#printDNC_DSPJournalPreviewPage`;
-  // Create the browser window
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    center: true,
-    webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      enableRemoteModule: true
-    }
-  });
-  win.on('close', function () { win = null });
-  win.loadURL(modalPath);
-}
-*/

@@ -10,6 +10,7 @@ import { MAX_SYSTEM_MESSAGES_STORED } from '@/constants/appSettings';
 
 export const common = {
   state: {
+    allDataLoadedOnApplicationReload: false,
     showAppSettings: {
       show: false,
       target: null,
@@ -24,6 +25,10 @@ export const common = {
   },
 
   getters: {
+    ifAllDataLoadedOnApplicationReload(state) {
+      return state.allDataLoadedOnApplicationReload;
+    },
+
     appSettingsVisible(state) {
       return state.showAppSettings.show;
     },
@@ -50,6 +55,10 @@ export const common = {
   },
 
   mutations: {
+    setAllDataLoadedOnApplicationReload (state) {
+      state.allDataLoadedOnApplicationReload = true;
+    },
+
     [SHOW_APP_SETTINGS] (state, { show, target }) {
       state.showAppSettings = { show, target };
     },

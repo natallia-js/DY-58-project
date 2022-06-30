@@ -7,8 +7,10 @@ import {
   CLEAR_SHIFT_FOR_SENDING_DATA,
   SET_USER_CHOSEN_STATUS,
   DEL_CURR_SECTORS_SHIFT,
+  CLEAR_OTHER_SHIFT,
 } from '@/store/mutation-types';
 import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
+import { store } from '@/store';
 
 
 /**
@@ -43,7 +45,7 @@ export const common = {
         state.sectorPersonal.sectorStationsShift.forEach((el) => clearSendItem(el));
       }
       if (state.sectorPersonal.otherShift) {
-        state.sectorPersonal.otherShift = [];
+        store.commit(CLEAR_OTHER_SHIFT);
       }
     },
 

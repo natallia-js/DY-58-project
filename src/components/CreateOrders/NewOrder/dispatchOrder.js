@@ -3,7 +3,6 @@ import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/or
 import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
 import { DISPATCH_ORDER_ACTION } from '@/store/action-types';
 
-
 /**
  * Данный модуль предназначен для сбора данных о распоряжении и для его издания.
  */

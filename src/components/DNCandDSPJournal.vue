@@ -150,7 +150,6 @@
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import isElectron from '@/additional/isElectron';
-  //import { ipcRenderer } from 'electron';
 
   const DEF_ROWS_PER_PAGE = 10;
 

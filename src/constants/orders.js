@@ -88,6 +88,7 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   WHAT_SHOULD_BE_DONE_FOR_WORK: 'Для работы должно быть',
   WORK_CATEGORIES: 'Категория работ',
   WORK_IF_THERE_ARE: 'Работать при наличии',
+  NARYAD_DOPUSK: 'Наряд допуск',
 });
 
 export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
@@ -95,6 +96,8 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   WORK_DONE_FROM: 'С чего производится работа',
   STATION: 'Станция',
   BLOCK: 'Перегон',
+  OBJECT: 'Объект',
+  TRACK: 'Путь',
 });
 
 export const SWITCH_OFF_ON_ITEMS = [
@@ -121,12 +124,25 @@ export const WORK_IF_THERE_ARE_ITEMS = [
   'переносных заземлений', 'двух шунтирующих штанг',
 ];
 
+export const OBJECT_ITEMS = [
+  'провод волноводной линии', 'провод обратного тока', 'экранирующий провод',
+];
+
 export const WORKS_OBJECT_ITEMS = [
-  'контактной сети', 'ВЛ ДПР', 'ВЛ АБ', 'Волноводе', 'ВЛ освещения', 'КЛ освещения',
+  'контактной сети', 'ВЛ ДПР', 'ВЛ АБ', 'Волноводе', 'ВЛ освещения', 'КЛ освещения', 'питающий провод',
 ];
 
 export const WORK_DONE_FROM_ITEMS = [
   'АДМ', 'лестница', 'лейтер', 'без подъема на высоту', 'лазов', 'вышки МШТС',
+];
+
+export const TRACK_ITEMS = [
+  'I', 'II', 'III', 'IV', 'V',
+];
+
+export const NARYAD_DOPUSK_ITEMS = [
+  'Наряд-допуск №',
+  'Без наряда-допуска, по приказу, согласно аварийной заявки №',
 ];
 
 export const GID_EVENT_TYPE = Object.freeze({

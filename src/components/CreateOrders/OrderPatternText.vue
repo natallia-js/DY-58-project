@@ -52,6 +52,9 @@
     WORK_IF_THERE_ARE_ITEMS,
     WORKS_OBJECT_ITEMS,
     WORK_DONE_FROM_ITEMS,
+    OBJECT_ITEMS,
+    TRACK_ITEMS,
+    NARYAD_DOPUSK_ITEMS,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -215,6 +218,11 @@
                 label: item,
                 value: item,
               }));
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.NARYAD_DOPUSK:
+              return NARYAD_DOPUSK_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
               if (this.isDNC)
@@ -269,6 +277,16 @@
               }));
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORK_DONE_FROM:
               return WORK_DONE_FROM_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.TRACK:
+              return TRACK_ITEMS.map((item) => ({
+                label: item,
+                value: item,
+              }));
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.OBJECT:
+              return OBJECT_ITEMS.map((item) => ({
                 label: item,
                 value: item,
               }));

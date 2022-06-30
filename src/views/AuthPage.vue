@@ -63,7 +63,7 @@
         </div>
         <div v-if="!state.loadingUserManualsList" class="p-col-12">
           <div v-if="state.userManualsListLoadError">
-            {{ userManualsListLoadError }}
+            {{ state.userManualsListLoadError }}
           </div>
           <div v-else>
             <div v-for="fileName of state.userManualsList" :key="fileName">
@@ -96,7 +96,7 @@
   import checkAuthString from '@/additional/checkAuthString';
   import { getUserManualsList, downloadDY58Manual } from '@/serverRequests/userManuals.requests';
   import getExtensionFromFullFileName from '@/additional/getExtensionFromFullFileName';
-  
+
   export default {
     name: 'dy58-auth-page',
 

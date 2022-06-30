@@ -86,7 +86,6 @@
       - переход к форме редактирования настроек системы (в настоящее время настройка у системы только
       одна: громкость звуковых оповещений о наличии входящих уведомлений)
     </p>
-    <to-help-start-block />
 
     <h4 id="dsp-take-pass-order-description" class="dy58-help-contents-item">Запись о приеме-сдаче дежурства ДСП</h4>
     <p class="dy58-help-paragraph">
@@ -137,7 +136,6 @@
       информация о работниках, принимающих дежурство на других рабочих местах этой же станции;
       дополнительная информация.
     </p>
-    <to-help-start-block />
 
     <h4 id="incoming-notifications-description" class="dy58-help-contents-item">Таблица "Входящие уведомления"</h4>
     <p class="dy58-help-paragraph">
@@ -160,7 +158,6 @@
     <p class="dy58-help-paragraph">
       Неподтвержденный документ будет находиться в таблице входящих уведомлений максимум 30 дней.
     </p>
-    <to-help-start-block />
 
     <h4 id="orders-in-work-description" class="dy58-help-contents-item">Секция "Документы в работе"</h4>
     <p class="dy58-help-paragraph">

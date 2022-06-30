@@ -11,7 +11,6 @@ import {
   SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
   OrderPatternElementType,
 } from '@/constants/orderPatterns';
-//import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import {
   SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
   SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -194,7 +193,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
         resetOrderPlace();
       }
     });
-    
+
     // Если в тексте распоряжения встречается поле 'Перегон' либо 'Перегон станции отправления',
     // то значение этого поля (первого встречающегося) устанавливается в качестве места действия
     // распоряжения (если установлен соответствующий флаг). Но только при условии что ранее (см. выше)

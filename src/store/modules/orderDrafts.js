@@ -77,6 +77,8 @@ function getOrderDraftObject(draft) {
     otherToSend: draft.otherToSend ? draft.otherToSend.map((el) => ({
       ...el,
       additionalId: el.additionalId ? +el.additionalId : null,
+      position: el.position ? +el.position : null,
+      existingStructuralDivision: Boolean(el.existingStructuralDivision),
       sendOriginal: +el.sendOriginal,
     })) : [],
   };

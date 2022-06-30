@@ -386,6 +386,7 @@
           <OtherToSendOrderDataTable
             :value="v$.otherSectorsToSendOrder.$model"
             @input="v$.otherSectorsToSendOrder.$model = $event"
+            :lastOtherToSendSource="lastOtherToSendSource"
           />
         </AccordionTab>
       </Accordion>
@@ -423,7 +424,7 @@
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
   import { useWatchOrderNumber } from './watchOrderNumber';
   import { useWatchOrderPatterns } from './watchOrderPatterns';
-  import { useWatchSectorPersonal } from './watchSectorPersonal';
+  import { useWatchAllAppDataLoad } from './watchAllAppDataLoad';
   import { useWatchOrderDrafts } from './watchOrderDrafts';
   import { useWatchOperationsResults } from './watchOperationsResults';
   import { useDispatchOrder } from './dispatchOrder';
@@ -434,7 +435,7 @@
   import { useSetAndAnalyzeOrderText } from './setAndAnalyzeOrderText';
   import { useWatchRelatedOrder } from './watchRelatedOrder';
   import { useOkna } from './okna';
-  import { useWatchExistingDNCTakeDutyOrder } from './watchExistingDNCTakeDutyOrder';
+  import { useWatchExistingDNC_ECDTakeDutyOrder } from './watchExistingDNC_ECDTakeDutyOrder';
   import { SET_SELECTED_OKNO } from '@/store/mutation-types';
 
   export default {
@@ -587,6 +588,8 @@
 
       const selectedOkno = computed(() => store.getters.getSelectedOkno);
 
+      const lastOtherToSendSource = ref(null);
+
       const {
         showOrderDrafts,
         showConnectedOrderFields,
@@ -617,7 +620,8 @@
         store.commit(SET_SELECTED_OKNO, { okno: null });
       });
 
-      const { displayLastCircularOrderDSP } = useWatchExistingDNCTakeDutyOrder({ store, isDNC, isECD });
+      const { existingDNC_ECDTakeDutyOrder, displayLastCircularOrderOtherPersonal } =
+        useWatchExistingDNC_ECDTakeDutyOrder({ store, isDNC, isECD, lastOtherToSendSource });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -645,21 +649,9 @@
       } = useStoreData({ store, relatedOrderObject });
 
       const {
-        handleSaveOrderDraft,
         currentOrderDraft,
-        applySelectedOrderDraft,
-        applySelectedOrderDraftPersonal,
-      } = useOrderDraft({
-        state,
-        props,
-        store,
-        confirm,
-        defineOrderTimeSpanOptions,
-        showOnGIDOptions,
-        defaultOrderPlace,
-        defaultOrderText,
-        defaultTimeSpan,
-      });
+        handleSaveOrderDraft,
+      } = useOrderDraft({ state, props, store, confirm });
 
       const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */ });
 
@@ -705,8 +697,11 @@
       });
 */
 
-      useWatchSectorPersonal({ store, applySelectedOrderDraftPersonal, displayLastCircularOrderDSP });
-      useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, applySelectedOrderDraft });
+      useWatchAllAppDataLoad({ store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
+        lastOtherToSendSource, displayLastCircularOrderOtherPersonal });
+      useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
+        showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan, lastOtherToSendSource,
+      });
       useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
 
       const {
@@ -720,7 +715,10 @@
         getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
-      useWatchRelatedOrder({ props, emit, store, relatedOrderId, relatedOrderObject, setRelatedOrderNumberInOrderText });
+      useWatchRelatedOrder({
+        props, emit, store, relatedOrderId, relatedOrderObject,
+        setRelatedOrderNumberInOrderText, lastOtherToSendSource,
+      });
 
       const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields, selectedOkno });
 
@@ -751,6 +749,7 @@
 
       return {
         state,
+        lastOtherToSendSource,
         showOnGIDOptions,
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,

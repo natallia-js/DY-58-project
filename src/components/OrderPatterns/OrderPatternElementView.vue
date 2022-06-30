@@ -972,6 +972,9 @@
   }
   .dy58-multiselect-header {
     background-color: var(--surface-b);
-    padding: 0.5rem 0.5rem 0 0.5rem;
+    padding: 0.5rem;
   }
+  /*:deep(.p-multiselect-panel .p-multiselect-header) {
+    display: none !important;
+  }*/
 </style>

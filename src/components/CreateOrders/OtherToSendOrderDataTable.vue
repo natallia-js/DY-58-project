@@ -8,6 +8,15 @@
       @close="handleHideOtherReceiverDlg"
     ></ShowOtherReceiverDlg>
 
+    <ShowChooseOtherPersonalDlg
+      :showDlg="showChooseOtherReceiversDlg"
+      :personal="sectorPersonal"
+      :prevSelectedPeople="selectedSectorPeople"
+      :sectorName="sectorName"
+      @input="handleChoosePeople"
+      @close="handleHideOtherReceiversDlg"
+    ></ShowChooseOtherPersonalDlg>
+
     <DataTable
       :value="getOtherShiftForSendingData"
       class="p-datatable-responsive p-datatable-gridlines p-datatable-sm"
@@ -23,16 +32,6 @@
           <Button v-if="selectedUser" class="p-mr-2" label="Редактировать" @click="handleEditRec" />
           <Button v-if="selectedUser" label="Удалить" @click="handleDelRec" />
         </div>
-        <MultiSelect
-          v-if="isECD"
-          v-model="selectedDivisions"
-          :options="getStructuralDivisions"
-          optionLabel="fullInfo"
-          optionValue="additionalId"
-          placeholder="Выберите структурные подразделения"
-          display="chip"
-          style="width:100%"
-        />
       </template>
 
       <Column v-for="col of getOtherShiftTblColumns"
@@ -51,6 +50,14 @@
               ]"
           >
             {{ slotProps.data[col.field] }}
+            <a v-if="col.field === getOtherShiftTblColumnNames.placeTitle && slotProps.data.existingStructuralDivision"
+              class="dy58-send-status-btn"
+              @click="() => openChoosePeopleDlg(
+                slotProps.data[getOtherShiftTblColumnNames.placeTitle]
+              )"
+            >
+              ...
+            </a>
           </div>
           <div v-else>
             <div class="dy58-tbl-send-btns-block">
@@ -117,9 +124,10 @@
     ADD_OTHER_GET_ORDER_RECORD,
     EDIT_OTHER_GET_ORDER_RECORD,
     DEL_OTHER_GET_ORDER_RECORD,
-    DEL_UNSELECTED_STRUCTURAL_DIVISIONS,
+    CLEAR_OTHER_SHIFT,
   } from '@/store/mutation-types';
   import ShowOtherReceiverDlg from '@/components/CreateOrders/ShowOtherReceiverDlg';
+  import ShowChooseOtherPersonalDlg from '@/components/CreateOrders/ShowChooseOtherPersonalDlg';
 
   export default {
     name: 'dy58-ecd-to-send-order-data-table',
@@ -131,6 +139,9 @@
       value: {
         type: Object,
       },
+      lastOtherToSendSource: {
+        type: Array,
+      },
     },
 
     data() {
@@ -140,21 +151,30 @@
         selectedUser: null,
         user: null,
         addNewRec: true, // true = add, false = edit
-        selectedDivisions: null, // массив id выбранных (из существующих в БД на сервере) структурных подразделений,
-                                 // только для ЭЦД!
+        showChooseOtherReceiversDlg: false,
+        sectorPersonal: [],
+        selectedSectorPeople: [],
+        selectedSectorsPeople: [],
+        sectorId: -1,
+        sectorName: null,
+        showChoosePeopleDlg: false,
       };
     },
 
     components: {
       ShowOtherReceiverDlg,
+      ShowChooseOtherPersonalDlg,
     },
 
     computed: {
       ...mapGetters([
         'getOtherShiftForSendingData',
         'isECD',
+        'getUserId',
         'getStructuralDivisions',
         'getStructuralDivisionById',
+        'getExistingDNC_ECDTakeDutyOrder',
+        'getFirstOrderInChain',
       ]),
 
       getOtherShiftTblColumnNames() {
@@ -168,12 +188,14 @@
       getOtherShiftTblColumns() {
         return OtherShiftTblColumns;
       },
+
+      existingDNC_ECDTakeDutyOrderDateTime() {
+        return this.getExistingDNC_ECDTakeDutyOrder ? this.getExistingDNC_ECDTakeDutyOrder.createDateTime.getTime() : null;
+      },
     },
 
     mounted() {
-      // Поскольку информация о выбранном для отправки распоряжения персонале хранится в глобальном
-      // хранилище, ее необходимо подгружать при монтировании компонента, чтобы отображать текущее
-      // состояние хранилища
+      this.$store.commit(CLEAR_OTHER_SHIFT);
       this.$emit('input', this.getOtherShiftForSendingData
         ? this.getOtherShiftForSendingData
           .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
@@ -181,40 +203,32 @@
     },
 
     watch: {
-      getOtherShiftForSendingData(newVal) {
-        if (this.isECD) {
-          if (newVal) {
-            const selectedDivisonsIds = newVal
-              .filter((el) => el.additionalId && el.additionalId > 0)
-              .map((el) => el.additionalId);
-            if ((this.selectedDivisions || selectedDivisonsIds) &&
-              JSON.stringify(this.selectedDivisions) !== JSON.stringify(selectedDivisonsIds)) {
-              this.selectedDivisions = selectedDivisonsIds;
+      // Реакция на изменение источника "иных" адресатов (связанный документ, черновик документа,
+      // последнее циркулярное распоряжение)
+      lastOtherToSendSource(newValue) {
+        if (newValue) {
+          this.selectedSectorsPeople = [];
+          newValue.forEach((el) => {
+            this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, el);
+            if (el.additionalId) {
+              const sector = this.selectedSectorsPeople.find((item) => item.placeTitle === el.placeTitle);
+              if (sector) {
+                sector.selectedPeople.push(el.additionalId);
+              } else {
+                this.selectedSectorsPeople.push({
+                  placeTitle: el.placeTitle,
+                  selectedPeople: [el.additionalId],
+                });
+              }
             }
-          } else if (this.selectedDivisions || this.selectedDivisions.length) {
-            this.selectedDivisions = null;
-          }
+          });
         }
+      },
+
+      getOtherShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
-      },
-
-      // Учитываем, что могло измениться как одно значение, так и сразу несколько
-      // (когда устанавливается / снимается флаг выделения всех записей).
-      // Только для ЭЦД!
-      selectedDivisions(newVal) {
-        if (this.isECD) {
-          const selectedRecs = newVal ? newVal.map((id) => this.getStructuralDivisionById(id)) : [];
-          if (selectedRecs.length) {
-            selectedRecs.forEach((rec) => {
-              if (rec) {
-                this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, rec);
-              }
-            });
-          }
-          this.$store.commit(DEL_UNSELECTED_STRUCTURAL_DIVISIONS, selectedRecs.map((el) => el.additionalId));
-        }
       },
     },
 
@@ -289,15 +303,78 @@
       },
 
       handleDelRec() {
-        if (this.selectedUser.additionalId > 0) {
-          this.selectedDivisions = this.selectedDivisions.filter((el) => el !== this.selectedUser.additionalId);
-        }
         this.$store.commit(DEL_OTHER_GET_ORDER_RECORD, this.selectedUser._id);
+
+        const deletedUserSectorChosenUsers = this.selectedSectorsPeople.find((el) => el.placeTitle === this.selectedUser.placeTitle);
+        if (deletedUserSectorChosenUsers) {
+          deletedUserSectorChosenUsers.selectedPeople = deletedUserSectorChosenUsers.selectedPeople.filter((additionalId) =>
+            additionalId !== this.selectedUser.additionalId);
+        }
         this.selectedUser = null;
       },
 
       handleHideOtherReceiverDlg() {
         this.showOtherReceiverDlg = false;
+      },
+
+      getStructuralDivisionFullInfo(division) {
+        if (!division) return null;
+        return `${division.placeTitle}${division.post ? ' ' + division.post : ''}${division.fio ? ' ' + division.fio : ''}`;
+      },
+
+      openChoosePeopleDlg(placeTitle) {
+        this.sectorPersonal = this.getStructuralDivisions
+          .filter((el) => el.placeTitle === placeTitle)
+          .sort((a, b) => {
+            if (!a.position && b.position)
+              return 1;
+            if (a.position && !b.position)
+              return -1;
+            return a.position - b.position;
+          })
+          .map((el) => ({
+            label: this.getStructuralDivisionFullInfo(el),
+            value: el.additionalId,
+          }));
+        this.sectorName = placeTitle;
+        this.showChooseOtherReceiversDlg = true;
+        this.selectedSectorPeople = this.selectedSectorsPeople.find((el) => el.placeTitle === this.sectorName)?.selectedPeople;
+      },
+
+      /**
+       * Реакция на выбор предопределенных "иных" лиц в диалоговом окне.
+       */
+      handleChoosePeople(newSelectedPeople) {
+        // Все новые выбранные записи включаем в список иных адресатов
+        if (newSelectedPeople && newSelectedPeople.length) {
+          newSelectedPeople.forEach((additionalId) => {
+            const person = this.getStructuralDivisions.find((el) => el.additionalId === additionalId);
+            if (person)
+              this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...person, existingStructuralDivision: true });
+          });
+        }
+        // Удаляем те записи, которые ранее были выбраны, а теперь - нет
+        const prevSelectedPersonal = this.$store.getters.getOtherShiftByPlaceTitle(this.sectorName);
+        prevSelectedPersonal.forEach((el) => {
+          if (!(newSelectedPeople || []).includes(el.additionalId)) {
+            this.$store.commit(DEL_OTHER_GET_ORDER_RECORD, el._id);
+          }
+        });
+        // Ищем сохраненную информацию о выбранном персонале по текущему участку и обновляем ее локально
+        // (либо запоминаем, если не существует локально)
+        const sector = this.selectedSectorsPeople.find((el) => el.placeTitle === this.sectorName);
+        if (sector) {
+          sector.selectedPeople = newSelectedPeople;
+        } else {
+          this.selectedSectorsPeople.push({
+            placeTitle: this.sectorName,
+            selectedPeople: newSelectedPeople || [],
+          });
+        }
+      },
+
+      handleHideOtherReceiversDlg() {
+        this.showChooseOtherReceiversDlg = false;
       },
     }
   }

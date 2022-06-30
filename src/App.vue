@@ -48,6 +48,7 @@
     LOAD_ORDER_PATTERNS_ACTION,
     LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION,
     CHECK_CLIPBOARD,
+    STORE_ORDERS_LOCALLY,
   } from '@/store/action-types';
   import { WS_SERVER_ADDRESS } from '@/constants/servers';
   import {
@@ -56,6 +57,7 @@
   } from '@/constants/appSettings';
   import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
   import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
+  //import LocalStoreServer from '@/additional/localStoreServer';
 
   export default {
     name: 'dy-58-app',
@@ -164,6 +166,14 @@
       });
 
       /**
+       * При появлении каких-либо изменений в рабочих распоряжениях принимаем меры по
+       * сохранению данных в локальном хранилище
+       */
+      watch(() => store.getters.getAllCurrentOrders, (newData) => {
+        store.dispatch(STORE_ORDERS_LOCALLY, newData);
+      });
+
+      /**
        * Пункт меню "Выход" может быть просто выходом из системы (если пользователь не на дежурстве)
        * либо просто выходом из системы и выходом из системы со сдачей дежурства (если пользователь
        * на дежурстве)
@@ -174,6 +184,7 @@
        * При смене рабочего полигона пользователя подгружаем информацию о:
        * - структуре данного рабочего полигона,
        * - шаблонах разного типа распоряжений данного рабочего полигона,
+       * - количестве входящих распоряжений за смену (если пользователь на дежурстве),
        * а также открываем WebSocket-соединение между клиентом и сервером,
        */
       watch(() => store.getters.getUserWorkPoligon, (workPoligonNew) => {
@@ -192,13 +203,14 @@
        * - черновиках распоряжений, изданных в рамках рабочего полигона,
        * - запускаем периодическую подгрузку входящих уведомлений и рабочих распоряжений
        */
-      watch(() => store.getters.getUserWorkPoligonData, (workPoligonDataNew) => {
+      watch(() => store.getters.getUserWorkPoligonData, async (workPoligonDataNew) => {
         if (workPoligonDataNew) {
-          store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
-          store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
+          await store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
+          await store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
           if (store.getters.isECD)
-            store.dispatch(LOAD_ORDER_DRAFTS_ACTION);
-          store.dispatch(LOAD_WORK_ORDERS_ACTION);
+            await store.dispatch(LOAD_ORDER_DRAFTS_ACTION);
+          await store.dispatch(LOAD_WORK_ORDERS_ACTION);
+          store.commit('setAllDataLoadedOnApplicationReload');
         }
       });
 

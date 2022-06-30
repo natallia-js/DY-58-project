@@ -1,10 +1,11 @@
 import { computed } from 'vue';
 
-
+/**
+ * Данный модуль позволяет преобразовать данные, хранящиеся в сторе, для их применения при
+ * создании документа.
+ */
 export const useStoreData = ({ store, relatedOrderObject }) => {
-  /**
-   * 
-   */
+
   const getSectorStationOrBlockTitleById = computed(() => {
     if (relatedOrderObject.value && relatedOrderObject.value.place) {
       return store.getters.getSectorStationOrBlockTitleById({
@@ -15,9 +16,6 @@ export const useStoreData = ({ store, relatedOrderObject }) => {
     return null;
   });
 
-  /**
-   * 
-   */
   const getSectorStations = computed(() =>
     store.getters.getSectorStations.map((station) => {
       return {
@@ -27,9 +25,6 @@ export const useStoreData = ({ store, relatedOrderObject }) => {
     })
   );
 
-  /**
-   * 
-   */
   const getSectorBlocks = computed(() =>
     store.getters.getSectorBlocks.map((block) => {
       return {

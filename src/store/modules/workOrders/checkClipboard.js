@@ -5,6 +5,11 @@ import {
 } from '@/store/mutation-types';
 
 
+/**
+ * Данный модуль предназначен для проверки буфера обмена на наличие в нем данных для
+ * распоряжения о поезде ДР. Если данные есть, то они извлекаются из буфера и запоминаются
+ * в системе, буфер чистится.
+ */
 export const checkClipboard = {
   getters: {
     getDataForDROrderFromClipboard(state) {
