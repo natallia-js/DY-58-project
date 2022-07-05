@@ -17,12 +17,16 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
 
   // Проверка элементов шаблона распоряжения на наличие в них значений.
   // Значение должно присутствовать у всех элементов шаблона, кроме элементов типа
-  // 'редактируемый список множественного выбора', 'перенос строки' и 'текстовая область',
+  // 'редактируемый список множественного выбора', 'перенос строки', 'текстовая область'
+  // и 'выдано запрещение ДСП',
   // а также элементов, смысловые значения которых находятся в определенном списке
   const orderTextFieldsNotEmpty = (orderText) => {
     for (let orderTextElement of orderText) {
-      if (![OrderPatternElementType.MULTIPLE_SELECT, OrderPatternElementType.LINEBREAK, OrderPatternElementType.TEXT_AREA].includes(orderTextElement.type) &&
-        !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) && !orderTextElement.value) {
+      if (![OrderPatternElementType.MULTIPLE_SELECT, OrderPatternElementType.LINEBREAK,
+            OrderPatternElementType.TEXT_AREA, OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING,
+           ].includes(orderTextElement.type) &&
+          !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) && !orderTextElement.value)
+      {
         return false;
       }
     }

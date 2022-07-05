@@ -70,8 +70,7 @@
         if (!newValue) {
           if (state.timeValue) state.timeValue = null;
           if (state.tillNotice) state.tillNotice = false;
-        }
-        if (newValue instanceof Date)
+        } else if (newValue instanceof Date)
           state.timeValue = newValue;
         else if (typeof newValue === 'boolean')
           state.tillNotice = newValue;

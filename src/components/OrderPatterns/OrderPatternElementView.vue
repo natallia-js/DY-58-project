@@ -116,6 +116,17 @@
     @input="state.elementModelValue = $event"
   />
 
+  <!-- Элемент "Выдано запрещение ДСП" -->
+
+  <CheckboxAndInputOrNothingComponent
+    v-else-if="element.type === OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING"
+    :checkboxText="'Выдано запрещение ДСП'"
+    :placeholder="element.ref || 'запрещение ДСП'"
+    v-tooltip="element.ref"
+    :value="state.elementModelValue"
+    @input="state.elementModelValue = $event"
+  />
+
   <!-- Элемент "Дата-время" -->
 
   <Calendar
@@ -363,7 +374,7 @@
   import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
   import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
   import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
-  //import { CLEAR_DATA_FOR_DR_ORDER_GOT_FROM_CLIPBOARD } from '@/store/mutation-types';
+  import CheckboxAndInputOrNothingComponent from '@/components/OrderPatterns/CheckboxAndInputOrNothingComponent';
 
   export default {
     name: 'dy58-order-pattern-element-view',
@@ -385,6 +396,7 @@
 
     components: {
       TimeOrTillNoticeComponent,
+      CheckboxAndInputOrNothingComponent,
     },
 
     emits: ['input'],
