@@ -150,6 +150,7 @@
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import isElectron from '@/additional/isElectron';
+  import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -171,6 +172,9 @@
       },
       checkDocs: {
         type: Boolean,
+      },
+      loadCachedOrders: {
+        type: Number,
       },
     },
 
@@ -314,6 +318,15 @@
       watch(() => props.checkDocs, (newVal) => {
         if (newVal === true) {
           showCreateRevisorCheckRecordDlg.value = true;
+        }
+      });
+
+      watch(() => props.loadCachedOrders, async () => {
+        try {
+          const data = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
+          console.log(data)
+        } catch (error) {
+          console.log(error)
         }
       });
 

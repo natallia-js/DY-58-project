@@ -106,6 +106,7 @@
           if (!updateDataTimerId) {
             updateDataTimerId = setInterval(() => {
               store.dispatch(LOAD_WORK_ORDERS_ACTION);
+              // Для распоряжения ДНЦ о поезде идущем ДР
               if (store.getters.isDNC) {
                 store.dispatch(CHECK_CLIPBOARD);
               }

@@ -168,6 +168,8 @@
   import CreateRevisorCheckRecordDlg from '@/components/CreateOrders/CreateRevisorCheckRecordDlg';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import isElectron from '@/additional/isElectron';
+  import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
+  //import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -189,6 +191,9 @@
       },
       checkDocs: {
         type: Boolean,
+      },
+      loadCachedOrders: {
+        type: Number,
       },
     },
 
@@ -317,7 +322,7 @@
           name: 'PrintECDJournalPreviewPage',
           params: null,
         });
-        
+
         const printWindow = window.open(route.href, '_blank');
         if (!isElectron()) {
           printWindow.addEventListener('ready', () => {
@@ -334,6 +339,50 @@
       watch(() => props.checkDocs, (newVal) => {
         if (newVal === true) {
           showCreateRevisorCheckRecordDlg.value = true;
+        }
+      });
+
+      watch(() => props.loadCachedOrders, async () => {
+        try {
+          const cachedOrders = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
+          if (!cachedOrders) {
+            data.value = [];
+            return;
+          }
+          console.log(cachedOrders)
+          /*data.value = cachedOrders.map((order) => {
+            const deserializedOrderData = JSON.parse(order.serializedData);
+            return {
+              ...deserializedOrderData,
+              dncToSend: !order.dncToSend ? [] :
+                order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+              dspToSend: !order.dspToSend ? [] :
+                order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+              ecdToSend: !order.ecdToSend ? [] :
+                order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+              otherToSend: !order.otherToSend ? [] :
+                order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+              // Исключаем главных ДСП (они будут в списке dspToSend)
+              stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
+                order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
+                  .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+              orderText: !deserializedOrderData.orderText ? null : {
+                ...deserializedOrderData.orderText,
+                orderText: !deserializedOrderData.orderText.orderText ? null :
+                  deserializedOrderData.orderText.orderText.map((el) => {
+                    return {
+                      ...el,
+                      value: getOrderTextElementTypedValue(el),
+                    };
+                  }),
+              },
+            };
+          });*/
+          data.value = prepareDataForDisplayInECDJournal(
+            cachedOrders.map((order) => JSON.parse(order.serializedData)), getOrderSeqNumber);
+          console.log(data.value)
+        } catch (error) {
+          console.log(error)
         }
       });
 

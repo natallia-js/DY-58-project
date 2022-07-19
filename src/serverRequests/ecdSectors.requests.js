@@ -19,29 +19,29 @@ export const getECDSectorsShortData = async ({ ecdSectorIds }) => {
   return response.data;
 };
 
-export const getDefinitECDSectorData = async (sectorId) => {
+export const getDefinitECDSectorData = async ({ sectorId, onlyHash = false }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getDefinitECDSectorData,
     method: 'POST',
-    params: { sectorId },
+    params: { sectorId, onlyHash },
   });
   return response.data;
 };
 
-export const getAdjacentECDSectorsShortDefinitData = async (sectorId) => {
+export const getAdjacentECDSectorsShortDefinitData = async ({ sectorId, onlyHash = false }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getAdjacentECDSectorsShortDefinitData,
     method: 'POST',
-    params: { sectorId },
+    params: { sectorId, onlyHash },
   });
   return response.data;
 };
 
-export const getNearestDNCSectorsShortDefinitData = async (sectorId) => {
+export const getNearestDNCSectorsShortDefinitData = async ({ sectorId, onlyHash = false }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getNearestDNCSectorsShortDefinitData,
     method: 'POST',
-    params: { sectorId },
+    params: { sectorId, onlyHash },
   });
   return response.data;
 };

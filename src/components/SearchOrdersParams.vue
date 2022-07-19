@@ -42,24 +42,30 @@
               <label for="include-active-docs">&#160;действующие цепочки документов</label>
             </div>
           </div>
-          <div class="p-col-6">
+          <div class="p-col-6 p-d-flex p-flex-row p-flex-wrap">
             <Button
               type="submit"
               icon="pi pi-search"
               label="Найти"
-              class="p-mr-3"
+              class="p-mr-3 p-mb-2"
             />
             <Button
               icon="pi pi-print"
               label="Печать"
-              class="p-mr-3"
+              class="p-mr-3 p-mb-2"
               @click="handlePrint"
             />
             <Button
               v-if="displayVerifyFunctions && canUserCreateCheckOrders"
               icon="pi pi-check-square"
               label="Создать запись о проверке"
+              class="p-mr-3 p-mb-2"
               @click="handleCheck"
+            />
+            <Button
+              label="Загрузить данные из кэша"
+              @click="handleLoadCachedData"
+              class="p-mb-2"
             />
           </div>
         </form>
@@ -88,7 +94,7 @@
       FindOrdersTimeSpanChooser,
     },
 
-    emits: ['input', 'print', 'createCheckRecord'],
+    emits: ['input', 'print', 'createCheckRecord', 'loadCachedOrders'],
 
     props: {
       displayVerifyFunctions: {
@@ -172,6 +178,10 @@
         emit('createCheckRecord');
       };
 
+      const handleLoadCachedData = async () => {
+        emit('loadCachedOrders');
+      };
+
       return {
         state,
         INCLUDE_DOCUMENTS_CRITERIA,
@@ -181,6 +191,7 @@
         handleSubmit,
         handlePrint,
         handleCheck,
+        handleLoadCachedData,
       };
     },
   }

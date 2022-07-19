@@ -34,6 +34,7 @@
       @input="searchParams = $event"
       @print="printParams = $event"
       @createCheckRecord="checkDocs = true"
+      @loadCachedOrders="loadCachedOrders++"
     />
     <div class="dy58-journal-container">
       <ECDJournal
@@ -41,6 +42,7 @@
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"
+        :loadCachedOrders="loadCachedOrders"
         @finishedCreatingCheckRecord="checkDocs = false"
       />
       <DNCandDSPJournal
@@ -49,6 +51,7 @@
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"
+        :loadCachedOrders="loadCachedOrders"
         @finishedCreatingCheckRecord="checkDocs = false"
       />
     </div>
@@ -89,6 +92,7 @@
       const checkDocs = ref(false);
       const startDisplayDate = ref(null);
       const endDisplayDate = ref(null);
+      const loadCachedOrders = ref(0);
 
       watch(searchParams, () => {
         startDisplayDate.value = (searchParams.value && searchParams.value.timeSpan && searchParams.value.timeSpan.start)
@@ -121,6 +125,7 @@
         checkDocs,
         startDisplayDate,
         endDisplayDate,
+        loadCachedOrders,
       };
     },
   }

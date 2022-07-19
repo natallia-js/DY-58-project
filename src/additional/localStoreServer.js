@@ -1,12 +1,15 @@
 import crypto from 'crypto';
 
-const STORE_NAME = 'dy58Orders';
+// название хранилища объектов распоряжений в IndexedDB
+const ORDERS_STORE_NAME = 'dy58Orders';
+// название хранилища информации о рабочем полигоне в IndexedDB
+const WORK_POLIGON_STORE_NAME = 'workPoligon';
 const DB_NAME = 'lastOrdersDB';
 const OBJECT_KEY = '_id';
 
 /**
- * Класс, позволяющий хранить массив объектов распоряжений в IndexedDB и поддерживать
- * содержимое локальной базы в "актуальном" состоянии.
+ * Класс, позволяющий хранить НСИ последнего пользователя и массив объектов распоряжений в IndexedDB
+ * и поддерживать содержимое локальной базы объектов распоряжений в "актуальном" состоянии.
  */
 class LocalStoreServer {
   constructor(maxTimeStoreDataInLocalDB) {
@@ -18,14 +21,14 @@ class LocalStoreServer {
     this.maxTimeStoreDataInLocalDB = maxTimeStoreDataInLocalDB;
     // ссылка на NoSQL-базу данных браузера (IndexedDB)
     this.db = null;
-    // название хранилища объектов распоряжений в IndexedDB
-    this.storeName = STORE_NAME;
     // ошибка создания хранилища
     this.createStoreError = null;
     // ошибка чтения хранилища
     this.readStoreError = null;
-    // ошибка записи в хранилище
-    this.writeStoreError = null;
+    // ошибка записи в хранилище информации о распоряжениях
+    this.writeStoreOrdersError = null;
+    // ошибка записи в хранилище информации о рабочем полигоне
+    this.writeStoreWorkPoligonDataError = null;
 
     // открываем NoSQL-базу данных, которую можно использовать внутри любого браузера для хранения большого количества данных;
     // 1 - это версия нашей локальной БД
@@ -38,15 +41,19 @@ class LocalStoreServer {
     openRequest.onupgradeneeded = function(event) {
       // сохраняем ссылку на базу данных
       localStoreServerObject.db = event.target.result;
-      // создадим хранилище объектов, если его нет (ключ данных в хранилище - поле _id)
-      if (!localStoreServerObject.db.objectStoreNames.contains(localStoreServerObject.storeName)) {
-        localStoreServerObject.db.createObjectStore(localStoreServerObject.storeName, { keyPath: OBJECT_KEY });
+      // создадим хранилище объектов распоряжений, если его нет (ключ данных в хранилище - поле _id)
+      if (!localStoreServerObject.db.objectStoreNames.contains(ORDERS_STORE_NAME)) {
+        localStoreServerObject.db.createObjectStore(ORDERS_STORE_NAME, { keyPath: OBJECT_KEY });
+      }
+      // создадим хранилище объекта информации о рабочем полигоне, если его нет (ключ данных в хранилище - поле _id)
+      if (!localStoreServerObject.db.objectStoreNames.contains(WORK_POLIGON_STORE_NAME)) {
+        localStoreServerObject.db.createObjectStore(WORK_POLIGON_STORE_NAME, { keyPath: OBJECT_KEY });
       }
     };
 
     openRequest.onerror = function(event) {
       localStoreServerObject.createStoreError =
-        `Ошибка создания хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${openRequest.error}`;
+        `Ошибка создания хранилища в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${openRequest.error}`;
     };
 
     // срабатывает после завершения onupgradeneeded, а также срабатывает после обновления страницы
@@ -59,9 +66,9 @@ class LocalStoreServer {
       // Далее, из IndexedDB извлекаем "оперативные" данных всех объектов распоряжений и сохраняем их в памяти.
       // В дальнейшем эти данные понадобятся для отслеживания изменений в массиве объектов
       // для поддержания хранилища распоряжений IndexedDB в актуальном состоянии.
-      const transaction = localStoreServerObject.db.transaction([localStoreServerObject.storeName], 'readonly');
+      const transaction = localStoreServerObject.db.transaction([ORDERS_STORE_NAME], 'readonly');
       // Получаем хранилище объектов распоряжений из транзакции
-      const store = transaction.objectStore(localStoreServerObject.storeName);
+      const store = transaction.objectStore(ORDERS_STORE_NAME);
       // Извлекаем из хранилища все распоряжения
       const request = store.getAll();
 
@@ -132,13 +139,13 @@ class LocalStoreServer {
   }
 
   /**
-   * Проверяет, есть ли среди входных объектов такой, которого нет в БД либо значение которого
+   * Проверяет, есть ли среди входных объектов-распоряжений такой, которого нет в БД либо значение которого
    * изменилось. Если да, то обновляет данные в локальной БД.
    * При обновлении данных в БД также проводится проверка хранящихся в ней распоряжений на "актуальность":
    * "просроченые" распоряжения удаляются.
    * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) распоряжений (тех, с которыми работает пользователь).
    */
-  async checkAndSaveDataIfNecessary(data) {
+  async checkAndSaveOrdersIfNecessary(data) {
     if (!data || !this.db) return;
 
     // выясняем, какие объекты из data новые, а какие - изменились
@@ -151,8 +158,8 @@ class LocalStoreServer {
     // Изменения в БД вносим только в том случае, если есть что изменять
 
     // считываем данные, хранящиеся в БД
-    const transaction = this.db.transaction([this.storeName], 'readwrite');
-    const store = transaction.objectStore(this.storeName);
+    const transaction = this.db.transaction([ORDERS_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(ORDERS_STORE_NAME);
     const request = store.getAll();
 
     const localStoreServerObject = this;
@@ -163,7 +170,7 @@ class LocalStoreServer {
     const activeOrdersIds = data.map((el) => el._id);
 
     request.onsuccess = function() {
-      localStoreServerObject.writeStoreError = null;
+      localStoreServerObject.writeStoreOrdersError = null;
 
       if (request.result) {
         // удаляю неактуальные данные (неактуальное распоряжение - такое, которое было издано более
@@ -194,7 +201,7 @@ class LocalStoreServer {
     };
 
     request.onerror = function(event) {
-      localStoreServerObject.writeStoreError =
+      localStoreServerObject.writeStoreOrdersError =
         `Ошибка обновления хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
     };
 
@@ -202,7 +209,7 @@ class LocalStoreServer {
     // Здесь мы уже уверены, что все успешно сохранено в БД, потому сохраняем копию нужных
     // данных в оперативной памяти.
     transaction.oncomplete = () => {
-      localStoreServerObject.writeStoreError = null;
+      localStoreServerObject.writeStoreOrdersError = null;
 
       // обновляем данные в памяти
       localStoreServerObject.lastOrdersShortData = newDBData.map((order) => ({
@@ -213,17 +220,147 @@ class LocalStoreServer {
     };
 
     transaction.onerror = (event) => {
-      localStoreServerObject.writeStoreError =
+      localStoreServerObject.writeStoreOrdersError =
         'error renewing orders (code: ' + event.target.errorCode + '): ' + JSON.stringify(event);
     };
   }
 
-  async getAllData() {
+  /**
+   *
+   */
+  async checkWorkPoligonDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.hash === hashToCheck ? true : false;
+    } catch (err) {
+      console.log(err)
+      return false;
+    }
+  }
+
+  /**
+   *
+   */
+   async checkAdjacentECDSectorsDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.adjacentECDSectorsDataHash === hashToCheck ? true : false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   *
+   */
+   async checkNearestDNCSectorsDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.nearestDNCSectorsDataHash === hashToCheck ? true : false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Проверяет, есть ли среди входных объектов-распоряжений такой, которого нет в БД либо значение которого
+   * изменилось. Если да, то обновляет данные в локальной БД.
+   * При обновлении данных в БД также проводится проверка хранящихся в ней распоряжений на "актуальность":
+   * "просроченые" распоряжения удаляются.
+   * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) распоряжений (тех, с которыми работает пользователь).
+   */
+   async checkAndSaveWorkPoligonDataIfNecessary(data) {
+    if (!data || !this.db) return;
+
+    // выясняем, какие объекты из data новые, а какие - изменились
+    const { newObjects, modifiedObjects } = this.getObjectsChanges(data);
+    // изменений не было - больше ничего не делаем
+    if (!newObjects.length && !modifiedObjects.length) {
+      return;
+    }
+
+    // Изменения в БД вносим только в том случае, если есть что изменять
+
+    // считываем данные, хранящиеся в БД
+    const transaction = this.db.transaction([ORDERS_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(ORDERS_STORE_NAME);
+    const request = store.getAll();
+
+    const localStoreServerObject = this;
+    // сюда поместим данные, которые заменят текущие данные в БД
+    let newDBData = [];
+
+    // id всех рабочих распоряжений
+    const activeOrdersIds = data.map((el) => el._id);
+
+    request.onsuccess = function() {
+      localStoreServerObject.writeStoreOrdersError = null;
+
+      if (request.result) {
+        // удаляю неактуальные данные (неактуальное распоряжение - такое, которое было издано более
+        // maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет среди data, т.е. нет в массиве
+        // рабочих распоряжений)
+        newDBData = request.result.filter((el) =>
+          (new Date() - el.createDateTime) <= this.maxTimeStoreDataInLocalDB ||
+          activeOrdersIds.includes(el._id));
+      }
+      // добавляем новые данные
+      newObjects.forEach((order) => newDBData.push(order));
+      // редактируем изменившиеся данные
+      modifiedObjects.forEach((order) => {
+        const newDBDataObjectIndex = newDBData.findIndex((obj) => obj._id === order._id);
+        if (newDBDataObjectIndex >= 0) {
+          newDBData[newDBDataObjectIndex] = order;
+        } else {
+          newDBData.push(order);
+        }
+      });
+      // теперь в newDBData содержится та информация, которая должна быть запомнена локально, а также
+      // сохранена в БД; применяем ее, предварительно очистив хранилище в БД
+      store.clear();
+      newDBData.forEach((order) => {
+        // Добавляем распоряжение в хранилище объектов
+        store.add(order);
+      });
+    };
+
+    request.onerror = function(event) {
+      localStoreServerObject.writeStoreOrdersError =
+        `Ошибка обновления хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+    };
+
+    // Когда все эти запросы будут завершены, завершится и транзакция.
+    // Здесь мы уже уверены, что все успешно сохранено в БД, потому сохраняем копию нужных
+    // данных в оперативной памяти.
+    transaction.oncomplete = () => {
+      localStoreServerObject.writeStoreOrdersError = null;
+
+      // обновляем данные в памяти
+      localStoreServerObject.lastOrdersShortData = newDBData.map((order) => ({
+        _id: order._id,
+        hash: order.hash,
+        createDateTime: order.createDateTime,
+      }));
+    };
+
+    transaction.onerror = (event) => {
+      localStoreServerObject.writeStoreOrdersError =
+        'error renewing orders (code: ' + event.target.errorCode + '): ' + JSON.stringify(event);
+    };
+  }
+
+  /**
+   *
+   */
+  async getAllLocallySavedOrders() {
     const localStoreServerObject = this;
 
     return new Promise((resolve, reject) => {
-      const transaction = localStoreServerObject.db.transaction([localStoreServerObject.storeName], 'readonly');
-      const store = transaction.objectStore(localStoreServerObject.storeName);
+      const transaction = localStoreServerObject.db.transaction([ORDERS_STORE_NAME], 'readonly');
+      const store = transaction.objectStore(ORDERS_STORE_NAME);
       const request = store.getAll();
 
       request.onsuccess = function() {
@@ -233,6 +370,66 @@ class LocalStoreServer {
       request.onerror = function(event) {
         localStoreServerObject.readStoreError =
           `Ошибка чтения хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+        reject(event);
+      };
+    });
+  }
+
+  /**
+   *
+   */
+  async saveWorkPoligonData(dataToSave) {
+    // считываем данные, хранящиеся в БД
+    const transaction = this.db.transaction([WORK_POLIGON_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
+    store.clear();
+    const dataToSaveLocally = {
+      _id: dataToSave.ECDS_ID,
+      serializedData: JSON.stringify(dataToSave),
+      hash: dataToSave.hash,
+      adjacentECDSectorsDataHash: dataToSave.adjacentECDSectorsDataHash,
+      nearestDNCSectorsDataHash: dataToSave.nearestDNCSectorsDataHash,
+    };
+    const request = store.add(dataToSaveLocally);
+
+    const localStoreServerObject = this;
+
+    request.onerror = function(event) {
+      localStoreServerObject.writeStoreWorkPoligonDataError =
+        `Ошибка обновления хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+    };
+
+    // Когда все эти запросы будут завершены, завершится и транзакция.
+    // Здесь мы уже уверены, что все успешно сохранено в БД
+    transaction.oncomplete = () => {
+      localStoreServerObject.writeStoreWorkPoligonDataError = null;
+    };
+
+    transaction.onerror = (event) => {
+      localStoreServerObject.writeStoreWorkPoligonDataError =
+        'error renewing work poligon data (code: ' + event.target.errorCode + '): ' + JSON.stringify(event);
+    };
+  }
+
+  /**
+   *
+   */
+  async getLocallySavedUserWorkPoligon() {
+    const localStoreServerObject = this;
+
+    return new Promise((resolve, reject) => {
+      const transaction = localStoreServerObject.db.transaction([WORK_POLIGON_STORE_NAME], 'readonly');
+      const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
+      const request = store.getAll();
+
+      request.onsuccess = function() {
+        //console.log('request.result[0].serializedData',request.result[0].serializedData)
+        resolve(request.result && request.result[0] ? JSON.parse(request.result[0].serializedData) : null);
+      };
+
+      request.onerror = function(event) {
+        localStoreServerObject.readStoreError =
+          `Ошибка чтения хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
         reject(event);
       };
     });
