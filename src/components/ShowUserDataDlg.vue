@@ -7,7 +7,7 @@
     @hide="closeDialog"
   >
     <p style="textAlign:center" class="p-text-bold p-text-uppercase p-mb-2">
-      {{ isUserOnDuty ? 'на дежурстве' : 'не на дежурстве' }}
+      {{ ifUserWorksOffline ? 'не в сети' : isUserOnDuty ? 'на дежурстве' : 'не на дежурстве' }}
     </p>
     <p><span class="p-text-bold">Фамилия:</span> &#160; {{ getUserSurname || '?' }}</p>
     <p><span class="p-text-bold">Имя:</span> &#160; {{ getUserName || '?' }}</p>
@@ -56,6 +56,7 @@
     computed: {
       ...mapGetters([
         'isUserOnDuty',
+        'ifUserWorksOffline',
         'getUserPost',
         'getUserName',
         'getUserSurname',

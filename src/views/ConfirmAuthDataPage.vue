@@ -164,7 +164,7 @@
         // При переходе на главную страницу необходимо обнулить все данные, которые были загружены
         // до прихода на эту страницу, иначе они могут снова подгрузиться, даже если будет входить
         // в систему пользователь с совсем другого полигона
-        store.dispatch(LOGOUT_ACTION, { onlyLocally: false });
+        store.dispatch(LOGOUT_ACTION, { onlyLocally: store.getters.ifUserWorksOffline });
         router.push({ name: 'AuthPage' });
       }
 

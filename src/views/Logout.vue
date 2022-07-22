@@ -15,7 +15,7 @@
       const store = useStore();
       const router = useRouter();
 
-      store.dispatch(LOGOUT_ACTION, { onlyLocally: false });
+      store.dispatch(LOGOUT_ACTION, { onlyLocally: store.getters.ifUserWorksOffline });
       router.push({ name: 'AuthPage' });
     },
   };

@@ -55,7 +55,8 @@
           </div>
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button type="submit" label="Войти" class="p-mr-2" />
+          <Button type="submit" label="Войти" class="p-mr-2 p-mb-2" />
+          <Button class="p-button-danger p-mr-2 p-mb-2" label="Войти при отсутствии связи с сервером" @click="handleWorkWithSystemWithoutServerSession" />
           <Button class="p-button-secondary" label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
         </div>
         <div v-else class="p-col-12">
@@ -92,7 +93,7 @@
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
-  import { LOGIN_ACTION } from '@/store/action-types';
+  import { LOGIN_ACTION, LOGIN_VIA_LOCAL_STORAGE_ACTION } from '@/store/action-types';
   import checkAuthString from '@/additional/checkAuthString';
   import { getUserManualsList, downloadDY58Manual } from '@/serverRequests/userManuals.requests';
   import getExtensionFromFullFileName from '@/additional/getExtensionFromFullFileName';
@@ -173,7 +174,7 @@
       };
 
       /**
-       * Этот вход в систему будет возможно осуществить, если пользователь ранее в текущу сессию
+       * Этот вход в систему будет возможно осуществить, если пользователь ранее в текущую сессию
        * уже входил (об этом уведомил сервер), и система предлагает пользователю продолжить
        * работу в рамках этой сессии.
        */
@@ -242,6 +243,17 @@
       };
 
       /**
+       * Если нет связи с сервером, то пользователь может войти в систему под именем последнего
+       * работавшего с системой пользователя. При этом сессия на сервере не создается. Следовательно,
+       * пользователь не сможет выполнять в системе никакие действия - только просматривать ранее
+       * сохраненные распоряжения.
+       */
+      const handleWorkWithSystemWithoutServerSession = async () => {
+        await store.dispatch(LOGIN_VIA_LOCAL_STORAGE_ACTION);
+        redirect();
+      };
+
+      /**
        * Хотим подгрузить руководство пользователя в браузере (средствами браузера через папку загрузок).
        */
       const uploadFile = (fileName) => {
@@ -275,6 +287,7 @@
         handleSubmit,
         handleRegisterUser,
         hideRegisterNewUserDlg,
+        handleWorkWithSystemWithoutServerSession,
         getUserFIO: computed(() => store.getters.getUserFIO),
         uploadFile,
       };

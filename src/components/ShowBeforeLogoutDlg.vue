@@ -74,7 +74,7 @@
 
     methods: {
       handleConfirmLogout() {
-        this.$store.dispatch(LOGOUT_ACTION, { onlyLocally: false });
+        this.$store.dispatch(LOGOUT_ACTION, { onlyLocally: this.$store.getters.ifUserWorksOffline });
       },
 
       handleCloseDialog() {

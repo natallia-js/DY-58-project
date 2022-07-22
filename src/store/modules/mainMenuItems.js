@@ -108,7 +108,7 @@ export const mainMenuItems = {
       if (!logoutItem) {
         return;
       }
-      if (!store.getters.isUserOnDuty) {
+      if (!store.getters.isUserOnDuty || store.getters.ifUserWorksOffline) {
         delete logoutItem.items;
         logoutItem.command = () => store.commit(PREPARE_FOR_LOGOUT, false);
       } else {

@@ -1,6 +1,8 @@
 export const APP_CODE_NAME = 'DY-58';
 export const DY58_CREDENTIALS_GROUP_NAME = 'DY-58';
 
+export const LOCAL_STORAGE_KEY = 'dy58-user';
+
 export const APP_CREDENTIALS = Object.freeze({
   DNC_FULL: 'DNC_FULL',
   DSP_FULL: 'DSP_FULL',

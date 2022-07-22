@@ -22,6 +22,7 @@ import {
 import {
   LOGIN_ACTION,
   TRY_LOGIN_VIA_SESSION_ACTION,
+  LOGIN_VIA_LOCAL_STORAGE_ACTION,
   LOGOUT_ACTION,
 } from '@/store/action-types';
 import {
@@ -34,6 +35,11 @@ import {
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
 import { getUserFIOString, getUserPostFIOString } from '@/store/modules/personal/transformUserData';
+import {
+  saveUserDataInLocalStorage,
+  getUserDataFromLocalStorage,
+  updateUserDataInLocalStorage,
+} from '@/additional/localStorage';
 
 
 /**
@@ -166,6 +172,7 @@ export const currUser = {
     logoutWithDutyPass: false, // true (false) - выход из системы со сдачей (без сдачи) дежурства
     logoutProcessIsUnderway: false, // true (false) - идет (не идет) процесс выхода из системы
     logoutError: null,
+    workOffline: false,
   },
 
   getters: {
@@ -280,37 +287,57 @@ export const currUser = {
       }
       // вечерняя сдача дежурства
       return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 20, 0, 0, 0);
-    }
+    },
+    /**
+     *
+     */
+    ifUserWorksOffline(state) {
+      return state.workOffline;
+    },
   },
 
   mutations: {
     /**
-     * Сохраняет полномочия пользователя (строка credential)
+     * Сохраняет полномочия пользователя (строка credential).
+     * userCredential пользователя в localStorage не меняем, если новый credential не определен.
      */
     [SET_USER_CREDENTIAL] (state, credential) {
       state.credential = credential;
+      if (credential) {
+        updateUserDataInLocalStorage({ userCredential: credential });
+      }
     },
 
     /**
      * Сохраняет рабочий полигон пользователя.
-     * workPoligon - объект с полями type, code, subCode
+     * userWorkPoligon - объект с полями type, code, subCode
+     * userWorkPoligon пользователя в localStorage не меняем, если новый userWorkPoligon не определен.
      */
-    [SET_USER_WORK_POLIGON] (state, workPoligon) {
-      state.workPoligon = workPoligon;
+    [SET_USER_WORK_POLIGON] (state, userWorkPoligon) {
+      state.workPoligon = userWorkPoligon;
+      if (userWorkPoligon) {
+        updateUserDataInLocalStorage({ userWorkPoligon });
+      }
     },
 
     /**
      * Сохраняет token пользователя (строка token).
+     * token пользователя в localStorage не меняем, если новый token не определен.
      */
     [SET_USER_TOKEN] (state, { token }) {
       state.token = token;
+      if (token) {
+        updateUserDataInLocalStorage({ userToken: token });
+      }
     },
 
     /**
      * Сохраняет дату и время последней сдачи дежурства пользователем (строка lastPassDutyTime).
+     * lastPassDutyTime пользователя в localStorage также меняем.
      */
      [SET_USER_PASS_DUTY_TIME] (state, { lastPassDutyTime }) {
       state.lastPassDutyTime = lastPassDutyTime;
+      updateUserDataInLocalStorage({ lastPassDutyTime });
     },
 
     /**
@@ -320,6 +347,7 @@ export const currUser = {
     [SET_USER_TAKE_PASS_DUTY_TIMES] (state, { lastTakeDutyTime, lastPassDutyTime }) {
       state.lastTakeDutyTime = lastTakeDutyTime;
       state.lastPassDutyTime = lastPassDutyTime;
+      updateUserDataInLocalStorage({ lastTakeDutyTime, lastPassDutyTime });
     },
 
     [CLEAR_LOGIN_RESULT] (state) {
@@ -360,6 +388,10 @@ export const currUser = {
 
       state.isAuthenticated = true;
       state.loginDateTime = new Date();
+
+      // Помещаем информацию о пользователе в localStorage - вдруг связь с сервером пропадет и
+      // нужно будет хоть как-то работать с системой
+      saveUserDataInLocalStorage(JSON.stringify(payload));
     },
 
     /**
@@ -428,6 +460,7 @@ export const currUser = {
         takeDuty,
         lastCredential,
         lastWorkPoligon,
+        offline,
       } = payload;
 
       // Без этой строчки не пойдут запросы на сервер в текущей функции
@@ -440,8 +473,7 @@ export const currUser = {
         // Проверяем полученную информацию, предназначенную для входа пользователя в систему
         const userCredsWithPoligons = checkUserAuthData({ userId, jtwToken, userInfo, credentials, workPoligons });
 
-        // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon (это происходит
-        // при входе в систему с данными, подгруженными из Local Storage), проверяем,
+        // Для пользователя, для которого определены lastCredential и/или lastWorkPoligon, проверяем,
         // есть ли данные параметры среди userCredsWithPoligons и соответствуют ли они друг другу
         let trueLastCredential = false;
         let trueLastWorkPoligon = false;
@@ -482,11 +514,13 @@ export const currUser = {
         let _lastPassDutyTime = lastPassDutyTime; // строка
         let userToken = jtwToken;
 
+        context.state.workOffline = offline;
+
         // если удалось однозначно определить полномочие и рабочий полигон пользователя,
         // то отправляем запрос на сервер о начале работы на данном рабочем полигоне;
         // вид запроса зависит от того, входит пользователь в систему с принятием дежурства или без
 
-        if (userCredential && userWorkPoligon) {
+        if (!offline && userCredential && userWorkPoligon) {
           let responseData;
           if (takeDuty === true) {
             responseData = await takeDutyUser({
@@ -517,6 +551,8 @@ export const currUser = {
           userWorkPoligon,
           lastTakeDutyTime: _lastTakeDutyTime ? new Date(_lastTakeDutyTime) : null,
           lastPassDutyTime: _lastPassDutyTime ? new Date(_lastPassDutyTime) : null,
+          credentials,
+          workPoligons,
         });
 
         const message = (userCredential && userWorkPoligon) ? 'Вход в систему выполнен успешно' :
@@ -551,7 +587,6 @@ export const currUser = {
             lastPassDutyTime: responseData.lastPassDutyTime,
             credentials: responseData.credentials,
             workPoligons: getUserWorkPoligonsArray(responseData),
-            // Login из Local Storage не подразумевает вход в систему с дополнительным принятием дежурства
             takeDuty: false,
             lastCredential: responseData.lastCredential && responseData.lastCredential.length ? responseData.lastCredential[0] : null,
             lastWorkPoligon: responseData.lastWorkPoligon
@@ -560,11 +595,38 @@ export const currUser = {
                 code: responseData.lastWorkPoligon.id,
                 subCode: responseData.lastWorkPoligon.workPlaceId,
               } : null,
+            offline: false,
           });
         }
       } catch (error) {
         // ничего не делаем при неудачной попытке аутентифицироваться автоматически через сессию,
         // пользователю будет просто предложено снова войти в систему
+      }
+    },
+
+    /**
+     * Пытается авторизовать пользователя через localStorage.
+     */
+    async [LOGIN_VIA_LOCAL_STORAGE_ACTION] (context) {
+      if (context.state.isAuthenticated) {
+        return;
+      }
+      let localStorageUserData = getUserDataFromLocalStorage();
+      if (localStorageUserData) {
+        localStorageUserData = JSON.parse(localStorageUserData);
+        context.dispatch(LOGIN_ACTION, {
+          userId: localStorageUserData.userId,
+          jtwToken: localStorageUserData.userToken,
+          userInfo: localStorageUserData.userInfo,
+          lastTakeDutyTime: localStorageUserData.lastTakeDutyTime ? new Date(localStorageUserData.lastTakeDutyTime) : null,
+          lastPassDutyTime: localStorageUserData.lastPassDutyTime ? new Date(localStorageUserData.lastPassDutyTime) : null,
+          credentials: localStorageUserData.credentials,
+          workPoligons: localStorageUserData.workPoligons,
+          takeDuty: false,
+          lastCredential: localStorageUserData.userCredential,
+          lastWorkPoligon: localStorageUserData.userWorkPoligon,
+          offline: true,
+        });
       }
     },
 
@@ -576,27 +638,33 @@ export const currUser = {
         return;
       }
       context.commit(START_LOGOUT_PROCESS);
+
       if (!onlyLocally) {
         try {
-          let responseData;
+          //let responseData;
           if (context.state.logoutWithDutyPass) {
-            responseData = await logoutWithDutyPass();
+            const responseData = await logoutWithDutyPass();
+            context.commit(SET_USER_PASS_DUTY_TIME, responseData.lastPassDutyTime);
           } else {
-            responseData = await logoutUser();
+            /*responseData = */await logoutUser();
           }
-          context.commit(SET_USER_TOKEN, { token: responseData.token });
+          //context.commit(SET_USER_TOKEN, { token: responseData.token });
         }
         catch (error) {
           const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка выхода из системы');
           context.commit(LOGOUT_FINISHED_WITH_ERROR, errMessage);
           return;
         }
-      }
-      context.commit(LOGOUT_FINISHED_WITHOUT_ERROR);
-      if (onlyLocally) {
+      } else {
         context.commit(SET_USER_TOKEN, { token: null });
       }
-      context.commit(CLEAR_USER_DATA_ON_LOGOUT);
+      // Здесь обязательно нужен хоть какой-то временной интервал, т.к. при onlyLocally = true
+      // после context.commit(START_LOGOUT_PROCESS) сразу идет context.commit(LOGOUT_FINISHED_WITHOUT_ERROR),
+      // и в коде ShowBeforeLogoutDlg не срабатывает watch на state.logoutProcessIsUnderway
+      setTimeout(() => {
+        context.commit(LOGOUT_FINISHED_WITHOUT_ERROR);
+        context.commit(CLEAR_USER_DATA_ON_LOGOUT);
+      }, 100);
     },
   },
 };

@@ -565,7 +565,7 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     * Подгружает с сервера информацию о полигоне управления "Участок ЭЦД".
+     * Подгружает с сервера либо локального хранилища информацию о полигоне управления "Участок ЭЦД".
      */
     async [LOAD_ECD_SECTOR_DATA_ACTION] (context, { sectorId }) {
       let serverError = false;
@@ -577,7 +577,7 @@ export const currWorkPoligonStructure = {
       let getNearestDNCSectorsData = true;
 
       // загружает недостающую информацию по рабочему полигону - участку ЭЦД - с сервера в локальное хранилище
-      const getWorkPoligonDataFromServer = async () => {console.log('getWorkPoligonDataFromServer')
+      const getWorkPoligonDataFromServer = async () => {
         if (getECDSectorData) {
           const responseData = await getDefinitECDSectorData({ sectorId });
           if (getAdjacentECDSectorsData && getNearestDNCSectorsData)
@@ -603,6 +603,7 @@ export const currWorkPoligonStructure = {
           nearestDNCSectorsDataHash: nearestDNCSectorsHashFromServer,
         });
       };
+
       try {
         // вначале получим хэши полигона управления, смежных участков ЭЦД и ближайших участков ДНЦ
         workPoligoHashFromServer = await getDefinitECDSectorData({ sectorId, onlyHash: true });
@@ -632,10 +633,9 @@ export const currWorkPoligonStructure = {
           getNearestDNCSectorsData = false;
         }
         if (!serverError && (getECDSectorData || getAdjacentECDSectorsData || getNearestDNCSectorsData)) {
-          console.log(serverError, getECDSectorData, getAdjacentECDSectorsData, getNearestDNCSectorsData)
           getWorkPoligonDataFromServer();
         }
-      } catch (err) { console.log('err',err)
+      } catch {
         if (!serverError) {
           getWorkPoligonDataFromServer();
         }
@@ -663,16 +663,23 @@ export const currWorkPoligonStructure = {
       context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, null);
       context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, true);
       try {
-        switch (workPoligon.type) {
-          case WORK_POLIGON_TYPES.STATION:
-            await context.dispatch(LOAD_STATION_DATA_ACTION, { stationId: workPoligon.code });
-            break;
-          case WORK_POLIGON_TYPES.DNC_SECTOR:
-            await context.dispatch(LOAD_DNC_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
-            break;
-          case WORK_POLIGON_TYPES.ECD_SECTOR:
-            await context.dispatch(LOAD_ECD_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
-            break;
+        if (context.getters.ifUserWorksOffline) {
+          // setTimeout только для того чтобы система корректно успела отреагировать на изменение флага,
+          // устанавливаемого при SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS
+          context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
+          setTimeout(() => {}, 100);
+        } else {
+          switch (workPoligon.type) {
+            case WORK_POLIGON_TYPES.STATION:
+              await context.dispatch(LOAD_STATION_DATA_ACTION, { stationId: workPoligon.code });
+              break;
+            case WORK_POLIGON_TYPES.DNC_SECTOR:
+              await context.dispatch(LOAD_DNC_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
+              break;
+            case WORK_POLIGON_TYPES.ECD_SECTOR:
+              await context.dispatch(LOAD_ECD_SECTOR_DATA_ACTION, { sectorId: workPoligon.code });
+              break;
+          }
         }
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о рабочем полигоне' });
       } catch (error) {

@@ -57,7 +57,6 @@
   } from '@/constants/appSettings';
   import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
   import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
-  //import LocalStoreServer from '@/additional/localStoreServer';
 
   export default {
     name: 'dy-58-app',

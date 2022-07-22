@@ -8,7 +8,12 @@
         @click="showUserInfo"
         v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
         style="width:100%;height:100%"
-        :class="{'p-button-raised': true, 'p-button-secondary': isUserOnDuty, 'p-button-warning': !isUserOnDuty}"
+        :class="{
+          'p-button-raised': true,
+          'p-button-danger': ifUserWorksOffline,
+          'p-button-secondary': !ifUserWorksOffline && isUserOnDuty,
+          'p-button-warning': !ifUserWorksOffline && !isUserOnDuty,
+        }"
       />
     </template>
   </Menubar>
@@ -38,6 +43,7 @@
       'getUserPost',
       'getUserFIO',
       'isUserOnDuty',
+      'ifUserWorksOffline',
     ]),
 
     methods: {

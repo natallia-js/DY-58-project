@@ -32,7 +32,7 @@ export async function makeServerRequest({ url, method, params = null, upload = f
     // выход из системы (с сервером сейчас бесполезно общаться), после чего ДУ-58, не обнаружив
     // токена текущего пользователя и остальных его данных, автоматически перейдет на
     // страницу авторизации
-    if (error?.response?.status === 410) {
+    if (!store.getters.ifUserWorksOffline && error?.response?.status === 410) {
       store.dispatch(LOGOUT_ACTION, { onlyLocally: true });
     }
     throw error;

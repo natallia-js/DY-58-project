@@ -12,7 +12,7 @@ import ShiftPage from '@/views/ShiftPage';
 import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
 import isElectron from '@/additional/isElectron';
-import { TRY_LOGIN_VIA_SESSION_ACTION } from '@/store/action-types';
+import { TRY_LOGIN_VIA_SESSION_ACTION, LOGIN_VIA_LOCAL_STORAGE_ACTION } from '@/store/action-types';
 
 const routes = [
   {
@@ -124,10 +124,14 @@ router.beforeEach(async (to, from, next) => {
   // Вне зависимости от того, на какую страницу хочет попасть пользователь, проверяем,
   // проходил ли он уже процедуру частичной аутентификации (login + password)
   if (!store.getters.isUserAuthenticated) {
-    // Нет -> пытаемся аутентифицировать пользователя через сессию
-    // (такое, в частности, возможно при перезагрузке страницы).
-    // Успешная аутентификация через сессию может привести к полной аутентификации в системе.
-    await store.dispatch(TRY_LOGIN_VIA_SESSION_ACTION);
+    if (!store.getters.ifUserWorksOffline)
+      // Нет + пользователь не работает offline -> пытаемся аутентифицировать пользователя через сессию
+      // (такое, в частности, возможно при перезагрузке страницы).
+      // Успешная аутентификация через сессию может привести к полной аутентификации в системе.
+      await store.dispatch(TRY_LOGIN_VIA_SESSION_ACTION);
+    else if (store.getters.canUserWorkWithSystem) {
+      // Пользователь работает offline и не осуществил выход из системы
+      await store.dispatch(LOGIN_VIA_LOCAL_STORAGE_ACTION)}
   }
 
   // Если пользователь полностью аутентифицирован, то он не может попасть на страницы, требующие

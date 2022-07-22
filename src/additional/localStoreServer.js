@@ -233,8 +233,7 @@ class LocalStoreServer {
     try {
       const workPoligonData = await this.getLocallySavedUserWorkPoligon();
       return workPoligonData && workPoligonData.hash === hashToCheck ? true : false;
-    } catch (err) {
-      console.log(err)
+    } catch {
       return false;
     }
   }
@@ -430,7 +429,7 @@ class LocalStoreServer {
       request.onerror = function(event) {
         localStoreServerObject.readStoreError =
           `Ошибка чтения хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
-        reject(event);
+        reject(new Error(localStoreServerObject.readStoreError));
       };
     });
   }
