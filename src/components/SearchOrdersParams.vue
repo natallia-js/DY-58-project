@@ -6,7 +6,7 @@
       </template>
       <div class="dy58-search-params-panel">
         <form @submit.prevent="handleSubmit()" class="p-grid">
-          <div class="p-field p-col-6 p-d-flex p-flex-column">
+          <div v-if="!ifUserWorksOffline" class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">
               Получить данные за:
             </label>
@@ -21,7 +21,7 @@
               Пожалуйста, корректно определите временной интервал поиска информации (не более трех месяцев)
             </small>
           </div>
-          <div class="p-field p-col-6 p-d-flex p-flex-column">
+          <div v-if="!ifUserWorksOffline" class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">Включать:</label>
             <div class="p-mb-2">
               <Checkbox
@@ -44,6 +44,7 @@
           </div>
           <div class="p-col-6 p-d-flex p-flex-row p-flex-wrap">
             <Button
+              v-if="!ifUserWorksOffline"
               type="submit"
               icon="pi pi-search"
               label="Найти"
@@ -56,16 +57,11 @@
               @click="handlePrint"
             />
             <Button
-              v-if="displayVerifyFunctions && canUserCreateCheckOrders"
+              v-if="!ifUserWorksOffline && displayVerifyFunctions && canUserCreateCheckOrders"
               icon="pi pi-check-square"
               label="Создать запись о проверке"
               class="p-mr-3 p-mb-2"
               @click="handleCheck"
-            />
-            <Button
-              label="Загрузить данные из кэша"
-              @click="handleLoadCachedData"
-              class="p-mb-2"
             />
           </div>
         </form>
@@ -144,6 +140,8 @@
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state, { $scope: false });
 
+      const ifUserWorksOffline = computed(() => store.getters.ifUserWorksOffline);
+
       /**
        * Поиск информации в соответствии с заданными критериями.
        * Не добавлять в параметры isFormValid, иначе при загрузке страницы не будет автоматически
@@ -155,12 +153,15 @@
         /*if (!isFormValid) {
             return;
         }*/
-        emit('input', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
+        if (!ifUserWorksOffline.value)
+          emit('input', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
+        else
+          emit('loadCachedOrders');
       };
 
       onMounted(() => {
         // Хотим, чтобы сразу по загрузке страницы отображались те распоряжения, которые были изданы
-        // в текущем месяце
+        // в текущем месяце, либо закешированы (если пользователь работает offline)
         handleSubmit();
       });
 
@@ -178,20 +179,16 @@
         emit('createCheckRecord');
       };
 
-      const handleLoadCachedData = async () => {
-        emit('loadCachedOrders');
-      };
-
       return {
         state,
         INCLUDE_DOCUMENTS_CRITERIA,
         canUserCreateCheckOrders: computed(() => store.getters.canUserCreateCheckOrders),
+        ifUserWorksOffline,
         v$,
         submitted,
         handleSubmit,
         handlePrint,
         handleCheck,
-        handleLoadCachedData,
       };
     },
   }

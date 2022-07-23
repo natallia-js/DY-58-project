@@ -1,15 +1,17 @@
 import crypto from 'crypto';
 
+// название БД приложения в IndexedDB
+const DB_NAME = 'dy58DB';
 // название хранилища объектов распоряжений в IndexedDB
 const ORDERS_STORE_NAME = 'dy58Orders';
 // название хранилища информации о рабочем полигоне в IndexedDB
 const WORK_POLIGON_STORE_NAME = 'workPoligon';
-const DB_NAME = 'lastOrdersDB';
+// название ключа записей в хранилищах IndexedDB
 const OBJECT_KEY = '_id';
 
 /**
- * Класс, позволяющий хранить НСИ последнего пользователя и массив объектов распоряжений в IndexedDB
- * и поддерживать содержимое локальной базы объектов распоряжений в "актуальном" состоянии.
+ * Класс, позволяющий хранить НСИ последнего пользователя и массив объектов распоряжений в IndexedDB,
+ * а также поддерживать содержимое локальной базы объектов распоряжений в "актуальном" состоянии.
  */
 class LocalStoreServer {
   constructor(maxTimeStoreDataInLocalDB) {
@@ -17,7 +19,7 @@ class LocalStoreServer {
     // позволят поддерживать хранилище в актуальном состоянии без необходимости к нему обращаться, если
     // данные не изменились)
     this.lastOrdersShortData = [];
-    // максимальное время хранения данных (в миллисекундах)
+    // максимальное время хранения объектов распоряжений в IndexedDB (в миллисекундах)
     this.maxTimeStoreDataInLocalDB = maxTimeStoreDataInLocalDB;
     // ссылка на NoSQL-базу данных браузера (IndexedDB)
     this.db = null;
@@ -30,7 +32,8 @@ class LocalStoreServer {
     // ошибка записи в хранилище информации о рабочем полигоне
     this.writeStoreWorkPoligonDataError = null;
 
-    // открываем NoSQL-базу данных, которую можно использовать внутри любого браузера для хранения большого количества данных;
+    // открываем NoSQL-базу данных, которую можно использовать внутри любого браузера для хранения
+    // большого количества данных;
     // 1 - это версия нашей локальной БД
     const openRequest = indexedDB.open(DB_NAME, 1);
 
@@ -41,11 +44,11 @@ class LocalStoreServer {
     openRequest.onupgradeneeded = function(event) {
       // сохраняем ссылку на базу данных
       localStoreServerObject.db = event.target.result;
-      // создадим хранилище объектов распоряжений, если его нет (ключ данных в хранилище - поле _id)
+      // создадим хранилище объектов распоряжений, если его нет (ключ данных в хранилище - поле OBJECT_KEY)
       if (!localStoreServerObject.db.objectStoreNames.contains(ORDERS_STORE_NAME)) {
         localStoreServerObject.db.createObjectStore(ORDERS_STORE_NAME, { keyPath: OBJECT_KEY });
       }
-      // создадим хранилище объекта информации о рабочем полигоне, если его нет (ключ данных в хранилище - поле _id)
+      // создадим хранилище объекта информации о рабочем полигоне, если его нет (ключ данных в хранилище - поле OBJECT_KEY)
       if (!localStoreServerObject.db.objectStoreNames.contains(WORK_POLIGON_STORE_NAME)) {
         localStoreServerObject.db.createObjectStore(WORK_POLIGON_STORE_NAME, { keyPath: OBJECT_KEY });
       }
@@ -63,9 +66,9 @@ class LocalStoreServer {
       // получаем и сохраняем ссылку на БД
       localStoreServerObject.db = event.target.result;
 
-      // Далее, из IndexedDB извлекаем "оперативные" данных всех объектов распоряжений и сохраняем их в памяти.
-      // В дальнейшем эти данные понадобятся для отслеживания изменений в массиве объектов
-      // для поддержания хранилища распоряжений IndexedDB в актуальном состоянии.
+      // Далее, из IndexedDB извлекаем "оперативные" данных всех объектов распоряжений и сохраняем их в оперативной памяти.
+      // В дальнейшем эти данные понадобятся для отслеживания изменений в массиве объектов распоряжений, чтобы
+      // поддерживать хранилище распоряжений IndexedDB в актуальном состоянии.
       const transaction = localStoreServerObject.db.transaction([ORDERS_STORE_NAME], 'readonly');
       // Получаем хранилище объектов распоряжений из транзакции
       const store = transaction.objectStore(ORDERS_STORE_NAME);
@@ -91,7 +94,7 @@ class LocalStoreServer {
   }
 
   /**
-   * Для данной строки dataString вычисляет и возвращает хэш-значение.
+   * Для заданной строки dataString вычисляет и возвращает хэш-значение.
    * Предполагается, что строка - сериализованный объект.
    */
   static getDataHash(dataString) {
@@ -241,11 +244,11 @@ class LocalStoreServer {
   /**
    *
    */
-   async checkAdjacentECDSectorsDataHash(hashToCheck) {
+   async checkAdjacentSectorsDataHash(hashToCheck) {
     if (!hashToCheck || !this.db) return false;
     try {
       const workPoligonData = await this.getLocallySavedUserWorkPoligon();
-      return workPoligonData && workPoligonData.adjacentECDSectorsDataHash === hashToCheck ? true : false;
+      return workPoligonData && workPoligonData.adjacentSectorsDataHash === hashToCheck ? true : false;
     } catch {
       return false;
     }
@@ -254,101 +257,14 @@ class LocalStoreServer {
   /**
    *
    */
-   async checkNearestDNCSectorsDataHash(hashToCheck) {
+   async checkNearestSectorsDataHash(hashToCheck) {
     if (!hashToCheck || !this.db) return false;
     try {
       const workPoligonData = await this.getLocallySavedUserWorkPoligon();
-      return workPoligonData && workPoligonData.nearestDNCSectorsDataHash === hashToCheck ? true : false;
+      return workPoligonData && workPoligonData.nearestSectorsDataHash === hashToCheck ? true : false;
     } catch {
       return false;
     }
-  }
-
-  /**
-   * Проверяет, есть ли среди входных объектов-распоряжений такой, которого нет в БД либо значение которого
-   * изменилось. Если да, то обновляет данные в локальной БД.
-   * При обновлении данных в БД также проводится проверка хранящихся в ней распоряжений на "актуальность":
-   * "просроченые" распоряжения удаляются.
-   * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) распоряжений (тех, с которыми работает пользователь).
-   */
-   async checkAndSaveWorkPoligonDataIfNecessary(data) {
-    if (!data || !this.db) return;
-
-    // выясняем, какие объекты из data новые, а какие - изменились
-    const { newObjects, modifiedObjects } = this.getObjectsChanges(data);
-    // изменений не было - больше ничего не делаем
-    if (!newObjects.length && !modifiedObjects.length) {
-      return;
-    }
-
-    // Изменения в БД вносим только в том случае, если есть что изменять
-
-    // считываем данные, хранящиеся в БД
-    const transaction = this.db.transaction([ORDERS_STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(ORDERS_STORE_NAME);
-    const request = store.getAll();
-
-    const localStoreServerObject = this;
-    // сюда поместим данные, которые заменят текущие данные в БД
-    let newDBData = [];
-
-    // id всех рабочих распоряжений
-    const activeOrdersIds = data.map((el) => el._id);
-
-    request.onsuccess = function() {
-      localStoreServerObject.writeStoreOrdersError = null;
-
-      if (request.result) {
-        // удаляю неактуальные данные (неактуальное распоряжение - такое, которое было издано более
-        // maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет среди data, т.е. нет в массиве
-        // рабочих распоряжений)
-        newDBData = request.result.filter((el) =>
-          (new Date() - el.createDateTime) <= this.maxTimeStoreDataInLocalDB ||
-          activeOrdersIds.includes(el._id));
-      }
-      // добавляем новые данные
-      newObjects.forEach((order) => newDBData.push(order));
-      // редактируем изменившиеся данные
-      modifiedObjects.forEach((order) => {
-        const newDBDataObjectIndex = newDBData.findIndex((obj) => obj._id === order._id);
-        if (newDBDataObjectIndex >= 0) {
-          newDBData[newDBDataObjectIndex] = order;
-        } else {
-          newDBData.push(order);
-        }
-      });
-      // теперь в newDBData содержится та информация, которая должна быть запомнена локально, а также
-      // сохранена в БД; применяем ее, предварительно очистив хранилище в БД
-      store.clear();
-      newDBData.forEach((order) => {
-        // Добавляем распоряжение в хранилище объектов
-        store.add(order);
-      });
-    };
-
-    request.onerror = function(event) {
-      localStoreServerObject.writeStoreOrdersError =
-        `Ошибка обновления хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
-    };
-
-    // Когда все эти запросы будут завершены, завершится и транзакция.
-    // Здесь мы уже уверены, что все успешно сохранено в БД, потому сохраняем копию нужных
-    // данных в оперативной памяти.
-    transaction.oncomplete = () => {
-      localStoreServerObject.writeStoreOrdersError = null;
-
-      // обновляем данные в памяти
-      localStoreServerObject.lastOrdersShortData = newDBData.map((order) => ({
-        _id: order._id,
-        hash: order.hash,
-        createDateTime: order.createDateTime,
-      }));
-    };
-
-    transaction.onerror = (event) => {
-      localStoreServerObject.writeStoreOrdersError =
-        'error renewing orders (code: ' + event.target.errorCode + '): ' + JSON.stringify(event);
-    };
   }
 
   /**
@@ -369,7 +285,7 @@ class LocalStoreServer {
       request.onerror = function(event) {
         localStoreServerObject.readStoreError =
           `Ошибка чтения хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
-        reject(event);
+        reject(new Error(localStoreServerObject.readStoreError));
       };
     });
   }
@@ -383,11 +299,11 @@ class LocalStoreServer {
     const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
     store.clear();
     const dataToSaveLocally = {
-      _id: dataToSave.ECDS_ID,
+      _id: dataToSave.ECDS_ID || dataToSave.DNCS_ID,
       serializedData: JSON.stringify(dataToSave),
       hash: dataToSave.hash,
-      adjacentECDSectorsDataHash: dataToSave.adjacentECDSectorsDataHash,
-      nearestDNCSectorsDataHash: dataToSave.nearestDNCSectorsDataHash,
+      adjacentSectorsDataHash: dataToSave.adjacentSectorsDataHash,
+      nearestSectorsDataHash: dataToSave.nearestSectorsDataHash,
     };
     const request = store.add(dataToSaveLocally);
 
@@ -422,7 +338,6 @@ class LocalStoreServer {
       const request = store.getAll();
 
       request.onsuccess = function() {
-        //console.log('request.result[0].serializedData',request.result[0].serializedData)
         resolve(request.result && request.result[0] ? JSON.parse(request.result[0].serializedData) : null);
       };
 

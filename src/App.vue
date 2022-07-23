@@ -37,6 +37,7 @@
     DEL_ORDERS_DRAFTS,
     DELETE_ALL_SYSTEM_MESSAGES,
     SET_SELECTED_OKNO,
+    SET_USER_OFFLINE_STATUS,
   } from '@/store/mutation-types';
   import {
     LOAD_CURR_SECTORS_SHIFT_ACTION,
@@ -179,6 +180,11 @@
        * на дежурстве)
        */
       watch(() => store.getters.isUserOnDuty, () => store.commit(DETERMINE_LOGOUT_ITEM_ACTION));
+
+      /**
+       * Если сокет-соединение неактивно, то полагаем, что пользователь работает offline.
+       */
+      watch(() => store.getters.isWebSocketConnectionActive, (newValue) => store.commit(SET_USER_OFFLINE_STATUS, !newValue));
 
       /**
        * При смене рабочего полигона пользователя подгружаем информацию о:

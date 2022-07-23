@@ -4,8 +4,8 @@ import {
   GET_ALL_LOCALLY_SAVED_ORDERS,
   GET_LOCALLY_SAVED_USER_WORK_POLIGON,
   CHECK_WORK_POLIGON_DATA_HASH,
-  CHECK_ADJACENT_ECD_SECTORS_DATA_HASH,
-  CHECK_NEAREST_DNC_SECTORS_DATA_HASH,
+  CHECK_ADJACENT_SECTORS_DATA_HASH,
+  CHECK_NEAREST_SECTORS_DATA_HASH,
   STORE_WORK_POLIGON_DATA_LOCALLY,
 } from '@/store/action-types';
 import { STORE_DATA_LOCALLY_TIME_IN_MS } from '@/constants/appSettings';
@@ -39,12 +39,12 @@ export const localStore = {
       return await context.state.localStoreServer.checkWorkPoligonDataHash(hash);
     },
 
-    async [CHECK_ADJACENT_ECD_SECTORS_DATA_HASH] (context, hash) {
-      return await context.state.localStoreServer.checkAdjacentECDSectorsDataHash(hash);
+    async [CHECK_ADJACENT_SECTORS_DATA_HASH] (context, hash) {
+      return await context.state.localStoreServer.checkAdjacentSectorsDataHash(hash);
     },
 
-    async [CHECK_NEAREST_DNC_SECTORS_DATA_HASH] (context, hash) {
-      return await context.state.localStoreServer.checkNearestDNCSectorsDataHash(hash);
+    async [CHECK_NEAREST_SECTORS_DATA_HASH] (context, hash) {
+      return await context.state.localStoreServer.checkNearestSectorsDataHash(hash);
     },
   },
 }

@@ -29,6 +29,10 @@ export const webSocket = {
       return state.lastNServerMessages;
     },
 
+    isWebSocketConnectionActive(state) {
+      return state.readyState.ready;
+    },
+
     getReadyState(state) {
       return state.readyState;
     },

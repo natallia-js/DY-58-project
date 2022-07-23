@@ -60,7 +60,8 @@
     </TabPanel>
   </TabView>
   <div v-else class="dy58-user-action-forbidden-block">
-    Вы не на дежурстве либо у вас нет прав на издание документов
+    <span v-if="!ifUserWorksOffline">Вы не на дежурстве либо у вас нет прав на издание документов</span>
+    <span v-else>Издание документов в режиме offline невозможно</span>
   </div>
 </template>
 
@@ -217,6 +218,7 @@
       return {
         activeIndex,
         canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
+        ifUserWorksOffline: computed(() => store.getters.ifUserWorksOffline),
         isDSP_or_DSPoperator,
         isDNC,
         isECD,

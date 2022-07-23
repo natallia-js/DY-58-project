@@ -18,6 +18,7 @@ import {
   CLEAR_USER_DATA_ON_LOGOUT,
   CLEAR_LOGIN_RESULT,
   SET_LOGIN_RESULT,
+  SET_USER_OFFLINE_STATUS,
 } from '@/store/mutation-types';
 import {
   LOGIN_ACTION,
@@ -441,6 +442,10 @@ export const currUser = {
 
       state.isAuthenticated = false;
       state.loginDateTime = null;
+    },
+
+    [SET_USER_OFFLINE_STATUS] (state, status) {
+      state.workOffline = status;
     },
   },
 
