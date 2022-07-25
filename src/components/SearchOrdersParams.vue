@@ -21,6 +21,9 @@
               Пожалуйста, корректно определите временной интервал поиска информации (не более трех месяцев)
             </small>
           </div>
+          <div v-else class="p-field p-col-6">
+            В режиме offline поиск информации не работает
+          </div>
           <div v-if="!ifUserWorksOffline" class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">Включать:</label>
             <div class="p-mb-2">
@@ -41,6 +44,8 @@
               />
               <label for="include-active-docs">&#160;действующие цепочки документов</label>
             </div>
+          </div>
+          <div v-else class="p-field p-col-6">
           </div>
           <div class="p-col-6 p-d-flex p-flex-row p-flex-wrap">
             <Button

@@ -61,7 +61,7 @@
         :style="{ width: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-top-content-cell-class"
-        :sortable="[getDNC_DSPJournalTblColumnsTitles.assertDateTime].includes(col.field)"
+        :sortable="!workingWithCachedOrders && [getDNC_DSPJournalTblColumnsTitles.assertDateTime].includes(col.field)"
         filterMatchMode="contains"
         :showFilterMatchModes="false"
       >
@@ -85,8 +85,8 @@
           </div>
         </template>
 
-        <template #filter="{filterModel,filterCallback}" v-if="[
-          getDNC_DSPJournalTblColumnsTitles.number,
+        <template #filter="{filterModel,filterCallback}" v-if="!workingWithCachedOrders &&
+        [ getDNC_DSPJournalTblColumnsTitles.number,
           getDNC_DSPJournalTblColumnsTitles.orderContent,
           getDNC_DSPJournalTblColumnsTitles.orderAcceptor,
         ].includes(col.field)">
@@ -183,6 +183,7 @@
       const router = useRouter();
 
       const data = ref([]);
+      const dataFromCache = ref([]);
       const errMessage = ref(null);
       const searchInProgress = ref(false);
       const totalRecords = ref(0);
@@ -198,6 +199,7 @@
       });
       const selectedRecords = ref();
       const showCreateRevisorCheckRecordDlg = ref(false);
+      const workingWithCachedOrders = ref(false);
 
       const getOrderSeqNumber = (index) => {
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
@@ -227,12 +229,16 @@
             totalRecords.value  = responseData.totalRecords;
             prepareDataForDisplay(responseData.data);
           })
-          .catch((err) => {
-            errMessage.value = err;
+          .catch((error) => {
+            errMessage.value = error;
           })
           .finally(() => {
             searchInProgress.value = false;
           });
+      };
+
+      const loadCachedDataForCurrentPage = () => {
+        data.value = dataFromCache.value.slice((currentPage.value - 1) * rowsPerPage.value, currentPage.value * rowsPerPage.value);
       };
 
       const onPage = (event) => {
@@ -244,10 +250,17 @@
           // если меняется текущий номер страницы
           currentPage.value = event.page + 1;
         }
-        loadLazyData();
+        if (!workingWithCachedOrders.value) {
+          loadLazyData();
+        } else {
+          loadCachedDataForCurrentPage();
+        }
       };
 
       const onSort = (event) => {
+        if (workingWithCachedOrders.value) {
+          return;
+        }
         // таблица при попытке что-то отсортировать производит автоматически переход на 1 страницу
         currentPage.value = 1;
         if (event.sortField) {
@@ -261,6 +274,9 @@
       };
 
       const onFilter = () => {
+        if (workingWithCachedOrders.value) {
+          return;
+        }
         // таблица при попытке что-то отфильтровать производит автоматически переход на 1 страницу
         currentPage.value = 1;
         filterFields.value = [];
@@ -321,12 +337,24 @@
         }
       });
 
+      /**
+       * Для работы с закешированными распоряжениями в режиме offline.
+       */
       watch(() => props.loadCachedOrders, async () => {
         try {
-          const data = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
-          console.log(data)
+          const cachedOrders = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
+          if (!cachedOrders) {
+            totalRecords.value = 0;
+            data.value = [];
+            return;
+          }
+          dataFromCache.value = prepareDataForDisplayInDNC_DSPJournal(
+            cachedOrders.map((order) => JSON.parse(order.serializedData)), getOrderSeqNumber);
+          totalRecords.value = cachedOrders.length;
+          workingWithCachedOrders.value = true;
+          loadCachedDataForCurrentPage();
         } catch (error) {
-          console.log(error)
+          errMessage.value = error;
         }
       });
 
@@ -337,6 +365,7 @@
 
       return {
         data,
+        workingWithCachedOrders,
         ORDER_PATTERN_TYPES,
         totalRecords,
         selectedRecords,

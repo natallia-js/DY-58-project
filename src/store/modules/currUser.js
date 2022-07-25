@@ -19,6 +19,7 @@ import {
   CLEAR_LOGIN_RESULT,
   SET_LOGIN_RESULT,
   SET_USER_OFFLINE_STATUS,
+  SET_USER_ALL_WORK_OFFLINE_STATUS,
 } from '@/store/mutation-types';
 import {
   LOGIN_ACTION,
@@ -173,7 +174,11 @@ export const currUser = {
     logoutWithDutyPass: false, // true (false) - выход из системы со сдачей (без сдачи) дежурства
     logoutProcessIsUnderway: false, // true (false) - идет (не идет) процесс выхода из системы
     logoutError: null,
+    // если true, то в данный момент пользователь работает в режиме offline, false - в режиме online
     workOffline: false,
+    // если true, то пользователь вошел в систему для работы в режиме offline, а значит, что
+    // workOffline всегда должно быть true (workOfflineAllTheTime устанавливается только в момент входа в систему)
+    workOfflineAllTheTime: false,
   },
 
   getters: {
@@ -445,7 +450,14 @@ export const currUser = {
     },
 
     [SET_USER_OFFLINE_STATUS] (state, status) {
-      state.workOffline = status;
+      if (!state.workOfflineAllTheTime)
+        state.workOffline = status;
+    },
+
+    [SET_USER_ALL_WORK_OFFLINE_STATUS] (state, status) {
+      state.workOfflineAllTheTime = status;
+      if (status)
+        state.workOffline = status;
     },
   },
 
@@ -519,7 +531,8 @@ export const currUser = {
         let _lastPassDutyTime = lastPassDutyTime; // строка
         let userToken = jtwToken;
 
-        context.state.workOffline = offline;
+        context.commit(SET_USER_ALL_WORK_OFFLINE_STATUS, offline);
+        context.commit(SET_USER_OFFLINE_STATUS, offline);
 
         // если удалось однозначно определить полномочие и рабочий полигон пользователя,
         // то отправляем запрос на сервер о начале работы на данном рабочем полигоне;

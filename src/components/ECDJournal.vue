@@ -64,7 +64,7 @@
         :style="{ width: col.width, textAlign: col.align }"
         headerClass="dy58-table-header-cell-class"
         bodyClass="dy58-table-top-content-cell-class"
-        :sortable="[
+        :sortable="!workingWithCachedOrders && [
           getECDJournalTblColumnsTitles.assertDateTime,
           getECDJournalTblColumnsTitles.orderNotificationDateTime].includes(col.field)"
         filterMatchMode="contains"
@@ -91,8 +91,8 @@
           </div>
         </template>
 
-        <template #filter="{filterModel,filterCallback}" v-if="[
-          getECDJournalTblColumnsTitles.toWhom,
+        <template #filter="{filterModel,filterCallback}" v-if="!workingWithCachedOrders &&
+        [ getECDJournalTblColumnsTitles.toWhom,
           getECDJournalTblColumnsTitles.number,
           getECDJournalTblColumnsTitles.orderContent,
           getECDJournalTblColumnsTitles.orderAcceptor,
@@ -202,6 +202,7 @@
       const router = useRouter();
 
       const data = ref([]);
+      const dataFromCache = ref([]);
       const errMessage = ref(null);
       const searchInProgress = ref(false);
       const totalRecords = ref(0);
@@ -220,6 +221,7 @@
       });
       const selectedRecords = ref();
       const showCreateRevisorCheckRecordDlg = ref(false);
+      const workingWithCachedOrders = ref(false);
 
       const getOrderSeqNumber = (index) => {
         return (currentPage.value - 1) * rowsPerPage.value + index + 1;
@@ -231,6 +233,10 @@
           data.value = [];
         }
         data.value = prepareDataForDisplayInECDJournal(responseData, getOrderSeqNumber);
+      };
+
+      const loadCachedDataForCurrentPage = () => {
+        data.value = dataFromCache.value.slice((currentPage.value - 1) * rowsPerPage.value, currentPage.value * rowsPerPage.value);
       };
 
       const loadLazyData = () => {
@@ -249,8 +255,8 @@
             totalRecords.value  = responseData.totalRecords;
             prepareDataForDisplay(responseData.data);
           })
-          .catch((err) => {
-            errMessage.value = err;
+          .catch((error) => {
+            errMessage.value = error;
           })
           .finally(() => {
             searchInProgress.value = false;
@@ -266,10 +272,17 @@
           // если меняется текущий номер страницы
           currentPage.value = event.page + 1;
         }
-        loadLazyData();
+        if (!workingWithCachedOrders.value) {
+          loadLazyData();
+        } else {
+          loadCachedDataForCurrentPage();
+        }
       };
 
       const onSort = (event) => {
+        if (workingWithCachedOrders.value) {
+          return;
+        }
         // таблица при попытке что-то отсортировать производит автоматически переход на 1 страницу
         currentPage.value = 1;
         if (event.sortField) {
@@ -283,6 +296,9 @@
       };
 
       const onFilter = () => {
+        if (workingWithCachedOrders.value) {
+          return;
+        }
         // таблица при попытке что-то отфильтровать производит автоматически переход на 1 страницу
         currentPage.value = 1;
         filterFields.value = [];
@@ -346,43 +362,17 @@
         try {
           const cachedOrders = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
           if (!cachedOrders) {
+            totalRecords.value = 0;
             data.value = [];
             return;
           }
-          console.log(cachedOrders)
-          /*data.value = cachedOrders.map((order) => {
-            const deserializedOrderData = JSON.parse(order.serializedData);
-            return {
-              ...deserializedOrderData,
-              dncToSend: !order.dncToSend ? [] :
-                order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
-              dspToSend: !order.dspToSend ? [] :
-                order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
-              ecdToSend: !order.ecdToSend ? [] :
-                order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
-              otherToSend: !order.otherToSend ? [] :
-                order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
-              // Исключаем главных ДСП (они будут в списке dspToSend)
-              stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
-                order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
-                  .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
-              orderText: !deserializedOrderData.orderText ? null : {
-                ...deserializedOrderData.orderText,
-                orderText: !deserializedOrderData.orderText.orderText ? null :
-                  deserializedOrderData.orderText.orderText.map((el) => {
-                    return {
-                      ...el,
-                      value: getOrderTextElementTypedValue(el),
-                    };
-                  }),
-              },
-            };
-          });*/
-          data.value = prepareDataForDisplayInECDJournal(
+          dataFromCache.value = prepareDataForDisplayInECDJournal(
             cachedOrders.map((order) => JSON.parse(order.serializedData)), getOrderSeqNumber);
-          console.log(data.value)
+          totalRecords.value = cachedOrders.length;
+          workingWithCachedOrders.value = true;
+          loadCachedDataForCurrentPage();
         } catch (error) {
-          console.log(error)
+          errMessage.value = error;
         }
       });
 
@@ -394,6 +384,7 @@
       return {
         ORDER_PATTERN_TYPES,
         data,
+        workingWithCachedOrders,
         totalRecords,
         selectedRecords,
         filters,

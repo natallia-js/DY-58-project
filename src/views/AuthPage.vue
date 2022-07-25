@@ -158,7 +158,7 @@
       const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
 
       const redirect = () => {
-        if (canUserWorkWithSystem.value) {
+        if (canUserWorkWithSystem.value) {console.log('main page')
           // Если в процессе входа в систему программе удалось явно определить полномочия пользователя и его
           // рабочий полигон, то осуществляем переход на главную страницу
           router.push({ name: 'MainPage' });
