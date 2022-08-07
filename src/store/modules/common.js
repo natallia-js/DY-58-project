@@ -4,6 +4,7 @@ import {
   SET_PRINT_PREVIEW,
   SET_SYSTEM_MESSAGE,
   DELETE_ALL_SYSTEM_MESSAGES,
+  SET_ALL_DATA_LOADED_ON_APP_RELOAD,
 } from '@/store/mutation-types';
 import { MAX_SYSTEM_MESSAGES_STORED } from '@/constants/appSettings';
 
@@ -55,7 +56,7 @@ export const common = {
   },
 
   mutations: {
-    setAllDataLoadedOnApplicationReload (state) {
+    [SET_ALL_DATA_LOADED_ON_APP_RELOAD] (state) { console.log('SET_ALL_DATA_LOADED_ON_APP_RELOAD')
       state.allDataLoadedOnApplicationReload = true;
     },
 

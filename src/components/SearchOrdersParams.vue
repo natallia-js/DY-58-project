@@ -175,8 +175,11 @@
         v$.value.$touch();
         v$.value.$validate();
         let isFormValid = !v$.value.$invalid;
+        console.log(state.timeSpan, state.includeDocsCriteria)
         if (isFormValid) {
           emit('print', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
+        } else if (ifUserWorksOffline.value) {
+          emit('print', { offline: true });
         }
       };
 

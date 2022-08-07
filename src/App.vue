@@ -38,6 +38,7 @@
     DELETE_ALL_SYSTEM_MESSAGES,
     SET_SELECTED_OKNO,
     SET_USER_OFFLINE_STATUS,
+    SET_ALL_DATA_LOADED_ON_APP_RELOAD,
   } from '@/store/mutation-types';
   import {
     LOAD_CURR_SECTORS_SHIFT_ACTION,
@@ -70,6 +71,13 @@
 
     setup() {
       const store = useStore();
+
+      store.commit('sss')
+
+      if (router.currentRoute.offline === 'true') {
+        store.commit(SET_USER_OFFLINE_STATUS, true);
+      }
+
       // для общения с сервером по протоколу WebSocket
       const wsClient = useWebSocket({ socketUrl: WS_SERVER_ADDRESS });
 
@@ -184,7 +192,13 @@
       /**
        * Если сокет-соединение неактивно, то полагаем, что пользователь работает offline.
        */
-      watch(() => store.getters.isWebSocketConnectionActive, (newValue) => store.commit(SET_USER_OFFLINE_STATUS, !newValue));
+      watch(() => store.getters.isWebSocketConnectionActive, (newValue) => {
+        store.commit(SET_USER_OFFLINE_STATUS, !newValue);
+      });
+
+      const ifUserWorksOffline = computed(() => store.getters.ifUserWorksOffline);
+
+      const isLocalStoreServerCreated = computed(() => { console.log('in app isLocalStoreServerCreated',store.getters.isLocalStoreServerCreated); return store.getters.isLocalStoreServerCreated});
 
       /**
        * При смене рабочего полигона пользователя подгружаем информацию о:
@@ -193,13 +207,15 @@
        * - количестве входящих распоряжений за смену (если пользователь на дежурстве),
        * а также открываем WebSocket-соединение между клиентом и сервером,
        */
-      watch(() => store.getters.getUserWorkPoligon, (workPoligonNew) => {
-        if (workPoligonNew) {
-          store.dispatch(LOAD_CURR_WORK_POLIGON_DATA_ACTION);
-          store.dispatch(LOAD_ORDER_PATTERNS_ACTION);
-          store.dispatch(LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION);
-          store.dispatch(LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION);
-        }
+      watch([() => store.getters.getUserWorkPoligon, isLocalStoreServerCreated],
+        ([workPoligonNew, localStoreServerCreated]) => {
+          console.log('workPoligonNew',workPoligonNew,localStoreServerCreated)
+          if (workPoligonNew && (!ifUserWorksOffline.value || localStoreServerCreated)) {
+            store.dispatch(LOAD_CURR_WORK_POLIGON_DATA_ACTION);
+            store.dispatch(LOAD_ORDER_PATTERNS_ACTION);
+            store.dispatch(LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION);
+            store.dispatch(LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION);
+          }
       });
 
       /**
@@ -209,14 +225,14 @@
        * - черновиках распоряжений, изданных в рамках рабочего полигона,
        * - запускаем периодическую подгрузку входящих уведомлений и рабочих распоряжений
        */
-      watch(() => store.getters.getUserWorkPoligonData, async (workPoligonDataNew) => {
+      watch(() => store.getters.getUserWorkPoligonData, async (workPoligonDataNew) => {console.log('workPoligonDataNew',workPoligonDataNew)
         if (workPoligonDataNew) {
           await store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
           await store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
           if (store.getters.isECD)
             await store.dispatch(LOAD_ORDER_DRAFTS_ACTION);
           await store.dispatch(LOAD_WORK_ORDERS_ACTION);
-          store.commit('setAllDataLoadedOnApplicationReload');
+          store.commit(SET_ALL_DATA_LOADED_ON_APP_RELOAD);
         }
       });
 

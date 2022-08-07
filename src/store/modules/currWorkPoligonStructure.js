@@ -34,6 +34,7 @@ import {
   getNearestDNCSectorsShortDefinitData,
 } from '@/serverRequests/ecdSectors.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import wait from '@/additional/wait';
 
 
 export const currWorkPoligonStructure = {
@@ -166,7 +167,7 @@ export const currWorkPoligonStructure = {
       };
     },
 
-    getUserWorkPoligonData(state, getters) {
+    getUserWorkPoligonData(state, getters) { console.log('getUserWorkPoligonData', state.sector)
       const workPoligon = getters.getUserWorkPoligon;
       if (!workPoligon) {
         return null;
@@ -537,7 +538,6 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера информацию о полигоне управления "Станция".
      */
     async [LOAD_STATION_DATA_ACTION] (context, { stationId }) {
-      console.log(await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON));
       const responseData = await getDefinitStationData(stationId);
       const blocksResponseData = await getStationBlocksData(stationId);
       const dncSectorsResponseData = await getStationDNCSectorsData(stationId);
@@ -714,14 +714,14 @@ export const currWorkPoligonStructure = {
      */
     async [LOAD_CURR_WORK_POLIGON_DATA_ACTION] (context) {
       if (!context.getters.canUserWorkWithSystem) {
-        const errMessage = 'У вас нет права на получение информации о рабочем полигоне';
+        const errMessage = 'У вас нет права на получение информации о рабочем полигоне';console.log(errMessage)
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
       }
       const workPoligon = context.getters.getUserWorkPoligon;
       if (!workPoligon) {
-        const errMessage = 'Ошибка загрузки информации о рабочем полигоне: неизвестен рабочий полигон';
+        const errMessage = 'Ошибка загрузки информации о рабочем полигоне: неизвестен рабочий полигон';console.log(errMessage)
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;
@@ -729,11 +729,12 @@ export const currWorkPoligonStructure = {
       context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, null);
       context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, true);
       try {
-        if (context.getters.ifUserWorksOffline) {
-          // setTimeout только для того чтобы система корректно успела отреагировать на изменение флага,
+        if (context.getters.ifUserWorksOffline) { console.log('ifUserWorksOffline',context.getters.ifUserWorksOffline)
+          // wait только для того чтобы система корректно успела отреагировать на изменение флага,
           // устанавливаемого при SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS
           context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
-          setTimeout(() => {}, 100);
+          console.log('context.state.sector', context.state.sector)
+          await wait(100);
         } else {
           switch (workPoligon.type) {
             case WORK_POLIGON_TYPES.STATION:
@@ -748,7 +749,7 @@ export const currWorkPoligonStructure = {
           }
         }
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: 'Загружена информация о рабочем полигоне' });
-      } catch (error) {
+      } catch (error) { console.log('error',error)
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка загрузки информации о рабочем полигоне');
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });

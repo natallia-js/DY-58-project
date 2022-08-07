@@ -297,7 +297,7 @@
 
       let printWindow;
       let params;
-      watch(() => props.printParams, (newVal) => {
+      watch(() => props.printParams, (newVal) => {console.log('print',props.printParams)
         if (!newVal) {
           return;
         }
@@ -305,6 +305,10 @@
         params = selectedRecords.value ?
           {
             selectedRecords: selectedRecords.value,
+          } :
+          props.printParams.offline ?
+          {
+            offline: true,
           } :
           {
             selectedRecords: selectedRecords.value,
@@ -316,8 +320,9 @@
           };
         const route = router.resolve({
           name: 'PrintDNC_DSPJournalPreviewPage',
-          params: null,
+          params: { offline: Boolean(props.printParams.offline) },
         });
+        console.log(route)
         printWindow = window.open(route.href, '_blank', 'nodeIntegration=yes');
         if (!isElectron()) {
           printWindow.addEventListener('ready', () => {

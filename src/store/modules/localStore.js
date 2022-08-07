@@ -9,13 +9,31 @@ import {
   STORE_WORK_POLIGON_DATA_LOCALLY,
 } from '@/store/action-types';
 import { STORE_DATA_LOCALLY_TIME_IN_MS } from '@/constants/appSettings';
+import wait from '@/additional/wait';
 
 export const localStore = {
   state: {
-    localStoreServer: (() => {
+    localStoreServer: {
+      db: null,
+    },
+    /* (() => {
       try { return new LocalStoreServer(STORE_DATA_LOCALLY_TIME_IN_MS); }
       catch { return null; }
-    })(),
+    })(),*/
+  },
+
+  getters: {
+    isLocalStoreServerCreated(state) { console.log('isLocalStoreServerCreated',state.localStoreServer.db)
+      return state.localStoreServer.db ? true : false;
+    },
+  },
+
+  mutations: {
+    sss(state) {
+      try {
+        state.localStoreServer = new LocalStoreServer(STORE_DATA_LOCALLY_TIME_IN_MS);
+      } catch { state.localStoreServer = { db: null }; }
+    },
   },
 
   actions: {
@@ -24,6 +42,9 @@ export const localStore = {
     },
 
     async [GET_ALL_LOCALLY_SAVED_ORDERS] (context) {
+      if (!context.state.localStoreServer.db) {
+        await wait(100);
+      }
       return await context.state.localStoreServer.getAllLocallySavedOrders();
     },
 

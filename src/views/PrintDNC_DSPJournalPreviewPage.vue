@@ -60,11 +60,13 @@
 
 
 <script>
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, ref, watch } from 'vue';
   import { useStore } from 'vuex';
+  //import { useRoute } from 'vue-router';
   import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
   import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
+  import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import isElectron from '@/additional/isElectron';
@@ -74,6 +76,7 @@
 
     setup() {
       const store = useStore();
+      //const route = useRoute();
 
       const data = ref([]);
       const errMessage = ref(null);
@@ -99,12 +102,29 @@
             errMessage.value = null;
             prepareDataForDisplay(responseData.data);
           })
-          .catch((err) => {
-            errMessage.value = err;
+          .catch((error) => {
+            errMessage.value = error;
           })
           .finally(() => {
             searchInProgress.value = false;
           });
+      };
+
+      const loadCachedOrders = async () => {
+        searchInProgress.value = true;
+        try {
+          const cachedOrders = await store.dispatch(GET_ALL_LOCALLY_SAVED_ORDERS);
+          if (!cachedOrders) {
+            data.value = [];
+          } else {
+            data.value = prepareDataForDisplayInDNC_DSPJournal(
+              cachedOrders.map((order) => JSON.parse(order.serializedData)), getOrderSeqNumber);
+          }
+        } catch (error) {
+          errMessage.value = error;
+        } finally {
+          searchInProgress.value = false;
+        }
       };
 
       const viewJournal = (params) => {
@@ -117,6 +137,8 @@
           data.value = params.selectedRecords
             .sort((a, b) => a.seqNum - b.seqNum)
             .map((el, index) => ({ ...el, seqNum: index + 1 }));
+        } else if (params.offline) {
+          loadCachedOrders();
         } else {
           // будем отображать данные, которые подгрузим с сервера
           loadData({
@@ -153,6 +175,17 @@
         window.print();
       };
 
+      const getUserWorkPoligonName = computed(() => {
+        if (store.getters.ifAllDataLoadedOnApplicationReload)
+          return store.getters.getUserWorkPoligonName;
+        return null;
+      });
+
+      console.log('store.getters.ifAllDataLoadedOnApplicationReload',store.getters.ifAllDataLoadedOnApplicationReload)
+
+      watch(() => store.getters.ifAllDataLoadedOnApplicationReload, (val) =>
+      console.log('store.getters.ifAllDataLoadedOnApplicationReload',val))
+
       return {
         data,
         errMessage,
@@ -161,13 +194,14 @@
         getDNC_DSPJournalTblColumns: computed(() => store.getters.getDNC_DSPJournalTblColumns),
         startDisplayDate,
         endDisplayDate,
+
         getUserWorkPoligonTypeName: computed(() => {
           switch (store.getters.getUserWorkPoligon.type) {
             case WORK_POLIGON_TYPES.STATION:
-              return `станции ${store.getters.getUserWorkPoligonName}`;
+              return `станции ${getUserWorkPoligonName.value}`;
             case WORK_POLIGON_TYPES.DNC_SECTOR:
             case WORK_POLIGON_TYPES.ECD_SECTOR:
-              return `участку ${store.getters.getUserWorkPoligonName}`;
+              return `участку ${getUserWorkPoligonName.value}`;
             default:
               return '?';
           }
@@ -188,7 +222,7 @@
     tfoot { display: table-footer-group }
     .print-btn { display: none }
   }
-  
+
   :deep(th) {
     border-width: 2px !important;
   }

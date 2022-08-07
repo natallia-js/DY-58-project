@@ -57,10 +57,11 @@ class LocalStoreServer {
     openRequest.onerror = function(event) {
       localStoreServerObject.createStoreError =
         `Ошибка создания хранилища в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${openRequest.error}`;
+        console.log('createStoreError',localStoreServerObject.createStoreError)
     };
 
     // срабатывает после завершения onupgradeneeded, а также срабатывает после обновления страницы
-    openRequest.onsuccess = function(event) {
+    openRequest.onsuccess = function(event) { console.log('onsuccess')
       localStoreServerObject.readStoreError = null;
 
       // получаем и сохраняем ссылку на БД
@@ -337,11 +338,11 @@ class LocalStoreServer {
       const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
       const request = store.getAll();
 
-      request.onsuccess = function() {
+      request.onsuccess = function() { console.log(request.result[0].serializedData)
         resolve(request.result && request.result[0] ? JSON.parse(request.result[0].serializedData) : null);
       };
 
-      request.onerror = function(event) {
+      request.onerror = function(event) { console.log(request.error)
         localStoreServerObject.readStoreError =
           `Ошибка чтения хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
         reject(new Error(localStoreServerObject.readStoreError));
