@@ -346,6 +346,10 @@ export const getCurrSectorShift = {
      * Извлекает информацию в зависимости от типа текущего рабочего полигона пользователя.
      */
     async [LOAD_CURR_SECTORS_SHIFT_ACTION] (context) {
+      if (context.getters.ifUserWorksOffline) {
+        context.commit(SET_ERROR_LOADING_CURR_SHIFT, 'При автономной работе с системой не предусмотрена возможность просматривать персонал рабочего полигона');
+        return;
+      }
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'У вас нет права на получение информации о персонале рабочего полигона';
         context.commit(SET_ERROR_LOADING_CURR_SHIFT, errMessage);

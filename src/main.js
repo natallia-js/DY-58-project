@@ -108,6 +108,7 @@ app.component('Password', Password);
 
 app.mount('#app');
 
+// Для работы в offline-режиме необходимо зарегистрировать соответствующего service-воркера
 if (process.env.NODE_ENV === 'production') {
   // Check that service workers are supported
   if ('serviceWorker' in navigator) {

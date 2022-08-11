@@ -63,6 +63,13 @@ export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
+  AUXILIARY_MODE_KIND: 'Вид вспомогательного режима',
+  TRACK_KIND: 'Вид пути',
+  CONNECTION_KIND: 'Вид связи',
+  ISSUED_DSP_BAN: 'Выдано запрещение ДСП',
+  ACTIONS: 'Действия',
+  ACTIONS_NOTIFICATIONS: 'Действия (уведомления)',
+  MOVEMENT_DIRECTION: 'Направление движения',
   ORDER_NUMBER: 'Номер действующего распоряжения',
   CLOSE_BLOCK_ORDER_NUMBER: 'Номер действующего распоряжения на закрытие перегона',
   REQUEST_NUMBER: 'Номер действующей заявки',
@@ -70,29 +77,35 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   ECD_ORDER_NUMBER: 'Номер действующего приказа',
   ECD_PROHIBITION_NUMBER: 'Номер действующего запрещения',
   BLOCK: 'Перегон',
+  TRAINS: 'Поезда',
   DPT_STATION_BLOCK: 'Перегон станции отправления',
+  ARRIVE_RETURN: 'Прибытие/возвращение',
   BLOCK_TRACK: 'Путь перегона',
   DPT_STATION_BLOCK_TRACK: 'Путь перегона станции отправления',
   STATION_TRACK: 'Путь станции',
   DPT_STATION_TRACK: 'Путь станции отправления',
   ARR_STATION_TRACK: 'Путь станции прибытия',
   WORKS_HEADS: 'Руководители',
+  MOVEMENT_SYSTEM: 'Система движения',
   STATION: 'Станция',
   DPT_STATION: 'Станция отправления',
   ARR_STATION: 'Станция прибытия',
   SWITCH_OFF_ON: 'Отключить, включить',
   EXACT_PLACE: 'Точное место',
   ACTIONS_ORDER: 'Порядок действий',
+  ACTIONS_ORDER_NOTIFICATION: 'Порядок действий (уведомления)',
   PASS_DUTY: 'Дежурство сдал',
   TAKE_DUTY: 'Дежурство принял',
   WHAT_SHOULD_BE_DONE_FOR_WORK: 'Для работы должно быть',
   WORK_CATEGORIES: 'Категория работ',
   WORK_IF_THERE_ARE: 'Работать при наличии',
   NARYAD_DOPUSK: 'Наряд допуск',
+  TRACK_SECTION_BEFORE: 'Участок пути до',
 });
 
 export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   WORKS_OBJECT: 'Объект работ',
+  WORKS_OBJECT_NOTIFICATION: 'Объект работ (уведомления)',
   WORK_DONE_FROM: 'С чего производится работа',
   STATION: 'Станция',
   BLOCK: 'Перегон',
@@ -100,8 +113,34 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   TRACK: 'Путь',
 });
 
-export const SWITCH_OFF_ON_ITEMS = [
-  'отключить', 'отключены', 'включить', 'включены',
+export const ISSUED_DSP_BAN_ITEMS = ['Выдано запрещение ДСП', ''];
+
+export const ACTIONS_ITEMS = [
+  'Отключить', 'Включить', 'Вывести АПВ ФКС №', 'Ввести АПВ ФКС №', 'Выкатить тележку', 'Вкатить тележку', 'Перевести питание с',
+];
+
+export const ACTIONS_NOTIFICATIONS_ITEMS = [
+  'отключено', 'включено', 'выведено АПВ ФКС №', 'введено АПВ ФКС №', 'выкачена тележка', 'вкачена тележка', 'переведено питание с',
+];
+
+export const CONNECTION_KIND_ITEMS = ['АБ', 'ПАБ', 'АЛСН', 'АЛСО'];
+
+export const TRACK_KIND_ITEMS = ['главного', 'приемоотправочного'];
+
+export const TRACK_SECTION_BEFORE_ITEMS = ['входного сигнала', 'сигнального знака «Граница станции»'];
+
+export const TRAINS_ITEMS = ['четных', 'нечетных'];
+
+export const MOVEMENT_SYSTEM_ITEMS = ['однопутного', 'двухпутного'];
+
+export const MOVEMENT_DIRECTION_ITEMS = ['нечетного на четное', 'четного на нечетное'];
+
+export const AUXILIARY_MODE_KIND_ITEMS = ['кнопок', 'рукояток', 'команд'];
+
+export const SWITCH_OFF_ON_ITEMS = ['отключить', 'отключены', 'включить', 'включены'];
+
+export const ARRIVE_RETURN_ITEMS = [
+  'прибытием', 'возвращением',
 ];
 
 export const EXACT_PLACE_ITEMS = [
@@ -109,7 +148,11 @@ export const EXACT_PLACE_ITEMS = [
 ];
 
 export const ACTIONS_ORDER_ITEMS = [
-  'вручную', 'дистанционно', 'закрыть привод на замок', 'вывесить запрещающие плакаты',
+  'по ТУ', 'по ДУ, вывесить запрещающие плакаты', 'по МУ, вывесить запрещающие плакаты', 'вручную, привод закрыть на замок',
+];
+
+export const ACTIONS_ORDER_NOTIFICATION_ITEMS = [
+  'по ТУ', 'по ДУ, вывешены запрещающие плакаты', 'по МУ, вывешены запрещающие плакаты', 'вручную, привод закрыт на замок',
 ];
 
 export const WORK_CATEGORIES_ITEMS = [
@@ -125,11 +168,16 @@ export const WORK_IF_THERE_ARE_ITEMS = [
 ];
 
 export const OBJECT_ITEMS = [
-  'провод волноводной линии', 'провод обратного тока', 'экранирующий провод',
+  'проводе волноводной линии', 'проводе обратного тока', 'экранирующем проводе',
 ];
 
 export const WORKS_OBJECT_ITEMS = [
-  'контактной сети', 'ВЛ ДПР', 'ВЛ АБ', 'Волноводе', 'ВЛ освещения', 'КЛ освещения', 'питающий провод',
+  'контактной сети', 'ВЛ ДПР', 'ВЛ АБ', 'волноводе', 'ВЛ освещения', 'КЛ освещения', 'питающем проводе',
+];
+
+export const WORKS_OBJECT_NOTIFICATION_ITEMS = [
+  'контактную сеть', 'ВЛ ДПР', 'ВЛ АБ', 'волновод', 'ВЛ освещения', 'КЛ освещения',
+  'питающий провод', 'провод волноводной линии', 'провод обратного тока', 'экранирующий провод',
 ];
 
 export const WORK_DONE_FROM_ITEMS = [

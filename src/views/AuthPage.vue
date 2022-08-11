@@ -55,8 +55,10 @@
           </div>
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button type="submit" label="Войти" class="p-mr-2 p-mb-2" />
-          <Button class="p-button-danger p-mr-2 p-mb-2" label="Войти при отсутствии связи с сервером" @click="handleWorkWithSystemWithoutServerSession" />
+          <Button type="submit" label="Войти" class="p-mb-2" />
+          <br />
+          <Button class="p-button-danger p-mb-2" label="Войти при отсутствии связи с сервером" @click="handleWorkWithSystemWithoutServerSession" />
+          <br/>
           <Button class="p-button-secondary" label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
         </div>
         <div v-else class="p-col-12">
@@ -158,7 +160,7 @@
       const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
 
       const redirect = () => {
-        if (canUserWorkWithSystem.value) {console.log('main page')
+        if (canUserWorkWithSystem.value) {
           // Если в процессе входа в систему программе удалось явно определить полномочия пользователя и его
           // рабочий полигон, то осуществляем переход на главную страницу
           router.push({ name: 'MainPage' });

@@ -64,7 +64,7 @@ export const checkUserAuthority = {
      * если он - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
      */
     canUserDispatchOrders(_state, getters) {
-      return getters.canUserWorkWithSystem &&
+      return getters.canUserWorkWithSystem && !getters.ifUserWorksOffline &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },

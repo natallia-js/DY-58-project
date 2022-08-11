@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
 
 // название БД приложения в IndexedDB
 const DB_NAME = 'dy58DB';
@@ -6,6 +7,8 @@ const DB_NAME = 'dy58DB';
 const ORDERS_STORE_NAME = 'dy58Orders';
 // название хранилища информации о рабочем полигоне в IndexedDB
 const WORK_POLIGON_STORE_NAME = 'workPoligon';
+// название хранилища информации о персонале рабочего полигона в IndexedDB
+const WORK_POLIGON_PERSONAL_STORE_NAME = 'workPoligonPersonal';
 // название ключа записей в хранилищах IndexedDB
 const OBJECT_KEY = '_id';
 
@@ -57,11 +60,10 @@ class LocalStoreServer {
     openRequest.onerror = function(event) {
       localStoreServerObject.createStoreError =
         `Ошибка создания хранилища в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${openRequest.error}`;
-        console.log('createStoreError',localStoreServerObject.createStoreError)
     };
 
     // срабатывает после завершения onupgradeneeded, а также срабатывает после обновления страницы
-    openRequest.onsuccess = function(event) { console.log('onsuccess')
+    openRequest.onsuccess = function(event) {
       localStoreServerObject.readStoreError = null;
 
       // получаем и сохраняем ссылку на БД
@@ -120,7 +122,7 @@ class LocalStoreServer {
     // выясняем, какие объекты из data новые, а какие - изменились;
     // при этом оперируем только данными, хранящимися в оперативной памяти, не трогая БД
     data.forEach((order) => {
-      const serializedData = JSON.stringify(order);
+      const serializedData = JSON.stringify({ ...order, orderText: getOrderTextForSendingToServer(order.orderText) });
       const hash = LocalStoreServer.getDataHash(serializedData);
       const existingObject = this.lastOrdersShortData.find((item) => item._id === order._id);
       const orderObject = {
@@ -271,6 +273,45 @@ class LocalStoreServer {
   /**
    *
    */
+  async checkStationBlocksDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.stationBlocksDataHash === hashToCheck ? true : false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   *
+   */
+  async checkStationDNCSectorsDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.stationDNCSectorsHashFromServer === hashToCheck ? true : false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   *
+   */
+  async checkStationECDSectorsDataHash(hashToCheck) {
+    if (!hashToCheck || !this.db) return false;
+    try {
+      const workPoligonData = await this.getLocallySavedUserWorkPoligon();
+      return workPoligonData && workPoligonData.stationECDSectorsHashFromServer === hashToCheck ? true : false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   *
+   */
   async getAllLocallySavedOrders() {
     const localStoreServerObject = this;
 
@@ -300,11 +341,47 @@ class LocalStoreServer {
     const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
     store.clear();
     const dataToSaveLocally = {
-      _id: dataToSave.ECDS_ID || dataToSave.DNCS_ID,
+      _id: dataToSave.ECDS_ID || dataToSave.DNCS_ID || dataToSave.St_ID,
       serializedData: JSON.stringify(dataToSave),
       hash: dataToSave.hash,
       adjacentSectorsDataHash: dataToSave.adjacentSectorsDataHash,
       nearestSectorsDataHash: dataToSave.nearestSectorsDataHash,
+      stationDNCSectorsDataHash: dataToSave.stationDNCSectorsDataHash,
+      stationECDSectorsDataHash: dataToSave.stationECDSectorsDataHash,
+    };
+    const request = store.add(dataToSaveLocally);
+
+    const localStoreServerObject = this;
+
+    request.onerror = function(event) {
+      localStoreServerObject.writeStoreWorkPoligonDataError =
+        `Ошибка обновления хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+    };
+
+    // Когда все эти запросы будут завершены, завершится и транзакция.
+    // Здесь мы уже уверены, что все успешно сохранено в БД
+    transaction.oncomplete = () => {
+      localStoreServerObject.writeStoreWorkPoligonDataError = null;
+    };
+
+    transaction.onerror = (event) => {
+      localStoreServerObject.writeStoreWorkPoligonDataError =
+        'error renewing work poligon data (code: ' + event.target.errorCode + '): ' + JSON.stringify(event);
+    };
+  }
+
+  /**
+   *
+   */
+  async saveWorkPoligonPersonalData(dataToSave) {
+    // считываем данные, хранящиеся в БД
+    const transaction = this.db.transaction([WORK_POLIGON_PERSONAL_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(WORK_POLIGON_PERSONAL_STORE_NAME);
+    store.clear();
+    const dataToSaveLocally = {
+      _id: dataToSave.ECDS_ID || dataToSave.DNCS_ID,
+      serializedData: JSON.stringify(dataToSave),
+      hash: dataToSave.hash,
     };
     const request = store.add(dataToSaveLocally);
 
@@ -338,11 +415,11 @@ class LocalStoreServer {
       const store = transaction.objectStore(WORK_POLIGON_STORE_NAME);
       const request = store.getAll();
 
-      request.onsuccess = function() { console.log(request.result[0].serializedData)
+      request.onsuccess = function() {
         resolve(request.result && request.result[0] ? JSON.parse(request.result[0].serializedData) : null);
       };
 
-      request.onerror = function(event) { console.log(request.error)
+      request.onerror = function(event) {
         localStoreServerObject.readStoreError =
           `Ошибка чтения хранилища информации о рабочем полигоне в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
         reject(new Error(localStoreServerObject.readStoreError));

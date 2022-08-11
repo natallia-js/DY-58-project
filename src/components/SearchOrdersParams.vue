@@ -22,7 +22,7 @@
             </small>
           </div>
           <div v-else class="p-field p-col-6">
-            В режиме offline поиск информации не работает
+            При автономной работе с системой поиск информации не работает
           </div>
           <div v-if="!ifUserWorksOffline" class="p-field p-col-6 p-d-flex p-flex-column">
             <label class="p-text-bold">Включать:</label>
@@ -47,9 +47,8 @@
           </div>
           <div v-else class="p-field p-col-6">
           </div>
-          <div class="p-col-6 p-d-flex p-flex-row p-flex-wrap">
+          <div v-if="!ifUserWorksOffline" class="p-col-6 p-d-flex p-flex-row p-flex-wrap">
             <Button
-              v-if="!ifUserWorksOffline"
               type="submit"
               icon="pi pi-search"
               label="Найти"
@@ -62,12 +61,15 @@
               @click="handlePrint"
             />
             <Button
-              v-if="!ifUserWorksOffline && displayVerifyFunctions && canUserCreateCheckOrders"
+              v-if="displayVerifyFunctions && canUserCreateCheckOrders"
               icon="pi pi-check-square"
               label="Создать запись о проверке"
               class="p-mr-3 p-mb-2"
               @click="handleCheck"
             />
+          </div>
+          <div v-else>
+            Для печати информации воспользуйтесь стандартными средствами браузера
           </div>
         </form>
       </div>
@@ -175,7 +177,6 @@
         v$.value.$touch();
         v$.value.$validate();
         let isFormValid = !v$.value.$invalid;
-        console.log(state.timeSpan, state.includeDocsCriteria)
         if (isFormValid) {
           emit('print', { timeSpan: state.timeSpan, includeDocsCriteria: state.includeDocsCriteria });
         } else if (ifUserWorksOffline.value) {

@@ -60,7 +60,7 @@
 
 
 <script>
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useStore } from 'vuex';
   //import { useRoute } from 'vue-router';
   import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
@@ -180,11 +180,6 @@
           return store.getters.getUserWorkPoligonName;
         return null;
       });
-
-      console.log('store.getters.ifAllDataLoadedOnApplicationReload',store.getters.ifAllDataLoadedOnApplicationReload)
-
-      watch(() => store.getters.ifAllDataLoadedOnApplicationReload, (val) =>
-      console.log('store.getters.ifAllDataLoadedOnApplicationReload',val))
 
       return {
         data,

@@ -169,7 +169,6 @@
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import isElectron from '@/additional/isElectron';
   import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
-  //import { getOrderTextElementTypedValue } from '@/additional/formOrderText';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -328,18 +327,17 @@
           } :
           {
             selectedRecords: selectedRecords.value,
-            datetimeStart: props.printParams.timeSpan.start,
-            datetimeEnd: props.printParams.timeSpan.end,
+            datetimeStart: props.printParams?.timeSpan?.start,
+            datetimeEnd: props.printParams?.timeSpan?.end,
             includeDocsCriteria: props.printParams.includeDocsCriteria,
             sortFields: sortFields.value,
             filterFields: filterFields.value,
           };
         const route = router.resolve({
           name: 'PrintECDJournalPreviewPage',
-          params: null,
+          params: { offline: Boolean(props.printParams.offline) },
         });
-
-        const printWindow = window.open(route.href, '_blank');
+        const printWindow = window.open(route.href, '_blank', 'nodeIntegration=yes');
         if (!isElectron()) {
           printWindow.addEventListener('ready', () => {
             const event = new CustomEvent('data', { detail: JSON.stringify(params) });

@@ -69,7 +69,6 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     }))
     .map((order, index) => {
       const orderWasCreatedOnThisWorkPoligon = orderDispatchedOnThisWorkPoligon(order);
-
       return {
         // dataKey в таблице
         id: order._id,
@@ -88,7 +87,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
             otherToSend: order.otherToSend,
             insertEmptyLineBeforeText: true,
           }) + '<br/>Передал: ' +
-          `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title}`,
+          `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon.title || order.senderWorkPoligon.title}`,
         orderAcceptor: formAcceptorsStrings({
           // ДСП нужна информация только по своей станции,
           // ДНЦ в случае ВХОДЯЩЕГО документа нужна информация только по тому лицу в рамках своего участка ДНЦ,

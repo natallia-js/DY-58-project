@@ -59,6 +59,7 @@
   } from '@/constants/appSettings';
   import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
   import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
+  import wait from '@/additional/wait';
 
   export default {
     name: 'dy-58-app',
@@ -71,8 +72,6 @@
 
     setup() {
       const store = useStore();
-
-      store.commit('sss')
 
       if (router.currentRoute.offline === 'true') {
         store.commit(SET_USER_OFFLINE_STATUS, true);
@@ -198,7 +197,8 @@
 
       const ifUserWorksOffline = computed(() => store.getters.ifUserWorksOffline);
 
-      const isLocalStoreServerCreated = computed(() => { console.log('in app isLocalStoreServerCreated',store.getters.isLocalStoreServerCreated); return store.getters.isLocalStoreServerCreated});
+      const isLocalStoreServerCreated = computed(() => store.getters.isLocalStoreServerCreated);
+      const localStoreServerCreateError = computed(() => store.getters.localStoreServerCreateError);
 
       /**
        * При смене рабочего полигона пользователя подгружаем информацию о:
@@ -207,10 +207,16 @@
        * - количестве входящих распоряжений за смену (если пользователь на дежурстве),
        * а также открываем WebSocket-соединение между клиентом и сервером,
        */
-      watch([() => store.getters.getUserWorkPoligon, isLocalStoreServerCreated],
-        ([workPoligonNew, localStoreServerCreated]) => {
-          console.log('workPoligonNew',workPoligonNew,localStoreServerCreated)
-          if (workPoligonNew && (!ifUserWorksOffline.value || localStoreServerCreated)) {
+      watch(() => store.getters.getUserWorkPoligon,
+        async (workPoligonNew) => {
+          // Если пользователь работает в режиме offline, то прежде чем продолжать, нужно подождать
+          // окончание загрузки сервера, отвечающего за работу с локальным хранилищем
+          if (ifUserWorksOffline.value && !isLocalStoreServerCreated.value) {
+            while (!isLocalStoreServerCreated.value && !localStoreServerCreateError.value) {
+              await wait(100);
+            }
+          }
+          if (workPoligonNew && (!ifUserWorksOffline.value || isLocalStoreServerCreated)) {
             store.dispatch(LOAD_CURR_WORK_POLIGON_DATA_ACTION);
             store.dispatch(LOAD_ORDER_PATTERNS_ACTION);
             store.dispatch(LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION);
@@ -225,7 +231,7 @@
        * - черновиках распоряжений, изданных в рамках рабочего полигона,
        * - запускаем периодическую подгрузку входящих уведомлений и рабочих распоряжений
        */
-      watch(() => store.getters.getUserWorkPoligonData, async (workPoligonDataNew) => {console.log('workPoligonDataNew',workPoligonDataNew)
+      watch(() => store.getters.getUserWorkPoligonData, async (workPoligonDataNew) => {
         if (workPoligonDataNew) {
           await store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
           await store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);

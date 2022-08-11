@@ -295,14 +295,12 @@
         loadLazyData();
       });
 
-      let printWindow;
-      let params;
-      watch(() => props.printParams, (newVal) => {console.log('print',props.printParams)
+      watch(() => props.printParams, (newVal) => {
         if (!newVal) {
           return;
         }
         // open print preview window
-        params = selectedRecords.value ?
+        const params = selectedRecords.value ?
           {
             selectedRecords: selectedRecords.value,
           } :
@@ -322,8 +320,7 @@
           name: 'PrintDNC_DSPJournalPreviewPage',
           params: { offline: Boolean(props.printParams.offline) },
         });
-        console.log(route)
-        printWindow = window.open(route.href, '_blank', 'nodeIntegration=yes');
+        const printWindow = window.open(route.href, '_blank', 'nodeIntegration=yes');
         if (!isElectron()) {
           printWindow.addEventListener('ready', () => {
             const event = new CustomEvent('data', { detail: JSON.stringify(params) });

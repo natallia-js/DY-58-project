@@ -13,6 +13,7 @@
           'p-button-danger': ifUserWorksOffline,
           'p-button-secondary': !ifUserWorksOffline && isUserOnDuty,
           'p-button-warning': !ifUserWorksOffline && !isUserOnDuty,
+          'dy58-blinking-button': ifUserWorksOffline && isWebSocketConnectionActive,
         }"
       />
     </template>
@@ -44,6 +45,7 @@
       'getUserFIO',
       'isUserOnDuty',
       'ifUserWorksOffline',
+      'isWebSocketConnectionActive',
     ]),
 
     methods: {

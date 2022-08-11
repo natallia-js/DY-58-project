@@ -502,6 +502,10 @@ export const getWorkOrders = {
      * Запрашивает у сервера входящие и рабочие распоряжения для текущего полигона управления.
      */
     async [LOAD_WORK_ORDERS_ACTION] (context) {
+      if (context.getters.ifUserWorksOffline) {
+        context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: 'При автономной работе с системой нет возможности обновлять список документов' });
+        return;
+      }
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'Не могу загрузить рабочие распоряжения: у вас нет прав на работу с системой';
         context.commit(SET_LOADING_WORK_ORDERS_RESULT, { error: true, message: errMessage });

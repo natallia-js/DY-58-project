@@ -554,22 +554,17 @@ export const confirmOrder = {
       const confirmDateTime = new Date();
       try {
         const responseData = await confirmOrderForOtherReceivers({ orderId, confirmDateTime });
-        console.log('OK1')
         context.commit(SET_CONFIRM_ORDER_FOR_OTHERS_RESULT, { orderId, error: false, message: responseData.message });
-        console.log('OK2')
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
-        console.log('OK3')
         context.commit(SET_ORDER_CONFIRMED_FOR_OTHER_RECEIVERS, {
           orderId: responseData.orderId,
           orderTimeSpan: getWorkOrderTimeSpanInfo(responseData.timeSpan),
           confirmDateTime,
         });
-        console.log('OK4')
         context.commit(SET_ORDER_ASSERT_DATE_TIME, {
           orderId,
           assertDateTime: responseData.assertDateTime ? new Date(responseData.assertDateTime) : null,
         });
-        console.log('OK5')
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка подтверждения распоряжения');

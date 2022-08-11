@@ -6,7 +6,7 @@
   "description": "Журнал диспетчесрких распоряжений ДУ-58",
   "scripts": {
     "serve": "cross-env NODE_ENV=development vue-cli-service serve",
-    "build": "cross-env NODE_ENV=production vue-cli-service build",
+    "build": "cross-env NODE_ENV=production vue-cli-service build && workbox generateSW ./workbox-config.js",
     "lint": "vue-cli-service lint",
     "electron:build": "vue-cli-service electron:build",
     "electron:serve": "vue-cli-service electron:serve",

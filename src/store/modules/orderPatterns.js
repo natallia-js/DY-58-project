@@ -430,6 +430,10 @@ export const orderPatterns = {
      *
      */
     async [LOAD_ORDER_PATTERNS_ACTION] (context) {
+      if (context.getters.ifUserWorksOffline) {
+        context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: 'При автономной работе с системой не предусмотрена возможность просматривать шаблоны документов' });
+        return;
+      }
       if (!context.getters.canUserGetOrderPatterns) {
         const errMessage = 'У вас нет права просматривать шаблоны документов';
         context.commit(SET_LOADING_ORDER_PATTERNS_RESULT, { error: true, message: errMessage });

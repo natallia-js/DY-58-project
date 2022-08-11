@@ -1,3 +1,5 @@
+@import './Animation.scss';
+
 .dy58-addon-button {
   background-color: var(--surface-b) !important;
   border-color: var(--surface-b) !important;
@@ -7,4 +9,8 @@
 .dy58-order-action-button {
   width: 1.6rem !important;
   height: 1.6rem !important;
+}
+
+.dy58-blinking-button {
+  animation: blinker 1s linear infinite;
 }

@@ -1,38 +1,39 @@
 import LocalStoreServer from '@/additional/localStoreServer';
 import {
   STORE_ORDERS_LOCALLY,
+  STORE_WORK_POLIGON_PERSONAL_DATA_LOCALLY,
+  STORE_WORK_POLIGON_DATA_LOCALLY,
   GET_ALL_LOCALLY_SAVED_ORDERS,
   GET_LOCALLY_SAVED_USER_WORK_POLIGON,
   CHECK_WORK_POLIGON_DATA_HASH,
   CHECK_ADJACENT_SECTORS_DATA_HASH,
   CHECK_NEAREST_SECTORS_DATA_HASH,
-  STORE_WORK_POLIGON_DATA_LOCALLY,
+  CHECK_STATION_BLOCKS_DATA_HASH,
+  CHECK_STATION_DNC_SECTORS_DATA_HASH,
+  CHECK_STATION_ECD_SECTORS_DATA_HASH,
 } from '@/store/action-types';
 import { STORE_DATA_LOCALLY_TIME_IN_MS } from '@/constants/appSettings';
 import wait from '@/additional/wait';
 
 export const localStore = {
   state: {
-    localStoreServer: {
-      db: null,
-    },
-    /* (() => {
+    localStoreServer: (() => {
       try { return new LocalStoreServer(STORE_DATA_LOCALLY_TIME_IN_MS); }
       catch { return null; }
-    })(),*/
+    })(),
   },
 
   getters: {
-    isLocalStoreServerCreated(state) { console.log('isLocalStoreServerCreated',state.localStoreServer.db)
+    /**
+     * true - сервер для работы с локальным хранилищем данных создан, false - не создан;
+     * Не использовать в watch!!!
+     */
+    isLocalStoreServerCreated(state) {
       return state.localStoreServer.db ? true : false;
     },
-  },
 
-  mutations: {
-    sss(state) {
-      try {
-        state.localStoreServer = new LocalStoreServer(STORE_DATA_LOCALLY_TIME_IN_MS);
-      } catch { state.localStoreServer = { db: null }; }
+    localStoreServerCreateError(state) {
+      return state.localStoreServer.createStoreError ? true : false;
     },
   },
 
@@ -52,6 +53,10 @@ export const localStore = {
       context.state.localStoreServer.saveWorkPoligonData(data);
     },
 
+    async [STORE_WORK_POLIGON_PERSONAL_DATA_LOCALLY] (context, data) {
+      context.state.localStoreServer.saveWorkPoligonPersonalData(data);
+    },
+
     async [GET_LOCALLY_SAVED_USER_WORK_POLIGON] (context) {
       return await context.state.localStoreServer.getLocallySavedUserWorkPoligon();
     },
@@ -66,6 +71,18 @@ export const localStore = {
 
     async [CHECK_NEAREST_SECTORS_DATA_HASH] (context, hash) {
       return await context.state.localStoreServer.checkNearestSectorsDataHash(hash);
+    },
+
+    async [CHECK_STATION_BLOCKS_DATA_HASH] (context, hash) {
+      return await context.state.localStoreServer.checkStationBlocksDataHash(hash);
+    },
+
+    async [CHECK_STATION_DNC_SECTORS_DATA_HASH] (context, hash) {
+      return await context.state.localStoreServer.checkStationDNCSectorsDataHash(hash);
+    },
+
+    async [CHECK_STATION_ECD_SECTORS_DATA_HASH] (context, hash) {
+      return await context.state.localStoreServer.checkStationECDSectorsDataHash(hash);
     },
   },
 }

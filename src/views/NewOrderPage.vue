@@ -61,7 +61,7 @@
   </TabView>
   <div v-else class="dy58-user-action-forbidden-block">
     <span v-if="!ifUserWorksOffline">Вы не на дежурстве либо у вас нет прав на издание документов</span>
-    <span v-else>Издание документов в режиме offline невозможно</span>
+    <span v-else>Издание документов при автономной работе с системой невозможно</span>
   </div>
 </template>
 

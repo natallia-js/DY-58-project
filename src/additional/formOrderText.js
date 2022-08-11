@@ -20,7 +20,7 @@ import { upperCaseFirst } from '@/additional/stringFunctions';
  * (а оно именно в виде строки и хранится в БД)
  * преобразует в нужный тип данных (в зависимости от типа элемента шаблона) и возвращает его.
  */
-export function getOrderTextElementTypedValue(element) {
+export function getOrderTextElementTypedValue(element/*, parseIfNecessary*/) {
   if (!element) {
     return '';
   }
@@ -38,7 +38,7 @@ export function getOrderTextElementTypedValue(element) {
         return element.value === 'true' ? true : false;
       return new Date(element.value);
     case OrderPatternElementType.MULTIPLE_SELECT:
-      return (JSON.parse(element.value) || []).join(', ');
+      return JSON.parse(element.value) || [];
     case OrderPatternElementType.DR_TRAIN_TABLE:
     case OrderPatternElementType_Future.OBJECT:
     case OrderPatternElementType_Future.OBJECTS_LIST:
@@ -47,6 +47,7 @@ export function getOrderTextElementTypedValue(element) {
       return element.value;
   }
 }
+
 
 
 // Данная функция позволяет проверить, что отправлять: оригинал или копию.
