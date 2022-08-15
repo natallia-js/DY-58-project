@@ -62,7 +62,6 @@
 <script>
   import { computed, onMounted, ref } from 'vue';
   import { useStore } from 'vuex';
-  //import { useRoute } from 'vue-router';
   import { getJournalOrdersFromServer } from '@/serverRequests/orders.requests';
   import prepareDataForDisplayInDNC_DSPJournal from '@/additional/prepareDataForDisplayInDNC_DSPJournal';
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
@@ -76,7 +75,6 @@
 
     setup() {
       const store = useStore();
-      //const route = useRoute();
 
       const data = ref([]);
       const errMessage = ref(null);

@@ -364,8 +364,27 @@
             data.value = [];
             return;
           }
-          dataFromCache.value = prepareDataForDisplayInECDJournal(
-            cachedOrders.map((order) => JSON.parse(order.serializedData)), getOrderSeqNumber);
+          // У ЭЦД каждое уведомление должно отображаться в строке таблицы напротив соответствующего приказа/запрещения,
+          // а не как отдельная строка.
+          // Следовательно, необходимо переформировать исходный набор данных перед его отрисовкой
+          const dataArrayToDisplay = [];
+          cachedOrders
+            .map((order) => JSON.parse(order.serializedData))
+            .forEach((order) => {
+              if (order.type !== ORDER_PATTERN_TYPES.ECD_NOTIFICATION) {
+                dataArrayToDisplay.push(order);
+              } else {
+                const correspOrder = dataArrayToDisplay.find((el) => el.orderChainId === order.orderChainId);
+                if (correspOrder) {
+                  correspOrder.connectedOrder = {
+                    number: order.number,
+                    creator: order.creator,
+                    startDate: order.timeSpan.start,
+                  };
+                }
+              }
+            });
+          dataFromCache.value = prepareDataForDisplayInECDJournal(dataArrayToDisplay, getOrderSeqNumber);
           totalRecords.value = cachedOrders.length;
           workingWithCachedOrders.value = true;
           loadCachedDataForCurrentPage();
