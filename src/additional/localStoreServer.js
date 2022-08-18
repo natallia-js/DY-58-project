@@ -183,8 +183,9 @@ class LocalStoreServer {
         // maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет среди data, т.е. нет в массиве
         // рабочих распоряжений)
         newDBData = request.result.filter((el) =>
-          (new Date() - el.createDateTime) <= this.maxTimeStoreDataInLocalDB ||
-          activeOrdersIds.includes(el._id));
+          activeOrdersIds.includes(el._id) ||
+          (new Date() - el.createDateTime) <= this.maxTimeStoreDataInLocalDB
+        );
       }
       // добавляем новые данные
       newObjects.forEach((order) => newDBData.push(order));

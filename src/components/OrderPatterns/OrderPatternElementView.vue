@@ -13,8 +13,8 @@
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
     :placeholder="element.ref"
-    @keydown="this.style.width = ((this.value.length + 1) * 8) + 'px';"
   />
+  <!--@keydown="this.style.width = ((this.value.length + 1) * 8) + 'px';"-->
 
   <!-- Элемент "Текстовая область" -->
 

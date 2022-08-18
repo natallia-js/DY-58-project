@@ -364,8 +364,8 @@
             data.value = [];
             return;
           }
-          // У ЭЦД каждое уведомление должно отображаться в строке таблицы напротив соответствующего приказа/запрещения,
-          // а не как отдельная строка.
+          // У ЭЦД каждое уведомление/отмена запрещения должно отображаться в строке таблицы
+          // напротив соответствующего приказа/запрещения, а не как отдельная строка.
           // Следовательно, необходимо переформировать исходный набор данных перед его отрисовкой
           const dataArrayToDisplay = [];
           cachedOrders
@@ -374,7 +374,11 @@
               if (order.type !== ORDER_PATTERN_TYPES.ECD_NOTIFICATION) {
                 dataArrayToDisplay.push(order);
               } else {
-                const correspOrder = dataArrayToDisplay.find((el) => el.orderChainId === order.orderChainId);
+                // Ищем приказ/запрещение
+                const correspOrder = dataArrayToDisplay.find((el) =>
+                  el.orderChainId === order.orderChainId &&
+                  [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION].includes(el.type)
+                );
                 if (correspOrder) {
                   correspOrder.connectedOrder = {
                     number: order.number,

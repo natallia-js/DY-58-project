@@ -106,6 +106,8 @@ export const SPECIAL_PV_ORDER_SIGN = 'ПВ';
 export const SPECIAL_PD_ORDER_SIGN = 'ПД';
 // отметка особой категории распоряжений ДНЦ о поезде повышенного веса и повышенной длины
 export const SPECIAL_PVPD_ORDER_SIGN = 'ПВПД';
+//
+export const SPECIAL_SP_ORDER_SIGN = 'СП';
 
 // Поначалу данное поле нужно было для обозначения особых категорий поездов, к которым
 // имеет отношение распоряжение. Но в дальнейшем значение данного поля стало шире, и
@@ -121,6 +123,7 @@ export const SPECIAL_TRAIN_CATEGORIES = [
   SPECIAL_PV_ORDER_SIGN,
   SPECIAL_PVPD_ORDER_SIGN,
   SPECIAL_PD_ORDER_SIGN,
+  SPECIAL_SP_ORDER_SIGN,
   'Т',
   'ТД',
   SPECIAL_TELECONTROL_ORDER_SIGN,

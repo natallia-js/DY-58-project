@@ -10,7 +10,7 @@
         />
       </span>
       <TreeSelect
-        placeholder="Выберите шаблон распоряжения"
+        placeholder="Выберите шаблон"
         v-model="state.orderPattern"
         :options="getOrderPatterns"
         style="width:100%"
@@ -28,7 +28,7 @@
         />
       </span>
       <InputText
-        placeholder="Либо введите наименование распоряжения"
+        placeholder="Создание нового документа"
         style="width:100%"
         v-model="state.orderTitle"
         @focus="handleFocusInput"

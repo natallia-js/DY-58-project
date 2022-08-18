@@ -116,7 +116,7 @@ export const dsp = {
      * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как ДСП, так и оператор при
      * ДСП одной и той же станции. Будет выбрана только информация по ДСП.
      */
-    getDSPShiftForSendingData(state, getters) {
+    getDSPShiftForSendingData(state, getters) {console.log('getDSPShiftForSendingData')
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
         !getters.getUserWorkPoligon || !getters.getUserWorkPoligonData) {
         return [];
@@ -156,7 +156,7 @@ export const dsp = {
               }),
             sendOriginal: item.sendOriginal,
           };
-        });
+        });console.log('arr',arr)
       return arr;
     },
 
@@ -179,7 +179,7 @@ export const dsp = {
     /**
      * Устанавливает указанных адресатов распоряжения из числа ДСП станций.
      */
-    [SET_DEFAULT_DSP_ADDRESSES] (state, dspUsers) {
+    [SET_DEFAULT_DSP_ADDRESSES] (state, dspUsers) {console.log('SET_DEFAULT_DSP_ADDRESSES')
       if (!dspUsers || !state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
         return;
       }
@@ -227,7 +227,7 @@ export const dsp = {
     /**
      * Оригинал/Копия/Ничего конкретной станции.
      */
-    [SET_GET_ORDER_STATUS_TO_DEFINIT_DSP] (state, { stationId, getOrderStatus }) {
+    [SET_GET_ORDER_STATUS_TO_DEFINIT_DSP] (state, { stationId, getOrderStatus }) {console.log('SET_GET_ORDER_STATUS_TO_DEFINIT_DSP')
       if (state.sectorPersonal && state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => {
           if (el.stationId === stationId && el.sendOriginal !== getOrderStatus) {

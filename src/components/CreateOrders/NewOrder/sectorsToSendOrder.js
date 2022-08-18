@@ -11,7 +11,7 @@ import { CLEAR_SHIFT_FOR_SENDING_DATA } from '@/store/mutation-types';
  * издаваемое распоряжение.
  */
 export const useSectorsToSendOrder = ({ state, store }) => {
-  const dspSectorsToSendOrderNoDupl = computed(() => {
+  const dspSectorsToSendOrderNoDupl = computed(() => {console.log('state.dspSectorsToSendOrder',state.dspSectorsToSendOrder)
     if (!state.dspSectorsToSendOrder || !state.dspSectorsToSendOrder.length) {
       return [];
     }

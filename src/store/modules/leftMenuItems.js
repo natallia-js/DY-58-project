@@ -14,6 +14,7 @@ import {
   SPECIAL_PV_ORDER_SIGN,
   SPECIAL_PD_ORDER_SIGN,
   SPECIAL_PVPD_ORDER_SIGN,
+  SPECIAL_SP_ORDER_SIGN,
 } from '@/constants/orderPatterns';
 import { createOrderOfGivenType, createECDOrderOfGivenType } from '@/additional/createOrderOfGivenType';
 
@@ -112,7 +113,7 @@ export const leftMenuItems = {
           command: () => createOrderOfGivenType(SPECIAL_N_ORDER_SIGN),
         },
         {
-          label: 'Создать распоряжение о поезде ПВ / ПД / ПВПД',
+          label: 'Создать распоряжение о поезде ПВ / ПД / ПВД / СП',
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([
             SPECIAL_PV_ORDER_SIGN, SPECIAL_PD_ORDER_SIGN, SPECIAL_PVPD_ORDER_SIGN]),
           imgURL: require('@/assets/img/P.png'),
@@ -121,6 +122,7 @@ export const leftMenuItems = {
               { label: SPECIAL_PV_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PV_ORDER_SIGN) },
               { label: SPECIAL_PD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PD_ORDER_SIGN) },
               { label: SPECIAL_PVPD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PVPD_ORDER_SIGN) },
+              { label: SPECIAL_SP_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_SP_ORDER_SIGN) },
             ];
           },
         },
@@ -138,7 +140,7 @@ export const leftMenuItems = {
       const items = [];
       if (getters.canUserDispatchECDTakeDutyOrder) {
         items.push({
-          label: 'Циркулярное распоряжение',
+          label: 'Циркулярный приказ',
           imgURL: require('@/assets/img/takePassDuty.png'),
           command: () => createECDOrderOfGivenType(SPECIAL_CIRCULAR_ORDER_SIGN),
         });

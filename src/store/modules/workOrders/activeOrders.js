@@ -160,8 +160,8 @@ export const activeOrders = {
      * - которое действует до отмены либо дата окончания его действия еще не наступила,
      * - которое не обязательно последнее в цепочке распоряжений, которой оно принадлежит (см.
      *   пункты ниже),
-     * - если речь идет о заявке, то в рамках цепочки распоряжений только 1 заявка (последняя) считается
-     *   действующей при условии, что далее по цепочке (не обязательно сразу) за нею не следует уведомление,
+     * - если речь идет о заявке, то в рамках цепочки распоряжений все заявки считаются
+     *   действующими при условии, что далее по цепочке (не обязательно сразу) за ними не следует уведомление,
      * - если речь идет об уведомлении, то оно является действующим только при условии, что оно
      *   в цепочке распоряжений последнее,
      * - если речь идет о распоряжении ДНЦ, то в рамках цепочки распоряжений только последнее
@@ -183,7 +183,7 @@ export const activeOrders = {
         (
           (
             (item.type === ORDER_PATTERN_TYPES.REQUEST) &&
-            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.REQUEST, order: item }) &&
+            //!getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.REQUEST, order: item }) &&
             !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.NOTIFICATION, order: item })
           ) ||
           ((item.type === ORDER_PATTERN_TYPES.NOTIFICATION) && getters.isOrderLastInChain(item)) ||

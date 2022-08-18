@@ -200,6 +200,7 @@
       // адресатов ДСП и назначить им "оригиналы"/"копии" документов, то при переходе на, например, закладку
       // "заявка" без указанного ниже кода будет отображен только сформированный список адресатов ДСП,
       // без обозначений "оригинал"/"копия")
+      console.log('mounted', this.getDSPShiftForSendingData)
       this.$emit('input', this.getDSPShiftForSendingData
         ? this.getDSPShiftForSendingData
           .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
@@ -207,7 +208,7 @@
     },
 
     watch: {
-      getDSPShiftForSendingData(newVal) {
+      getDSPShiftForSendingData(newVal) {console.log('getDSPShiftForSendingData',newVal)
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
@@ -228,7 +229,7 @@
         }
       },
 
-      sendOriginalToDefinitStation(stationId) {
+      sendOriginalToDefinitStation(stationId) { console.log('sendOriginalToDefinitStation', stationId)
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
@@ -259,7 +260,7 @@
         }
       },
 
-      sendCopyToDefinitStation(stationId) {
+      sendCopyToDefinitStation(stationId) {console.log('sendCopyToDefinitStation')
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
@@ -290,7 +291,7 @@
         }
       },
 
-      doNotSendToDefinitStation(stationId) {
+      doNotSendToDefinitStation(stationId) {console.log('doNotSendToDefinitStation')
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
