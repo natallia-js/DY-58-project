@@ -12,6 +12,7 @@
       :showDlg="showChooseOtherReceiversDlg"
       :personal="sectorPersonal"
       :prevSelectedPeople="selectedSectorPeople"
+      :selectedPerson="selectedUser"
       :sectorName="sectorName"
       @input="handleChoosePeople"
       @close="handleHideOtherReceiversDlg"
