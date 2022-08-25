@@ -340,6 +340,7 @@
         this.sectorName = placeTitle;
         this.showChooseOtherReceiversDlg = true;
         this.selectedSectorPeople = this.selectedSectorsPeople.find((el) => el.placeTitle === this.sectorName)?.selectedPeople;
+        console.log('this.selectedSectorPeople',this.selectedSectorPeople)
       },
 
       /**

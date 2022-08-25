@@ -50,7 +50,7 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { ADD_OTHER_GET_ORDER_RECORD } from '@/store/mutation-types';
+  import { REWRITE_OTHER_GET_ORDER_RECORD } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-choose-other-personal-dialog',
@@ -76,7 +76,7 @@
         required: true,
       },
       selectedPerson: {
-        type: Object,
+        type: Object, // Number or null
         required: false,
       },
       /*prevSelectedPeople: {
@@ -110,7 +110,7 @@
         if (this.selectedUser) {
           const person = this.getStructuralDivisions.find((el) => el.additionalId === this.selectedUser);
           if (person) {
-            this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...person, existingStructuralDivision: true });
+            this.$store.commit(REWRITE_OTHER_GET_ORDER_RECORD, { ...person, existingStructuralDivision: true });
           }
         }
         /*this.$store.commit(SET_USER_CHOSEN_STATUS, {

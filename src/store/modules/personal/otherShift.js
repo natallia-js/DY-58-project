@@ -5,6 +5,7 @@ import {
   SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
   SET_GET_ORDER_STATUS_TO_ALL_LEFT_OTHER_SHIFT,
   ADD_OTHER_GET_ORDER_RECORD,
+  REWRITE_OTHER_GET_ORDER_RECORD,
   EDIT_OTHER_GET_ORDER_RECORD,
   DEL_OTHER_GET_ORDER_RECORD,
   SET_OTHER_SHIFT_FOR_SENDING_DATA,
@@ -186,6 +187,41 @@ export const otherShift = {
           ...objectToAdd,
         },
       ];
+    },
+
+    /**
+     * Перезаписывает запись с "иным(-и)" адресатом(-ами) заданного placeTitle указанными данными.
+     */
+    [REWRITE_OTHER_GET_ORDER_RECORD] (state, props) {
+      const {
+        position = -1,
+        additionalId = -1,
+        placeTitle,
+        post,
+        fio,
+        sendOriginal = CurrShiftGetOrderStatus.doNotSend,
+        existingStructuralDivision = false,
+      } = props;
+
+      const existingPlaceTitleIndex = state.sectorPersonal.otherShift.findIndex((el) => el.placeTitle === placeTitle);
+      if (existingPlaceTitleIndex >= 0) {
+        state.sectorPersonal.otherShift = [
+          ...state.sectorPersonal.otherShift.slice(0, existingPlaceTitleIndex),
+          {
+            ...state.sectorPersonal.otherShift[existingPlaceTitleIndex],
+            ...{
+              position,
+              additionalId,
+              placeTitle,
+              post,
+              fio,
+              sendOriginal,
+              existingStructuralDivision,
+            },
+          },
+          ...state.sectorPersonal.otherShift.slice(existingPlaceTitleIndex + 1),
+        ];
+      }
     },
 
     /**
