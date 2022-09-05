@@ -10,39 +10,31 @@
       v-model="selectedUser"
       :options="personal"
       optionValue="value"
+      optionLabel="label"
       :multiple="false"
     >
       <template #option="slotProps">
-        <div>
+        <div v-on:dblclick="() => chooseUser(slotProps.option.value)">
           <span>{{ slotProps.option.label }}</span>
         </div>
       </template>
     </Listbox>
-    <!--
-    <MultiSelect
-      style="width:100%"
-      :options="personal"
-      optionLabel="label"
-      optionValue="value"
-      dataKey="value"
-      v-model="selectedPeople"
-    />-->
     <template #footer>
       <Button
-        v-if="selectedUser && (!selectedPerson || selectedUser.id !== selectedPerson.id)"
-        label="Выбрать"
+        v-if="selectedUser && (!selectedPerson || selectedPerson === -1 || selectedUser !== selectedPerson)"
+        v-tooltip="'Выбрать'"
+        icon="pi pi-check"
         @click="chooseUser"
-        class="p-mt-2"
+        class="p-mt-2 p-button p-p-1"
       />
-      <Button v-if="selectedPerson" label="Отменить текущий выбор" @click="unChooseUser" class="p-mt-2" />
+      <Button
+        v-if="selectedPerson && selectedPerson !== -1"
+        v-tooltip="'Отменить текущий выбор'"
+        icon="pi pi-times"
+        @click="unChooseUser"
+        class="p-mt-2 p-button p-p-1"
+      />
       <Button label="Отмена" @click="closeDialog" class="p-mt-2" />
-      <!--<Button
-        v-if="selectedPeople"
-        label="Выбрать"
-        @click="choosePeople"
-        class="p-mt-2"
-      />
-      <Button label="Отмена" @click="closeDialog" class="p-mt-2" />-->
     </template>
   </Dialog>
 </template>
@@ -50,7 +42,12 @@
 
 <script>
   import { mapGetters } from 'vuex';
-  import { REWRITE_OTHER_GET_ORDER_RECORD } from '@/store/mutation-types';
+  import {
+    REWRITE_OTHER_GET_ORDER_RECORD,
+    DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
+    SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+  } from '@/store/mutation-types';
+  import { CurrShiftGetOrderStatus } from '@/constants/orders';
 
   export default {
     name: 'dy58-choose-other-personal-dialog',
@@ -61,8 +58,6 @@
       return {
         dlgVisible: false,
         selectedUser: null,
-        //dataToSelect: null,
-        //selectedPeople: null,
       };
     },
 
@@ -76,13 +71,9 @@
         required: true,
       },
       selectedPerson: {
-        type: Object, // Number or null
+        type: Number,
         required: false,
       },
-      /*prevSelectedPeople: {
-        type: Array,
-        required: false,
-      },*/
       sectorName: {
         type: String,
       },
@@ -98,45 +89,33 @@
       showDlg: function(val) {
         this.dlgVisible = val;
         if (val) {
-          //this.selectedPeople = this.prevSelectedPeople;
           this.selectedUser = this.selectedPerson;
-          console.log(this.personal)
         }
       },
     },
 
     methods: {
-      chooseUser() {
-        if (this.selectedUser) {
-          const person = this.getStructuralDivisions.find((el) => el.additionalId === this.selectedUser);
+      chooseUser(userId) {
+        const id = this.selectedUser || userId;
+        if (id) {
+          const person = this.getStructuralDivisions.find((el) => el.additionalId === id);
           if (person) {
             this.$store.commit(REWRITE_OTHER_GET_ORDER_RECORD, { ...person, existingStructuralDivision: true });
+            const otherId = this.$store.getters.getOtherPersonId(person.placeTitle, person.additionalId);
+            if (otherId) {
+              this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+                { otherId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+            }
           }
         }
-        /*this.$store.commit(SET_USER_CHOSEN_STATUS, {
-          userId: this.selectedUser.id,
-          chooseUser: true,
-          workPoligonType: this.workPoligonType,
-          workPoligonId: this.sectorId,
-        });*/
         this.closeDialog();
       },
 
       unChooseUser() {
-        /*this.$store.commit(SET_USER_CHOSEN_STATUS, {
-          userId: this.selectedUser.id,
-          chooseUser: false,
-          workPoligonType: this.workPoligonType,
-          workPoligonId: this.sectorId,
-        });*/
+        this.$store.commit(DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID, this.selectedPerson);
         this.selectedUser = null;
         this.closeDialog();
       },
-
-      /*choosePeople() {
-        this.$emit('input', this.selectedPeople);
-        this.closeDialog();
-      },*/
 
       closeDialog() {
         this.$emit('close');

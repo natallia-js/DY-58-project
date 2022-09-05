@@ -143,7 +143,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
    * Позволяет зафиксировать изменения, производимые пользователм в тексте распоряжения.
    * Кроме того, для шаблонного распоряжения анализирует устанавливаемые в поля распоряжения значения.
    */
-  const setOrderText = (event) => {console.log('setOrderText')
+  const setOrderText = (event) => {
     state.orderText = event;
 
     if (!event || event.orderTextSource !== ORDER_TEXT_SOURCE.pattern || !event.orderText) {
@@ -164,7 +164,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
       [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
        FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION].includes(el.ref));
-console.log('stationElements',stationElements)
+
     stationElements.forEach((stationElement, index) => {
       const resetOrderPlace = () => {
         if (index === 0) {
@@ -203,7 +203,7 @@ console.log('stationElements',stationElements)
     const blockElements = event.orderText.filter((el) =>
       [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
-console.log('blockElements',blockElements)
+
     blockElements.forEach((blockElement, index) => {
       const resetOrderPlace = () => {
         if (index === 0) {
@@ -236,11 +236,10 @@ console.log('blockElements',blockElements)
         resetOrderPlace();
       }
     });
-console.log('stationsToSendOrder',stationsToSendOrder)
+
     if (stationsToSendOrder.length) {
       // Отменяем отправку документа всем станциям, которые до этого были назначены
       store.commit(SET_GET_ORDER_STATUS_TO_ALL_DSP, { getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
-      console.log('ANEW')
       // Формируем список станций-адресатов документа заново
       stationsToSendOrder.forEach((stationId) => {
         store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,

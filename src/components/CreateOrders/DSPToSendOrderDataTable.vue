@@ -200,7 +200,6 @@
       // адресатов ДСП и назначить им "оригиналы"/"копии" документов, то при переходе на, например, закладку
       // "заявка" без указанного ниже кода будет отображен только сформированный список адресатов ДСП,
       // без обозначений "оригинал"/"копия")
-      console.log('mounted', this.getDSPShiftForSendingData)
       this.$emit('input', this.getDSPShiftForSendingData
         ? this.getDSPShiftForSendingData
           .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
@@ -208,7 +207,7 @@
     },
 
     watch: {
-      getDSPShiftForSendingData(newVal) {console.log('getDSPShiftForSendingData',newVal)
+      getDSPShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
           : []);
@@ -229,7 +228,7 @@
         }
       },
 
-      sendOriginalToDefinitStation(stationId) { console.log('sendOriginalToDefinitStation', stationId)
+      sendOriginalToDefinitStation(stationId) {
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
       },
@@ -260,7 +259,7 @@
         }
       },
 
-      sendCopyToDefinitStation(stationId) {console.log('sendCopyToDefinitStation')
+      sendCopyToDefinitStation(stationId) {
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
@@ -291,14 +290,14 @@
         }
       },
 
-      doNotSendToDefinitStation(stationId) {console.log('doNotSendToDefinitStation')
+      doNotSendToDefinitStation(stationId) {
         this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_DSP,
           { stationId, getOrderStatus: CurrShiftGetOrderStatus.doNotSend });
       },
 
       openChoosePersonDlg(people, selectedPerson, sectorId, sectorName) {
         this.sectorPersonal = people || [];
-        this.selectedPerson = selectedPerson;
+        this.selectedPerson = selectedPerson?.id;
         this.sectorId = sectorId;
         this.sectorName = `ст. ${sectorName}`;
         this.showChoosePersonDlg = true;

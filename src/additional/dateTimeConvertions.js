@@ -80,7 +80,7 @@ export function getTimeSpanString(orderType, timeSpan, isECD, specialOrderCatego
     return startDateString;
   }
   const startString = `с ${startDateString}`;
-  const endString = timeSpan.end ? ` по ${endDateString}` : (!isECD ? ' до отмены' : ' до уведомления');
+  const endString = timeSpan.end ? ` по ${endDateString}` : '';// (!isECD ? ' до отмены' : ' до уведомления');
   return startString + endString;
 }
 

@@ -8,6 +8,7 @@ import {
   REWRITE_OTHER_GET_ORDER_RECORD,
   EDIT_OTHER_GET_ORDER_RECORD,
   DEL_OTHER_GET_ORDER_RECORD,
+  DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID,
   SET_OTHER_SHIFT_FOR_SENDING_DATA,
   CLEAR_OTHER_SHIFT,
 } from '@/store/mutation-types';
@@ -76,6 +77,34 @@ export const otherShift = {
           return [];
         }
         return state.sectorPersonal.otherShift.filter((el) => el.placeTitle === placeTitle);
+      };
+    },
+
+    getOtherPlaceSelectedPerson(state) {
+      return (placeTitle) => {
+        const existingPlaceTitleIndex = state.sectorPersonal.otherShift.findIndex((el) => el.placeTitle === placeTitle);
+        if (existingPlaceTitleIndex >= 0) {
+          return state.sectorPersonal.otherShift[existingPlaceTitleIndex];
+        }
+        return null;
+      };
+    },
+
+    getOtherPersonId(state) {
+      return (placeTitle, personAdditionalId) => {
+        const chosenUser = state.sectorPersonal.otherShift.find((el) =>
+          el.placeTitle === placeTitle && el.additionalId === personAdditionalId
+        );
+        return chosenUser ? chosenUser._id : null;
+      };
+    },
+
+    getNewOtherPersonId(state) {
+      return ({ placeTitle, post, fio }) => {
+        const newUser = state.sectorPersonal.otherShift.find((el) =>
+          el.placeTitle === placeTitle && el.post === post && el.fio === fio
+        );
+        return newUser ? newUser._id : null;
       };
     },
   },
@@ -202,7 +231,6 @@ export const otherShift = {
         sendOriginal = CurrShiftGetOrderStatus.doNotSend,
         existingStructuralDivision = false,
       } = props;
-
       const existingPlaceTitleIndex = state.sectorPersonal.otherShift.findIndex((el) => el.placeTitle === placeTitle);
       if (existingPlaceTitleIndex >= 0) {
         state.sectorPersonal.otherShift = [
@@ -245,8 +273,9 @@ export const otherShift = {
 
     /**
      * Удаляет запись с указанным id из списка иных адресатов.
-     * Запись, у которой existingStructuralDivision = true, удаляется только в том случае, если поля post и fio этой записи пусты
-     * либо присутствует более одной записи с таким же placeTitle.
+     * Запись, у которой existingStructuralDivision = true, удаляется только в том случае, если
+     * присутствует более одной записи с таким же placeTitle. При этом на все такие записи переносится
+     * значение поля position удаляемой записи (для сохранения порядка сортировки записей в таблице).
      */
     [DEL_OTHER_GET_ORDER_RECORD] (state, id) {
       if (state.sectorPersonal && state.sectorPersonal.otherShift) {
@@ -254,15 +283,35 @@ export const otherShift = {
         if (recordToDelete) {
           if (
             !recordToDelete.existingStructuralDivision ||
-            (!recordToDelete.post && !recordToDelete.fio) ||
             (state.sectorPersonal.otherShift.filter((item) => item.placeTitle === recordToDelete.placeTitle).length > 1)
           ) {
             state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.filter((item) => item._id !== id);
+            if (recordToDelete.position !== -1) {
+              state.sectorPersonal.otherShift = state.sectorPersonal.otherShift.map((el) => {
+                if (el.placeTitle === recordToDelete.placeTitle)
+                  return {
+                    ...el,
+                    position: recordToDelete.position,
+                  };
+                return el;
+              });
+            }
           } else {
             recordToDelete.post = '';
             recordToDelete.fio = '';
             recordToDelete.additionalId = -1;
           }
+        }
+      }
+    },
+
+    [DEL_OTHER_GET_ORDER_RECORD_BY_ADDITIONAL_ID] (state, additionalId) {
+      if (state.sectorPersonal && state.sectorPersonal.otherShift) {
+        const recordToDelete = state.sectorPersonal.otherShift.find((item) => item.additionalId === additionalId);
+        if (recordToDelete) {
+          recordToDelete.post = '';
+          recordToDelete.fio = '';
+          recordToDelete.additionalId = -1;
         }
       }
     },

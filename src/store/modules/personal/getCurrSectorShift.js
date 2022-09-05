@@ -224,22 +224,27 @@ export const getCurrSectorShift = {
         // управления), так и на станциях, смежных с текущей
         sectorStationsShift: initialSectorStationsPersonalData(context.getters.getSectorStations),
       };
+      console.log('shiftPersonal1',shiftPersonal)
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ
       if (dncSectorsIds.length) {
         const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: dncSectorsIds, onlyOnline: false });
+        console.log('responseData1',responseData)
         setDNCSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД
       if (ecdSectorsIds.length) {
         const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: ecdSectorsIds, onlyOnline: false });
+        console.log('responseData2',responseData)
         setECDSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на смежных станциях
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: true });
+        console.log('responseData3',responseData)
         setStationsShift(responseData, shiftPersonal);
       }
       context.commit(SET_SECTOR_PERSONAL, shiftPersonal);
+      console.log('shiftPersonal2',shiftPersonal)
     },
 
     /**

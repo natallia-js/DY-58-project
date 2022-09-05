@@ -11,8 +11,7 @@
     <ShowChooseOtherPersonalDlg
       :showDlg="showChooseOtherReceiversDlg"
       :personal="sectorPersonal"
-      :prevSelectedPeople="selectedSectorPeople"
-      :selectedPerson="selectedUser"
+      :selectedPerson="selectedOtherPlacePerson"
       :sectorName="sectorName"
       @input="handleChoosePeople"
       @close="handleHideOtherReceiversDlg"
@@ -154,11 +153,12 @@
         addNewRec: true, // true = add, false = edit
         showChooseOtherReceiversDlg: false,
         sectorPersonal: [],
-        selectedSectorPeople: [],
+        //selectedSectorPeople: [],
         selectedSectorsPeople: [],
         sectorId: -1,
         sectorName: null,
         showChoosePeopleDlg: false,
+        selectedOtherPlacePerson: null,
       };
     },
 
@@ -275,8 +275,15 @@
       },
 
       handleInputFromOtherReceiverDlg(userData) {
-        if (this.addNewRec) {
+        if (this.addNewRec) { console.log(userData)
           this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...userData });
+          if (this.isECD) {
+            const otherId = this.$store.getters.getNewOtherPersonId({ placeTitle: userData.placeTitle, post: userData.post, fio: userData.fio });
+            if (otherId) {
+              this.$store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+                { otherId, getOrderStatus: CurrShiftGetOrderStatus.sendOriginal });
+            }
+          }
         } else {
           this.selectedUser = { ...userData };
           this.$store.commit(EDIT_OTHER_GET_ORDER_RECORD, { ...userData });
@@ -338,9 +345,9 @@
             value: el.additionalId,
           }));
         this.sectorName = placeTitle;
+        const selectedOtherPerson = this.$store.getters.getOtherPlaceSelectedPerson(placeTitle);
+        this.selectedOtherPlacePerson = selectedOtherPerson ? selectedOtherPerson.additionalId : null;
         this.showChooseOtherReceiversDlg = true;
-        this.selectedSectorPeople = this.selectedSectorsPeople.find((el) => el.placeTitle === this.sectorName)?.selectedPeople;
-        console.log('this.selectedSectorPeople',this.selectedSectorPeople)
       },
 
       /**

@@ -236,7 +236,7 @@
 
       openChoosePersonDlg(people, selectedPerson, sectorId, sectorName) {
         this.sectorPersonal = people || [];
-        this.selectedPerson = selectedPerson;
+        this.selectedPerson = selectedPerson?.id;
         this.sectorId = sectorId;
         this.sectorName = `уч. ЭЦД ${sectorName}`;
         this.showChoosePersonDlg = true;

@@ -112,7 +112,7 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
       const appSettingsOverlayPanel = ref();
       const orderDraftsOverlayPanel = ref();
-      // Для отображения подпунктов меню создания распоряжения о поезде ПВ / ПД / ПВПД
+      // Для отображения подпунктов меню создания распоряжения о поезде ПВ / ПД / ПВД
       const submenuItems = ref([]);
       const submenu = ref();
 

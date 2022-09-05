@@ -565,15 +565,24 @@ export const currWorkPoligonStructure = {
         }
         if (ifGetStationBlocksData) {
           const stationBlocksResponseData = await getStationBlocksData({ stationId });
-          context.state.station.TBlocks = stationBlocksResponseData;
+          context.state.station = {
+            ...context.state.station,
+            TBlocks: stationBlocksResponseData,
+          };
         }
         if (ifGetStationDNCSectorsData) {
           const dncSectorsResponseData = await getStationDNCSectorsData({ stationId });
-          context.state.station.TDNCSectors = dncSectorsResponseData;
+          context.state.station = {
+            ...context.state.station,
+            TDNCSectors: dncSectorsResponseData,
+          };
         }
         if (ifGetStationECDSectorsData) {
           const ecdSectorsResponseData = await getStationECDSectorsData({ stationId });
-          context.state.station.TECDSectors = ecdSectorsResponseData;
+          context.state.station = {
+            ...context.state.station,
+            TECDSectors: ecdSectorsResponseData,
+          };
         }
         context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
           ...context.state.station,
@@ -656,11 +665,17 @@ export const currWorkPoligonStructure = {
         }
         if (getAdjacentDNCSectorsData) {
           const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData({ sectorId });
-          context.state.sector.TAdjacentDNCSectors = adjDNCSectResponseData;
+          context.state.sector = {
+            ...context.state.sector,
+            TAdjacentDNCSectors: adjDNCSectResponseData,
+          };
         }
         if (getNearestECDSectorsData) {
           const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData({ sectorId });
-          context.state.sector.TNearestECDSectors = nearECDSectResponseData;
+          context.state.sector = {
+            ...context.state.sector,
+            TNearestECDSectors: nearECDSectResponseData,
+          };
         }
         context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
           ...context.state.sector,
@@ -735,11 +750,17 @@ export const currWorkPoligonStructure = {
         }
         if (getAdjacentECDSectorsData) {
           const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData({ sectorId });
-          context.state.sector.TAdjacentECDSectors = adjECDSectResponseData;
+          context.state.sector = {
+            ...context.state.sector,
+            TAdjacentECDSectors: adjECDSectResponseData,
+          };
         }
         if (getNearestDNCSectorsData) {
           const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData({ sectorId });
-          context.state.sector.TNearestDNCSectors = nearDNCSectResponseData;
+          context.state.sector = {
+            ...context.state.sector,
+            TNearestDNCSectors: nearDNCSectResponseData,
+          };
         }
         context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
           ...context.state.sector,

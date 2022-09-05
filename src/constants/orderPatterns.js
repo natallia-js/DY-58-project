@@ -105,7 +105,7 @@ export const SPECIAL_PV_ORDER_SIGN = 'ПВ';
 // отметка особой категории распоряжений ДНЦ о поезде повышенной длины
 export const SPECIAL_PD_ORDER_SIGN = 'ПД';
 // отметка особой категории распоряжений ДНЦ о поезде повышенного веса и повышенной длины
-export const SPECIAL_PVPD_ORDER_SIGN = 'ПВПД';
+export const SPECIAL_PVPD_ORDER_SIGN = 'ПВД';
 //
 export const SPECIAL_SP_ORDER_SIGN = 'СП';
 
