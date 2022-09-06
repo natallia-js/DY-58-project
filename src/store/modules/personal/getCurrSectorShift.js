@@ -207,10 +207,13 @@ export const getCurrSectorShift = {
     async [LOAD_SHIFT_DATA_FOR_DSP_ACTION] (context) {
       // id участков ДНЦ
       const dncSectorsIds = context.getters.getStationDNCSectors.map((sector) => sector.DNCS_ID);
+      console.log('dncSectorsIds',dncSectorsIds)
       // id участков ЭЦД
       const ecdSectorsIds = context.getters.getStationECDSectors.map((sector) => sector.ECDS_ID);
+      console.log('ecdSectorsIds',ecdSectorsIds)
       // id всех станций: как текущего полигона управления, так и смежных к нему станций
       const stationsIds = context.getters.getSectorStations.map((station) => station.St_ID);
+      console.log('stationsIds',stationsIds)
       // Сюда поместим информацию о персонале, необходимую ДСП. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {

@@ -38,7 +38,7 @@ function getOrderDraftObject(draft) {
   }
   return {
     ...draft,
-    displayTitle: `${draft.orderText.orderTitle || '?'} от ${getLocaleDateTimeString(new Date(draft.createDateTime))}`,
+    displayTitle: `${draft.orderText.fullOrderTitle || '?'} от ${getLocaleDateTimeString(new Date(draft.createDateTime))}`,
     createDateTime: new Date(draft.createDateTime),
     orderText: !draft.orderText ? null : {
       ...draft.orderText,

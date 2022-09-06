@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
+import ifOrderBelongsToThisSector from '@/additional/ifOrderBelongsToThisSector';
 
 // название БД приложения в IndexedDB
 const DB_NAME = 'dy58DB';
@@ -152,39 +153,44 @@ class LocalStoreServer {
    * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) распоряжений (тех, с которыми работает пользователь).
    */
   async checkAndSaveOrdersIfNecessary(data) {
-    if (!data || !this.db) return;
+    if (!this.db) return;
 
     // выясняем, какие объекты из data новые, а какие - изменились
-    const { newObjects, modifiedObjects } = this.getObjectsChanges(data);
-    // изменений не было - больше ничего не делаем
-    if (!newObjects.length && !modifiedObjects.length) {
-      return;
-    }
+    const { newObjects, modifiedObjects } = this.getObjectsChanges(data || []);
 
-    // Изменения в БД вносим только в том случае, если есть что изменять
+    // Изменения в БД вносим в любом случае, даже если нет чего изменять, т.к. может получиться
+    // ситуация, когда пользователь входит спустя длительное время на тот же самый участок либо входит
+    // на другой участок, находясь на той же машине. Данные в локальной БД при этом должны быть
+    // пересмотрены и удалены лишние. Т.е. такой код здесь неуместен:
+    /*if (!newObjects.length && !modifiedObjects.length) {
+      return;
+    }*/
 
     // считываем данные, хранящиеся в БД
     const transaction = this.db.transaction([ORDERS_STORE_NAME], 'readwrite');
     const store = transaction.objectStore(ORDERS_STORE_NAME);
     const request = store.getAll();
 
-    const localStoreServerObject = this;
     // сюда поместим данные, которые заменят текущие данные в БД
     let newDBData = [];
 
     // id всех рабочих распоряжений
     const activeOrdersIds = data.map((el) => el._id);
+    const localStoreServerObject = this;
 
     request.onsuccess = function() {
       localStoreServerObject.writeStoreOrdersError = null;
 
       if (request.result) {
-        // удаляю неактуальные данные (неактуальное распоряжение - такое, которое было издано более
-        // maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет среди data, т.е. нет в массиве
-        // рабочих распоряжений)
+        // удаляю неактуальные данные (неактуальное распоряжение - такое, которое:
+        // 1) было издано на рабочем полигоне, отличном от текущего, и не было адресовано текущему рабочему полигону,
+        // 2) было издано более maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет в массиве рабочих распоряжений data)
         newDBData = request.result.filter((el) =>
-          activeOrdersIds.includes(el._id) ||
-          (new Date() - el.createDateTime) <= this.maxTimeStoreDataInLocalDB
+          ifOrderBelongsToThisSector(JSON.parse(el.serializedData)) &&
+          (
+            activeOrdersIds.includes(el._id) ||
+            (new Date() - el.createDateTime) <= localStoreServerObject.maxTimeStoreDataInLocalDB
+          )
         );
       }
       // добавляем новые данные

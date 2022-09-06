@@ -3,12 +3,19 @@ import {
   SAVE_ORDER_DRAFT_ACTION,
   EDIT_ORDER_DRAFT_ACTION,
 } from '@/store/action-types';
+import {
+  FILLED_ORDER_DROPDOWN_ELEMENTS,
+  FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
+} from '@/constants/orders';
+import {
+  OrderPatternElementType,
+} from '@/constants/orderPatterns';
 
 /**
  * Данный модуль предназначен для работы с черновиком распоряжения.
  */
  export const useOrderDraft = (inputVals) => {
-  const { state, props, store, confirm } = inputVals;
+  const { state, props, store, confirm, getOrderPatternElementValue } = inputVals;
 
   // Объект текущего черновика распоряжения (объект либо null)
   const currentOrderDraft = computed(() =>
@@ -23,6 +30,14 @@ import {
    * При сохранении черновика не производится проверка корректности заполнения полей данных (на форме).
    */
   const handleSaveOrderDraft = (event) => {
+    const orderPlaceFromText = getOrderPatternElementValue([
+      [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK],
+      [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION],
+      [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
+      [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
+    ]);
+    const fullOrderTitle = (orderPlaceFromText ? orderPlaceFromText + '. ' : '') + state.orderText.orderTitle;
+    if (orderPlaceFromText)
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',
@@ -37,7 +52,7 @@ import {
             place: state.orderPlace,
             timeSpan: state.timeSpan,
             defineOrderTimeSpan: state.defineOrderTimeSpan,
-            orderText: state.orderText,
+            orderText: { ...state.orderText, fullOrderTitle, },
             dncToSend: state.dncSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,
@@ -68,7 +83,7 @@ import {
             place: state.orderPlace,
             timeSpan: state.timeSpan,
             defineOrderTimeSpan: state.defineOrderTimeSpan,
-            orderText: state.orderText,
+            orderText: { ...state.orderText, fullOrderTitle, },
             dncToSend: state.dncSectorsToSendOrder.map((el) => ({
               id: el.id,
               type: el.type,

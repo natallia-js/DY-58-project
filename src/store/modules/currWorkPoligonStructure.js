@@ -290,8 +290,8 @@ export const currWorkPoligonStructure = {
      */
     getSectorStations(state) {
       if (state.sector && (state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors)) {
-        const trainSectors = state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors;
         const stations = [];
+        const trainSectors = state.sector.TDNCTrainSectors || state.sector.TECDTrainSectors;
         trainSectors.forEach((sector) => {
           if (!sector.TStations || !sector.TStations.length) {
             return;

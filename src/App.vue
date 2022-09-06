@@ -177,7 +177,7 @@
        * При появлении каких-либо изменений в рабочих распоряжениях принимаем меры по
        * сохранению данных в локальном хранилище
        */
-      watch(() => store.getters.getAllCurrentOrders, (newData) => {
+      watch(() => store.getters.getAllCurrentOrders, (newData) => { console.log('getAllCurrentOrders', newData)
         store.dispatch(STORE_ORDERS_LOCALLY, newData);
       });
 

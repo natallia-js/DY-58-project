@@ -648,12 +648,7 @@
         getSectorBlocks,
       } = useStoreData({ store, relatedOrderObject });
 
-      const {
-        currentOrderDraft,
-        handleSaveOrderDraft,
-      } = useOrderDraft({ state, props, store, confirm });
-
-      const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */ });
+      const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */, isECD });
 
       const submitted = ref(false);
       // Код { $scope: false } нужен для того чтобы (цитата из справочника):
@@ -697,18 +692,24 @@
       });
 */
 
+      const {
+        setRelatedOrderNumberInOrderText,
+        getOrderPatternElementValue,
+        setRequestOrderTextFields,
+        setOrderText,
+      } = useSetAndAnalyzeOrderText({ state, props, store, relatedOrderObject /*, showConnectedOrderFields */, selectedOkno });
+
+      const {
+        currentOrderDraft,
+        handleSaveOrderDraft,
+      } = useOrderDraft({ state, props, store, confirm, getOrderPatternElementValue });
+
       useWatchAllAppDataLoad({ store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
         lastOtherToSendSource, displayLastCircularOrderOtherPersonal });
       useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
         showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan, lastOtherToSendSource,
       });
       useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
-
-      const {
-        setRelatedOrderNumberInOrderText,
-        setRequestOrderTextFields,
-        setOrderText,
-      } = useSetAndAnalyzeOrderText({ state, props, store, relatedOrderObject /*, showConnectedOrderFields */, selectedOkno });
 
       useWatchOrderPatterns({
         state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,

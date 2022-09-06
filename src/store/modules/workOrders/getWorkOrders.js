@@ -419,9 +419,7 @@ export const getWorkOrders = {
      */
     [SET_NEW_WORK_ORDERS_ARRAY] (state, newData) {
       if (!newData || !newData.length) {
-        if (state.data.length) {
-          state.data = [];
-        }
+        state.data = [];
         return;
       }
       if (!state.data || !state.data.length) {

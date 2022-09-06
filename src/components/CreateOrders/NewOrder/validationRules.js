@@ -8,7 +8,7 @@ import isNumber from '@/additional/isNumber';
 /**
  * Данный модуль предназначен для проверки параметров издаваемого распоряжения.
  */
-export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject */ }) => {
+export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject */, isECD }) => {
 
   const endDateNoLessStartDate = (value) => !value ? true :
     !state.timeSpan.start ? true : (isValidDateTime(value) && value >= state.timeSpan.start);
@@ -16,15 +16,19 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
   const cancelOrEndDate = (value) => value || state.timeSpan.end;
 
   // Проверка элементов шаблона распоряжения на наличие в них значений.
-  // Значение должно присутствовать у всех элементов шаблона, кроме элементов типа
+  // Для ДСП и ДНЦ:
+  // значение должно присутствовать у всех элементов шаблона, кроме элементов типа
   // 'редактируемый список множественного выбора', 'перенос строки', 'текстовая область'
-  // и 'выдано запрещение ДСП',
-  // а также элементов, смысловые значения которых находятся в определенном списке
+  // и 'выдано запрещение ДСП', а также элементов, смысловые значения которых находятся в определенном списке
+  // Для ЭЦД:
+  // значение может отсутствовать у абсолютно любого элемента шаблона
   const orderTextFieldsNotEmpty = (orderText) => {
+    if (isECD)
+      return true;
     for (let orderTextElement of orderText) {
       if (![OrderPatternElementType.MULTIPLE_SELECT, OrderPatternElementType.LINEBREAK,
             OrderPatternElementType.TEXT_AREA, OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING,
-           ].includes(orderTextElement.type) &&
+          ].includes(orderTextElement.type) &&
           !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) && !orderTextElement.value)
       {
         return false;

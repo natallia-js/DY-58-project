@@ -275,7 +275,7 @@
       },
 
       handleInputFromOtherReceiverDlg(userData) {
-        if (this.addNewRec) { console.log(userData)
+        if (this.addNewRec) {
           this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...userData });
           if (this.isECD) {
             const otherId = this.$store.getters.getNewOtherPersonId({ placeTitle: userData.placeTitle, post: userData.post, fio: userData.fio });

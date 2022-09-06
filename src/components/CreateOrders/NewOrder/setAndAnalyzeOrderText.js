@@ -36,6 +36,19 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
   };
 
   /**
+   * Возвращает значение первого элемента шаблонного распоряжения, тип и смысловое значение которого лежат в
+   * списке elTypesRefs (массив двумерных массивов). Если ничего не найдет, то возвратит null.
+   */
+  const getOrderPatternElementValue = (elTypesRefs) => {
+    if (!state.orderText || !state.orderText.orderText || !state.orderText.patternId || !elTypesRefs || !elTypesRefs.length)
+      return null;
+    const typesRefsIncludes = (type, ref) =>
+      elTypesRefs.find((el) => el && el.length === 2 && el[0] === type && el[1] === ref) ? true : false;
+    const orderTextElement = state.orderText.orderText.find((el) => typesRefsIncludes(el.type, el.ref));
+    return orderTextElement ? orderTextElement.value : null;
+  };
+
+  /**
    * Позволяет установить в тексте шаблонного распоряжения номер выбранного для связи документа
    * (если в тексте есть специально предназначенный для этого элемент).
    */
@@ -70,7 +83,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
   /**
    * Позволяет заполнить в тексте шаблонного распоряжения-заявки поля, соответствующие выбранному "окну".
    */
-   const setRequestOrderTextFields = () => {
+  const setRequestOrderTextFields = () => {
     if (!selectedOkno.value || !state.orderText.patternId || props.orderType !== ORDER_PATTERN_TYPES.REQUEST) {
       return;
     }
@@ -338,6 +351,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
 
   return {
     setRelatedOrderNumberInOrderText,
+    getOrderPatternElementValue,
     setRequestOrderTextFields,
     setOrderText,
   };
