@@ -30,14 +30,13 @@ import {
    * При сохранении черновика не производится проверка корректности заполнения полей данных (на форме).
    */
   const handleSaveOrderDraft = (event) => {
-    const orderPlaceFromText = getOrderPatternElementValue([
+    const orderPlaceFromText = getOrderPatternElementValue({ elTypesRefs: [
       [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK],
       [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
-    ]);
-    const fullOrderTitle = (orderPlaceFromText ? orderPlaceFromText + '. ' : '') + state.orderText.orderTitle;
-    if (orderPlaceFromText)
+    ] }) || '?';
+    const fullOrderTitle = `${orderPlaceFromText}. ${state.orderText.orderTitle}`;
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',

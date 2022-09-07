@@ -38,13 +38,17 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
   /**
    * Возвращает значение первого элемента шаблонного распоряжения, тип и смысловое значение которого лежат в
    * списке elTypesRefs (массив двумерных массивов). Если ничего не найдет, то возвратит null.
+   * Если firstFilledElement = true, то ищется значение первого заполненного (непустого) элемента шаблона.
    */
-  const getOrderPatternElementValue = (elTypesRefs) => {
+  const getOrderPatternElementValue = ({ elTypesRefs, firstFilledElement = true }) => {
     if (!state.orderText || !state.orderText.orderText || !state.orderText.patternId || !elTypesRefs || !elTypesRefs.length)
       return null;
     const typesRefsIncludes = (type, ref) =>
       elTypesRefs.find((el) => el && el.length === 2 && el[0] === type && el[1] === ref) ? true : false;
-    const orderTextElement = state.orderText.orderText.find((el) => typesRefsIncludes(el.type, el.ref));
+    const considerValueFill = (value) => !firstFilledElement || (firstFilledElement && value);
+    const orderTextElement = state.orderText.orderText.find((el) => {
+      return typesRefsIncludes(el.type, el.ref) && considerValueFill(el.value)
+    });
     return orderTextElement ? orderTextElement.value : null;
   };
 
