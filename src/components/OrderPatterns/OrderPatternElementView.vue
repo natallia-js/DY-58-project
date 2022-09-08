@@ -930,7 +930,10 @@
       const isDropdownEditable = computed(() =>
         props.element &&
         props.element.type === OrderPatternElementType.SELECT &&
-        props.element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS
+        (
+          props.element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS ||
+          props.element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.SPEED
+        )
       );
 
       return {

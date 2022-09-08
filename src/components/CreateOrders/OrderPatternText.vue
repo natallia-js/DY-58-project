@@ -68,6 +68,7 @@
     ACTIONS_ORDER_NOTIFICATION_ITEMS,
     ISSUED_DSP_BAN_ITEMS,
     WORKS_OBJECT_NOTIFICATION_ITEMS,
+    SPEED_ITEMS,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -252,6 +253,8 @@
                   value: item.postFIO,
                 }));
               return [];
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.SPEED:
+              return SPEED_ITEMS.map((item) => ({ label: item, value: item }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS:
               return !this.getSelectedOkno
                 ? null

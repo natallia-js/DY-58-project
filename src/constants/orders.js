@@ -101,6 +101,7 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   WORK_IF_THERE_ARE: 'Работать при наличии',
   NARYAD_DOPUSK: 'Наряд допуск',
   TRACK_SECTION_BEFORE: 'Участок пути до',
+  SPEED: 'Скорость',
 });
 
 export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
@@ -114,6 +115,10 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
 });
 
 export const ISSUED_DSP_BAN_ITEMS = ['Выдано запрещение ДСП', ''];
+
+export const SPEED_ITEMS = [
+  'со скоростью по   км не более   км/ч', 'с установленной скоростью', 'со скоростью согласно ранее выданных предупреждений',
+];
 
 export const ACTIONS_ITEMS = [
   'Отключить', 'Включить', 'Вывести АПВ ФКС №', 'Ввести АПВ ФКС №', 'Выкатить тележку', 'Вкатить тележку', 'Перевести питание с',
