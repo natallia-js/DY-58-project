@@ -108,14 +108,16 @@ function setStationsShift(responseData, shiftPersonal) {
         if (item.stationId === user.stationId) {
           item.people.push({
             ...user,
-            // на станциях данному приложению известны лишь наборы полномочий DSP_FULL и DSP_Operator
+            // на станциях данному приложению известны наборы полномочий DSP_FULL, DSP_Operator и STATION_WORKS_MANAGER
             appsCredentials:
               user.appsCredentials.length === 0 || !user.stationId ? null :
                 !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_FULL)
                   ? APP_CREDENTIALS.DSP_FULL
                   : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
                     ? APP_CREDENTIALS.DSP_Operator
-                    : null,
+                    : !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.STATION_WORKS_MANAGER)
+                      ? APP_CREDENTIALS.STATION_WORKS_MANAGER
+                      : null,
           });
         }
       });
@@ -207,13 +209,10 @@ export const getCurrSectorShift = {
     async [LOAD_SHIFT_DATA_FOR_DSP_ACTION] (context) {
       // id участков ДНЦ
       const dncSectorsIds = context.getters.getStationDNCSectors.map((sector) => sector.DNCS_ID);
-      console.log('dncSectorsIds',dncSectorsIds)
       // id участков ЭЦД
       const ecdSectorsIds = context.getters.getStationECDSectors.map((sector) => sector.ECDS_ID);
-      console.log('ecdSectorsIds',ecdSectorsIds)
       // id всех станций: как текущего полигона управления, так и смежных к нему станций
       const stationsIds = context.getters.getSectorStations.map((station) => station.St_ID);
-      console.log('stationsIds',stationsIds)
       // Сюда поместим информацию о персонале, необходимую ДСП. Предварительно (до обращения к БД)
       // сформируем структуру данных
       const shiftPersonal = {
@@ -227,27 +226,22 @@ export const getCurrSectorShift = {
         // управления), так и на станциях, смежных с текущей
         sectorStationsShift: initialSectorStationsPersonalData(context.getters.getSectorStations),
       };
-      console.log('shiftPersonal1',shiftPersonal)
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ
       if (dncSectorsIds.length) {
         const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: dncSectorsIds, onlyOnline: false });
-        console.log('responseData1',responseData)
         setDNCSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД
       if (ecdSectorsIds.length) {
         const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: ecdSectorsIds, onlyOnline: false });
-        console.log('responseData2',responseData)
         setECDSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на смежных станциях
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: true });
-        console.log('responseData3',responseData)
         setStationsShift(responseData, shiftPersonal);
       }
       context.commit(SET_SECTOR_PERSONAL, shiftPersonal);
-      console.log('shiftPersonal2',shiftPersonal)
     },
 
     /**

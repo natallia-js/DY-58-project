@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isDSP_or_DSPoperator || isDNC || isECD || isRevisor">
+  <div v-if="canUserReadOrderJournal">
     <div
       v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
       class="p-mt-3 p-mb-3"
@@ -15,7 +15,7 @@
       </h3>
     </div>
     <div
-      v-else-if="isDSP_or_DSPoperator || isDNC ||
+      v-else-if="isDSP_or_DSPoperator || isDNC || isStationWorksManager ||
         (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
       class="p-mt-3 p-mb-3"
     >
@@ -46,7 +46,7 @@
         @finishedCreatingCheckRecord="checkDocs = false"
       />
       <DNCandDSPJournal
-        v-else-if="isDSP_or_DSPoperator || isDNC ||
+        v-else-if="isDSP_or_DSPoperator || isDNC || isStationWorksManager ||
           (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
         :searchParams="searchParams"
         :printParams="printParams"
@@ -56,7 +56,7 @@
       />
     </div>
   </div>
-  <div v-else class="dy58-user-action-forbidden-block">
+  <div v-else class="dy58-user-action-forbidden-block dy58-error-message">
     Для вас не предусмотрен функционал работы с Журналом распоряжений
   </div>
 </template>
@@ -107,6 +107,8 @@
         isDNC: computed(() => store.getters.isDNC),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         isRevisor: computed(() => store.getters.isRevisor),
+        isStationWorksManager: computed(() => store.getters.isStationWorksManager),
+        canUserReadOrderJournal: computed(() => store.getters.canUserReadOrderJournal),
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
         getUserWorkPoligonTypeName: computed(() => {

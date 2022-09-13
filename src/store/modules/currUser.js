@@ -101,7 +101,7 @@ function checkUserAuthData(payload) {
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
     // ---> ДСП
-    if (cred === APP_CREDENTIALS.DSP_FULL) {
+    if ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(cred)) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
         obj.poligons = [];
@@ -244,6 +244,14 @@ export const currUser = {
     },
     isDSP_or_DSPoperator(state) {
       return state.credential === APP_CREDENTIALS.DSP_FULL || state.credential === APP_CREDENTIALS.DSP_Operator;
+    },
+    isStationWorksManager(state) {
+      return state.credential === APP_CREDENTIALS.STATION_WORKS_MANAGER;
+    },
+    isStationWorkPoligonSpecialist(state) {
+      return state.credential === APP_CREDENTIALS.DSP_FULL ||
+             state.credential === APP_CREDENTIALS.DSP_Operator ||
+             state.credential === APP_CREDENTIALS.STATION_WORKS_MANAGER;
     },
     isDSPoperator(state) {
       return state.credential === APP_CREDENTIALS.DSP_Operator;

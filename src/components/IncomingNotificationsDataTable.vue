@@ -21,7 +21,7 @@
       <template #header>
         <div class="dy58-table-title">
           <i v-if="getLoadingWorkOrdersStatus" class="pi pi-spin pi-spinner"></i>
-          Входящие {{ isDSP_or_DSPoperator ? 'документы' : 'уведомления' }}
+          Входящие {{ isStationWorkPoligonSpecialist ? 'документы' : 'уведомления' }}
           <p v-if="getErrorLoadingWorkOrders" class="dy58-bold-error-message">
             {{ getErrorLoadingWorkOrders }}
           </p>
@@ -34,7 +34,7 @@
           v-if="state.chosenOrder"
           label="Подробнее"
           @click="showOrderInfo"
-          v-tooltip.bottom="`Просмотреть информацию о входящем ${isDSP_or_DSPoperator ? 'документе' : 'уведомлении'}`"
+          v-tooltip.bottom="`Просмотреть информацию о входящем ${isStationWorkPoligonSpecialist ? 'документе' : 'уведомлении'}`"
         />
       </template>
 
@@ -155,7 +155,7 @@
         getReportOnOrdersDeliveryResult: computed(() => store.getters.getReportOnOrdersDeliveryResult),
         getErrorLoadingWorkOrders: computed(() => store.getters.getErrorLoadingWorkOrders),
         getIncomingOrders,
-        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isStationWorkPoligonSpecialist: computed(() => store.getters.isStationWorkPoligonSpecialist),
         getInputMessTblColumnsTitles: computed(() => store.getters.getInputMessTblColumnsTitles),
         getInputMessTblColumns: computed(() => store.getters.getInputMessTblColumns),
         isOrderBeingConfirmed: computed(() => store.getters.isOrderBeingConfirmed),

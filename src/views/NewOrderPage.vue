@@ -28,7 +28,7 @@
         @changeProps="handleChangeRouteParams"
       />
     </TabPanel>
-    <TabPanel v-if="isDNC || isDSP_or_DSPoperator" :header="ORDER_PATTERN_TYPES.REQUEST">
+    <TabPanel v-if="isDNC || isDSP_or_DSPoperator || isStationWorksManager" :header="ORDER_PATTERN_TYPES.REQUEST">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.REQUEST"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
@@ -38,11 +38,11 @@
       />
     </TabPanel>
     <TabPanel
-      v-if="isDNC || isECD || isDSP_or_DSPoperator"
+      v-if="isDNC || isECD || isDSP_or_DSPoperator || isStationWorksManager"
       :header="isDNC || isDSP_or_DSPoperator ? ORDER_PATTERN_TYPES.NOTIFICATION : ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
     >
       <new-order
-        v-if="isDNC || isDSP_or_DSPoperator"
+        v-if="isDNC || isDSP_or_DSPoperator || isStationWorksManager"
         :orderType="ORDER_PATTERN_TYPES.NOTIFICATION"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
@@ -61,7 +61,7 @@
   </TabView>
   <div v-else class="dy58-user-action-forbidden-block">
     <span v-if="!ifUserWorksOffline">Вы не на дежурстве либо у вас нет прав на издание документов</span>
-    <span v-else>Издание документов при автономной работе с системой невозможно</span>
+    <span v-else class="dy58-error-message">Издание документов при автономной работе с системой невозможно</span>
   </div>
 </template>
 
@@ -104,20 +104,32 @@
       const isDNC = computed(() => store.getters.isDNC);
       const isECD = computed(() => store.getters.isECD);
       const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
+      const isStationWorksManager = computed(() => store.getters.isStationWorksManager);
 
       const getOrderTypeByTabIndex = (tabIndex) => {
         switch (tabIndex) {
           case TABS_INDEXES.FIRST_TAB:
-            return isDNC.value ? ORDER_PATTERN_TYPES.ORDER :
-              isDSP_or_DSPoperator.value ? ORDER_PATTERN_TYPES.REQUEST :
-              isECD.value ? ORDER_PATTERN_TYPES.ECD_ORDER : null;
+            return isDNC.value
+              ? ORDER_PATTERN_TYPES.ORDER
+              : (isDSP_or_DSPoperator.value || isStationWorksManager.value)
+                ? ORDER_PATTERN_TYPES.REQUEST
+                : isECD.value
+                  ? ORDER_PATTERN_TYPES.ECD_ORDER
+                  : null;
           case TABS_INDEXES.SECOND_TAB:
-            return isDNC.value ? ORDER_PATTERN_TYPES.REQUEST :
-              isDSP_or_DSPoperator.value ? ORDER_PATTERN_TYPES.NOTIFICATION :
-              isECD.value ? ORDER_PATTERN_TYPES.ECD_PROHIBITION : null;
+            return isDNC.value
+              ? ORDER_PATTERN_TYPES.REQUEST
+              : (isDSP_or_DSPoperator.value || isStationWorksManager.value)
+                ? ORDER_PATTERN_TYPES.NOTIFICATION
+                : isECD.value
+                  ? ORDER_PATTERN_TYPES.ECD_PROHIBITION
+                  : null;
           case TABS_INDEXES.THIRD_TAB:
-            return isDNC.value ? ORDER_PATTERN_TYPES.NOTIFICATION :
-              isECD.value ? ORDER_PATTERN_TYPES.ECD_NOTIFICATION : null;
+            return isDNC.value
+              ? ORDER_PATTERN_TYPES.NOTIFICATION
+              : isECD.value
+                ? ORDER_PATTERN_TYPES.ECD_NOTIFICATION
+                : null;
         }
         return null;
       };
@@ -134,7 +146,7 @@
             }
             break;
           case ORDER_PATTERN_TYPES.NOTIFICATION:
-            if (isDSP_or_DSPoperator.value) {
+            if (isDSP_or_DSPoperator.value || isStationWorksManager.value) {
               activeIndex.value = TABS_INDEXES.SECOND_TAB;
             }
             else if (isDNC.value) {
@@ -222,6 +234,7 @@
         isDSP_or_DSPoperator,
         isDNC,
         isECD,
+        isStationWorksManager,
         ORDER_PATTERN_TYPES,
         TABS_INDEXES,
         handleTabChange,

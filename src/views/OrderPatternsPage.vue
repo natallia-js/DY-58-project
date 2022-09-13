@@ -1,12 +1,12 @@
 <template>
-  <div v-if="!orderPatternsLoadedSuccessfully" class="dy58-user-action-forbidden-block">
+  <div v-if="!orderPatternsLoadedSuccessfully" class="dy58-user-action-forbidden-block dy58-error-message">
     {{ getErrorLoadingPatterns }}
   </div>
   <TabView v-else>
     <TabPanel header="Шаблоны по категориям">
       <order-patterns-tree />
     </TabPanel>
-    <TabPanel v-if="!isDNC && !isECD && !isDSP_or_DSPoperator" header="Создать шаблон">
+    <TabPanel v-if="!isDNC && !isECD && !isDSP_or_DSPoperator && !isStationWorksManager" header="Создать шаблон">
       <create-order-pattern />
     </TabPanel>
   </TabView>
@@ -38,6 +38,7 @@
         isDNC: computed(() => store.getters.isDNC),
         isECD: computed(() => store.getters.isECD),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         orderPatternsLoadedSuccessfully : computed(() => store.getters.orderPatternsLoadedSuccessfully),
         getErrorLoadingPatterns: computed(() => store.getters.getErrorLoadingPatterns),
       };

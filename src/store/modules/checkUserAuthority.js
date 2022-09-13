@@ -10,11 +10,11 @@ export const checkUserAuthority = {
 
     /**
      * Пользователь, принявший дежурство, может получить количество входящих распоряжений с начала его
-     * смены, если этот пользователь - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * смены, если этот пользователь - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserGetIncomingOrdersPerShift(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },
 
@@ -61,25 +61,18 @@ export const checkUserAuthority = {
 
     /**
      * Издавать распоряжения может лишь пользователь, принявший дежурство,
-     * если он - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * если он - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserDispatchOrders(_state, getters) {
       return getters.canUserWorkWithSystem && !getters.ifUserWorksOffline &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },
 
     /**
-     * Создавать записи о проверке Журнала может лишь принявший дежурство ревизор.
+     * Создавать записи о проверке Журнала распоряжений может лишь принявший дежурство ревизор.
      */
     canUserCreateCheckOrders(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty ? true : false;
-    },
-
-    /**
-     * Создавать записи о проверке распоряжений может лишь ревизор, принявший дежурство.
-     */
-    canUserDispatchControlRecords(_state, getters) {
       return getters.canUserWorkWithSystem && getters.isRevisor && getters.isUserOnDuty ? true : false;
     },
 
@@ -127,11 +120,11 @@ export const checkUserAuthority = {
 
     /**
      * Получить параметры последних изданных распоряжений на полигоне управления может лишь
-     * ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserGetLastOrdersParams(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) ? true : false;
     },
 
     /**
@@ -154,11 +147,11 @@ export const checkUserAuthority = {
     },
 
     /**
-     * Получить шаблоны распоряжений может лишь ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * Получить шаблоны распоряжений может лишь ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserGetOrderPatterns(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) ? true : false;
     },
 
     /**
@@ -168,6 +161,14 @@ export const checkUserAuthority = {
     canUserWorkWithOrderPatterns(_state, getters) {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) ? true : false;
+    },
+
+    /**
+     * Просматривать Журнал распоряжений может ДНЦ, ЭЦД, ДСП, Оператор при ДСП, Ревизор и Руководитель работ на станции.
+     */
+    canUserReadOrderJournal(_state, getters) {
+      return getters.canUserWorkWithSystem &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD || getters.isRevisor) ? true : false;
     },
   },
 };

@@ -22,7 +22,10 @@ export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline, inc
     params: {
       stationIds,
       onlyOnline,
-      credsGroups: [{ credsGroup: DY58_CREDENTIALS_GROUP_NAME, creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator] }],
+      credsGroups: [{
+        credsGroup: DY58_CREDENTIALS_GROUP_NAME,
+        creds: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER],
+      }],
       includeWorkPlaces,
     },
   });

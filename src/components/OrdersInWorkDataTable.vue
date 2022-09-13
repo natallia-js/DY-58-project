@@ -70,7 +70,7 @@
             </span>
             <!-- столбец статуса -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
-              <div v-if="isDSP_or_DSPoperator || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
+              <div v-if="isStationWorkPoligonSpecialist || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
                   <span class="p-mr-2">Не доставлено:</span>
                   <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}/${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
@@ -567,7 +567,7 @@
         state,
         isDNC: computed(() => store.getters.isDNC),
         isECD: computed(() => store.getters.isECD),
-        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isStationWorkPoligonSpecialist: computed(() => store.getters.isStationWorkPoligonSpecialist),
         isRevisor: computed(() => store.getters.isRevisor),
         WORK_POLIGON_TYPES,
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),

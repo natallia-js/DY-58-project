@@ -9,6 +9,7 @@ export const APP_CREDENTIALS = Object.freeze({
   DSP_Operator: 'DSP_Operator',
   ECD_FULL: 'ECD_FULL',
   REVISOR: 'REVISOR',
+  STATION_WORKS_MANAGER: 'STATION_WORKS_MANAGER',
 });
 
 export const APP_CREDENTIALS_TRANSLATIONS = Object.freeze({
@@ -17,6 +18,7 @@ export const APP_CREDENTIALS_TRANSLATIONS = Object.freeze({
   [APP_CREDENTIALS.DSP_Operator]: 'Дополнительный пользователь на станции',
   [APP_CREDENTIALS.ECD_FULL]: 'ЭЦД',
   [APP_CREDENTIALS.REVISOR]: 'Ревизор',
+  [APP_CREDENTIALS.STATION_WORKS_MANAGER]: 'Руководитель работ',
 });
 
 export const WORK_POLIGON_TYPES = Object.freeze({

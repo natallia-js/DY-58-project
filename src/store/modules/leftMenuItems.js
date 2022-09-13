@@ -161,7 +161,7 @@ export const leftMenuItems = {
     },
 
     getLeftMenuItems(_state, getters) {
-      if (getters.isDSP_or_DSPoperator || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
+      if (getters.isStationWorkPoligonSpecialist || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
         return getters.getDSPLeftMenuItems;
       } else if (getters.isDNC || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR)) {
         return getters.getDNCLeftMenuItems;

@@ -37,7 +37,7 @@ export const dsp = {
       }
       return stationWithPersonal.people
         .filter((item) =>
-          (item.appsCredentials === APP_CREDENTIALS.DSP_FULL || item.appsCredentials === APP_CREDENTIALS.DSP_Operator) &&
+          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(item.appsCredentials)) &&
           (
             (!userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId === userWorkPoligon.subCode)
@@ -83,7 +83,7 @@ export const dsp = {
       };
       stationWithPersonal.people
         .filter((item) =>
-          (item.appsCredentials === APP_CREDENTIALS.DSP_FULL || item.appsCredentials === APP_CREDENTIALS.DSP_Operator) &&
+          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(item.appsCredentials)) &&
           (
             (!userWorkPoligon.subCode && item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && !item.stationWorkPlaceId) ||

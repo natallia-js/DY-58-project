@@ -24,7 +24,9 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  *     ДСП             Распоряжение на закрытие перегона        Заявка, Уведомление
  *     ЭЦД             Распоряжение на закрытие перегона        Запрещение
  *     ДНЦ             Заявка (ДСП)                             Распоряжение, Заявка, Уведомление
- *     ДСП             Заявка (ДСП)                             Заявка, Уведомление
+ *     ДСП, руково-    Заявка (ДСП)                             Заявка, Уведомление
+ *     дитель работ
+ *     на станции
  *     ЭЦД             Заявка (ДСП)                             -
  *     ДНЦ             Уведомление (ДСП)                        Распоряжение
  *     ДСП             Уведомление (ДСП)                        -
@@ -62,7 +64,7 @@ const possibleDocsConnections = [
         possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
       },
       {
-        userCredentials: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator],
+        userCredentials: [APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER],
         possibleNewDocTypes: [ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
       },
     ],

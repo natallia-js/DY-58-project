@@ -116,7 +116,7 @@ import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
         draftId = null,
       } = params;
 
-      if (!context.getters.canUserDispatchOrders && !context.getters.canUserDispatchControlRecords) {
+      if (!context.getters.canUserDispatchOrders && !context.getters.canUserCreateCheckOrders) {
         const errMessage = 'У вас нет права на издание документов / создание контрольных записей';
         context.commit(SET_DISPATCH_ORDER_RESULT, { error: true, orderType: type, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
