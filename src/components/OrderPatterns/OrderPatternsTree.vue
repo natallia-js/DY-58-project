@@ -26,6 +26,11 @@
         @nodeExpand="expandAll"
         @nodeCollapse="collapseAll"
       >
+        <template #default="slotProps">
+          <span :class="[{'dy58-user-order-pattern': slotProps.node.positionInPatternsCategory < 0}]">
+            {{slotProps.node.label}}
+          </span>
+        </template>
       </Tree>
       <Button
         icon="pi pi-refresh"
@@ -628,5 +633,9 @@
     position: absolute;
     left: 0;
     top: 0;
+  }
+
+  .dy58-user-order-pattern {
+    color: red;
   }
 </style>

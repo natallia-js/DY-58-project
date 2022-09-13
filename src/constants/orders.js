@@ -24,7 +24,7 @@ export const ORDER_PLACE_VALUES = Object.freeze({
 
 // Смысловые значения элементов шаблонов распоряжений, которые разрешается не заполнять при издании распоряжения
 export const ORDER_ELEMENTS_CAN_BE_EMPTY = [
-  'Примечание',
+  'Примечание', 'Место работ',
 ];
 
 export const FILLED_ORDER_TIME_ELEMENTS = Object.freeze({

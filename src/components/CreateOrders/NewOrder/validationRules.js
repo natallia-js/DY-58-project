@@ -23,8 +23,9 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
   // Для ЭЦД:
   // значение может отсутствовать у абсолютно любого элемента шаблона
   const orderTextFieldsNotEmpty = (orderText) => {
-    if (isECD)
+    if (isECD.value) {
       return true;
+  }
     for (let orderTextElement of orderText) {
       if (![OrderPatternElementType.MULTIPLE_SELECT, OrderPatternElementType.LINEBREAK,
             OrderPatternElementType.TEXT_AREA, OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING,
@@ -37,13 +38,15 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
     return true;
   };
 
-  const checkOrderTextDateTimeParams = (orderText) => {
-    for (let orderTextElement of orderText) {
+  const checkOrderTextDateTimeParams = (/*orderText*/) => {
+    // Здесь нельзя использовать isValidDateTime, т.к. он не работает со строками
+    /*for (let orderTextElement of orderText) {
       if ([OrderPatternElementType.DATE, OrderPatternElementType.TIME, OrderPatternElementType.DATETIME]
         .includes(orderTextElement.type) && !isValidDateTime(orderTextElement.value)) {
+          console.log('checkOrderTextDateTimeParams false')
         return false;
       }
-    }
+    }*/
     return true;
   };
 /*

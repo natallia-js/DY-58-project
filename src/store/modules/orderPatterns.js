@@ -88,10 +88,37 @@ export const orderPatterns = {
       return orderCategories;
     },
 
+    /**
+     * Формирует массив данных шаблонов распоряжений для отображения в компоненте TreeSelect
+     * (компонент выбора шаблона распоряжения при его издании).
+     * Шаблоны в рамках соответствующей группы (категории распоряжений) сортируются по значению
+     * поля positionInPatternsCategory (позиция в дереве шаблонов).
+     * Группы распоряжений сортируются по наименованию соответствующей категории.
+     */
     getOrderPatternsToDisplayInTreeSelect(state) {
       return (patternsType) => {
         // data is grouped by order category
-        const orders = state.patterns.filter((pattern) => pattern.type === patternsType);
+        const orders = state.patterns
+          .filter((pattern) => pattern.type === patternsType)
+          .sort((pattern1, pattern2) => {
+            if (pattern1.category < pattern2.category) {
+              return -1;
+            }
+            if (pattern1.category > pattern2.category) {
+              return 1;
+            }
+            if (pattern1.positionInPatternsCategory >= 0 && pattern2.positionInPatternsCategory >= 0) {
+              if (pattern1.positionInPatternsCategory < pattern2.positionInPatternsCategory)
+                return -1;
+              return 1;
+            }
+            if (pattern1.positionInPatternsCategory < 0 && pattern2.positionInPatternsCategory < 0) {
+              return 0;
+            }
+            if (pattern1.positionInPatternsCategory < 0)
+              return 1;
+            return -1;
+          });
         const groupedOrders = [];
         orders.forEach((order) => {
           const categoryGroup = groupedOrders.find((group) => group.key === order.category);
@@ -132,6 +159,7 @@ export const orderPatterns = {
           pattern: orderPattern.elements,
           type: OrderPatternsNodeType.ORDER_PATTERN,
           specialTrainCategories: orderPattern.specialTrainCategories,
+          positionInPatternsCategory: orderPattern.positionInPatternsCategory,
           personalPattern:
             orderPattern.personalPattern &&
             String(orderPattern.personalPattern) === String(getters.getUserId),
@@ -190,7 +218,29 @@ export const orderPatterns = {
             if (!theSameCategoryElement) {
               theSameTypeElement.children.push(orderCategoryNodeObject(orderPattern));
             } else {
-              theSameCategoryElement.children.push(orderPatternNodeObject(orderPattern));
+              const orderPatternLeaf = orderPatternNodeObject(orderPattern);
+              //theSameCategoryElement.children.push(orderPatternNodeObject(orderPattern));
+              // Шаблоны в дереве должны сортироваться в рамках соответствующей категории распоряжений.
+              // Сортировка производится по положительным значениям поля positionInPatternsCategory.
+              // Если значение поля positionInPatternsCategory отрицательное, то такой шаблон оказывается в конце списка.
+              // Шаблоны с отрицательными значениями positionInPatternsCategory не сортируются.
+              if (orderPatternLeaf.positionInPatternsCategory === -1) {
+                theSameCategoryElement.children.push(orderPatternLeaf);
+              } else {
+                const firstElementWithGreaterPositionIndex = theSameCategoryElement.children.findIndex((el) => el.positionInPatternsCategory > orderPatternLeaf.positionInPatternsCategory);
+                if (firstElementWithGreaterPositionIndex === -1) {
+                  // нужно проверить, не содержится ли в конце списка элемент с positionInPatternsCategory = -1;
+                  // если содержится, то поместить новый элемент можно перед первым в списке элементом с positionInPatternsCategory = -1
+                  const firstElementWithNegativePositionIndex = theSameCategoryElement.children.findIndex((el) => el.positionInPatternsCategory < 0);
+                  if (firstElementWithNegativePositionIndex === -1)
+                    theSameCategoryElement.children.push(orderPatternLeaf);
+                  else
+                    theSameCategoryElement.children.splice(firstElementWithNegativePositionIndex, 0, orderPatternLeaf);
+                }
+                else {
+                  theSameCategoryElement.children.splice(firstElementWithGreaterPositionIndex, 0, orderPatternLeaf);
+                }
+              }
             }
           }
         }
