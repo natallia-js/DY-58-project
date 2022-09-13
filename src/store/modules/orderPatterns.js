@@ -214,12 +214,17 @@ export const orderPatterns = {
           if (!theSameTypeElement) {
             theSameServiceElement.children.push(serviceNodeObject(orderPattern));
           } else {
+            // Категории распоряжений сортируются по алфавиту в рамках соответствующего типа распоряжений
             const theSameCategoryElement = theSameTypeElement.children.find((category) => category.label === orderPattern.category);
             if (!theSameCategoryElement) {
-              theSameTypeElement.children.push(orderCategoryNodeObject(orderPattern));
+              const categoryNode = orderCategoryNodeObject(orderPattern);
+              const insertPos = theSameTypeElement.children.findIndex((category) => category.label > categoryNode.label);
+              if (insertPos === -1)
+                theSameTypeElement.children.push(categoryNode);
+              else
+                theSameTypeElement.children.splice(insertPos, 0, categoryNode);
             } else {
               const orderPatternLeaf = orderPatternNodeObject(orderPattern);
-              //theSameCategoryElement.children.push(orderPatternNodeObject(orderPattern));
               // Шаблоны в дереве должны сортироваться в рамках соответствующей категории распоряжений.
               // Сортировка производится по положительным значениям поля positionInPatternsCategory.
               // Если значение поля positionInPatternsCategory отрицательное, то такой шаблон оказывается в конце списка.
