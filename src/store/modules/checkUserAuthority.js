@@ -51,11 +51,11 @@ export const checkUserAuthority = {
 
     /**
      * Подтвердить распоряжение за других может лишь находящийся на дежурстве пользователь,
-     * если он - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * если он - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserConfirmOrderForOthers(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },
 

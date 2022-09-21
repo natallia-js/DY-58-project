@@ -28,8 +28,12 @@
   font-weight: 600;
 }
 
-.dy58-edit-order-pattern-element-block {
+.dy58-edit-order-pattern-element-block, .dy58-view-order-pattern-element-refs-meanings-block {
   background-color: #feffe6;
+}
+
+.dy58-view-order-pattern-element-refs-meanings-list-item-block {
+  background-color: var(--surface-b);
 }
 
 .dy58-footer {

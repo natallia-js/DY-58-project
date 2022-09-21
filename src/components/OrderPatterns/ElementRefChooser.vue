@@ -1,20 +1,41 @@
 <template>
-  <Dropdown
-    style="width:100%"
-    v-model="selectedRef"
-    :options="getPossibleElementRefs"
-    placeholder="Выберите значение элемента"
-  />
+  <div class="p-d-flex p-flex-row">
+    <view-order-pattern-element-refs-dlg
+      :elementType="elementType"
+      :elementRefs="getPossibleElementRefsFullData"
+      :showDlg="showViewOrderPatternElementRefsDlg"
+      @close="closeViewOrderPatternElementRefsDlg"
+    />
+    <Dropdown
+      style="width:100%"
+      v-model="selectedRef"
+      :options="getPossibleElementRefsStrings"
+      placeholder="Выберите значение элемента"
+    />
+    <Button
+      type="button"
+      icon="pi pi-list"
+      class="p-button-primary"
+      v-tooltip.right="'Просмотреть список смысловых значений'"
+      @click="openViewOrderPatternElementRefsDlg"
+    >
+    </Button>
+  </div>
 </template>
 
 
 <script>
   import { mapGetters } from 'vuex';
+  import ViewOrderPatternElementRefsDlg from '../ViewOrderPatternElementRefsDlg';
 
   export default {
     name: 'dy58-element-ref-chooser',
 
     emits: ['changeRef'],
+
+    components: {
+      ViewOrderPatternElementRefsDlg,
+    },
 
     props: {
       chosenRef: String,
@@ -24,6 +45,7 @@
     data() {
       return {
         selectedRef: this.chosenRef,
+        showViewOrderPatternElementRefsDlg: false,
       };
     },
 
@@ -32,8 +54,19 @@
         'getOrderPatternsElementsRefsForGivenElementType',
       ]),
 
-      getPossibleElementRefs() {
-        return this.getOrderPatternsElementsRefsForGivenElementType(this.elementType);
+      getPossibleElementRefsStrings() {
+        return this.getOrderPatternsElementsRefsForGivenElementType({
+          elementType: this.elementType,
+          onlyRefStrings: true,
+          includeEmptyString: true,
+        });
+      },
+
+      getPossibleElementRefsFullData() {
+        const elementRefs = this.getOrderPatternsElementsRefsForGivenElementType({ elementType: this.elementType });
+        if (elementRefs)
+          return elementRefs.possibleRefs;
+        return null;
       },
     },
 
@@ -43,6 +76,15 @@
       },
       selectedRef(newVal) {
         this.$emit('changeRef', newVal);
+      },
+    },
+
+    methods: {
+      openViewOrderPatternElementRefsDlg() {
+        this.showViewOrderPatternElementRefsDlg = true;
+      },
+      closeViewOrderPatternElementRefsDlg() {
+        this.showViewOrderPatternElementRefsDlg = false;
       },
     },
   };

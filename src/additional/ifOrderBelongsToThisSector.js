@@ -6,13 +6,13 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
  *
  */
 function ifOrderBelongsToThisSector(order) {
-  if (!order)
+  const userWorkPoligon = store.getters.getUserWorkPoligon;
+  if (!order || !userWorkPoligon)
     return false;
   // проверяем, было ли распоряжение издано на данном рабочем полигоне
   if (orderDispatchedOnThisWorkPoligon(order)) {
     return true;}
   // проверяем, было ли распоряжение адресовано данному рабочему полигону
-  const userWorkPoligon = store.getters.getUserWorkPoligon;
   switch (userWorkPoligon.type) {
     case WORK_POLIGON_TYPES.STATION:
       if (order.dspToSend) {

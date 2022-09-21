@@ -114,6 +114,7 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   TRACK: 'Путь',
 });
 
+/*
 export const ISSUED_DSP_BAN_ITEMS = ['Выдано запрещение ДСП', ''];
 
 export const SPEED_ITEMS = [
@@ -197,7 +198,7 @@ export const NARYAD_DOPUSK_ITEMS = [
   'Наряд-допуск №',
   'Без наряда-допуска, по приказу, согласно аварийной заявки №',
 ];
-
+*/
 export const GID_EVENT_TYPE = Object.freeze({
   ARRIVAL: 1,
   FOLLOWING: 2,

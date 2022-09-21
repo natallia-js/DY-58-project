@@ -44,31 +44,31 @@
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
     FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
-    SWITCH_OFF_ON_ITEMS,
-    MOVEMENT_DIRECTION_ITEMS,
-    AUXILIARY_MODE_KIND_ITEMS,
-    ARRIVE_RETURN_ITEMS,
-    MOVEMENT_SYSTEM_ITEMS,
-    EXACT_PLACE_ITEMS,
-    ACTIONS_ORDER_ITEMS,
-    WORK_CATEGORIES_ITEMS,
-    WHAT_SHOULD_BE_DONE_FOR_WORK_ITEMS,
-    WORK_IF_THERE_ARE_ITEMS,
-    WORKS_OBJECT_ITEMS,
-    WORK_DONE_FROM_ITEMS,
-    OBJECT_ITEMS,
-    TRACK_ITEMS,
-    NARYAD_DOPUSK_ITEMS,
-    TRAINS_ITEMS,
-    TRACK_SECTION_BEFORE_ITEMS,
-    TRACK_KIND_ITEMS,
-    CONNECTION_KIND_ITEMS,
-    ACTIONS_ITEMS,
-    ACTIONS_NOTIFICATIONS_ITEMS,
-    ACTIONS_ORDER_NOTIFICATION_ITEMS,
-    ISSUED_DSP_BAN_ITEMS,
-    WORKS_OBJECT_NOTIFICATION_ITEMS,
-    SPEED_ITEMS,
+    //SWITCH_OFF_ON_ITEMS,
+    //MOVEMENT_DIRECTION_ITEMS,
+    //AUXILIARY_MODE_KIND_ITEMS,
+    //ARRIVE_RETURN_ITEMS,
+    //MOVEMENT_SYSTEM_ITEMS,
+    //EXACT_PLACE_ITEMS,
+    //ACTIONS_ORDER_ITEMS,
+    //WORK_CATEGORIES_ITEMS,
+    //WHAT_SHOULD_BE_DONE_FOR_WORK_ITEMS,
+    //WORK_IF_THERE_ARE_ITEMS,
+    //WORKS_OBJECT_ITEMS,
+    //WORK_DONE_FROM_ITEMS,
+    //OBJECT_ITEMS,
+    //TRACK_ITEMS,
+    //NARYAD_DOPUSK_ITEMS,
+    //TRAINS_ITEMS,
+    //TRACK_SECTION_BEFORE_ITEMS,
+    //TRACK_KIND_ITEMS,
+    //CONNECTION_KIND_ITEMS,
+    //ACTIONS_ITEMS,
+    //ACTIONS_NOTIFICATIONS_ITEMS,
+    //ACTIONS_ORDER_NOTIFICATION_ITEMS,
+    //ISSUED_DSP_BAN_ITEMS,
+    //WORKS_OBJECT_NOTIFICATION_ITEMS,
+    //SPEED_ITEMS,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -114,6 +114,7 @@
         'getSelectedOkno',
         'isDNC',
         'isECD',
+        'getOrderPatternElementRefMeanings',
       ]),
 
       getOrderPatternElementTypes() {
@@ -202,7 +203,7 @@
                 label: order.number,
                 value: order.number,
               }));
-            case FILLED_ORDER_DROPDOWN_ELEMENTS.SWITCH_OFF_ON:
+            /*case FILLED_ORDER_DROPDOWN_ELEMENTS.SWITCH_OFF_ON:
               return SWITCH_OFF_ON_ITEMS.map((item) => ({ label: item, value: item }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.EXACT_PLACE:
               return EXACT_PLACE_ITEMS.map((item) => ({ label: item, value: item }));
@@ -239,7 +240,7 @@
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ACTIONS_ORDER_NOTIFICATION:
               return ACTIONS_ORDER_NOTIFICATION_ITEMS.map((item) => ({ label: item, value: item }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ISSUED_DSP_BAN:
-              return ISSUED_DSP_BAN_ITEMS.map((item) => ({ label: item, value: item }));
+              return ISSUED_DSP_BAN_ITEMS.map((item) => ({ label: item, value: item }));*/
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
               if (this.isDNC)
@@ -253,8 +254,8 @@
                   value: item.postFIO,
                 }));
               return [];
-            case FILLED_ORDER_DROPDOWN_ELEMENTS.SPEED:
-              return SPEED_ITEMS.map((item) => ({ label: item, value: item }));
+            /*case FILLED_ORDER_DROPDOWN_ELEMENTS.SPEED:
+              return SPEED_ITEMS.map((item) => ({ label: item, value: item }));*/
             case FILLED_ORDER_DROPDOWN_ELEMENTS.WORKS_HEADS:
               return !this.getSelectedOkno
                 ? null
@@ -268,7 +269,7 @@
                     )
                   )].map((personString) => ({ label: personString, value: personString }));
             default:
-              return [];
+              return this.getOrderPatternElementRefMeanings({ elementType, elementRef }).map((item) => ({ label: item, value: item }));
           }
         };
       },
@@ -289,7 +290,7 @@
                 label: block.Bl_Title,
                 value: block.Bl_Title,
               })).sort();
-            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORKS_OBJECT:
+            /*case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORKS_OBJECT:
               return WORKS_OBJECT_ITEMS.map((item) => ({ label: item, value: item }));
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORK_DONE_FROM:
               return WORK_DONE_FROM_ITEMS.map((item) => ({ label: item, value: item }));
@@ -298,9 +299,9 @@
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.OBJECT:
               return OBJECT_ITEMS.map((item) => ({ label: item, value: item }));
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.WORKS_OBJECT_NOTIFICATION:
-              return WORKS_OBJECT_NOTIFICATION_ITEMS.map((item) => ({ label: item, value: item }));
+              return WORKS_OBJECT_NOTIFICATION_ITEMS.map((item) => ({ label: item, value: item }));*/
             default:
-              return [];
+              return this.getOrderPatternElementRefMeanings({ elementType, elementRef }).map((item) => ({ label: item, value: item }));
           }
         };
       },

@@ -39,7 +39,7 @@
     </TabPanel>
     <TabPanel
       v-if="isDNC || isECD || isDSP_or_DSPoperator || isStationWorksManager"
-      :header="isDNC || isDSP_or_DSPoperator ? ORDER_PATTERN_TYPES.NOTIFICATION : ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
+      :header="isDNC || isDSP_or_DSPoperator || isStationWorksManager ? ORDER_PATTERN_TYPES.NOTIFICATION : ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
     >
       <new-order
         v-if="isDNC || isDSP_or_DSPoperator || isStationWorksManager"
@@ -59,7 +59,7 @@
       />
     </TabPanel>
   </TabView>
-  <div v-else class="dy58-user-action-forbidden-block">
+  <div v-else class="dy58-user-action-forbidden-block dy58-error-message">
     <span v-if="!ifUserWorksOffline">Вы не на дежурстве либо у вас нет прав на издание документов</span>
     <span v-else class="dy58-error-message">Издание документов при автономной работе с системой невозможно</span>
   </div>

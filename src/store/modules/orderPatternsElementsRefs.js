@@ -22,10 +22,6 @@ export const orderPatternsElementsRefs = {
   },
 
   getters: {
-    getOrderPatternsElementsRefs: (state) => {
-      return state.refs;
-    },
-
     getLoadingOrderPatternsElementsRefsStatus: (state) => {
       return state.loadingRefs;
     },
@@ -34,13 +30,31 @@ export const orderPatternsElementsRefs = {
       return state.loadingRefsResult;
     },
 
-    getOrderPatternsElementsRefsForGivenElementType: (state) => (elementType) => {
-      const refs = state.refs.find((item) => item.elementType === elementType);
-      if (refs) {
-        return ['', ...refs.possibleRefs];
-      }
-      return [];
-    },
+    getOrderPatternsElementsRefsForGivenElementType: (state) =>
+      ({ elementType, onlyRefStrings = false, includeEmptyString = false }) => {
+        const refs = state.refs.find((item) => item.elementType === elementType);
+        if (!refs)
+          return [];
+        if (onlyRefStrings) {
+          const refNames = refs.possibleRefs.map((ref) => ref.refName);
+          if (includeEmptyString)
+            return ['', ...refNames];
+          else
+            return refNames;
+        }
+        return refs.possibleRefs;
+      },
+
+    getOrderPatternElementRefMeanings: (_state, getters) =>
+      ({ elementType, elementRef }) => {
+        const ref = getters
+          .getOrderPatternsElementsRefsForGivenElementType({ elementType })
+          .find((el) => el.refName === elementRef);
+        if (!ref || !ref.possibleMeanings) {
+          return [];
+        }
+        return ref.possibleMeanings;
+      },
   },
 
   mutations: {

@@ -95,7 +95,6 @@ function checkUserAuthData(payload) {
   if (!workPoligons || !workPoligons.length) {
     throw new Error('Для данного пользователя не определен рабочий полигон. Обратитесь к Администратору Системы')
   }
-
   let userCredsWithPoligons = [];
   let workPoligonExists = false; // будет true, если хотя бы для одного из типов полномочий существует хотя бы один рабочий полигон
   userAppCredentials.forEach((cred) => {
