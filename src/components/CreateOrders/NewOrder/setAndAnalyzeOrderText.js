@@ -45,10 +45,18 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
       return null;
     const typesRefsIncludes = (type, ref) =>
       elTypesRefs.find((el) => el && el.length === 2 && el[0] === type && el[1] === ref) ? true : false;
-    const considerValueFill = (value) => !firstFilledElement || (firstFilledElement && value);
-    const orderTextElement = state.orderText.orderText.find((el) => {
-      return typesRefsIncludes(el.type, el.ref) && considerValueFill(el.value)
-    });
+    const valueExists = (value) => {
+      switch (typeof value) {
+        case 'object':
+          if (Array.isArray(value))
+            return value.length ? true : false;
+          return Boolean(value);
+        default:
+          return Boolean(value);
+      }
+    };
+    const considerValueFill = (value) => !firstFilledElement || (firstFilledElement && valueExists(value));
+    const orderTextElement = state.orderText.orderText.find((el) => typesRefsIncludes(el.type, el.ref) && considerValueFill(el.value));
     return orderTextElement ? orderTextElement.value : null;
   };
 

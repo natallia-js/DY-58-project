@@ -73,7 +73,7 @@ export const currWorkPoligonStructure = {
       switch (workPoligon.type) {
         case WORK_POLIGON_TYPES.STATION:
           if (state.station) {
-            poligonName = `${state.station.St_Title} (${state.station.St_UNMC})`;
+            poligonName = `${state.station.St_Title}`;//(${state.station.St_UNMC})`;
             if (!workPoligon.subCode) {
               return poligonName;
             }
@@ -300,20 +300,22 @@ export const currWorkPoligonStructure = {
         });
         return stations;
       }
-      if (state.station && state.station.TBlocks) {
+      if (state.station) {
         const stations = [{
           St_ID: state.station.St_ID,
           St_Title: state.station.St_Title,
           St_UNMC: state.station.St_UNMC,
           TStationTracks: state.station.TStationTracks,
         }];
-        state.station.TBlocks.forEach((block) => {
-          if (block.station1.St_ID !== state.station.St_ID) {
-            stations.push(block.station1);
-          } else if (block.station2.St_ID !== state.station.St_ID) {
-            stations.push(block.station2);
-          }
-        });
+        if (state.station.TBlocks) {
+          state.station.TBlocks.forEach((block) => {
+            if (block.station1.St_ID !== state.station.St_ID) {
+              stations.push(block.station1);
+            } else if (block.station2.St_ID !== state.station.St_ID) {
+              stations.push(block.station2);
+            }
+          });
+        }
         return stations;
       }
       return [];

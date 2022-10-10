@@ -112,7 +112,8 @@ export const checkUserAuthority = {
     },
 
     /**
-     * Возвращает true, если текущий пользователь имеет право удалять получателей распоряжения на станции.
+     * Возвращает true, если текущий пользователь имеет право удалять получателей распоряжения на станции
+     * (такое право есть у ДСП и Операторов ДСП в отношении всех рабочих мест на их станции).
      */
     canUserDeleteOrderStationReceivers(_state, getters) {
       return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator ? true : false;

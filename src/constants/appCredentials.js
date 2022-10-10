@@ -26,3 +26,8 @@ export const WORK_POLIGON_TYPES = Object.freeze({
   DNC_SECTOR: 'участок ДНЦ',
   ECD_SECTOR: 'участок ЭЦД',
 });
+
+export const STATION_WORKPLACE_TYPES = Object.freeze({
+  OPERATOR: 'o',
+  WORKS_MANAGER: 'w',
+});

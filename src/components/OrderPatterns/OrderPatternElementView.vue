@@ -58,9 +58,15 @@
       :placeholder="element.ref"
     >
       <template #header>
-        <div class="p-d-flex p-jc-between dy58-multiselect-header">
-          <InputText type="text" v-model="state.newMultipleValue" class="p-mr-2" />
-          <Button type="button" @click="addNewMultipleValue" icon="pi pi-plus" class="p-button-rounded p-button-secondary" />
+        <div class="p-grid dy58-multiselect-header">
+          <InputText type="text" v-model="state.newMultipleValue" class="p-mr-2 p-col" />
+          <Button
+            type="button"
+            @click="addNewMultipleValue"
+            icon="pi pi-plus"
+            v-tooltip="'Добавить элемент в список и выбрать его'"
+            class="p-button-rounded p-button-secondary"
+          />
         </div>
       </template>
     </MultiSelect>
@@ -989,7 +995,7 @@
     background-color: var(--surface-b);
     padding: 0.5rem;
   }
-  /*:deep(.p-multiselect-panel .p-multiselect-header) {
-    display: none !important;
+  /*:deep(.p-multiselect-panel .p-widget .p-multiselect-header) {
+    display: none;
   }*/
 </style>

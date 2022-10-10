@@ -2,6 +2,7 @@ import {
   APP_CODE_NAME,
   APP_CREDENTIALS,
   WORK_POLIGON_TYPES,
+  STATION_WORKPLACE_TYPES,
 } from '@/constants/appCredentials';
 import {
   SET_USER_CREDENTIAL,
@@ -42,6 +43,24 @@ import {
   getUserDataFromLocalStorage,
   updateUserDataInLocalStorage,
 } from '@/additional/localStorage';
+
+
+/**
+ * Для пользователя с данным полномочием userCredential определяет возможность его работы на
+ * рабочем месте workPlace станции.
+ */
+function isStationWorkPlaceAppropriateForUser(userCredential, workPlace) {
+  switch (userCredential) {
+    // руководитель работ
+    case APP_CREDENTIALS.STATION_WORKS_MANAGER:
+      return workPlace.subPoligonType === STATION_WORKPLACE_TYPES.WORKS_MANAGER;
+    // оператор
+    case APP_CREDENTIALS.DSP_Operator:
+      return workPlace.subPoligonType === STATION_WORKPLACE_TYPES.OPERATOR;
+    default:
+      return false;
+  }
+}
 
 
 /**
@@ -100,7 +119,7 @@ function checkUserAuthData(payload) {
   userAppCredentials.forEach((cred) => {
     const obj = { cred };
     // ---> ДСП
-    if ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(cred)) {
+    if (cred === APP_CREDENTIALS.DSP_FULL) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
         obj.poligons = [];
@@ -110,15 +129,15 @@ function checkUserAuthData(payload) {
           workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && !wp.subPoligonId),
         }];
       }
-    // ---> Оператор при ДСП
-    } else if (cred === APP_CREDENTIALS.DSP_Operator) {
+    // ---> Оператор при ДСП, иной работник станции
+    } else if ([APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(cred)) {
       const poligon = workPoligons.find((poligon) => poligon.type === WORK_POLIGON_TYPES.STATION);
       if (!poligon) {
         obj.poligons = [];
       } else {
         obj.poligons = [{
           type: WORK_POLIGON_TYPES.STATION,
-          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId),
+          workPoligons: poligon.workPoligons.filter((wp) => wp.poligonId && wp.subPoligonId && isStationWorkPlaceAppropriateForUser(cred, wp)),
         }];
       }
     // ---> ДНЦ
@@ -527,7 +546,9 @@ export const currUser = {
         // рабочий полигон, на котором будет работать пользователь (если удалось однозначно определить)
         const userWorkPoligon = trueLastWorkPoligon ? lastWorkPoligon :
           (!userCredential || (userCredsWithPoligons[0].poligons.length > 1) ||
-            (userCredsWithPoligons[0].poligons[0].workPoligons.length > 1)) ? null :
+           !userCredsWithPoligons[0].poligons[0].workPoligons ||
+           !userCredsWithPoligons[0].poligons[0].workPoligons.length ||
+           userCredsWithPoligons[0].poligons[0].workPoligons.length > 1) ? null :
           {
             type: userCredsWithPoligons[0].poligons[0].type,
             code: userCredsWithPoligons[0].poligons[0].workPoligons[0].poligonId,

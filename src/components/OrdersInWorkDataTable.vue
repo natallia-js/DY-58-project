@@ -266,9 +266,10 @@
 
             <!-- Блок получателей распоряжения на станции будет отображен только в том случае, если присутствует
             хотя бы одна запись в таблице получателей на станции. Это автоматически означает, что данная информация
-            будет отображаться только ДСП и Оператору при ДСП -->
+            будет отображаться только ДСП и Оператору при ДСП. Для руководителя работ на станции данный блок
+            необходимо скрывать. -->
 
-            <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length">
+            <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length && !isStationWorksManager">
               <p>Получатели на станции:</p>
               <DataTable :value="slotProps.data.stationReceivers" breakpoint="200px">
                 <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
@@ -491,7 +492,7 @@
           (
             !considerWorkPlace ||
             (!currentUserWorkPoligon.value.subCode && !orderSenderWorkPoligon.workPlaceId) ||
-            (String(currentUserWorkPoligon.value.subCode) === String(!orderSenderWorkPoligon.workPlaceId))
+            (String(currentUserWorkPoligon.value.subCode) === String(orderSenderWorkPoligon.workPlaceId))
           )
       };
 
@@ -569,6 +570,7 @@
         isECD: computed(() => store.getters.isECD),
         isStationWorkPoligonSpecialist: computed(() => store.getters.isStationWorkPoligonSpecialist),
         isRevisor: computed(() => store.getters.isRevisor),
+        isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         WORK_POLIGON_TYPES,
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),
         getWorkingOrders: computed(() => store.getters.getWorkingOrders),
@@ -601,6 +603,7 @@
         deleteOrderStationWorkPoligon,
         isOrderDispatchedOnCurrentWorkPoligon,
         expandOrCollapseRow,
+        currentUserWorkPoligon,
       };
     },
   }

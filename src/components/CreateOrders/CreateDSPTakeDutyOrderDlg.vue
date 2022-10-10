@@ -56,7 +56,7 @@
         <Dropdown
           id="pass-duty-user-post-fio"
           v-model="v$.passDutyUserPostFIO.$model"
-          :options="getCurrStationWorkPlaceUsers"
+          :options="getCurrStationDSPUsers"
           optionLabel="userPostFIO"
           dataKey="userId"
           :class="{'p-invalid':v$.passDutyUserPostFIO.$invalid && submitted}"
@@ -143,7 +143,7 @@
         <Dropdown
           id="take-duty-user-post-fio"
           v-model="v$.takeDutyUserPostFIO.$model"
-          :options="getCurrStationWorkPlaceUsers"
+          :options="getCurrStationDSPUsers"
           optionLabel="userPostFIO"
           dataKey="userId"
           :class="{'p-invalid':v$.takeDutyUserPostFIO.$invalid && submitted}"
@@ -318,10 +318,10 @@
       // Существующее (ранее изданное) распоряжение о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ
       const existingDSPTakeDutyOrder = computed(() => store.getters.getExistingDSPTakeDutyOrder);
 
-      // Список пользователей данного рабочего полигона, которые зарегистрированы на данном рабочем месте
+      // Список пользователей из числа ДСП данного рабочего полигона, которые зарегистрированы на данном рабочем месте
       // (с которого производится издание текущего распоряжения)
-      const getCurrStationWorkPlaceUsers = computed(() =>
-        store.getters.getCurrStationWorkPlaceUsers.map((item) => ({
+      const getCurrStationDSPUsers = computed(() =>
+        store.getters.getCurrStationDSPUsers.map((item) => ({
           userId: item.userId,
           userPostFIO: getUserPostFIOString({ post: item.post, name: item.name, fatherName: item.fatherName, surname: item.surname }),
         })));
@@ -337,8 +337,8 @@
         takeDutyUserPostFIO: null,
         takeDutyDateTime: '',
         additionalOrderText: null,
-        // Списки пользователей данного рабочего полигона, которые зарегистрированы на рабочих местах,
-        // отличных от данного рабочего места (нужны для формирования списков персонала, принимающего и сдающего дежурство)
+        // Списки пользователей данного рабочего полигона (станции), которые зарегистрированы на рабочих местах операторов
+        // при ДСП (нужны для формирования списков персонала, принимающего и сдающего дежурство)
         usersThatTakeDuty: [],
         usersThatPassDuty: [],
         // Выбранные пользователи рабочих мест (которые будут фиругировать в распоряжении о приеме-сдаче дежурства)
@@ -400,7 +400,7 @@
       // Ищет объект пользователя текущего рабочего места, который соответствует указанному в запросе
       // параметру текста распоряжения
       const getCurrStationWorkPlaceUserObjectFromOrderText = (paramName, orderText) => {
-        if (!paramName || !orderText || !orderText.length || !getCurrStationWorkPlaceUsers.value) {
+        if (!paramName || !orderText || !orderText.length || !getCurrStationDSPUsers.value) {
           return null;
         }
         return getOrderTextParamValue(paramName, orderText);
@@ -450,9 +450,9 @@
       };
 
       /**
-       * Пользователи на всех рабочих местах, кроме текущего (информация, которая была получена от сервера).
+       * Пользователи на всех рабочих местах операторов при ДСП станции (информация, которая была получена от сервера).
        */
-      const defaultWorkPlacesUsers = () => store.getters.getCurrStationUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
+      const defaultWorkPlacesUsers = () => store.getters.getCurrStationDSPandOperatorUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
         ...item,
         items: item.items.map((el) => ({
           key: el.key,
@@ -792,7 +792,7 @@
         textarea,
         editExistingTakeDutyOrder,
         handleInsertRowbreak,
-        getCurrStationWorkPlaceUsers,
+        getCurrStationDSPUsers,
         newNumberOverlayPanel,
         changeOrderNumber,
         closeDialog,

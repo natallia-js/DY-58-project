@@ -16,6 +16,7 @@ function getUserWorkPoligonsArray(responseData) {
       workPoligons: responseData.stationWorkPoligons.map((poligon) => ({
         poligonId: poligon.SWP_StID,
         subPoligonId: poligon.SWP_StWP_ID,
+        subPoligonType: poligon.SWP_Type,
       })),
     });
   }

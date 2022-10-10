@@ -18,10 +18,9 @@ import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCod
 export const dsp = {
   getters: {
     /**
-     * Возвращает массив ДСП (Операторов при ДСП) текущего рабочего места полигона управления "Станция".
-     * Т.е. возвращаются не все пользователи ДСП и Операторы при ДСП станции, а только те, кто зарегистрирован
-     * для работы на текущем рабочем месте (место самого ДСП станции либо рабочее место на станции - если речь идет
-     * об Операторе при ДСП).
+     * Возвращает массив ДСП (Операторов при ДСП и др.) текущего рабочего места полигона управления "Станция".
+     * Т.е. возвращаются не все пользователи ДСП, Операторы при ДСП и др. станции, а только те, кто зарегистрирован
+     * для работы на текущем рабочем месте.
      */
     getCurrStationWorkPlaceUsers: (state, getters) => {
       const userWorkPoligon = getters.getUserWorkPoligon;
@@ -49,7 +48,18 @@ export const dsp = {
           name: item.name,
           fatherName: item.fatherName,
           surname: item.surname,
+          appsCredentials: item.appsCredentials,
         }));
+    },
+
+    /**
+     * Возвращает массив ДСП текущего рабочего места полигона управления "Станция".
+     * Т.е. возвращаются не все пользователи ДСП, а только те, кто зарегистрирован
+     * для работы на текущем рабочем месте (место самого ДСП станции либо рабочее место на станции - если речь идет
+     * об Операторе при ДСП).
+     */
+    getCurrStationDSPUsers: (_state, getters) => {
+      return getters.getCurrStationWorkPlaceUsers.filter((user) => user.appsCredentials === APP_CREDENTIALS.DSP_FULL);
     },
 
     /**
@@ -60,7 +70,7 @@ export const dsp = {
      * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места оператора при ДСП №2.
      * Возвращаемая информация группируется по принадлежности пользователей к конкретному рабочему месту.
      */
-    getCurrStationUsersThatDoNotBelongToCurrWorkPlace(state, getters) {
+    getCurrStationDSPandOperatorUsersThatDoNotBelongToCurrWorkPlace(state, getters) {
       const userWorkPoligon = getters.getUserWorkPoligon;
       if (!getters.userWorkPoligonIsStation || !state.sectorPersonal ||
         !state.sectorPersonal.sectorStationsShift || !getters.getUserWorkPoligonData || !userWorkPoligon) {
@@ -83,7 +93,7 @@ export const dsp = {
       };
       stationWithPersonal.people
         .filter((item) =>
-          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(item.appsCredentials)) &&
+          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator].includes(item.appsCredentials)) &&
           (
             (!userWorkPoligon.subCode && item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
