@@ -263,7 +263,7 @@ export const getCurrSectorShift = {
           ...context.getters.getAdjacentDNCSectors,
           {
             DNCS_ID: context.getters.getUserWorkPoligon.code,
-            DNCS_Title: context.getters.getUserWorkPoligonName,
+            DNCS_Title: context.getters.getUserWorkPoligonName(),
           },
         ]),
         // Здесь будет информация о тех пользователях, которые работают на станциях текущего участка ДНЦ
@@ -312,7 +312,7 @@ export const getCurrSectorShift = {
           ...context.getters.getAdjacentECDSectors,
           {
             ECDS_ID: context.getters.getUserWorkPoligon.code,
-            ECDS_Title: context.getters.getUserWorkPoligonName,
+            ECDS_Title: context.getters.getUserWorkPoligonName(),
           },
         ]),
         // Здесь будет информация о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId

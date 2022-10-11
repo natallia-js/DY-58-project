@@ -105,18 +105,19 @@ export const checkUserAuthority = {
 
     /**
      * Возвращает true, если текущий пользователь имеет право подтверждать рабочие распоряжения за других
-     * лиц на станции (такое право есть у ДСП и Операторов ДСП в отношении всех рабочих мест на их станции).
+     * лиц на станции (такое право есть у ДСП, Операторов при ДСП и Руководителей работ в отношении всех
+     * рабочих мест на их станции).
      */
     canUserConfirmOrdersForOthersOnStationWorkPlaces(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator ? true : false;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isStationWorkPoligonSpecialist ? true : false;
     },
 
     /**
      * Возвращает true, если текущий пользователь имеет право удалять получателей распоряжения на станции
-     * (такое право есть у ДСП и Операторов ДСП в отношении всех рабочих мест на их станции).
+     * (такое право есть у ДСП, Операторов при ДСП и Руководителей работ в отношении всех рабочих мест на их станции).
      */
     canUserDeleteOrderStationReceivers(_state, getters) {
-      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isDSP_or_DSPoperator ? true : false;
+      return getters.canUserWorkWithSystem && getters.isUserOnDuty && getters.isStationWorkPoligonSpecialist ? true : false;
     },
 
     /**

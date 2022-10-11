@@ -175,7 +175,7 @@
 
       const getUserWorkPoligonName = computed(() => {
         if (store.getters.ifAllDataLoadedOnApplicationReload)
-          return store.getters.getUserWorkPoligonName;
+          return store.getters.getUserWorkPoligonName();
         return null;
       });
 

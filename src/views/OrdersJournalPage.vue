@@ -8,7 +8,7 @@
         Оперативный журнал ЭЦД
       </h2>
       <h3 class="p-text-center p-mb-2">
-        Рабочий полигон {{ getUserWorkPoligonName }}
+        Рабочий полигон {{ getUserWorkPoligonName() }}
       </h3>
       <h3 v-if="startDisplayDate" class="p-text-center p-m-2">
         период c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}
@@ -114,10 +114,10 @@
         getUserWorkPoligonTypeName: computed(() => {
           switch (store.getters.getUserWorkPoligon.type) {
             case WORK_POLIGON_TYPES.STATION:
-              return `станции ${store.getters.getUserWorkPoligonName}`;
+              return `станции ${store.getters.getUserWorkPoligonName()}`;
             case WORK_POLIGON_TYPES.DNC_SECTOR:
             case WORK_POLIGON_TYPES.ECD_SECTOR:
-              return `участку ${store.getters.getUserWorkPoligonName}`;
+              return `участку ${store.getters.getUserWorkPoligonName()}`;
             default:
               return '?';
           }

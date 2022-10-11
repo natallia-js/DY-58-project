@@ -28,7 +28,7 @@
     <p>Передал: &#160;
       {{ getUserPost }} &#160; {{ getUserFIO }} &#160;
       <span v-if="createdOnBehalfOf">(от имени {{ createdOnBehalfOf }}) &#160; </span>
-      {{ getUserWorkPoligonName }}
+      {{ getUserWorkPoligonName(false) }}
     </p>
     <template #footer>
       <div v-if="draftId" class="p-mb-2 p-mr-2">

@@ -164,7 +164,7 @@ import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
                 sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
               };
             }),
-            workPoligonTitle: context.getters.getUserWorkPoligonName,
+            workPoligonTitle: context.getters.getUserWorkPoligonName(false),
             createdOnBehalfOf,
             orderChainId,
             dispatchedOnOrder,

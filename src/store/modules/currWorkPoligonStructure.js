@@ -63,34 +63,36 @@ export const currWorkPoligonStructure = {
     },
 
     getUserWorkPoligonName(state, getters) {
-      const defaultMessage = '<Наименование рабочего полигона неизвестно>';
-      const workPoligon = getters.getUserWorkPoligon;
-      if (!workPoligon) {
-        return defaultMessage;
-      }
-      let poligonName;
-      let workPlaceName;
-      switch (workPoligon.type) {
-        case WORK_POLIGON_TYPES.STATION:
-          if (state.station) {
-            poligonName = `${state.station.St_Title}`;//(${state.station.St_UNMC})`;
-            if (!workPoligon.subCode) {
-              return poligonName;
-            }
-            if (state.station.TStationWorkPlaces) {
-              const stationWorkPlace = state.station.TStationWorkPlaces.find((wp) => wp.SWP_ID === workPoligon.subCode);
-              workPlaceName = stationWorkPlace ? stationWorkPlace.SWP_Name : null;
-            }
-            return workPlaceName ? `${poligonName} ${workPlaceName}` : poligonName;
-          }
+      return (includeWorkPlaceName = true) => {
+        const defaultMessage = '<Наименование рабочего полигона неизвестно>';
+        const workPoligon = getters.getUserWorkPoligon;
+        if (!workPoligon) {
           return defaultMessage;
-        case WORK_POLIGON_TYPES.DNC_SECTOR:
-          return state.sector ? state.sector.DNCS_Title : null;
-        case WORK_POLIGON_TYPES.ECD_SECTOR:
-          return state.sector ? state.sector.ECDS_Title : null;
-        default:
-          return defaultMessage;
-      }
+        }
+        let poligonName;
+        let workPlaceName;
+        switch (workPoligon.type) {
+          case WORK_POLIGON_TYPES.STATION:
+            if (state.station) {
+              poligonName = `${state.station.St_Title}`;//(${state.station.St_UNMC})`;
+              if (!workPoligon.subCode || !includeWorkPlaceName) {
+                return poligonName;
+              }
+              if (state.station.TStationWorkPlaces) {
+                const stationWorkPlace = state.station.TStationWorkPlaces.find((wp) => wp.SWP_ID === workPoligon.subCode);
+                workPlaceName = stationWorkPlace ? stationWorkPlace.SWP_Name : null;
+              }
+              return workPlaceName ? `${poligonName} ${workPlaceName}` : poligonName;
+            }
+            return defaultMessage;
+          case WORK_POLIGON_TYPES.DNC_SECTOR:
+            return state.sector ? state.sector.DNCS_Title : null;
+          case WORK_POLIGON_TYPES.ECD_SECTOR:
+            return state.sector ? state.sector.ECDS_Title : null;
+          default:
+            return defaultMessage;
+        }
+      };
     },
 
     /**

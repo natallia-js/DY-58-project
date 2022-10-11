@@ -18,7 +18,7 @@
     <p>
       <span class="p-text-bold">Рабочий полигон:</span> &#160;
       {{ getUserWorkPoligon ? getUserWorkPoligon.type : '?' }}
-      {{ getUserWorkPoligonName }}
+      {{ getUserWorkPoligonName() }}
     </p>
     <p><span class="p-text-bold">Время последнего приема дежурства:</span> &#160; {{ getUserLastTakeDutyTimeString }}</p>
     <p><span class="p-text-bold">Время последней сдачи дежурства:</span> &#160; {{ getUserLastPassDutyTimeString }}</p>

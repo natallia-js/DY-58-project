@@ -35,7 +35,7 @@
       <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
         На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
       </div>
-      <div v-if="(isDSP_or_DSPoperator || isDNC) && orderType === ORDER_PATTERN_TYPES.REQUEST" class="p-mb-2">
+      <div v-if="(isDSP_or_DSPoperator || isDNC || isStationWorksManager) && orderType === ORDER_PATTERN_TYPES.REQUEST" class="p-mb-2">
         <Accordion class="dy58-oknas-accordion">
           <AccordionTab>
             <template #header>
@@ -760,6 +760,7 @@
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         isDNC,
         isECD,
+        isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         getOknaTblColumns: computed(() => store.getters.getOknaTblColumns),
         v$,
         submitted,

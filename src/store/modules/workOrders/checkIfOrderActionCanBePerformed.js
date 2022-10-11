@@ -25,10 +25,9 @@ export const checkIfOrderActionCanBePerformed = {
      * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
      * (т.е. за те полигоны, которые присутствовали в секции "Кому" при издании распоряжения).
      * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-     * котором работает пользователь (в случае ДСП и Оператора при ДСП одной станции: их рабочие
-     * полигоны - разные: рабочий полигон = рабочее место).
-     * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
-     * за других.
+     * котором работает пользователь (в случае ДСП и иного работника станции - в частности,
+     * Оператора при ДСП этой же станции - их рабочие полигоны - разные: рабочий полигон = рабочее место).
+     * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение за других.
      */
     orderCanBeConfirmedFor(_state, getters) {
       return (order) => {
@@ -70,7 +69,7 @@ export const checkIfOrderActionCanBePerformed = {
      */
     orderCanBeConfirmedForOnStation(_state, getters) {
       return (order) => {
-        if (!getters.isDSP_or_DSPoperator) {
+        if (!getters.isStationWorkPoligonSpecialist) {
           return false;
         }
         const userWorkPoligon = getters.getUserWorkPoligon;
@@ -116,7 +115,7 @@ export const checkIfOrderActionCanBePerformed = {
      */
     orderStationWorkPlaceReceiverCanBeDeleted(_state, getters) {
       return (order) => {
-        if (!getters.isDSP_or_DSPoperator) {
+        if (!getters.isStationWorkPoligonSpecialist) {
           return false;
         }
         const userWorkPoligon = getters.getUserWorkPoligon;

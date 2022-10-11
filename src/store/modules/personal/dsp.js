@@ -111,7 +111,7 @@ export const dsp = {
             surname: item.surname, // обязательно! (нужно "из вне")
           };
           if (!item.stationWorkPlaceId) {
-            addDataInGroup(`${getStationWorkPlaceFullCode(userWorkPoligon.code, userWorkPoligon.subCode)}`, getters.getUserWorkPoligonName, dataToAdd);
+            addDataInGroup(`${getStationWorkPlaceFullCode(userWorkPoligon.code, userWorkPoligon.subCode)}`, getters.getUserWorkPoligonName(), dataToAdd);
           } else {
             addDataInGroup(`${getStationWorkPlaceFullCode(item.stationId, item.stationWorkPlaceId)}`, getters.getCurrStationWorkPlaceNameById(item.stationWorkPlaceId), dataToAdd);
           }

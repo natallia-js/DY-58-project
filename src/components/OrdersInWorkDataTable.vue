@@ -266,10 +266,9 @@
 
             <!-- Блок получателей распоряжения на станции будет отображен только в том случае, если присутствует
             хотя бы одна запись в таблице получателей на станции. Это автоматически означает, что данная информация
-            будет отображаться только ДСП и Оператору при ДСП. Для руководителя работ на станции данный блок
-            необходимо скрывать. -->
+            будет отображаться только работнику станции (ДСП, Оператору при ДСП, Руководителю работ). -->
 
-            <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length && !isStationWorksManager">
+            <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length">
               <p>Получатели на станции:</p>
               <DataTable :value="slotProps.data.stationReceivers" breakpoint="200px">
                 <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
