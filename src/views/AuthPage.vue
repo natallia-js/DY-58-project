@@ -1,5 +1,5 @@
 <template>
-  <div class="p-d-flex p-jc-center p-ai-center" style="height:100vh;">
+  <div class="p-d-flex p-jc-center p-ai-center" style="height:100vh">
     <RegisterNewUserDlg
       :showDlg="state.showRegisterNewUserDlg"
       @close="hideRegisterNewUserDlg"

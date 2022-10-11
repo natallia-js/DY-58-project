@@ -1,72 +1,74 @@
 <template>
-  <div class="p-d-flex" style="height: 100vh;">
+  <div class="p-d-flex p-jc-center p-ai-center" style="height:100vh">
     <Toast />
 
-    <div v-if="state.gettingData" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
-      <div class="p-col-12">
+    <div v-if="state.gettingData">
+      <div class="p-mb-2">
         Получаю информацию о рабочих полигонах...
       </div>
-      <div class="p-col-12">
+      <div class="p-mb-2">
         <ProgressSpinner />
       </div>
-      <div class="p-col-12">
+      <div>
         <Button type="button" label="Назад" class="p-button-secondary" @click="goToAuthPage" />
       </div>
     </div>
 
-    <div v-else-if="state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
-      <div class="p-col-12">
+    <div v-else-if="state.getDataError">
+      <div class="p-mb-2">
         <InlineMessage severity="error">{{ state.getDataError }}</InlineMessage>
       </div>
-      <div class="p-col-12">
+      <div>
         <Button type="button" label="Назад" class="p-button-secondary" @click="goToAuthPage" />
       </div>
     </div>
 
-    <div v-else-if="!state.gettingData && !state.getDataError" class="p-mr-2 p-as-center p-col-4 p-offset-4 p-mb-6">
-      <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
-      <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
-        <p class="p-text-bold p-mb-3">Полномочие</p>
-        <div
-          v-for="cred of getAllPossibleCredentialsWithPoligons"
-          :key="cred.cred"
-          class="p-field-radiobutton"
-        >
-          <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
-          <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
+    <div v-else style="max-height:80vh;max-width:100vw;overflow:auto">
+      <div>
+        <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
+        <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
+          <p class="p-text-bold p-mb-3">Полномочие</p>
+          <div
+            v-for="cred of getAllPossibleCredentialsWithPoligons"
+            :key="cred.cred"
+            class="p-field-radiobutton"
+          >
+            <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
+            <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
+          </div>
         </div>
-      </div>
-      <div v-if="state.selectedCredential">
-        <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
-          <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
-          <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
-            <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
-            <div
-              v-for="workPoligon of typedPoligon.workPoligons"
-              :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-              class="p-field-radiobutton"
-            >
-              <RadioButton
-                :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                name="workPoligon"
-                :value="{ type: typedPoligon.type, ...workPoligon }"
-                v-model="state.selectedPoligon"
-              />
-              <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
-                {{ getWorkPoligonTitle(typedPoligon.type, workPoligon.poligonId, workPoligon.subPoligonId) }}
-              </label>
+        <div v-if="state.selectedCredential">
+          <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
+            <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
+            <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
+              <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
+              <div
+                v-for="workPoligon of typedPoligon.workPoligons"
+                :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                class="p-field-radiobutton"
+              >
+                <RadioButton
+                  :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                  name="workPoligon"
+                  :value="{ type: typedPoligon.type, ...workPoligon }"
+                  v-model="state.selectedPoligon"
+                />
+                <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
+                  {{ getWorkPoligonTitle(typedPoligon.type, workPoligon.poligonId, workPoligon.subPoligonId) }}
+                </label>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="p-col-12">
-        <Button type="button" label="Назад" class="p-button-secondary p-mr-2" @click="goToAuthPage" />
-        <Button
-          v-if="state.selectedCredential && state.selectedPoligon"
-          type="button"
-          label="Продолжить"
-          @click="goToMainPage"
-        />
+        <div class="p-col-12">
+          <Button type="button" label="Назад" class="p-button-secondary p-mr-2" @click="goToAuthPage" />
+          <Button
+            v-if="state.selectedCredential && state.selectedPoligon"
+            type="button"
+            label="Продолжить"
+            @click="goToMainPage"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -153,6 +155,7 @@
               });
             }
           }
+          //throw new Error('sdfsdfsdf')
         } catch (err) {
           state.getDataError = `При попытке получить информацию о рабочих полигонах возникла ошибка: ${err}`;
         } finally {

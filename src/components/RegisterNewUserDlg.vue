@@ -28,7 +28,7 @@
           class="p-error"
         >
           {{ v$.login.$errors.length ? v$.login.$errors[0].$message : 'Неверно указан логин' }}
-        </small>        
+        </small>
         <small v-if="state.fieldsErrorsFromServer.login" class="p-error">
           {{ state.fieldsErrorsFromServer.login }}
         </small>
@@ -55,7 +55,7 @@
           class="p-error"
         >
           {{ v$.password.$errors.length ? v$.password.$errors[0].$message : 'Неверно указан пароль' }}
-        </small>        
+        </small>
         <small v-if="state.fieldsErrorsFromServer.password" class="p-error">
           {{ state.fieldsErrorsFromServer.password }}
         </small>
@@ -228,6 +228,13 @@
         >
           <span class="p-text-bold">Станции</span>
         </label>
+        <div>
+        <Button
+          label="Включить рабочие места Руководителей работ всех станций"
+          class="p-mt-2 p-button-secondary p-button-outlined"
+          @click="includeAllWorkManagerWorkPlaces"
+        />
+        </div>
         <MultiSelect
           id="new-user-stations"
           v-model="v$.stations.$model"
@@ -368,6 +375,7 @@
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import compareStrings from '@/additional/compareStrings';
   import checkAuthString from '@/additional/checkAuthString';
+  import { STATION_WORKPLACE_TYPES } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-register-new-user-dialog',
@@ -495,6 +503,7 @@
                       state.allStations.push({
                         id: { id: item.St_ID, workPlaceId: wp.SWP_ID },
                         title: `${wp.SWP_Name} (${item.St_Title})`,
+                        type: wp.SWP_Type,
                       });
                     });
                   }
@@ -645,6 +654,24 @@
         emit('close');
       };
 
+      const includeAllWorkManagerWorkPlaces = () => {
+        confirm.require({
+          message: 'Добавить рабочие места?',
+          header: 'Подтверждение действия',
+          icon: 'pi pi-exclamation-triangle',
+          accept: () => {
+            const newWorkPlacesArray = state.stations;
+            state.allStations
+              .filter((item) => item.type === STATION_WORKPLACE_TYPES.WORKS_MANAGER)
+              .forEach(item => {
+                if (!newWorkPlacesArray.find((el) => el.id === item.id.id && el.workPlaceId === item.id.workPlaceId))
+                  newWorkPlacesArray.push({ id: item.id.id, workPlaceId: item.id.workPlaceId });
+              });
+            state.stations = [...newWorkPlacesArray];
+          },
+        });
+      };
+
       return {
         state,
         submitted,
@@ -652,6 +679,7 @@
         handleSubmit,
         handleResetForm,
         handleCloseDialog,
+        includeAllWorkManagerWorkPlaces,
       };
     },
   };
