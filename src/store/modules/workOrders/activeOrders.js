@@ -406,7 +406,7 @@ export const activeOrders = {
       if (!orders.length) {
         return null;
       }
-      // сортируем распоряжения в порядке убывания времени издания и возвращаем порвое распоряжение
+      // сортируем распоряжения в порядке убывания времени издания и возвращаем первое распоряжение
       // в отсортированном массиве
       return orders.sort((a, b) => {
         if (a.createDateTime < b.createDateTime) return 1;
@@ -440,7 +440,7 @@ export const activeOrders = {
       if (!orders.length) {
         return null;
       }
-      // сортируем распоряжения в порядке убывания времени издания и возвращаем порвое распоряжение
+      // сортируем распоряжения в порядке убывания времени издания и возвращаем первое распоряжение
       // в отсортированном массиве
       return orders.sort((a, b) => {
         if (a.createDateTime < b.createDateTime) return 1;

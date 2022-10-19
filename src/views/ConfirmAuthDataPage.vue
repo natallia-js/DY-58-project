@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div v-else style="max-height:80vh;max-width:100vw;overflow:auto">
+    <div v-else>
       <div>
         <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
         <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
@@ -40,22 +40,24 @@
         <div v-if="state.selectedCredential">
           <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
             <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
-            <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
-              <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
-              <div
-                v-for="workPoligon of typedPoligon.workPoligons"
-                :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                class="p-field-radiobutton"
-              >
-                <RadioButton
-                  :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                  name="workPoligon"
-                  :value="{ type: typedPoligon.type, ...workPoligon }"
-                  v-model="state.selectedPoligon"
-                />
-                <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
-                  {{ getWorkPoligonTitle(typedPoligon.type, workPoligon.poligonId, workPoligon.subPoligonId) }}
-                </label>
+            <div style="max-height:35vh;max-width:100vw;overflow:auto">
+              <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
+                <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
+                <div
+                  v-for="workPoligon of sortedWorkPoligonData(typedPoligon.type, typedPoligon.workPoligons)"
+                  :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                  class="p-field-radiobutton"
+                >
+                  <RadioButton
+                    :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                    name="workPoligon"
+                    :value="{ type: typedPoligon.type, ...workPoligon }"
+                    v-model="state.selectedPoligon"
+                  />
+                  <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
+                    {{ workPoligon.titleToDisplay }}
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -93,6 +95,7 @@
   } from '@/store/mutation-types';
   import { LOGOUT_ACTION } from '@/store/action-types';
   import showMessage from '@/hooks/showMessage.hook';
+  import compareStrings from '@/additional/compareStrings';
 
   export default {
     name: 'dy58-confirm-auth-data-page',
@@ -270,6 +273,15 @@
           : `${workPoligonTitle}, ${workSubPoligonId}`;
       };
 
+      const sortedWorkPoligonData = (poligonsType, workPoligons) => {
+        return workPoligons
+          .map((poligon) => ({
+            ...poligon,
+            titleToDisplay: getWorkPoligonTitle(poligonsType, poligon.poligonId, poligon.subPoligonId),
+          }))
+          .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase()));
+      };
+
       return {
         state,
         APP_CREDENTIALS_TRANSLATIONS,
@@ -277,6 +289,7 @@
         goToAuthPage,
         goToMainPage,
         getWorkPoligonTitle,
+        sortedWorkPoligonData,
       };
     }
   };

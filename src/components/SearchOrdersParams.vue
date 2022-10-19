@@ -56,7 +56,7 @@
             />
             <Button
               icon="pi pi-print"
-              label="Печать"
+              label="Найти и вывести на печать"
               class="p-mr-3 p-mb-2"
               @click="handlePrint"
             />

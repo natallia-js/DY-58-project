@@ -27,7 +27,7 @@
     <p class="dy58-help-paragraph">
       <img :src="require('@/assets/img/editTakePassDuty.png')" class="dy58-help-img-style" />
       - только для находящегося на дежурстве ДСП: переход к форме редактирования текущей записи
-      о приеме-сдаче дежурства (созданной текущим пользователем)
+      о приеме-сдаче дежурства; редактировать текущую запись о приеме-сдаче дежурства может только ее создатель
     </p>
     <p class="dy58-help-paragraph">
       <img :src="require('@/assets/img/incomingOrdersPerShift.png')" class="dy58-help-img-style" />

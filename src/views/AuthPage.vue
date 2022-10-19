@@ -4,6 +4,12 @@
       :showDlg="state.showRegisterNewUserDlg"
       @close="hideRegisterNewUserDlg"
     />
+
+    <ContactDataDlg
+      :showDlg="state.showContactDataDlg"
+      @close="hideContactDataDlg"
+    />
+
     <div style="max-width:600px;">
       <Toast />
       <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
@@ -77,7 +83,9 @@
         <div v-else class="p-col-12">
           Идет загрузка списка руководств...
         </div>
-        <!--<a href="../static/docs/filename.pdf" target="_blank">Download PDF</a>-->
+        <div class="p-col-12">
+          <Button label="Контактные данные" @click="showContactDataDlg" />
+        </div>
       </form>
     </div>
   </div>
@@ -95,6 +103,7 @@
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
+  import ContactDataDlg from '@/components/ContactDataDlg';
   import { LOGIN_ACTION, LOGIN_VIA_LOCAL_STORAGE_ACTION } from '@/store/action-types';
   import checkAuthString from '@/additional/checkAuthString';
   import { getUserManualsList, downloadDY58Manual } from '@/serverRequests/userManuals.requests';
@@ -105,6 +114,7 @@
 
     components: {
       RegisterNewUserDlg,
+      ContactDataDlg,
     },
 
     setup() {
@@ -119,6 +129,7 @@
         submitted: false,
         waitingForServerResponse: false,
         showRegisterNewUserDlg: false,
+        showContactDataDlg: false,
         loadingUserManualsList: false,
         userManualsList: [],
         userManualsListLoadError: null,
@@ -244,6 +255,14 @@
         state.showRegisterNewUserDlg = false;
       };
 
+      const showContactDataDlg = () => {
+        state.showContactDataDlg = true;
+      };
+
+      const hideContactDataDlg = () => {
+        state.showContactDataDlg = false;
+      };
+
       /**
        * Если нет связи с сервером, то пользователь может войти в систему под именем последнего
        * работавшего с системой пользователя. При этом сессия на сервере не создается. Следовательно,
@@ -289,6 +308,8 @@
         handleSubmit,
         handleRegisterUser,
         hideRegisterNewUserDlg,
+        showContactDataDlg,
+        hideContactDataDlg,
         handleWorkWithSystemWithoutServerSession,
         getUserFIO: computed(() => store.getters.getUserFIO),
         uploadFile,

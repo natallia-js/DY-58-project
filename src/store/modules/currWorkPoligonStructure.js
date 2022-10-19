@@ -151,9 +151,10 @@ export const currWorkPoligonStructure = {
     },
 
     /**
-     * Для заданных id станции и id рабочего места на станции возвращает наименование рабочего места.
+     * Если текущий рабочий полигон - станция, то:
+     * для заданных id станции и id рабочего места на станции возвращает наименование рабочего места.
      */
-    getStationWorkPlaceNameById(state, getters) {
+    getStationWorkPlaceNameById(_state, getters) {
       return (stationId, workPlaceId) => {
         const workPoligon = getters.getUserWorkPoligon;
         if (!workPoligon) {
@@ -614,22 +615,26 @@ export const currWorkPoligonStructure = {
         // в противном случае грузим ее с сервера (загруженная информация может включать информацию о прилегающих перегонах,
         // а также участках ДНЦ и ЭЦД, составной частью которых является станция)
         let checkResult = await context.dispatch(CHECK_WORK_POLIGON_DATA_HASH, workPoligoHashFromServer);
+        console.log('checkResult 1', checkResult)
         if (checkResult) {
           context.state.station = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
           ifGetStationData = false;
         }
         // смотрим, нужно ли подгрузить с сервера информацию о перегонах
         checkResult = await context.dispatch(CHECK_STATION_BLOCKS_DATA_HASH, stationBlocksHashFromServer);
+        console.log('checkResult 2', checkResult)
         if (checkResult) {
           ifGetStationBlocksData = false;
         }
         // смотрим, нужно ли подгрузить с сервера информацию об участках ДНЦ
         checkResult = await context.dispatch(CHECK_STATION_DNC_SECTORS_DATA_HASH, stationDNCSectorsHashFromServer);
+        console.log('checkResult 3', checkResult)
         if (checkResult) {
           ifGetStationDNCSectorsData = false;
         }
         // смотрим, нужно ли подгрузить с сервера информацию об участках ЭЦД
         checkResult = await context.dispatch(CHECK_STATION_ECD_SECTORS_DATA_HASH, stationECDSectorsHashFromServer);
+        console.log('checkResult 4', checkResult)
         if (checkResult) {
           ifGetStationECDSectorsData = false;
         }
@@ -818,6 +823,7 @@ export const currWorkPoligonStructure = {
      * с сервера информации о данном полигоне управления.
      */
     async [LOAD_CURR_WORK_POLIGON_DATA_ACTION] (context) {
+      console.log('LOAD_CURR_WORK_POLIGON_DATA_ACTION')
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'У вас нет права на получение информации о рабочем полигоне';
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
@@ -834,7 +840,7 @@ export const currWorkPoligonStructure = {
       context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, null);
       context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, true);
       try {
-        if (context.getters.ifUserWorksOffline) {
+        if (context.getters.ifUserWorksOffline) { console.log('offline')
           // wait только для того чтобы система корректно успела отреагировать на изменение флага,
           // устанавливаемого при SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS
           if (workPoligon.type === WORK_POLIGON_TYPES.STATION)
@@ -842,7 +848,7 @@ export const currWorkPoligonStructure = {
           else
             context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
           await wait(100);
-        } else {
+        } else { console.log('not offline')
           switch (workPoligon.type) {
             case WORK_POLIGON_TYPES.STATION:
               await context.dispatch(LOAD_STATION_DATA_ACTION, { stationId: workPoligon.code });

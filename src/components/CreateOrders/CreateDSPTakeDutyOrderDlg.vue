@@ -457,6 +457,7 @@
         items: item.items.map((el) => ({
           key: el.key,
           workPlaceId: el.workPlaceId, // обязательно! (понадобится в дальнейшем для формирования списка получателей всех действующих распоряжений на станции)
+          placeTitle: store.getters.getCurrStationWorkPlaceNameById(el.workPlaceId),
           userId: el.userId,
           post: el.post, // обязательно! (-//-)
           name: el.name, // обязательно! (-//-)

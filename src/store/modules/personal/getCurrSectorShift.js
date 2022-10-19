@@ -115,7 +115,7 @@ function setStationsShift(responseData, shiftPersonal) {
                   ? APP_CREDENTIALS.DSP_FULL
                   : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
                     ? APP_CREDENTIALS.DSP_Operator
-                    : !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.STATION_WORKS_MANAGER)
+                    : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.STATION_WORKS_MANAGER)
                       ? APP_CREDENTIALS.STATION_WORKS_MANAGER
                       : null,
           });
