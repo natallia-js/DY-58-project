@@ -106,7 +106,19 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         // время уведомления (на приказ/запрещение) - из связанного распоряжения
         orderNotificationDateTime: order.connectedOrder ? getLocaleDateTimeString(new Date(order.connectedOrder.startDate), false) : '',
         // номер уведомления - из связанного распоряжения
-        notificationNumber: order.connectedOrder ? order.connectedOrder.number : '',
+        notificationNumber: order?.connectedOrder?.number ?? '',
+        // текст уведомления - из связанного распоряжения
+        notificationText: !order?.connectedOrder?.orderText ? '' :
+          formOrderText({
+            orderTextArray: order.connectedOrder.orderText,
+            dncToSend: [],
+            dspToSend: [],
+            ecdToSend: [],
+            otherToSend: [],
+            insertEmptyLineBeforeText: true,
+            asString: false,
+            includeFIO: false,
+          }).text,
         // для работы с издателем распоряжения (см. формирование sendOriginal)
         workPoligon: order.workPoligon,
         // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем

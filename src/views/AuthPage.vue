@@ -61,11 +61,7 @@
           </div>
         </div>
         <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button type="submit" label="Войти" class="p-mb-2" />
-          <br />
-          <Button class="p-button-danger p-mb-2" label="Войти при отсутствии связи с сервером" @click="handleWorkWithSystemWithoutServerSession" />
-          <br/>
-          <Button class="p-button-secondary" label="Отправить заявку на регистрацию" @click="handleRegisterUser" />
+          <Button type="submit" label="Войти" style="width:210px" />
         </div>
         <div v-else class="p-col-12">
           <ProgressSpinner />
@@ -83,8 +79,23 @@
         <div v-else class="p-col-12">
           Идет загрузка списка руководств...
         </div>
+        <div v-if="!state.waitingForServerResponse" class="p-col-12">
+          <Button
+            class="p-button-danger p-mb-2"
+            label="Войти при отсутствии связи с сервером"
+            @click="handleWorkWithSystemWithoutServerSession"
+            style="width:380px"
+          />
+          <br/>
+          <Button
+            class="p-button-secondary"
+            label="Отправить заявку на регистрацию"
+            @click="handleRegisterUser"
+            style="width:380px"
+          />
+        </div>
         <div class="p-col-12">
-          <Button label="Контактные данные" @click="showContactDataDlg" />
+          <Button label="Контактные данные" @click="showContactDataDlg" style="width:210px" />
         </div>
       </form>
     </div>

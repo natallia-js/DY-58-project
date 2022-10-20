@@ -211,7 +211,7 @@
         })
       );
 
-      //
+      // Срабатывает при разворачивании списка с категориями и наименованиями шаблонов распоряжений (TreeSelect)
       const handleFocusDropdown = () => {
         if (state.orderTextSource !== ORDER_TEXT_SOURCE.pattern) {
           state.orderTextSource = ORDER_TEXT_SOURCE.pattern;
@@ -222,6 +222,22 @@
           orderTitle: getSelectedOrderPattern.value.title,
           orderText: state.orderPatternText,
         });
+
+        // Для пользователя очень удобно, когда он для просмотра списка шаблонов конкретной категории
+        // может не только нажать на кнопку "птичка" слева от категории распоряжений (поведение компонента
+        // TreeSelect по умолчанию), а сделать то же самое путем двойного клика по наименованию категории.
+        const treeSelectNodes = document.querySelectorAll('.p-treenode-label');
+        for (let i = 0; i < treeSelectNodes.length; i++) {
+          treeSelectNodes[i].addEventListener('dblclick', function() {
+            const parent = treeSelectNodes[i].closest('.p-treenode-content');
+            if (parent) {
+              const arrowElement = parent.querySelectorAll('.p-tree-toggler');
+              if (arrowElement?.length) {
+                arrowElement[0].dispatchEvent(new Event('click'));
+              }
+            }
+          });
+        }
       };
 
       //

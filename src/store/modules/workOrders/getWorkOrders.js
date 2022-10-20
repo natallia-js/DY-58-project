@@ -15,6 +15,7 @@ import { LOAD_WORK_ORDERS_ACTION, REPORT_ON_ORDERS_DELIVERY_ACTION } from '@/sto
 import { getWorkOrdersFromServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import { getWorkOrderObject } from './getWorkOrderObject';
+import { formShortOrderInfo } from '@/additional/formShortOrderInfo';
 
 
 /**
@@ -183,6 +184,10 @@ export const getWorkOrders = {
             orderNum: item.number,
             extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,
+            shortOrderInfo:
+              (getters.isDNC || getters.isECD)
+              ?  formShortOrderInfo(item.orderText.orderText, getters.isDNC, getters.isECD)
+              : '',
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({
               orderTextArray: item.orderText.orderText,

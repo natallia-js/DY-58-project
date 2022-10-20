@@ -35,7 +35,7 @@
               />
               <label for="include-only-outgoing-docs">&#160;только исходящие документы</label>
             </div>
-            <div>
+            <div class="p-mb-2">
               <Checkbox
                 id="include-active-docs"
                 name="includeDocsCriteria"
@@ -43,6 +43,15 @@
                 v-model="state.includeDocsCriteria"
               />
               <label for="include-active-docs">&#160;действующие цепочки документов</label>
+            </div>
+            <div v-if="isECDWorkPoligon">
+              <Checkbox
+                id="include-order-notification-text"
+                name="includeDocsCriteria"
+                :value="INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_ORDER_NOTIFICATION_TEXT"
+                v-model="state.includeDocsCriteria"
+              />
+              <label for="include-active-docs">&#160;текст уведомлений</label>
             </div>
           </div>
           <div v-else class="p-field p-col-6">
@@ -88,6 +97,7 @@
   const INCLUDE_DOCUMENTS_CRITERIA = {
     ONLY_OUTGOUING: 'ONLY_OUTGOUING',
     INCLUDE_ACTIVE: 'INCLUDE_ACTIVE',
+    INCLUDE_ORDER_NOTIFICATION_TEXT: 'INCLUDE_ORDER_NOTIFICATION_TEXT',
   };
 
   export default {
@@ -193,6 +203,7 @@
         INCLUDE_DOCUMENTS_CRITERIA,
         canUserCreateCheckOrders: computed(() => store.getters.canUserCreateCheckOrders),
         ifUserWorksOffline,
+        isECDWorkPoligon: computed(() => store.getters.isECDWorkPoligon),
         v$,
         submitted,
         handleSubmit,

@@ -50,6 +50,13 @@
           <div v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
+          <div v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber">
+            {{ slotProps.data[col.field] }}
+            <div v-if="slotProps.data.notificationText">
+              <br/>
+              <div v-html="slotProps.data.notificationText" />
+            </div>
+          </div>
           <div v-else>
             {{ slotProps.data[col.field] }}
           </div>

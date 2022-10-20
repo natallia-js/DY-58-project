@@ -24,7 +24,7 @@
     appendTo="body"
     :showCloseIcon="true"
     id="order-drafts-overlay_panel"
-    :breakpoints="{'960px':'75vw'}"
+    :style="{width: '700px'}"
   >
     <Listbox
       v-model="state.selectedOrderDraft"
@@ -32,6 +32,7 @@
       optionLabel="createDateTime"
       optionGroupLabel="label"
       optionGroupChildren="items"
+      :style="{width:'100%'}"
     >
       <template #optiongroup="slotProps">
         <div class="p-text-capitalize">
@@ -266,7 +267,6 @@
 
   :deep(.p-listbox-list) {
     padding: 0 !important;
-    max-width: 400px !important;
     max-height: 600px !important;
     overflow-y: scroll;
   }

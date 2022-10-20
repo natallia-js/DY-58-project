@@ -60,14 +60,15 @@
                 {{ slotProps.data.chainMembersNumber > 1 ? '*' : '' }}
               </span>
             </div>
-            <!-- столбцы данных -->
-            <span v-else-if="![
-              getWorkMessTblColumnsTitles.expander,
-              getWorkMessTblColumnsTitles.state,
-              getWorkMessTblColumnsTitles.orderReceiveStatus].includes(col.field)"
-            >
-              {{ slotProps.data[col.field] }}
-            </span>
+            <!-- столбец наименования документа -->
+            <div v-else-if="col.field == getWorkMessTblColumnsTitles.extendedOrderTitle">
+              <div>
+                {{ slotProps.data[col.field] }}
+              </div>
+              <div v-if="slotProps.data.shortOrderInfo" class="p-mt-2">
+                {{slotProps.data.shortOrderInfo}}
+              </div>
+            </div>
             <!-- столбец статуса -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
               <div v-if="isStationWorkPoligonSpecialist || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
@@ -142,6 +143,10 @@
                 </div>
               </div>
             </div>
+            <!-- столбцы остальных данных -->
+            <span v-else>
+              {{ slotProps.data[col.field] }}
+            </span>
           </div>
         </template>
       </Column>
