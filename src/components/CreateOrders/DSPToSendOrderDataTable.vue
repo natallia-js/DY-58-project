@@ -188,6 +188,7 @@
         return WORK_POLIGON_TYPES;
       },
 
+      // Количество поездных участков
       trainSectorsNumber() {
         return new Set(this.getDSPShiftForSendingData.map((el) => el.sector)).size;
       },

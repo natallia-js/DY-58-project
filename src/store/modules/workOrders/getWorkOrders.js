@@ -23,6 +23,9 @@ import { formShortOrderInfo } from '@/additional/formShortOrderInfo';
  */
 export const getWorkOrders = {
   getters: {
+    /**
+     * Возвращает массив абсолютно всех распоряжений, периодически получаемых от сервера (входящих + находящихся в работе).
+     */
     getAllCurrentOrders(state) {
       return state.data;
     },
@@ -47,9 +50,18 @@ export const getWorkOrders = {
      * (без сортировок, вложений и т.д.).
      * Рабочее распоряжение - такое полученное в рамках соответствующего запроса с сервера
      * распоряжение, у которого присутствует дата подтверждения его получения.
+     * В список рабочих распоряжений не входят так называемые "скрытые" распоряжения (которые
+     * не должен видеть пользователь).
      */
     getRawWorkingOrders(state) {
-      return state.data.filter((item) => item.confirmDateTime);
+      return state.data.filter((item) => item.confirmDateTime && !item.hidden);
+    },
+
+    /**
+     * Возвращает массив "скрытых" рабочих распоряжений.
+     */
+    getHiddenRawWorkingOrders(state) {
+      return state.data.filter((item) => item.confirmDateTime && item.hidden);
     },
 
     /**
@@ -186,7 +198,7 @@ export const getWorkOrders = {
             orderTitle: item.orderText.orderTitle,
             shortOrderInfo:
               (getters.isDNC || getters.isECD)
-              ?  formShortOrderInfo(item.orderText.orderText, getters.isDNC, getters.isECD)
+              ?  formShortOrderInfo(item.orderText.orderText, getters.isDNC, getters.isECD, item.otherToSend)
               : '',
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({

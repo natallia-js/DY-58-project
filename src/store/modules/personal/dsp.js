@@ -120,11 +120,11 @@ export const dsp = {
     },
 
     /**
-     * Возвращает информацию обо всех ДСП (не Операторах ДСП станций!), связанных с текущим полигом управления.
+     * Возвращает информацию обо всех ДСП (не Операторах при ДСП станций!), связанных с текущим полигом управления.
      * Данным лицам и может адресоваться информация, отправляемая текущим пользователем.
      * Если текущий полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
-     * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как ДСП, так и оператор при
-     * ДСП одной и той же станции. Будет выбрана только информация по ДСП.
+     * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как в качестве ДСП,
+     * так и как Оператор при ДСП одной и той же станции. Будет выбрана только информация по ДСП.
      */
     getDSPShiftForSendingData(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
@@ -188,28 +188,32 @@ export const dsp = {
   mutations: {
     /**
      * Устанавливает указанных адресатов распоряжения из числа ДСП станций.
+     * Учитывает наличие более одного поездного участка, в который может входить одна и та же станция.
      */
     [SET_DEFAULT_DSP_ADDRESSES] (state, dspUsers) {
       if (!dspUsers || !state.sectorPersonal || !state.sectorPersonal.sectorStationsShift) {
         return;
       }
       dspUsers.forEach((user) => {
-        const stationShiftInfo = state.sectorPersonal.sectorStationsShift.find((el) => el.stationId === user.stationId);
-        const elIndex = state.sectorPersonal.sectorStationsShift.findIndex((el) => el.stationId === user.stationId);
-        if (!stationShiftInfo || !stationShiftInfo.people) {
+        const stationsShiftInfo = state.sectorPersonal.sectorStationsShift.filter((el) => el.stationId === user.stationId);
+        if (!stationsShiftInfo?.length)
           return;
+        for (let stationShiftInfo of stationsShiftInfo) {
+          const elIndex = state.sectorPersonal.sectorStationsShift.findIndex((el) =>
+            el.stationId === stationShiftInfo.stationId && el.trainSectorId === stationShiftInfo.trainSectorId);
+          if (!stationShiftInfo?.people?.length)
+            continue;
+          const stationUser = stationShiftInfo.people.find((u) =>
+            getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === user.fio);
+          if (!stationUser)
+            continue;
+          state.sectorPersonal.sectorStationsShift[elIndex] = {
+            ...state.sectorPersonal.sectorStationsShift[elIndex],
+            lastUserChoiceId: stationUser._id,
+            lastUserChoicePost: stationUser.post,
+            lastUserChoice: user.fio,
+          };
         }
-        const stationUser = stationShiftInfo.people.find((u) =>
-          getUserFIOString({ name: u.name, fatherName: u.fatherName, surname: u.surname }) === user.fio);
-        if (!stationUser) {
-          return;
-        }
-        state.sectorPersonal.sectorStationsShift[elIndex] = {
-          ...state.sectorPersonal.sectorStationsShift[elIndex],
-          lastUserChoiceId: stationUser._id,
-          lastUserChoicePost: stationUser.post,
-          lastUserChoice: user.fio,
-        };
       });
     },
 

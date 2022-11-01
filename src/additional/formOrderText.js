@@ -320,7 +320,7 @@ export function getExtendedOrderTitle(order) {
   if (!order || !order.orderText || !order.type) {
     return '';
   }
-  return order.specialTrainCategories && order.specialTrainCategories.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
+  return order.specialTrainCategories?.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
   `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${order.orderText.orderTitle}` :
   `${upperCaseFirst(order.type)}. ${order.orderText.orderTitle}`;
 }

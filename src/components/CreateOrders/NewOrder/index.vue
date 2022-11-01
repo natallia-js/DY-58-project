@@ -620,8 +620,8 @@
         store.commit(SET_SELECTED_OKNO, { okno: null });
       });
 
-      const { existingDNC_ECDTakeDutyOrder, displayLastCircularOrderOtherPersonal } =
-        useWatchExistingDNC_ECDTakeDutyOrder({ store, isDNC, isECD, lastOtherToSendSource });
+      //const { /*existingDNC_ECDTakeDutyOrder, displayLastCircularOrderOtherPersonal*/ } =
+        useWatchExistingDNC_ECDTakeDutyOrder({ store, isDNC, isECD /*, lastOtherToSendSource */ });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -704,8 +704,8 @@
         handleSaveOrderDraft,
       } = useOrderDraft({ state, props, store, confirm, getOrderPatternElementValue });
 
-      useWatchAllAppDataLoad({ store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
-        lastOtherToSendSource, displayLastCircularOrderOtherPersonal });
+      useWatchAllAppDataLoad({ store, relatedOrderObject, currentOrderDraft, /*existingDNC_ECDTakeDutyOrder,*/
+        lastOtherToSendSource/*, displayLastCircularOrderOtherPersonal*/ });
       useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
         showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan, lastOtherToSendSource,
       });

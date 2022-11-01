@@ -14,7 +14,8 @@ import { dispatchOrderToServer } from '@/serverRequests/orders.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import getOrderTextForSendingToServer from '@/additional/getOrderTextForSendingToServer';
 import { getWorkOrderObject } from './getWorkOrderObject';
-import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
+import { ALL_ORDERS_TYPE_ECD, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
 
 /**
@@ -144,20 +145,32 @@ import { ALL_ORDERS_TYPE_ECD } from '@/constants/orderPatterns';
                 placeTitle: item.sector,
               };
             }),
-            dspToSend : dspToSend.map((item) => {
+            dspToSend: dspToSend.map((item) => {
               return {
                 ...item,
                 sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
                 placeTitle: item.station,
               };
             }),
-            ecdToSend: ecdToSend.map((item) => {
-              return {
-                ...item,
-                sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
-                placeTitle: item.sector,
-              };
-            }),
+            // Если издается циркулярное распоряжение ДНЦ, то его необходимо также направить ЭЦД всех смехных участков.
+            // Они не должны об этом знать и видеть это распоряжение. Оно лишь необходимо для быстрого заполнения таблицы
+            // "Кому" по ДСП (ведь только ДНЦ знает, кто с ним заступает на дежурство на станциях)
+            ecdToSend: context.getters.isDNC && specialTrainCategories?.includes(SPECIAL_CIRCULAR_ORDER_SIGN)
+              ? context.getters.getNearestECDSectors?.map((item) => {
+                return {
+                  id: item.ECDS_ID,
+                  type: WORK_POLIGON_TYPES.ECD_SECTOR,
+                  sendOriginal: false,
+                  placeTitle: item.ECDS_Title,
+                };
+              })
+              : ecdToSend.map((item) => {
+                return {
+                  ...item,
+                  sendOriginal: item.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+                  placeTitle: item.sector,
+                };
+              }),
             otherToSend: otherToSend.map((item) => {
               return {
                 ...item,

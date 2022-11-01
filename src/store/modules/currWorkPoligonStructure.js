@@ -12,13 +12,13 @@ import {
   LOAD_ECD_SECTOR_DATA_ACTION,
   LOAD_CURR_WORK_POLIGON_DATA_ACTION,
   GET_LOCALLY_SAVED_USER_WORK_POLIGON,
-  CHECK_WORK_POLIGON_DATA_HASH,
-  CHECK_ADJACENT_SECTORS_DATA_HASH,
-  CHECK_NEAREST_SECTORS_DATA_HASH,
+  //CHECK_WORK_POLIGON_DATA_HASH,
+  //CHECK_ADJACENT_SECTORS_DATA_HASH,
+  //CHECK_NEAREST_SECTORS_DATA_HASH,
   STORE_WORK_POLIGON_DATA_LOCALLY,
-  CHECK_STATION_BLOCKS_DATA_HASH,
-  CHECK_STATION_DNC_SECTORS_DATA_HASH,
-  CHECK_STATION_ECD_SECTORS_DATA_HASH,
+  //CHECK_STATION_BLOCKS_DATA_HASH,
+  //CHECK_STATION_DNC_SECTORS_DATA_HASH,
+  //CHECK_STATION_ECD_SECTORS_DATA_HASH,
 } from '@/store/action-types';
 import {
   getDefinitStationData,
@@ -551,276 +551,72 @@ export const currWorkPoligonStructure = {
      * Подгружает с сервера либо локального хранилища информацию о полигоне управления "Станция".
      */
     async [LOAD_STATION_DATA_ACTION] (context, { stationId }) {
-      let serverError = false;
-      let workPoligoHashFromServer;
-      let stationBlocksHashFromServer;
-      let stationDNCSectorsHashFromServer;
-      let stationECDSectorsHashFromServer;
-      let ifGetStationData = true;
-      let ifGetStationBlocksData = true;
-      let ifGetStationDNCSectorsData = true;
-      let ifGetStationECDSectorsData = true;
+      const responseData = await getDefinitStationData({ stationId });
+      const stationBlocksResponseData = await getStationBlocksData({ stationId });
+      const dncSectorsResponseData = await getStationDNCSectorsData({ stationId });
+      const ecdSectorsResponseData = await getStationECDSectorsData({ stationId });
 
-      // загружает недостающую информацию по рабочему полигону - станции - с сервера в локальное хранилище
-      const getWorkPoligonDataFromServer = async () => {
-        if (ifGetStationData) {
-          const responseData = await getDefinitStationData({ stationId });
-          if (ifGetStationBlocksData && ifGetStationDNCSectorsData && ifGetStationECDSectorsData)
-            context.state.station = responseData;
-          else
-            context.state.station = {
-              ...context.state.station,
-              ...responseData,
-            };
-        }
-        if (ifGetStationBlocksData) {
-          const stationBlocksResponseData = await getStationBlocksData({ stationId });
-          context.state.station = {
-            ...context.state.station,
-            TBlocks: stationBlocksResponseData,
-          };
-        }
-        if (ifGetStationDNCSectorsData) {
-          const dncSectorsResponseData = await getStationDNCSectorsData({ stationId });
-          context.state.station = {
-            ...context.state.station,
-            TDNCSectors: dncSectorsResponseData,
-          };
-        }
-        if (ifGetStationECDSectorsData) {
-          const ecdSectorsResponseData = await getStationECDSectorsData({ stationId });
-          context.state.station = {
-            ...context.state.station,
-            TECDSectors: ecdSectorsResponseData,
-          };
-        }
-        context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
-          ...context.state.station,
-          hash: workPoligoHashFromServer,
-          stationBlocksDataHash: stationBlocksHashFromServer,
-          stationDNCSectorsDataHash: stationDNCSectorsHashFromServer,
-          stationECDSectorsDataHash: stationECDSectorsHashFromServer,
-        });
+      context.state.station = {
+        ...context.state.station,
+        ...responseData,
+        TBlocks: stationBlocksResponseData,
+        TDNCSectors: dncSectorsResponseData,
+        TECDSectors: ecdSectorsResponseData,
       };
 
-      try {
-        // вначале получим хэши полигона управления Станция, хэши прилегающих перегонов, а также хэши
-        // ДНЦ и ЭЦД участков, составной частью которых является полигон управления Станция
-        workPoligoHashFromServer = await getDefinitStationData({ stationId, onlyHash: true });
-        stationBlocksHashFromServer = await getStationBlocksData({ stationId, onlyHash: true });
-        stationDNCSectorsHashFromServer = await getStationDNCSectorsData({ stationId, onlyHash: true });
-        stationECDSectorsHashFromServer = await getStationECDSectorsData({ stationId, onlyHash: true });
-      } catch (err) {
-        serverError = true;
-      }
-
-      try {
-        // сравним полученный хэш workPoligoHashFromServer с хэшем полигона управления, хранящимся в локальном хранилище;
-        // если они окажутся одинаковыми, то информацию о полигоне управления грузим с локального хранилища,
-        // в противном случае грузим ее с сервера (загруженная информация может включать информацию о прилегающих перегонах,
-        // а также участках ДНЦ и ЭЦД, составной частью которых является станция)
-        let checkResult = await context.dispatch(CHECK_WORK_POLIGON_DATA_HASH, workPoligoHashFromServer);
-        console.log('checkResult 1', checkResult)
-        if (checkResult) {
-          context.state.station = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
-          ifGetStationData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию о перегонах
-        checkResult = await context.dispatch(CHECK_STATION_BLOCKS_DATA_HASH, stationBlocksHashFromServer);
-        console.log('checkResult 2', checkResult)
-        if (checkResult) {
-          ifGetStationBlocksData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию об участках ДНЦ
-        checkResult = await context.dispatch(CHECK_STATION_DNC_SECTORS_DATA_HASH, stationDNCSectorsHashFromServer);
-        console.log('checkResult 3', checkResult)
-        if (checkResult) {
-          ifGetStationDNCSectorsData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию об участках ЭЦД
-        checkResult = await context.dispatch(CHECK_STATION_ECD_SECTORS_DATA_HASH, stationECDSectorsHashFromServer);
-        console.log('checkResult 4', checkResult)
-        if (checkResult) {
-          ifGetStationECDSectorsData = false;
-        }
-        if (!serverError && (ifGetStationData || ifGetStationBlocksData || ifGetStationDNCSectorsData || ifGetStationECDSectorsData)) {
-          getWorkPoligonDataFromServer();
-        }
-      } catch {
-        if (!serverError) {
-          getWorkPoligonDataFromServer();
-        }
-      }
+      context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
+        ...context.state.station,
+        hash: '',
+        stationBlocksDataHash: '',
+        stationDNCSectorsDataHash: '',
+        stationECDSectorsDataHash: '',
+      });
     },
 
     /**
      * Подгружает с сервера либо локального хранилища информацию о полигоне управления "Участок ДНЦ".
      */
     async [LOAD_DNC_SECTOR_DATA_ACTION] (context, { sectorId }) {
-      let serverError = false;
-      let workPoligoHashFromServer;
-      let adjacentDNCSectorsHashFromServer;
-      let nearestECDSectorsHashFromServer;
-      let getDNCSectorData = true;
-      let getAdjacentDNCSectorsData = true;
-      let getNearestECDSectorsData = true;
+      const responseData = await getDefinitDNCSectorData({ sectorId });
+      const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData({ sectorId });
+      const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData({ sectorId });
 
-      // загружает недостающую информацию по рабочему полигону - участку ДНЦ - с сервера в локальное хранилище
-      const getWorkPoligonDataFromServer = async () => {
-        if (getDNCSectorData) {
-          const responseData = await getDefinitDNCSectorData({ sectorId });
-          if (getAdjacentDNCSectorsData && getNearestECDSectorsData)
-            context.state.sector = responseData;
-          else
-            context.state.sector = {
-              ...context.state.sector,
-              ...responseData,
-            };
-        }
-        if (getAdjacentDNCSectorsData) {
-          const adjDNCSectResponseData = await getAdjacentDNCSectorsShortDefinitData({ sectorId });
-          context.state.sector = {
-            ...context.state.sector,
-            TAdjacentDNCSectors: adjDNCSectResponseData,
-          };
-        }
-        if (getNearestECDSectorsData) {
-          const nearECDSectResponseData = await getNearestECDSectorsShortDefinitData({ sectorId });
-          context.state.sector = {
-            ...context.state.sector,
-            TNearestECDSectors: nearECDSectResponseData,
-          };
-        }
-        context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
-          ...context.state.sector,
-          hash: workPoligoHashFromServer,
-          adjacentSectorsDataHash: adjacentDNCSectorsHashFromServer,
-          nearestSectorsDataHash: nearestECDSectorsHashFromServer,
-        });
+      context.state.sector = {
+        ...context.state.sector,
+        ...responseData,
+        TAdjacentDNCSectors: adjDNCSectResponseData,
+        TNearestECDSectors: nearECDSectResponseData,
       };
 
-      try {
-        // вначале получим хэши полигона управления, смежных участков ДНЦ и ближайших участков ЭЦД
-        workPoligoHashFromServer = await getDefinitDNCSectorData({ sectorId, onlyHash: true });
-        adjacentDNCSectorsHashFromServer = await getAdjacentDNCSectorsShortDefinitData({ sectorId, onlyHash: true });
-        nearestECDSectorsHashFromServer = await getNearestECDSectorsShortDefinitData({ sectorId, onlyHash: true });
-      } catch (err) {
-        serverError = true;
-      }
-
-      try {
-        // сравним полученный хэш workPoligoHashFromServer с хэшем полигона управления, хранящимся в локальном хранилище;
-        // если они окажутся одинаковыми, то информацию о полигоне управления грузим с локального хранилища,
-        // в противном случае грузим ее с сервера (загруженная информация может включать информацию о смежных
-        // участках ДНЦ и ближайших участках ЭЦД, если ранее данная информация была сохранена в локальном хранилище)
-        let checkResult = await context.dispatch(CHECK_WORK_POLIGON_DATA_HASH, workPoligoHashFromServer);
-        if (checkResult) {
-          context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
-          getDNCSectorData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию о смежных участках ДНЦ
-        checkResult = await context.dispatch(CHECK_ADJACENT_SECTORS_DATA_HASH, adjacentDNCSectorsHashFromServer);
-        if (checkResult) {
-          getAdjacentDNCSectorsData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию о ближайших участках ЭЦД
-        checkResult = await context.dispatch(CHECK_NEAREST_SECTORS_DATA_HASH, nearestECDSectorsHashFromServer);
-        if (checkResult) {
-          getNearestECDSectorsData = false;
-        }
-        if (!serverError && (getDNCSectorData || getAdjacentDNCSectorsData || getNearestECDSectorsData)) {
-          getWorkPoligonDataFromServer();
-        }
-      } catch {
-        if (!serverError) {
-          getWorkPoligonDataFromServer();
-        }
-      }
+      context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
+        ...context.state.sector,
+        hash: '',
+        adjacentSectorsDataHash: '',
+        nearestSectorsDataHash: '',
+      });
     },
 
     /**
      * Подгружает с сервера либо локального хранилища информацию о полигоне управления "Участок ЭЦД".
      */
     async [LOAD_ECD_SECTOR_DATA_ACTION] (context, { sectorId }) {
-      let serverError = false;
-      let workPoligoHashFromServer;
-      let adjacentECDSectorsHashFromServer;
-      let nearestDNCSectorsHashFromServer;
-      let getECDSectorData = true;
-      let getAdjacentECDSectorsData = true;
-      let getNearestDNCSectorsData = true;
+      const responseData = await getDefinitECDSectorData({ sectorId });
+      const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData({ sectorId });
+      const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData({ sectorId });
 
-      // загружает недостающую информацию по рабочему полигону - участку ЭЦД - с сервера в локальное хранилище
-      const getWorkPoligonDataFromServer = async () => {
-        if (getECDSectorData) {
-          const responseData = await getDefinitECDSectorData({ sectorId });
-          if (getAdjacentECDSectorsData && getNearestDNCSectorsData)
-            context.state.sector = responseData;
-          else
-            context.state.sector = {
-              ...context.state.sector,
-              ...responseData,
-            };
-        }
-        if (getAdjacentECDSectorsData) {
-          const adjECDSectResponseData = await getAdjacentECDSectorsShortDefinitData({ sectorId });
-          context.state.sector = {
-            ...context.state.sector,
-            TAdjacentECDSectors: adjECDSectResponseData,
-          };
-        }
-        if (getNearestDNCSectorsData) {
-          const nearDNCSectResponseData = await getNearestDNCSectorsShortDefinitData({ sectorId });
-          context.state.sector = {
-            ...context.state.sector,
-            TNearestDNCSectors: nearDNCSectResponseData,
-          };
-        }
-        context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
-          ...context.state.sector,
-          hash: workPoligoHashFromServer,
-          adjacentSectorsDataHash: adjacentECDSectorsHashFromServer,
-          nearestSectorsDataHash: nearestDNCSectorsHashFromServer,
-        });
+      context.state.sector = {
+        ...context.state.sector,
+        ...responseData,
+        TAdjacentECDSectors: adjECDSectResponseData,
+        TNearestDNCSectors: nearDNCSectResponseData,
       };
 
-      try {
-        // вначале получим хэши полигона управления, смежных участков ЭЦД и ближайших участков ДНЦ
-        workPoligoHashFromServer = await getDefinitECDSectorData({ sectorId, onlyHash: true });
-        adjacentECDSectorsHashFromServer = await getAdjacentECDSectorsShortDefinitData({ sectorId, onlyHash: true });
-        nearestDNCSectorsHashFromServer = await getNearestDNCSectorsShortDefinitData({ sectorId, onlyHash: true });
-      } catch (err) {
-        serverError = true;
-      }
-
-      try {
-        // сравним полученный хэш workPoligoHashFromServer с хэшем полигона управления, хранящимся в локальном хранилище;
-        // если они окажутся одинаковыми, то информацию о полигоне управления грузим с локального хранилища,
-        // в противном случае грузим ее с сервера (загруженная информация может включать информацию о смежных
-        // участках ЭЦД и ближайших участках ДНЦ, если ранее данная информация была сохранена в локальном хранилище)
-        let checkResult = await context.dispatch(CHECK_WORK_POLIGON_DATA_HASH, workPoligoHashFromServer);
-        if (checkResult) {
-          context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
-          getECDSectorData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию о смежных участках ЭЦД
-        checkResult = await context.dispatch(CHECK_ADJACENT_SECTORS_DATA_HASH, adjacentECDSectorsHashFromServer);
-        if (checkResult) {
-          getAdjacentECDSectorsData = false;
-        }
-        // смотрим, нужно ли подгрузить с сервера информацию о ближайших участках ДНЦ
-        checkResult = await context.dispatch(CHECK_NEAREST_SECTORS_DATA_HASH, nearestDNCSectorsHashFromServer);
-        if (checkResult) {
-          getNearestDNCSectorsData = false;
-        }
-        if (!serverError && (getECDSectorData || getAdjacentECDSectorsData || getNearestDNCSectorsData)) {
-          getWorkPoligonDataFromServer();
-        }
-      } catch {
-        if (!serverError) {
-          getWorkPoligonDataFromServer();
-        }
-      }
+      context.dispatch(STORE_WORK_POLIGON_DATA_LOCALLY, {
+        ...context.state.sector,
+        hash: '',
+        adjacentSectorsDataHash: '',
+        nearestSectorsDataHash: '',
+      });
     },
 
     /**
@@ -828,7 +624,6 @@ export const currWorkPoligonStructure = {
      * с сервера информации о данном полигоне управления.
      */
     async [LOAD_CURR_WORK_POLIGON_DATA_ACTION] (context) {
-      console.log('LOAD_CURR_WORK_POLIGON_DATA_ACTION')
       if (!context.getters.canUserWorkWithSystem) {
         const errMessage = 'У вас нет права на получение информации о рабочем полигоне';
         context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, errMessage);
@@ -845,7 +640,7 @@ export const currWorkPoligonStructure = {
       context.commit(SET_ERROR_LOADING_CURR_WORK_POLIGON_DATA, null);
       context.commit(SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS, true);
       try {
-        if (context.getters.ifUserWorksOffline) { console.log('offline')
+        if (context.getters.ifUserWorksOffline) {
           // wait только для того чтобы система корректно успела отреагировать на изменение флага,
           // устанавливаемого при SET_LOADING_CURR_WORK_POLIGON_DATA_STATUS
           if (workPoligon.type === WORK_POLIGON_TYPES.STATION)
@@ -853,7 +648,7 @@ export const currWorkPoligonStructure = {
           else
             context.state.sector = await context.dispatch(GET_LOCALLY_SAVED_USER_WORK_POLIGON);
           await wait(100);
-        } else { console.log('not offline')
+        } else {
           switch (workPoligon.type) {
             case WORK_POLIGON_TYPES.STATION:
               await context.dispatch(LOAD_STATION_DATA_ACTION, { stationId: workPoligon.code });

@@ -36,7 +36,10 @@ import {
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
     ] }) || '?';
-    const fullOrderTitle = `${orderPlaceFromText}. ${state.orderText.orderTitle}`;
+    const fullOrderTitle =
+      `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') : '?'}. ` +
+      `${orderPlaceFromText}. ${state.orderText.orderTitle}`;
+    state.otherSectorsToSendOrder
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',

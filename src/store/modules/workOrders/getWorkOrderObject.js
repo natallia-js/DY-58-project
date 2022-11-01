@@ -14,6 +14,7 @@ export function getWorkOrderTimeSpanInfo(timeSpan) {
 export function getWorkOrderGeneralInfoObject(order) {
   return {
     _id: order._id,
+    hidden: order.hidden,
     createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
     creator: order.creator,
     createdOnBehalfOf: order.createdOnBehalfOf,

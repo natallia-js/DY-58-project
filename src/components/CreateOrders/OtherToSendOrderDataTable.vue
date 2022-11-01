@@ -204,26 +204,29 @@
     },
 
     watch: {
-      // Реакция на изменение источника "иных" адресатов (связанный документ, черновик документа,
-      // последнее циркулярное распоряжение)
+      // Реакция на изменение источника "иных" адресатов (связанный документ, черновик документа).
+      //
+      // Теоретически сюда же можно добавить обработку изменения списка "иных" адресатов в случае
+      // реакции на последнее циркулярное распоряжение, изданное ЭЦД, но пока этого нет.
       lastOtherToSendSource(newValue) {
-        if (newValue) {
-          this.selectedSectorsPeople = [];
-          newValue.forEach((el) => {
-            this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, el);
-            if (el.additionalId) {
-              const sector = this.selectedSectorsPeople.find((item) => item.placeTitle === el.placeTitle);
-              if (sector) {
-                sector.selectedPeople.push(el.additionalId);
-              } else {
-                this.selectedSectorsPeople.push({
-                  placeTitle: el.placeTitle,
-                  selectedPeople: [el.additionalId],
-                });
-              }
-            }
-          });
+        if (!newValue) {
+          return;
         }
+        this.selectedSectorsPeople = [];
+        newValue.forEach((el) => {
+          this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, el);
+          if (el.additionalId) {
+            const sector = this.selectedSectorsPeople.find((item) => item.placeTitle === el.placeTitle);
+            if (sector) {
+              sector.selectedPeople.push(el.additionalId);
+            } else {
+              this.selectedSectorsPeople.push({
+                placeTitle: el.placeTitle,
+                selectedPeople: [el.additionalId],
+              });
+            }
+          }
+        });
       },
 
       getOtherShiftForSendingData(newVal) {

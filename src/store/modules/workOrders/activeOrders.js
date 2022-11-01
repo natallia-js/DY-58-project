@@ -5,7 +5,7 @@ import {
   SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
   SPECIAL_CIRCULAR_ORDER_SIGN,
 } from '@/constants/orderPatterns';
-import { APP_CREDENTIALS } from '@/constants/appCredentials';
+import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
 import { getUserFIOString } from '@/store/modules/personal/transformUserData';
 
@@ -417,13 +417,17 @@ export const activeOrders = {
 
     /**
      * Функция проверяет, существует ли в списке рабочих распоряжений распоряжение о принятии
-     * дежурства ДНЦ/ЭЦД, изданное на ТЕКУЩЕМ РАБОЧЕМ МЕСТЕ.
+     * дежурства ДНЦ/ЭЦД, изданное на ТЕКУЩЕМ РАБОЧЕМ МЕСТЕ (т.е. для ДНЦ ищется циркулярное распоряжение ДНЦ,
+     * для ЭЦД - циркулярное распоряжение ЭЦД).
      * Если существует, функция возвращает последнее такое найденное распоряжение (по времени издания),
      * в противном случае функция возвращает null.
-     *
+     * Функция не обращает внимания на время издания циркулярного распоряжения и его время действия.
      * Функцию следует вызывать только в том случае, если текущий пользователь - ДНЦ/ЭЦД, находящийся на дежурстве!
      */
     getExistingDNC_ECDTakeDutyOrder(_state, getters) {
+      if (!getters.isECD && !getters.isDNC) {
+        return null;
+      }
       const workPoligon = getters.getUserWorkPoligon;
       if (!workPoligon) {
         return null;
@@ -447,6 +451,47 @@ export const activeOrders = {
         if (a.createDateTime > b.createDateTime) return -1;
         return 0;
       })[0];
+    },
+
+    /**
+     * Функция проверяет, существуют ли в списке рабочих распоряжений ЭЦД распоряжения о принятии
+     * дежурства ДНЦ ближайших участков (данные распоряжения - скрытые, их сам ЭЦД не видит в списке рабочих распоряжений).
+     * Функция возвращает null, если ни одного такого распоряжения найти не удалось.
+     * Если же найти распоряжения удалось, то для каждого ближайшего участка ДНЦ возвращается последнее по времени
+     * издания циркулярное распоряжение.
+     * Функция не обращает внимания на время издания циркулярных распоряжений ДНЦ и их время действия.
+     * Функцию следует вызывать только в том случае, если текущий пользователь - ЭЦД, находящийся на дежурстве!
+     */
+    getExistingDNCTakeDutyOrders_ForECD(_state, getters) {
+      if (!getters.isECD) {
+        return null;
+      }
+      const orders = getters.getHiddenRawWorkingOrders.filter((order) => {
+        if (!order?.specialTrainCategories?.length) {
+          return false;
+        }
+        return (order.workPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR) &&
+          (!order.workPoligon.workPlaceId) &&
+          order.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN);
+      });
+      if (!orders.length) {
+        return null;
+      }
+      // сортируем найденные распоряжения в порядке убывания времени издания и для каждого ближайшего участка ДНЦ
+      // возвращаем первое циркулярное распоряжение в отсортированном массиве (это будет самое последнее
+      // циркулярное распоряжение, изданное в рамках данного участка ДНЦ)
+      orders.sort((a, b) => {
+        if (a.createDateTime < b.createDateTime) return 1;
+        if (a.createDateTime > b.createDateTime) return -1;
+        return 0;
+      });
+      const arrayToReturn = [];
+      orders.forEach((order) => {
+        if (!arrayToReturn.find((el) => el.workPoligon.id === order.workPoligon.id)) {
+          arrayToReturn.push(order);
+        }
+      });
+      return arrayToReturn;
     },
 
     /**
