@@ -81,7 +81,7 @@ export const incomingOrdersPerShift = {
      */
     async [LOAD_INCOMING_ORDERS_PER_SHIFT_ACTION] (context) {
       if (!context.getters.canUserGetIncomingOrdersPerShift) {
-        const errMessage = 'У вас нет права получать количество входящий документов за смену либо вы не на дежурстве';
+        const errMessage = 'У вас нет права получать количество входящих документов за смену либо вы не на дежурстве';
         context.commit(SET_GETTING_INCOMING_ORDERS_PER_SHIFT_RESULT, { error: true, message: errMessage });
         context.commit(SET_SYSTEM_MESSAGE, { error: true, datetime: new Date(), message: errMessage });
         return;

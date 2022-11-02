@@ -60,9 +60,9 @@ export const onlinePersonal = {
             const onlineUser = !(sectorData && sectorData.people) ? null :
               sectorData.people.find((user) => user.online &&
                 (
-                  (sectorType === WORK_POLIGON_TYPES.STATION && user.appsCredentials === APP_CREDENTIALS.DSP_FULL) ||
-                  (sectorType === WORK_POLIGON_TYPES.DNC_SECTOR && user.appsCredentials === APP_CREDENTIALS.DNC_FULL) ||
-                  (sectorType === WORK_POLIGON_TYPES.ECD_SECTOR && user.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+                  (sectorType === WORK_POLIGON_TYPES.STATION && user.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL)) ||
+                  (sectorType === WORK_POLIGON_TYPES.DNC_SECTOR && user.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL)) ||
+                  (sectorType === WORK_POLIGON_TYPES.ECD_SECTOR && user.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
                 )
               );
             if (onlineUser) {
@@ -122,9 +122,9 @@ export const onlinePersonal = {
           });
         }
       }
-      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds === APP_CREDENTIALS.DNC_FULL);
-      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds === APP_CREDENTIALS.DSP_FULL);
-      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds === APP_CREDENTIALS.ECD_FULL);
+      setOnlineSectorsShift(state.sectorPersonal.DNCSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.DNC_FULL));
+      setOnlineSectorsShift(state.sectorPersonal.sectorStationsShift, (creds) => creds.includes(APP_CREDENTIALS.DSP_FULL));
+      setOnlineSectorsShift(state.sectorPersonal.ECDSectorsShift, (creds) => creds.includes(APP_CREDENTIALS.ECD_FULL));
     },
   },
 }

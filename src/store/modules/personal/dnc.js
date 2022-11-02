@@ -35,7 +35,7 @@ export const dnc = {
       return !currentDNCSectorShift || !currentDNCSectorShift.people
         ? [] :
         currentDNCSectorShift.people
-          .filter((el) => el.appsCredentials === APP_CREDENTIALS.DNC_FULL)
+          .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL))
           .map((el) => {
             return {
               id: el._id,
@@ -76,7 +76,7 @@ export const dnc = {
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
           people: item.people
-            .filter((el) => el.appsCredentials === APP_CREDENTIALS.DNC_FULL)
+            .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL))
             .map((el) => {
               return {
                 id: el._id,

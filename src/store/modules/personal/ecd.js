@@ -35,7 +35,7 @@ export const ecd = {
       return !currentECDSectorShift || !currentECDSectorShift.people
         ? [] :
         currentECDSectorShift.people
-          .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+          .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
           .map((el) => {
             return {
               id: el._id,
@@ -76,7 +76,7 @@ export const ecd = {
         fioId: item.lastUserChoiceId,
         fioOnline: item.lastUserChoiceOnline,
         people: item.people
-          .filter((el) => el.appsCredentials === APP_CREDENTIALS.ECD_FULL)
+          .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
           .map((el) => {
             return {
               id: el._id,

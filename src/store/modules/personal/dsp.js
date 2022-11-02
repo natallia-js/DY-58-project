@@ -36,7 +36,11 @@ export const dsp = {
       }
       return stationWithPersonal.people
         .filter((item) =>
-          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator, APP_CREDENTIALS.STATION_WORKS_MANAGER].includes(item.appsCredentials)) &&
+          (
+            item.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL) ||
+            item.appsCredentials.includes(APP_CREDENTIALS.DSP_Operator) ||
+            item.appsCredentials.includes(APP_CREDENTIALS.STATION_WORKS_MANAGER)
+          ) &&
           (
             (!userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && item.stationWorkPlaceId && item.stationWorkPlaceId === userWorkPoligon.subCode)
@@ -59,7 +63,7 @@ export const dsp = {
      * об Операторе при ДСП).
      */
     getCurrStationDSPUsers: (_state, getters) => {
-      return getters.getCurrStationWorkPlaceUsers.filter((user) => user.appsCredentials === APP_CREDENTIALS.DSP_FULL);
+      return getters.getCurrStationWorkPlaceUsers.filter((user) => user.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL));
     },
 
     /**
@@ -93,7 +97,10 @@ export const dsp = {
       };
       stationWithPersonal.people
         .filter((item) =>
-          ([APP_CREDENTIALS.DSP_FULL, APP_CREDENTIALS.DSP_Operator].includes(item.appsCredentials)) &&
+          (
+            item.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL) ||
+            item.appsCredentials.includes(APP_CREDENTIALS.DSP_Operator)
+          ) &&
           (
             (!userWorkPoligon.subCode && item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && !item.stationWorkPlaceId) ||
@@ -155,7 +162,7 @@ export const dsp = {
             fioId: item.lastUserChoiceId,
             fioOnline: item.lastUserChoiceOnline,
             people: item.people
-              .filter((el) => el.appsCredentials === APP_CREDENTIALS.DSP_FULL)
+              .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL))
               .map((el) => {
                 return {
                   id: el._id,

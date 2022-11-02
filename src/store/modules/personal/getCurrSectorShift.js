@@ -4,7 +4,7 @@ import {
   getECDSectorsWorkPoligonsUsers,
 } from '@/serverRequests/users.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
-import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import {
   SET_ERROR_LOADING_CURR_SHIFT,
@@ -62,67 +62,48 @@ function initialSectorStationsWithTrainSectorsPersonalData(sectorStationsWithTra
 }
 
 function setDNCSectorsShift(responseData, shiftPersonal) {
-  if (responseData && responseData.length) {
-    responseData.forEach((user) => {
-      shiftPersonal.DNCSectorsShift.forEach((item) => {
-        if (item.sectorId === user.dncSectorId) {
-          item.people.push({
-            ...user,
-            // на участках ДНЦ данному приложению известен лишь набор полномочий DNC_FULL
-            appsCredentials:
-              user.appsCredentials.length > 0 &&
-              user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DNC_FULL)
-                ? APP_CREDENTIALS.DNC_FULL
-                : null,
-          });
-        }
-      });
+  if (!responseData?.length)
+    return;
+  responseData.forEach((user) => {
+    shiftPersonal.DNCSectorsShift.forEach((item) => {
+      if (item.sectorId === user.dncSectorId) {
+        item.people.push({
+          ...user,
+          appsCredentials: user.appsCredentials.length > 0 ? (user.appsCredentials[0].creds || []) : [],
+        });
+      }
     });
-  }
+  });
 }
 
 function setECDSectorsShift(responseData, shiftPersonal) {
-  if (responseData && responseData.length) {
-    responseData.forEach((user) => {
-      shiftPersonal.ECDSectorsShift.forEach((item) => {
-        if (item.sectorId === user.ecdSectorId) {
-          item.people.push({
-            ...user,
-            // на участках ЭЦД данному приложению известен лишь набор полномочий ECD_FULL
-            appsCredentials:
-              user.appsCredentials.length > 0 &&
-              user.appsCredentials[0].creds.includes(APP_CREDENTIALS.ECD_FULL)
-                ? APP_CREDENTIALS.ECD_FULL
-                : null,
-          });
-        }
-      });
+  if (!responseData?.length)
+    return;
+  responseData.forEach((user) => {
+    shiftPersonal.ECDSectorsShift.forEach((item) => {
+      if (item.sectorId === user.ecdSectorId) {
+        item.people.push({
+          ...user,
+          appsCredentials: user.appsCredentials.length > 0 ? (user.appsCredentials[0].creds || []) : [],
+        });
+      }
     });
-  }
+  });
 }
 
 function setStationsShift(responseData, shiftPersonal) {
-  if (responseData && responseData.length) {
-    responseData.forEach((user) => {
-      shiftPersonal.sectorStationsShift.forEach((item) => {
-        if (item.stationId === user.stationId) {
-          item.people.push({
-            ...user,
-            // на станциях данному приложению известны наборы полномочий DSP_FULL, DSP_Operator и STATION_WORKS_MANAGER
-            appsCredentials:
-              user.appsCredentials.length === 0 || !user.stationId ? null :
-                !user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_FULL)
-                  ? APP_CREDENTIALS.DSP_FULL
-                  : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.DSP_Operator)
-                    ? APP_CREDENTIALS.DSP_Operator
-                    : user.stationWorkPlaceId && user.appsCredentials[0].creds.includes(APP_CREDENTIALS.STATION_WORKS_MANAGER)
-                      ? APP_CREDENTIALS.STATION_WORKS_MANAGER
-                      : null,
-          });
-        }
-      });
+  if (!responseData?.length)
+    return;
+  responseData.forEach((user) => {
+    shiftPersonal.sectorStationsShift.forEach((item) => {
+      if (item.stationId === user.stationId) {
+        item.people.push({
+          ...user,
+          appsCredentials: user.appsCredentials.length > 0 ? (user.appsCredentials[0].creds || []) : [],
+        });
+      }
     });
-  }
+  });
 }
 
 
@@ -227,16 +208,19 @@ export const getCurrSectorShift = {
         sectorStationsShift: initialSectorStationsPersonalData(context.getters.getSectorStations),
       };
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ДНЦ)
       if (dncSectorsIds.length) {
         const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: dncSectorsIds, onlyOnline: false });
         setDNCSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ЭЦД)
       if (ecdSectorsIds.length) {
         const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: ecdSectorsIds, onlyOnline: false });
         setECDSectorsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на смежных станциях
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на станции)
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: true });
         setStationsShift(responseData, shiftPersonal);
@@ -274,18 +258,21 @@ export const getCurrSectorShift = {
       };
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ, смежных с
       // текущим участком ДНЦ
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ДНЦ)
       const responseData = await getDNCSectorsWorkPoligonsUsers({
         sectorIds: [...adjacentSectorsIds, context.getters.getUserWorkPoligon.code],
         onlyOnline: false,
       });
       setDNCSectorsShift(responseData, shiftPersonal);
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ДНЦ с id = sectorId
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на станции)
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
         setStationsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД, ближайших к
       // участку ДНЦ с id = sectorId
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ЭЦД)
       if (nearestSectorsIds.length) {
         const responseData = await getECDSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
         setECDSectorsShift(responseData, shiftPersonal);
@@ -323,18 +310,21 @@ export const getCurrSectorShift = {
       };
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ЭЦД, смежных с
       // текущим участком ЭЦД
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ЭЦД)
       const responseData = await getECDSectorsWorkPoligonsUsers({
         sectorIds: [...adjacentSectorsIds, context.getters.getUserWorkPoligon.code],
         onlyOnline: false,
       });
       setECDSectorsShift(responseData, shiftPersonal);
       // Извлекаем из БД информацию о тех пользователях, которые работают на станциях участка ЭЦД с id = sectorId
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на станции)
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: false });
         setStationsShift(responseData, shiftPersonal);
       }
       // Извлекаем из БД информацию о тех пользователях, которые работают на участках ДНЦ, ближайших к
       // участку ЭЦД с id = sectorId
+      // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на участке ДНЦ)
       if (nearestSectorsIds.length) {
         const responseData = await getDNCSectorsWorkPoligonsUsers({ sectorIds: nearestSectorsIds, onlyOnline: false });
         setDNCSectorsShift(responseData, shiftPersonal);

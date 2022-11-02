@@ -2,18 +2,10 @@
   <div v-if="!getSectorPersonal">Сменный персонал не определен</div>
   <div v-else>
     <Fieldset legend="Персонал текущего участка ДНЦ" :toggleable="true">
-      <div v-if="!getCurrentDNCSectorShift || !getCurrentDNCSectorShift.people || !getCurrentDNCSectorShift.people.length">
-        -
-      </div>
-      <div v-else>
-        <p
-          v-for="user of getCurrentDNCSectorShift.people"
-          :key="user._id"
-          :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
-        >
-          {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
-        </p>
-      </div>
+      <ViewSectorPeopleBlock
+        :peopleArray="getCurrentDNCSectorShift ? (getCurrentDNCSectorShift.people || []) : []"
+        :ifStationPeople="false"
+      />
     </Fieldset>
     <Fieldset legend="Персонал станций участка ДНЦ" :toggleable="true">
       <div v-if="!getSectorPersonal.sectorStationsShift || !getSectorPersonal.sectorStationsShift.length">
@@ -22,19 +14,10 @@
       <div v-else>
         <div v-for="station of getSectorPersonal.sectorStationsShift" :key="station.stationId" class="p-ml-4">
           <span class="p-text-bold">{{ station.stationTitle }}</span>
-          <div v-if="!station.people || !station.people.length">
-            -
-          </div>
-          <div v-else>
-            <p
-              v-for="user of station.people"
-              :key="user._id"
-              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
-            >
-              {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}
-              ${user.stationWorkPlaceId ? '(рабочее место с id=' + user.stationWorkPlaceId + ')' : ''}` }}
-            </p>
-          </div>
+          <ViewSectorPeopleBlock
+            :peopleArray="station.people || []"
+            :ifStationPeople="true"
+          />
         </div>
       </div>
     </Fieldset>
@@ -45,18 +28,10 @@
       <div v-else>
         <div v-for="adjSector of getAllDNCShiftExceptCurrent" :key="adjSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ adjSector.sectorTitle }}</span>
-          <div v-if="!adjSector.people || !adjSector.people.length">
-            -
-          </div>
-          <div v-else>
-            <p
-              v-for="user of adjSector.people"
-              :key="user._id"
-              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
-            >
-              {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
-            </p>
-          </div>
+          <ViewSectorPeopleBlock
+            :peopleArray="adjSector.people || []"
+            :ifStationPeople="false"
+          />
         </div>
       </div>
     </Fieldset>
@@ -67,18 +42,10 @@
       <div v-else>
         <div v-for="nearSector of getSectorPersonal.ECDSectorsShift" :key="nearSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ nearSector.sectorTitle }}</span>
-          <div v-if="!nearSector.people || !nearSector.people.length">
-            -
-          </div>
-          <div v-else>
-            <p
-              v-for="user of nearSector.people"
-              :key="user._id"
-              :class="['p-ml-4', { 'dy58-info': user.online }, { 'dy58-error-message': !user.appsCredentials }]"
-            >
-              {{ `${user.post} ${user.surname} ${user.name} ${user.fatherName || ''}` }}
-            </p>
-          </div>
+          <ViewSectorPeopleBlock
+            :peopleArray="nearSector.people || []"
+            :ifStationPeople="false"
+          />
         </div>
       </div>
     </Fieldset>
@@ -88,9 +55,14 @@
 
 <script>
   import { mapGetters } from 'vuex';
+  import ViewSectorPeopleBlock from '@/components/ViewSectorPeopleBlock';
 
   export default {
     name: 'dy58-view-shift-for-dnc',
+
+    components: {
+      ViewSectorPeopleBlock,
+    },
 
     computed: {
       ...mapGetters([
