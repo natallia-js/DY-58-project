@@ -45,6 +45,16 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
             };
           })
       },
+      notificationOrderText: !order?.connectedOrder?.orderText ? null : {
+        ...order.connectedOrder.orderText,
+        orderText: !order.connectedOrder.orderText ? null :
+          order.connectedOrder.orderText.map((el) => {
+            return {
+              ...el,
+              value: getOrderTextElementTypedValue(el),
+            };
+          })
+      },
     }))
     .map((order, index) => {
       const orderTextData = formOrderText({
@@ -108,9 +118,9 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         // номер уведомления - из связанного распоряжения
         notificationNumber: order?.connectedOrder?.number ?? '',
         // текст уведомления - из связанного распоряжения
-        notificationText: !order?.connectedOrder?.orderText ? '' :
+        notificationText: !order.notificationOrderText? '' :
           formOrderText({
-            orderTextArray: order.connectedOrder.orderText,
+            orderTextArray: order.notificationOrderText.orderText,
             dncToSend: [],
             dspToSend: [],
             ecdToSend: [],

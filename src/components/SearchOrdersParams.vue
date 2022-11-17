@@ -60,12 +60,12 @@
             <Button
               type="submit"
               icon="pi pi-search"
-              label="Найти"
+              label="Применить"
               class="p-mr-3 p-mb-2"
             />
             <Button
               icon="pi pi-print"
-              label="Найти и вывести на печать"
+              label="Применить и вывести на печать"
               class="p-mr-3 p-mb-2"
               @click="handlePrint"
             />
