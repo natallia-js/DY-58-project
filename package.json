@@ -26,6 +26,7 @@
     "primevue": "^3.11.1",
     "vue": "^3.0.0",
     "vue-axios": "^3.2.4",
+    "vue-input-autowidth": "^1.0.11",
     "vue-router": "^4.0.3",
     "vuelidate": "^0.7.6",
     "vuex": "^4.0.0"
