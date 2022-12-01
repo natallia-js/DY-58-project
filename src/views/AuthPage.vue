@@ -1,72 +1,94 @@
 <template>
-  <div class="p-d-flex p-jc-center p-ai-center" style="height:100vh">
-    <RegisterNewUserDlg
-      :showDlg="state.showRegisterNewUserDlg"
-      @close="hideRegisterNewUserDlg"
-    />
+  <!-- nowrap is default for p-d-flex -->
+  <div class="p-d-flex p-flex-column dy58-auth-page-container">
 
-    <ContactDataDlg
-      :showDlg="state.showContactDataDlg"
-      @close="hideContactDataDlg"
-    />
+    <div class="p-d-flex p-jc-center p-ai-center dy58-white-color-text dy58-title-huge" style="height:200px">
+      АС Журнал ДУ-58
+    </div>
 
-    <div style="max-width:600px;">
-      <Toast />
-      <div class="dy58-title-huge p-mb-4">Журнал ДУ-58</div>
-      <div class="p-text-bold p-mb-4">Авторизуйтесь в системе</div>
-      <div v-if="canUserWorkWithSystem || isUserAuthenticated" class="p-mb-3">
-        <Button :label="`Продолжить как ${getUserFIO}`" @click="handleContinueLogin" />
-      </div>
-      <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
-          <label for="userName" :class="{'p-error': v$.userName.$invalid && state.submitted}">
-            <span class="dy58-required-field">*</span> Имя пользователя
-          </label>
-          <InputText
-            id="userName"
-            autofocus
-            v-model="v$.userName.$model"
-            :class="{'p-invalid':v$.userName.$invalid && state.submitted}"
-          />
-          <small
-            v-if="(v$.userName.$invalid && state.submitted) || v$.userName.$pending.$response"
-            class="p-error"
-          >
-            {{ v$.userName.$errors.length ? v$.userName.$errors[0].$message : 'Неверно указано имя пользователя' }}
-          </small>
-        </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
-          <label for="password" :class="{'p-error':v$.password.$invalid && state.submitted}">
-            <span class="dy58-required-field">*</span> Пароль
-          </label>
-          <Password
-            id="password"
-            v-model="v$.password.$model"
-            inputStyle="width:100%"
-            :class="{'p-invalid':v$.password.$invalid && state.submitted}"
-            :feedback="false"
-            toggleMask
-          />
-          <small
-            v-if="(v$.password.$invalid && state.submitted) || v$.password.$pending.$response"
-            class="p-error"
-          >
-            {{ v$.password.$errors.length ? v$.password.$errors[0].$message : 'Неверно указан пароль' }}
-          </small>
-        </div>
-        <div class="p-field p-col-12 p-d-flex p-flex-column">
-          <div class="p-field-checkbox">
-            <Checkbox id="take-duty" v-model="state.takeDuty" :binary="true" />
-            <label for="take-duty">Принять дежурство</label>
+    <div class="p-d-flex p-flex-column" style="flex-grow:4;">
+
+      <div class="p-col-12 p-d-flex p-jc-center p-ai-center" style="margin-top:50px;">
+        <RegisterNewUserDlg
+          :showDlg="state.showRegisterNewUserDlg"
+          @close="hideRegisterNewUserDlg"
+        />
+
+        <!--<ContactDataDlg
+          :showDlg="state.showContactDataDlg"
+          @close="hideContactDataDlg"
+        />-->
+
+        <div class="dy58-shadowed-block" style="max-width:400px;">
+          <Toast />
+          <div v-if="canUserWorkWithSystem || isUserAuthenticated" class="p-mb-3">
+            <Button :label="`Продолжить как ${getUserFIO}`" @click="handleContinueLogin" />
           </div>
+          <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
+            <div class="p-field p-col-12 p-d-flex p-flex-column">
+              <div class="p-input-icon-left">
+                <i class="pi pi-user" />
+                <InputText
+                  id="userName"
+                  autofocus
+                  v-model="v$.userName.$model"
+                  :class="{'p-invalid':v$.userName.$invalid && state.submitted}"
+                  style="width:100%;"
+                />
+              </div>
+              <small
+                v-if="(v$.userName.$invalid && state.submitted) || v$.userName.$pending.$response"
+                class="p-error p-text-bold"
+              >
+                {{ v$.userName.$errors.length ? v$.userName.$errors[0].$message : 'Неверно указано имя пользователя' }}
+              </small>
+            </div>
+            <div class="p-field p-col-12 p-d-flex p-flex-column">
+              <Password
+                id="password"
+                v-model="v$.password.$model"
+                inputStyle="width:100%"
+                :class="{'p-invalid':v$.password.$invalid && state.submitted}"
+                :feedback="false"
+                toggleMask
+                style="width:100%;"
+              />
+              <small
+                v-if="(v$.password.$invalid && state.submitted) || v$.password.$pending.$response"
+                class="p-error p-text-bold"
+              >
+                {{ v$.password.$errors.length ? v$.password.$errors[0].$message : 'Неверно указан пароль' }}
+              </small>
+            </div>
+            <div class="p-field p-col-12 p-d-flex p-flex-column">
+              <div class="p-field-checkbox">
+                <Checkbox id="take-duty" v-model="state.takeDuty" :binary="true" />
+                <label for="take-duty" class="p-text-bold dy58-white-color-text">Принять дежурство</label>
+              </div>
+            </div>
+            <div v-if="!state.waitingForServerResponse" class="p-col-12">
+              <Button type="submit" label="Войти" class="p-button-rounded dy58-login-button" />
+            </div>
+            <div v-else class="p-col-12">
+              <ProgressSpinner />
+            </div>
+
+            <div v-if="!state.waitingForServerResponse" class="p-col-12 p-d-flex p-flex-column">
+              <Button
+                label="Заявка на регистрацию"
+                class="p-button-text dy58-white-color-text p-as-center p-text-bold"
+                @click="handleRegisterUser"
+              />
+            </div>
+            <!--<div class="p-col-12">
+              <Button label="Контактные данные" @click="showContactDataDlg" style="width:210px" />
+            </div>-->
+          </form>
         </div>
-        <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button type="submit" label="Войти" style="width:210px" />
-        </div>
-        <div v-else class="p-col-12">
-          <ProgressSpinner />
-        </div>
-        <div v-if="!state.loadingUserManualsList" class="p-col-12">
+      </div>
+
+      <div class="p-d-flex p-flex-column p-as-end p-ml-3 p-mr-3 dy58-shadowed-block">
+        <div v-if="!state.loadingUserManualsList" class="">
           <div v-if="state.userManualsListLoadError">
             {{ state.userManualsListLoadError }}
           </div>
@@ -76,28 +98,21 @@
             </div>
           </div>
         </div>
-        <div v-else class="p-col-12">
+        <div v-else class="dy58-shadowed-block">
           Идет загрузка списка руководств...
         </div>
-        <div v-if="!state.waitingForServerResponse" class="p-col-12">
-          <Button
-            class="p-button-danger p-mb-2"
-            label="Войти при отсутствии связи с сервером"
-            @click="handleWorkWithSystemWithoutServerSession"
-            style="width:380px"
-          />
-          <br/>
-          <Button
-            class="p-button-secondary"
-            label="Отправить заявку на регистрацию"
-            @click="handleRegisterUser"
-            style="width:380px"
-          />
-        </div>
-        <div class="p-col-12">
-          <Button label="Контактные данные" @click="showContactDataDlg" style="width:210px" />
-        </div>
-      </form>
+        <br />
+        <Button
+          class="p-button-rounded dy58-login-offline-button"
+          label="Войти при отсутствии связи с сервером"
+          @click="handleWorkWithSystemWithoutServerSession"
+          style="width:380px"
+        />
+      </div>
+    </div>
+
+    <div class="p-d-flex p-jc-center p-ai-center dy58-white-color-text p-text-bold" style="height:50px;">
+      <span>Журнал ДУ-58 ©2022 КТЦ БелЖД. Контактный телефон: 7-400-38-12/ городской 8-0232-95-38-12</span>
     </div>
   </div>
 </template>
@@ -114,7 +129,7 @@
   import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
   import getUserWorkPoligonsArray from '@/additional/getUserWorkPoligonsArray';
   import RegisterNewUserDlg from '@/components/RegisterNewUserDlg';
-  import ContactDataDlg from '@/components/ContactDataDlg';
+  //import ContactDataDlg from '@/components/ContactDataDlg';
   import { LOGIN_ACTION, LOGIN_VIA_LOCAL_STORAGE_ACTION } from '@/store/action-types';
   import checkAuthString from '@/additional/checkAuthString';
   import { getUserManualsList, downloadDY58Manual } from '@/serverRequests/userManuals.requests';
@@ -125,7 +140,7 @@
 
     components: {
       RegisterNewUserDlg,
-      ContactDataDlg,
+      //ContactDataDlg,
     },
 
     setup() {
@@ -140,7 +155,7 @@
         submitted: false,
         waitingForServerResponse: false,
         showRegisterNewUserDlg: false,
-        showContactDataDlg: false,
+        //showContactDataDlg: false,
         loadingUserManualsList: false,
         userManualsList: [],
         userManualsListLoadError: null,
@@ -176,7 +191,17 @@
       // не осуществляется, т.к. не было выхода из системы.
       onMounted(() => {
         //store.dispatch('logout', { onlyLocally: false });
+
+        const passwordIcon = document.createElement('i');
+        passwordIcon.setAttribute('id', 'password-left-icon');
+        passwordIcon.classList.add('pi', 'pi-lock');
+        const passwordBlock = document.querySelector('.p-password');
+        if (passwordBlock) {
+          passwordBlock.insertBefore(passwordIcon, passwordBlock.children[0]);
+          passwordBlock.classList.add('p-input-icon-left');
+        }
       });
+
 
       const canUserWorkWithSystem = computed(() => store.getters.canUserWorkWithSystem);
       const isUserAuthenticated = computed(() => store.getters.isUserAuthenticated);
@@ -266,13 +291,13 @@
         state.showRegisterNewUserDlg = false;
       };
 
-      const showContactDataDlg = () => {
+      /*const showContactDataDlg = () => {
         state.showContactDataDlg = true;
       };
 
       const hideContactDataDlg = () => {
         state.showContactDataDlg = false;
-      };
+      };*/
 
       /**
        * Если нет связи с сервером, то пользователь может войти в систему под именем последнего
@@ -319,8 +344,8 @@
         handleSubmit,
         handleRegisterUser,
         hideRegisterNewUserDlg,
-        showContactDataDlg,
-        hideContactDataDlg,
+        //showContactDataDlg,
+        //hideContactDataDlg,
         handleWorkWithSystemWithoutServerSession,
         getUserFIO: computed(() => store.getters.getUserFIO),
         uploadFile,
@@ -331,12 +356,51 @@
 
 
 <style scoped>
+  .dy58-auth-page-container {
+    height:100vh;
+    margin:0;
+    background: url('~@/assets/img/LoginPageBackground.jpg') no-repeat;
+    -moz-background-size: 100% 100%; /* Firefox 3.6+ */
+    -webkit-background-size: 100% 100%; /* Safari 3.1+ и Chrome 4.0+ */
+    -o-background-size: 100% 100%; /* Opera 9.6+ */
+    background-size: cover; /* Современные браузеры */
+  }
   .dy58-load-file-link {
     cursor: pointer;
-    color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: none;
   }
   .dy58-load-file-link:hover {
     background-color: var(--surface-400);
     color: var(--text-color);
+  }
+  .dy58-white-color-text {
+    color: #ffffff !important;
+  }
+  .p-inputtext, :deep(.p-inputtext) {
+    border-radius: 20px;
+    padding-left: 2.5rem;
+    box-shadow: 0 0 10px;
+  }
+  :deep(i:first-of-type) {
+    left: 0.75rem;
+    color: #495057;
+  }
+  .dy58-shadowed-block {
+    background: rgba(0,0,0,.3);
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+  .dy58-login-button {
+    width: 100%;
+    background-color: #2C569B;
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 10px;
+  }
+  .dy58-login-offline-button {
+    background-color: #B55539;
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 10px;
   }
 </style>

@@ -78,22 +78,25 @@
               getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
-            :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
           ></div>
           <div
             v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
-            :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
           >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
-          <div v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber">
+          <div
+            v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
+          >
             {{ slotProps.data[col.field] }}
             <div v-if="slotProps.data.notificationText">
               <br/>
               <div v-html="slotProps.data.notificationText" />
             </div>
           </div>
-          <div v-else :class="`${slotProps.data.type === ORDER_PATTERN_TYPES.CONTROL ? 'dy58-control-record' : ''}`">
+          <div v-else :class="getJournalTableCellStyleClasses(slotProps.data)">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -176,6 +179,7 @@
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
   import isElectron from '@/additional/isElectron';
   import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
+  import getJournalTableCellStyleClasses from '@/additional/getJournalTableCellStyleClasses';
 
   const DEF_ROWS_PER_PAGE = 10;
 
@@ -426,6 +430,7 @@
         onFilter,
         showCreateRevisorCheckRecordDlg,
         hideCreateRevisorCheckRecordDlg,
+        getJournalTableCellStyleClasses,
       };
     },
   }

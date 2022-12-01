@@ -1,5 +1,5 @@
 <template>
-  <div class="p-m-2">
+  <div class="p-m-2 dy58-print-data-container">
     <h2 class="p-text-center p-m-2">
       Оперативный журнал ЭЦД
     </h2>
@@ -46,18 +46,25 @@
               getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
           ></div>
-          <div v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
+          <div
+            v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
+          >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
-          <div v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber">
+          <div
+            v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
+          >
             {{ slotProps.data[col.field] }}
             <div v-if="slotProps.data.notificationText">
               <br/>
               <div v-html="slotProps.data.notificationText" />
             </div>
           </div>
-          <div v-else>
+          <div v-else :class="getJournalTableCellStyleClasses(slotProps.data)">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -75,6 +82,7 @@
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import isElectron from '@/additional/isElectron';
+  import getJournalTableCellStyleClasses from '@/additional/getJournalTableCellStyleClasses';
 
   export default {
     name: 'dy58-print-ecd-journal-preview-page',
@@ -170,6 +178,7 @@
         endDisplayDate,
         getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
         sendToPrinter,
+        getJournalTableCellStyleClasses,
       };
     },
   }
@@ -178,11 +187,15 @@
 
 <style lang="scss" scoped>
   @media print {
+    /* Способ отображения таблицы на печатном экземпляре */
     table { page-break-after: auto }
     tr    { page-break-inside: avoid; page-break-after: auto }
     td    { page-break-inside: avoid; page-break-after: auto }
     thead { display: table-header-group }
     tfoot { display: table-footer-group }
+    /* Чтобы сохранить цвет ячеек внутри таблицы */
+    .dy58-print-data-container { -webkit-print-color-adjust: exact; color-adjust: exact; }
+    /* Убираем со страницы ненужные на печатном экземпляре элементы */
     .print-btn { display: none }
   }
 

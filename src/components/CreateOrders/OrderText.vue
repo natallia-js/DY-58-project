@@ -48,7 +48,7 @@
         ref="textarea"
       />
     </div>
-    <div v-else-if="state.orderPattern" class="dy58-order-pattern-border p-col-12">
+    <div v-else-if="state.orderPattern" class="dy58-order-pattern-border p-col-12" style="overflow-x:scroll;">
       <order-pattern-text
         :value="state.orderPatternText"
         @input="handleChangeOrderPatternElementValue"

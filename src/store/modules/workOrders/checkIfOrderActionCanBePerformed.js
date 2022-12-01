@@ -17,19 +17,17 @@ export const checkIfOrderActionCanBePerformed = {
       return (orderId) => (
         !getters.getOrdersChainsBeingDeleted.includes(orderId) &&
         !getters.isOrderBeingConfirmedForOthers(orderId) &&
-        !getters.isOrderBeingDeletedStationWorkPlaceReceiver(orderId)
+        !getters.isOrderBeingDeletedStationWorkPlaceReceiver(orderId) &&
+        !getters.isOrderBeingChangedItsInvalidMark(orderId)
       ) ? true : false;
     },
 
     /**
-     * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
-     * (т.е. за те полигоны, которые присутствовали в секции "Кому" при издании распоряжения).
-     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-     * котором работает пользователь (в случае ДСП и иного работника станции - в частности,
-     * Оператора при ДСП этой же станции - их рабочие полигоны - разные: рабочий полигон = рабочее место).
-     * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение за других.
+     * Возвращает true, если распоряжение было издано на текущем рабочем полигоне, false - в противном случае.
+     * В случае ДСП и иного работника станции - в частности, Оператора при ДСП этой же станции - их рабочие
+     * полигоны - разные: рабочий полигон = рабочее место.
      */
-    orderCanBeConfirmedFor(_state, getters) {
+    orderDispatchedOnCurrentWorkPoligon(_state, getters) {
       return (order) => {
         const userWorkPoligon = getters.getUserWorkPoligon;
         return (
@@ -42,6 +40,17 @@ export const checkIfOrderActionCanBePerformed = {
           )
         ) ? true : false;
       };
+    },
+
+    /**
+     * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
+     * (т.е. за те полигоны, которые присутствовали в секции "Кому" при издании распоряжения).
+     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
+     * котором работает пользователь.
+     * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение за других.
+     */
+    orderCanBeConfirmedFor(_state, getters) {
+      return (order) => getters.orderDispatchedOnCurrentWorkPoligon(order);
     },
 
     /**
@@ -165,6 +174,49 @@ export const checkIfOrderActionCanBePerformed = {
         getters.canUserPerformAnyActionOnOrder(orderId) &&
         getters.canUserDispatchOrders &&
         getters.isOrderActive(orderId)
+      ) ? true : false;
+    },
+
+    /**
+     *
+     */
+    orderDispatchedByTheCurrentUser(_state, getters) {
+      return (order) => order.creator.id === getters.getUserId;
+    },
+
+    /**
+     * Проверка возможности отметить рабочий документ как недействительный.
+     * Возвращает true, если пользователь может пометить распоряжение как недействительное.
+     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
+     * котором работает пользователь, и именно этим пользователем, при этом это распоряжение не является
+     * помеченным как недействительное. Пользователь должен быть на дежурстве.
+     * Возвращает false, если текущий пользователь не имеет права пометить распоряжение как недействительное.
+     */
+    canMarkOrderAsInvalid(_state, getters) {
+      return (order) => (
+        getters.canUserPerformAnyActionOnOrder(order.id) &&
+        getters.canUserToggleOrderInvalidMark &&
+        getters.orderDispatchedOnCurrentWorkPoligon(order) &&
+        getters.orderDispatchedByTheCurrentUser(order) &&
+        !order.invalid
+      ) ? true : false;
+    },
+
+    /**
+     * Проверка возможности отметить рабочий документ как действительный.
+     * Возвращает true, если пользователь может пометить распоряжение как действительное.
+     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
+     * котором работает пользователь, и именно этим пользователем, при этом это распоряжение является
+     * помеченным как недействительное. Пользователь должен быть на дежурстве.
+     * Возвращает false, если текущий пользователь не имеет права пометить распоряжение как действительное.
+     */
+    canMarkOrderAsValid(_state, getters) {
+      return (order) => (
+        getters.canUserPerformAnyActionOnOrder(order.id) &&
+        getters.canUserToggleOrderInvalidMark &&
+        getters.orderDispatchedOnCurrentWorkPoligon(order) &&
+        getters.orderDispatchedByTheCurrentUser(order) &&
+        order.invalid
       ) ? true : false;
     },
   },

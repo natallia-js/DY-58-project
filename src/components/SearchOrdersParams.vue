@@ -44,6 +44,15 @@
               />
               <label for="include-active-docs">&#160;действующие цепочки документов</label>
             </div>
+            <div class="p-mb-2">
+              <Checkbox
+                id="include-invalid-docs"
+                name="includeDocsCriteria"
+                :value="INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_INVALID"
+                v-model="state.includeDocsCriteria"
+              />
+              <label for="include-active-docs">&#160;ошибочно изданные документы</label>
+            </div>
             <div v-if="isECDWorkPoligon">
               <Checkbox
                 id="include-order-notification-text"
@@ -97,6 +106,7 @@
   const INCLUDE_DOCUMENTS_CRITERIA = {
     ONLY_OUTGOUING: 'ONLY_OUTGOUING',
     INCLUDE_ACTIVE: 'INCLUDE_ACTIVE',
+    INCLUDE_INVALID: 'INCLUDE_INVALID',
     INCLUDE_ORDER_NOTIFICATION_TEXT: 'INCLUDE_ORDER_NOTIFICATION_TEXT',
   };
 
@@ -124,7 +134,7 @@
           start: null,
           end: null,
         },
-        includeDocsCriteria: [INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_ACTIVE],
+        includeDocsCriteria: [INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_ACTIVE, INCLUDE_DOCUMENTS_CRITERIA.INCLUDE_INVALID],
       });
 
       const endDateNoLessStartDate = (value) => {

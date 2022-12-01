@@ -83,4 +83,5 @@ export const DY58_SERVER_ACTIONS_PATHS = Object.freeze({
   getOknas: `${DY58_SERVER_ADDRESS}/api/okna/data`,
   getUserManualsList: `${DY58_SERVER_ADDRESS}/api/upload/dy58UserManualsList`,
   downloadDY58Manual: `${DY58_SERVER_ADDRESS}/api/upload/downloadDY58Manual`,
+  setOrderInvalidMark: `${DY58_SERVER_ADDRESS}/api/orders/setOrderInvalidMark`,
 });

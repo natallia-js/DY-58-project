@@ -43,10 +43,6 @@
   vertical-align: middle !important;
 }
 
-.dy58-control-record {
-  color: var(--primary-color) !important;
-}
-
 // ---------------------------------------------------------------------
 // Стили для таблиц со входящими уведомлениями и распоряжениями в работе
 
@@ -109,4 +105,16 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-row-gap: 5px;
+}
+
+// -------------------------
+// Стили для таблиц журналов
+
+.dy58-invalid-order-record {
+  background-color: #ffe28b;
+}
+
+// для записи ревизора в журнале
+.dy58-control-record {
+  color: var(--primary-color) !important;
 }

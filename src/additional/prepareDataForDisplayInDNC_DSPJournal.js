@@ -123,6 +123,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
               sendOriginal(el.sendOriginal))
           )
         ),
+        invalid: order.invalid,
       };
     });
 }

@@ -1,14 +1,14 @@
 <template>
-  <div class="p-grid" style="margin-right:0;">
-    <div class="p-col-fixed" style="width:250px">
+  <div class="p-d-flex p-flex-row p-mr-0 p-mt-0 dy58-user-manual-text-block">
+    <div class="p-p-0" style="flex-basis:250px">
       <Menu :model="contentsItems" orientation="vertical" style="width:100%;height:100%;">
         <template #item="{item}">
           <a :href="item.url" class="p-menuitem-link">{{ item.label }}</a>
         </template>
       </Menu>
     </div>
-    <div class="p-col">
-      <h2 class="p-text-center p-mt-3 p-mb-2" id="user-manual-start">Руководство пользователя</h2>
+    <div class="p-m-3 p-p-0" style="flex:1">
+      <h2 class="p-text-center p-mb-2" id="user-manual-start">Руководство пользователя</h2>
       <system-enter-description />
       <to-help-start-block />
       <main-menu-description />
@@ -139,6 +139,10 @@
 
 
 <style lang="scss" scoped>
+  .dy58-user-manual-text-block {
+    background-color: #ffffff;
+  }
+
   :deep(.p-menu) {
     border-radius: 0;
     background-color: var(--surface-b);

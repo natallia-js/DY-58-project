@@ -190,6 +190,7 @@ export const getWorkOrders = {
             id: item._id,
             type: item.type,
             sendOriginal: item.sendOriginal,
+            creator: item.creator,
             state: '',
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD, item.specialTrainCategories),
@@ -270,6 +271,7 @@ export const getWorkOrders = {
             }),
             otherReceivers: item.otherToSend || [],
             assertDateTime: item.assertDateTime ? getLocaleDateTimeString(item.assertDateTime, false) : null,
+            invalid: item.invalid,
           };
         });
     },

@@ -144,6 +144,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
               sendOriginal(el.sendOriginal))
           )
         ),
+        invalid: order.invalid,
       };
     });
 }

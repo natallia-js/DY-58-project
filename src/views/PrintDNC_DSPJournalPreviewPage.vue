@@ -1,5 +1,5 @@
 <template>
-  <div class="p-m-2">
+  <div class="p-m-2 dy58-print-data-container">
     <h2 class="p-text-center p-m-2">
       Журнал диспетчерских распоряжений
     </h2>
@@ -45,11 +45,15 @@
               getDNC_DSPJournalTblColumnsTitles.orderContent,
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
           ></div>
-          <div v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal">
+          <div
+            v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
+            :class="getJournalTableCellStyleClasses(slotProps.data)"
+          >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
-          <div v-else>
+          <div v-else :class="getJournalTableCellStyleClasses(slotProps.data)">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -69,6 +73,7 @@
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import isElectron from '@/additional/isElectron';
+  import getJournalTableCellStyleClasses from '@/additional/getJournalTableCellStyleClasses';
 
   export default {
     name: 'dy58-print-dnc-dsp-journal-preview-page',
@@ -200,6 +205,7 @@
           }
         }),
         sendToPrinter,
+        getJournalTableCellStyleClasses,
       };
     },
   }
@@ -208,11 +214,15 @@
 
 <style lang="scss" scoped>
   @media print {
+    /* Способ отображения таблицы на печатном экземпляре */
     table { page-break-after: auto }
     tr    { page-break-inside: avoid; page-break-after: auto }
     td    { page-break-inside: avoid; page-break-after: auto }
     thead { display: table-header-group }
     tfoot { display: table-footer-group }
+    /* Чтобы сохранить цвет ячеек внутри таблицы */
+    .dy58-print-data-container { -webkit-print-color-adjust: exact; color-adjust: exact; }
+    /* Убираем со страницы ненужные на печатном экземпляре элементы */
     .print-btn { display: none }
   }
 

@@ -7,14 +7,22 @@
 
   <!-- Элемент "Поле ввода" -->
 
+  <AutoWidthInputText
+    v-else-if="element.type === OrderPatternElementType.INPUT"
+    :width="getElementSizesCorrespondence[element.size]"
+    v-model="state.elementModelValue"
+    :tooltip="element.ref"
+    :placeholder="element.ref"
+  />
+<!--
+  Было до AutoWidthInputText:
   <InputText
     v-else-if="element.type === OrderPatternElementType.INPUT"
     :style="{ width: getElementSizesCorrespondence[element.size] }"
     v-model="state.elementModelValue"
     v-tooltip="element.ref"
     :placeholder="element.ref"
-  />
-  <!--@keydown="this.style.width = ((this.value.length + 1) * 8) + 'px';"-->
+  />-->
 
   <!-- Элемент "Текстовая область" -->
 
@@ -31,6 +39,18 @@
 
   <!-- Элемент "Нередактируемый список одиночного выбора" -->
 
+  <AutoWidthDropdown
+    v-else-if="element.type === OrderPatternElementType.SELECT"
+    :dropdownValues="dropdownValues"
+    :width="getElementSizesCorrespondence[element.size]"
+    v-model="state.elementModelValue"
+    :tooltip="element.ref"
+    :placeholder="element.ref"
+    :isDropdownEditable="isDropdownEditable"
+  />
+
+  <!--
+    Было до AutoWidthDropdown:
   <div v-else-if="element.type === OrderPatternElementType.SELECT" v-tooltip="element.ref">
     <Dropdown
       :style="{ width: getElementSizesCorrespondence[element.size] }"
@@ -42,7 +62,7 @@
       :placeholder="element.ref"
       :editable="isDropdownEditable"
     />
-  </div>
+  </div>-->
 
   <!-- Элемент "Редактируемый список множественного выбора" -->
 
@@ -381,6 +401,8 @@
   import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
   import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
   import CheckboxAndInputOrNothingComponent from '@/components/OrderPatterns/CheckboxAndInputOrNothingComponent';
+  import AutoWidthInputText from '@/components/OrderPatterns/AutoWidthInputText';
+  import AutoWidthDropdown from '@/components/OrderPatterns/AutoWidthDropdown';
 
   export default {
     name: 'dy58-order-pattern-element-view',
@@ -403,6 +425,8 @@
     components: {
       TimeOrTillNoticeComponent,
       CheckboxAndInputOrNothingComponent,
+      AutoWidthInputText,
+      AutoWidthDropdown,
     },
 
     emits: ['input'],

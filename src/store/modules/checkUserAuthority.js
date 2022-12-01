@@ -172,5 +172,15 @@ export const checkUserAuthority = {
       return getters.canUserWorkWithSystem &&
         (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD || getters.isRevisor) ? true : false;
     },
+
+    /**
+     * Пользователь, принявший дежурство, может пометить документ как действительный / недействительный,
+     * если этот пользователь - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     */
+    canUserToggleOrderInvalidMark(_state, getters) {
+      return getters.canUserWorkWithSystem &&
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        getters.isUserOnDuty ? true : false;
+    },
   },
 };

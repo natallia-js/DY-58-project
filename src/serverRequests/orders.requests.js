@@ -73,6 +73,15 @@ export const reportServerOnOrdersDelivery = async ({ orderIds, deliverDateTime }
   return response.data;
 };
 
+export const setOrderInvalidMark = async ({ orderId, invalid }) => {
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.setOrderInvalidMark,
+    method: 'POST',
+    params: { orderId, invalid },
+  });
+  return response.data;
+};
+
 export const dispatchOrderToServer = async (params) => {
   const {
     type,

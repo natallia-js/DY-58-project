@@ -118,6 +118,7 @@ export function getWorkOrderGeneralInfoObject(order) {
     specialTrainCategories: order.specialTrainCategories,
     assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
     dispatchedOnOrder: order.dispatchedOnOrder,
+    invalid: order.invalid,
   };
 }
 

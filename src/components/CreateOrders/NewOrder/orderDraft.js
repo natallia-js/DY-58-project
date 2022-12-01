@@ -39,7 +39,6 @@ import {
     const fullOrderTitle =
       `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') : '?'}. ` +
       `${orderPlaceFromText}. ${state.orderText.orderTitle}`;
-    state.otherSectorsToSendOrder
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',

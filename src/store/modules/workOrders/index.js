@@ -12,6 +12,7 @@ import { contextMenus } from './contextMenus';
 import { checkIfOrderActionCanBePerformed } from './checkIfOrderActionCanBePerformed';
 import { checkClipboard } from './checkClipboard';
 import { okna } from './okna';
+import { invalidOrders } from './invalidOrders';
 
 
 export const workOrders = {
@@ -61,6 +62,11 @@ export const workOrders = {
     // количество запущенных процессов издания распоряжений по их типам
     dispatchOrdersBeingProcessed: [],
 
+    // массив id распоряжений, для которых идет процесс установки отметки об их действительности / недействительности
+    ordersBeingChangedTheirInvalidMark: [],
+    // массив результатов установки отметки о действительности / недействительности распоряжений
+    changeOrdersInvalidMarksResults: [],
+
     editDispatchedOrderResult: null,
     editDispatchedOrdersBeingProcessed: 0,
 
@@ -91,6 +97,7 @@ export const workOrders = {
     ...checkIfOrderActionCanBePerformed.getters,
     ...okna.getters,
     ...checkClipboard.getters,
+    ...invalidOrders.getters,
   },
 
   mutations: {
@@ -104,6 +111,7 @@ export const workOrders = {
     ...editOrder.mutations,
     ...okna.mutations,
     ...checkClipboard.mutations,
+    ...invalidOrders.mutations,
   },
 
   actions: {
@@ -115,5 +123,6 @@ export const workOrders = {
     ...dispatchOrder.actions,
     ...editOrder.actions,
     ...checkClipboard.actions,
+    ...invalidOrders.actions,
   },
 };

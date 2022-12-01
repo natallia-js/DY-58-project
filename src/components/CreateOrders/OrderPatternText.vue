@@ -12,11 +12,14 @@
         v-else
         class="p-mr-2 p-mb-2"
         :style="{
-          width: [getOrderPatternElementTypes.TEXT_AREA, getOrderPatternElementTypes.DR_TRAIN_TABLE].includes(patternElement.type) ?
-            '100%' : getElementSizesCorrespondence[patternElement.size],
-          display: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? 'inline-block': 'block',
+          display: [getOrderPatternElementTypes.TEXT_AREA, getOrderPatternElementTypes.DR_TRAIN_TABLE].includes(patternElement.type) ? 'block' : 'inline-block',
         }"
       >
+      <!--
+         width: [getOrderPatternElementTypes.TEXT_AREA, getOrderPatternElementTypes.DR_TRAIN_TABLE].includes(patternElement.type) ?
+            '100%' : getElementSizesCorrespondence[patternElement.size],
+            display: patternElement.type !== getOrderPatternElementTypes.TEXT_AREA ? 'inline-block': 'block',
+      -->
         <order-pattern-element-view
           :element="patternElement"
           :dropdownValues="getElementDropdownValues(patternElement.type, patternElement.ref)"
