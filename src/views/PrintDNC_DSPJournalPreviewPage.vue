@@ -45,15 +45,15 @@
               getDNC_DSPJournalTblColumnsTitles.orderContent,
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
-            :class="getJournalTableCellStyleClasses(slotProps.data)"
+            :class="journalTableCellStyleClasses(slotProps.data)"
           ></div>
           <div
             v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
-            :class="getJournalTableCellStyleClasses(slotProps.data)"
+            :class="journalTableCellStyleClasses(slotProps.data)"
           >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
-          <div v-else :class="getJournalTableCellStyleClasses(slotProps.data)">
+          <div v-else :class="journalTableCellStyleClasses(slotProps.data)">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -73,7 +73,7 @@
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import isElectron from '@/additional/isElectron';
-  import getJournalTableCellStyleClasses from '@/additional/getJournalTableCellStyleClasses';
+  import journalTableCellStyleClasses from '@/additional/styleClasses/journalTableCellStyleClasses';
 
   export default {
     name: 'dy58-print-dnc-dsp-journal-preview-page',
@@ -205,7 +205,7 @@
           }
         }),
         sendToPrinter,
-        getJournalTableCellStyleClasses,
+        journalTableCellStyleClasses,
       };
     },
   }

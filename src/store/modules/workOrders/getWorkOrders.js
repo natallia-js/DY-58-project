@@ -146,6 +146,7 @@ export const getWorkOrders = {
           assertDateTime: order.assertDateTime ? getLocaleDateTimeString(order.assertDateTime, false) : null,
           orderChainId: order.orderChainId,
           specialTrainCategories: order.specialTrainCategories,
+          invalid: order.invalid,
           children: [],
         };
 

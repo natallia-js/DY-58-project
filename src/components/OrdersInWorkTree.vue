@@ -20,12 +20,7 @@
             'dy58-order-being-deleted': getOrdersChainsBeingDeleted.includes(slotProps.node.orderChainId),
           }]"
         >
-          <b :class="[{
-            'dy58-order-dispatched-on-this-global-poligon':
-              getUserWorkPoligon && slotProps.node.senderWorkPoligon &&
-              getUserWorkPoligon.type === slotProps.node.senderWorkPoligon.type &&
-              String(getUserWorkPoligon.code) === String(slotProps.node.senderWorkPoligon.id)
-          }]">
+          <b :class="getWorkOrderNumberInWorkTableClassStyles(slotProps.node)">
             {{ slotProps.node.specialTrainCategories &&
             slotProps.node.specialTrainCategories.includes(specialOrderDSPTakeDutySign) ?
             specialOrderSubpatternTypes.RECORD : slotProps.node.type }}, №{{ slotProps.node.orderNum || '?' }}
@@ -92,6 +87,8 @@
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import ShowIncomingOrderDlg from '@/components/ShowIncomingOrderDlg';
   import { SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN, SPECIAL_ORDER_SUBPATTERN_TYPES } from '@/constants/orderPatterns';
+  import workOrderNumberInWorkTableClassStyles from '@/additional/styleClasses/workOrderNumberInWorkTableClassStyles';
+  import isOrderDispatchedOnCurrentWorkPoligon from '@/additional/isOrderDispatchedOnCurrentWorkPoligon';
 
   export default {
     name: 'dy58-orders-in-work-tree',
@@ -161,6 +158,10 @@
 
       toggleCreateOrderMenu(event) {
         this.$refs.createOrderMenu.toggle(event);
+      },
+
+      getWorkOrderNumberInWorkTableClassStyles(order) {
+        return workOrderNumberInWorkTableClassStyles(order, isOrderDispatchedOnCurrentWorkPoligon(order?.senderWorkPoligon));
       },
     },
   }

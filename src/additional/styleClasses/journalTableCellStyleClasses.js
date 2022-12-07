@@ -1,6 +1,6 @@
 import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
-function getJournalTableCellStyleClasses(order) {
+function journalTableCellStyleClasses(order) {
   let resultStyleClasses = '';
   // Запись о недействительном документе
   if (order?.invalid) {
@@ -13,4 +13,4 @@ function getJournalTableCellStyleClasses(order) {
   return resultStyleClasses;
 }
 
-export default getJournalTableCellStyleClasses;
+export default journalTableCellStyleClasses;

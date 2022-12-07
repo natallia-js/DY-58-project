@@ -89,7 +89,7 @@
 
       <div class="p-d-flex p-flex-column p-as-end p-ml-3 p-mr-3 dy58-shadowed-block">
         <div v-if="!state.loadingUserManualsList" class="">
-          <div v-if="state.userManualsListLoadError">
+          <div v-if="state.userManualsListLoadError" class="dy58-white-color-text">
             {{ state.userManualsListLoadError }}
           </div>
           <div v-else>

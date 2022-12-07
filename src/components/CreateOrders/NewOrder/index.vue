@@ -342,7 +342,7 @@
       </p>
       <p class="p-mb-2">! адресаты, указанные в таблице "Иные адресаты", не получат создаваемый документ</p>
       <Accordion id="addressees" :multiple="true">
-        <AccordionTab v-if="orderType !== ORDER_PATTERN_TYPES.NOTIFICATION">
+        <AccordionTab>
           <template #header>
             <span><b>ДСП:</b> <span v-html="selectedDSPString"></span></span>
           </template>

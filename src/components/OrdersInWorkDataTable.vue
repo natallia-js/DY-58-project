@@ -48,7 +48,7 @@
             <div
               v-if="col.field === getWorkMessTblColumnsTitles.orderNum"
               style="text-align:center"
-              :class="getDisplayOrderNumberClassStyles(slotProps.data)"
+              :class="getWorkOrderNumberInWorkTableClassStyles(slotProps.data)"
             >
               <span v-if="col.field === getWorkMessTblColumnsTitles.orderNum && !slotProps.data.sendOriginal">
                 {{ slotProps.data[col.field] }}
@@ -415,6 +415,8 @@
     SET_DOCUMENT_INVALID_MARK,
   } from '@/store/action-types';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+  import workOrderNumberInWorkTableClassStyles from '@/additional/styleClasses/workOrderNumberInWorkTableClassStyles';
+  import isOrderDispatchedOnCurrentWorkPoligon from '@/additional/isOrderDispatchedOnCurrentWorkPoligon';
 
   export default {
     name: 'dy58-orders-in-work-data-table',
@@ -515,22 +517,6 @@
        */
       const getOrderOtherUnconfirmedWorkPoligons = (otherReceivers) => {
         return otherReceivers ? otherReceivers.filter((el) => !el.confirmDateTime) : [];
-      };
-
-      const currentUserWorkPoligon = computed(() => store.getters.getUserWorkPoligon);
-
-      /**
-       * Возвращает true, если распоряжение были издано на текущем рабочем полигоне, false - в противном случае.
-       */
-      const isOrderDispatchedOnCurrentWorkPoligon = (orderSenderWorkPoligon, considerWorkPlace = false) => {
-        return currentUserWorkPoligon.value && orderSenderWorkPoligon &&
-          currentUserWorkPoligon.value.type === orderSenderWorkPoligon.type &&
-          String(currentUserWorkPoligon.value.code) === String(orderSenderWorkPoligon.id) &&
-          (
-            !considerWorkPlace ||
-            (!currentUserWorkPoligon.value.subCode && !orderSenderWorkPoligon.workPlaceId) ||
-            (String(currentUserWorkPoligon.value.subCode) === String(orderSenderWorkPoligon.workPlaceId))
-          )
       };
 
       /**
@@ -636,16 +622,8 @@
         });
       };
 
-      /**
-       * Стили ячейки с номером документа в таблице "Документы в работе" в зависимости от состояния документа.
-       */
-      const getDisplayOrderNumberClassStyles = (order) => {
-        if (order.invalid) {
-          return 'dy58-order-invalid';
-        }
-        if (isOrderDispatchedOnCurrentWorkPoligon(order.senderWorkPoligon)) {
-          return 'dy58-order-dispatched-on-this-global-poligon';
-        }
+      const getWorkOrderNumberInWorkTableClassStyles = (order) => {
+        return workOrderNumberInWorkTableClassStyles(order, isOrderDispatchedOnCurrentWorkPoligon(order?.senderWorkPoligon));
       };
 
       return {
@@ -689,9 +667,8 @@
         deleteOrderStationWorkPoligon,
         isOrderDispatchedOnCurrentWorkPoligon,
         expandOrCollapseRow,
-        currentUserWorkPoligon,
         setDocumentInvalidMark,
-        getDisplayOrderNumberClassStyles,
+        getWorkOrderNumberInWorkTableClassStyles,
       };
     },
   }

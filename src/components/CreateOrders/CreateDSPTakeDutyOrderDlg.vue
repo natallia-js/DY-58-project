@@ -114,9 +114,9 @@
               class="p-datatable-gridlines p-datatable-sm"
               :rowHover="true"
               responsiveLayout="scroll"
+              selectionMode="single"
               v-model:selection="state.selectedPassDutyUsers[slotProps.data.groupCode]"
             >
-              <Column selectionMode="multiple" headerStyle="minWidth:3em" bodyStyle="minWidth:3em"></Column>
               <Column field="userPostFIO" header="Работник" headerStyle="width:50%" bodyStyle="width:50%"></Column>
               <Column field="takeOrPassDutyTime" header="Дата-время сдачи дежурства">
                 <template #body="slotProps">
@@ -129,6 +129,11 @@
                   />
                 </template>
               </Column>
+              <template #footer>
+                <small>
+                  Для снятия выделения со строки таблицы необходимо удерживать клавишу Ctrl
+                </small>
+              </template>
             </DataTable>
           </template>
         </DataTable>
@@ -201,9 +206,9 @@
               class="p-datatable-gridlines p-datatable-sm"
               :rowHover="true"
               responsiveLayout="scroll"
+              selectionMode="single"
               v-model:selection="state.selectedTakeDutyUsers[slotProps.data.groupCode]"
             >
-              <Column selectionMode="multiple" headerStyle="minWidth:3em" bodyStyle="minWidth:3em"></Column>
               <Column field="userPostFIO" header="Работник" headerStyle="width:50%" bodyStyle="width:50%"></Column>
               <Column field="takeOrPassDutyTime" header="Дата-время принятия дежурства">
                 <template #body="slotProps">
@@ -216,6 +221,11 @@
                   />
                 </template>
               </Column>
+              <template #footer>
+                <small>
+                  Для снятия выделения со строки таблицы необходимо удерживать клавишу Ctrl
+                </small>
+              </template>
             </DataTable>
           </template>
         </DataTable>
@@ -497,11 +507,14 @@
         };
 
         const addSelectedRecord = (selectedRecordsObject, groupCode, record) => {
-          if (selectedRecordsObject[groupCode]) {
+          // Случай, когда на одном рабочем месте можно выбирать несколько работников
+          /*if (selectedRecordsObject[groupCode]) {
             selectedRecordsObject[groupCode].push(record);
           } else {
             selectedRecordsObject[groupCode] = [record];
-          }
+          }*/
+          // 1 рабочее место = 1 работник
+          selectedRecordsObject[groupCode] = record;
         };
 
         const prevTakeDutyPersonal = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.TAKE_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
@@ -801,14 +814,20 @@
         usersThatTakeDutyStrings: computed(() => {
           const resObj = {};
           Object.entries(state.selectedTakeDutyUsers).forEach((item) => {
-            resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+            // Случай, когда на одном рабочем месте можно выбирать несколько работников
+            //resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+            // 1 рабочее место = 1 работник
+            resObj[item[0]] = displayTakeOrPassUserString(item[1]);
           });
           return resObj;
         }),
         usersThatPassDutyStrings: computed(() => {
           const resObj = {};
           Object.entries(state.selectedPassDutyUsers).forEach((item) => {
-            resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+            // Случай, когда на одном рабочем месте можно выбирать несколько работников
+            //resObj[item[0]] = item[1].map((el) => displayTakeOrPassUserString(el)).join(', ');
+            // 1 рабочее место = 1 работник
+            resObj[item[0]] = displayTakeOrPassUserString(item[1]);
           });
           return resObj;
         }),
@@ -818,6 +837,7 @@
     },
   };
 </script>
+
 
 <style lang="scss" scoped>
   :deep(.dy58-take-pass-duty-personal-table-header) {

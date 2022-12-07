@@ -46,17 +46,17 @@
               getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
-            :class="getJournalTableCellStyleClasses(slotProps.data)"
+            :class="journalTableCellStyleClasses(slotProps.data)"
           ></div>
           <div
             v-else-if="col.field === getECDJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
-            :class="getJournalTableCellStyleClasses(slotProps.data)"
+            :class="journalTableCellStyleClasses(slotProps.data)"
           >
             {{ slotProps.data[col.field] }}<br/>(копия)
           </div>
           <div
             v-else-if="col.field === getECDJournalTblColumnsTitles.notificationNumber"
-            :class="getJournalTableCellStyleClasses(slotProps.data)"
+            :class="journalTableCellStyleClasses(slotProps.data)"
           >
             {{ slotProps.data[col.field] }}
             <div v-if="slotProps.data.notificationText">
@@ -64,7 +64,7 @@
               <div v-html="slotProps.data.notificationText" />
             </div>
           </div>
-          <div v-else :class="getJournalTableCellStyleClasses(slotProps.data)">
+          <div v-else :class="journalTableCellStyleClasses(slotProps.data)">
             {{ slotProps.data[col.field] }}
           </div>
         </template>
@@ -82,7 +82,7 @@
   import { SET_PRINT_PREVIEW } from '@/store/mutation-types';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
   import isElectron from '@/additional/isElectron';
-  import getJournalTableCellStyleClasses from '@/additional/getJournalTableCellStyleClasses';
+  import journalTableCellStyleClasses from '@/additional/styleClasses/journalTableCellStyleClasses';
 
   export default {
     name: 'dy58-print-ecd-journal-preview-page',
@@ -178,7 +178,7 @@
         endDisplayDate,
         getUserWorkPoligonName: computed(() => store.getters.getUserWorkPoligonName),
         sendToPrinter,
-        getJournalTableCellStyleClasses,
+        journalTableCellStyleClasses,
       };
     },
   }
