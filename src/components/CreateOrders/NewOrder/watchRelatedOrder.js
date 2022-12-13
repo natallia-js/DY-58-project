@@ -30,9 +30,12 @@ export const useWatchRelatedOrder = (inputVals) => {
       }
     }
     emit('changeProps', {
-      orderType: props.orderType,
-      prevOrderId: newVal,
-      orderDraftId: props.orderDraftId,
+      newRouteParams: {
+        orderType: props.orderType,
+        prevOrderId: newVal,
+        orderDraftId: props.orderDraftId,
+      },
+      rerender: false,
     });
   });
 };

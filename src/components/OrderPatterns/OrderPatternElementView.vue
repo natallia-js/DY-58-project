@@ -524,7 +524,8 @@
       // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке
       // циркулярного распоряжения)
       const watchedRawWorkingOrders = ref(false);
-      const stopWatchingRawWorkingOrders = watch(() => store.getters.getRawWorkingOrders, () => {
+      const stopWatchingRawWorkingOrders = watch(() => store.getters.ifAllDataLoadedOnApplicationReload/*getRawWorkingOrders*/, (value) => {
+        console.log('loaded', value)
         if (watchedRawWorkingOrders.value === false && !state.elementModelValue) {
           watchedRawWorkingOrders.value = true;
           state.elementModelValue = getDefaultElementModelValue();

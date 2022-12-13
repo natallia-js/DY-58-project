@@ -26,7 +26,7 @@
 
     props: {
       dropdownValues: Array,
-      modelValue: String,
+      modelValue: [String, Number],
       width: [String, Number],
       tooltip: String,
       placeholder: String,
@@ -89,7 +89,7 @@
 
         const dropdownBlock = dropdown.value.querySelector('.p-dropdown');
         const dropdownHidden = dropdown.value.querySelector('.p-hidden-accessible');
-        const dropdownInput = dropdown.value.querySelector('input.p-dropdown-label');
+        const dropdownInput = dropdown.value.querySelector(props.isDropdownEditable ? 'input.p-dropdown-label' : 'span.p-dropdown-label');
         const dropdownTriggerBlock = dropdown.value.querySelector('.p-dropdown-trigger');
 
         // Узнаем paddings и borders по X для элемента dropdownBlock (в px)

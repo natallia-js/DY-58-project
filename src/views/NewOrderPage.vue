@@ -1,6 +1,6 @@
 <template>
   <!-- Параметр lazy должен быть обязательно, иначе придется переписывать код! -->
-  <TabView v-if="canUserDispatchOrders" :activeIndex="activeIndex" lazy @tabChange="handleTabChange">
+  <TabView v-if="canUserDispatchOrders" v-model:activeIndex="activeIndex" lazy @tabChange="handleTabChange" :key="tabViewKey">
     <TabPanel v-if="isDNC" :header="ORDER_PATTERN_TYPES.ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
@@ -105,6 +105,7 @@
       const isECD = computed(() => store.getters.isECD);
       const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
       const isStationWorksManager = computed(() => store.getters.isStationWorksManager);
+      let tabViewKey = ref(0);
 
       const getOrderTypeByTabIndex = (tabIndex) => {
         switch (tabIndex) {
@@ -132,6 +133,25 @@
                 : null;
         }
         return null;
+      };
+
+      const getTabIndexByOrderType = () => {
+        switch (route.params.orderType) {
+          case ORDER_PATTERN_TYPES.ORDER:
+            return TABS_INDEXES.FIRST_TAB;
+          case ORDER_PATTERN_TYPES.REQUEST:
+            return isDNC.value ? TABS_INDEXES.SECOND_TAB : TABS_INDEXES.FIRST_TAB;
+          case ORDER_PATTERN_TYPES.NOTIFICATION:
+            return isDNC.value ? TABS_INDEXES.THIRD_TAB : TABS_INDEXES.SECOND_TAB;
+          case ORDER_PATTERN_TYPES.ECD_ORDER:
+            return TABS_INDEXES.FIRST_TAB;
+          case ORDER_PATTERN_TYPES.ECD_PROHIBITION:
+            return TABS_INDEXES.SECOND_TAB;
+          case ORDER_PATTERN_TYPES.ECD_NOTIFICATION:
+            return TABS_INDEXES.THIRD_TAB;
+          default:
+            return TABS_INDEXES.FIRST_TAB;
+        }
       };
 
       onMounted(() => {
@@ -206,8 +226,14 @@
         });
       };
 
-      const handleChangeRouteParams = (newRouteParams) => {
-        router.replace({ name: 'NewOrderPage', params: { ...newRouteParams } });
+      const handleChangeRouteParams = ({ newRouteParams, rerender }) => {
+        router.replace({ name: 'NewOrderPage', params: { ...newRouteParams } })
+          .then(() => {
+            if (rerender) {
+              tabViewKey.value += 1;
+              activeIndex.value = getTabIndexByOrderType();
+            }
+          });
       };
 
       const getOrderPatternIdPropValue = (orderType) =>
@@ -229,6 +255,7 @@
 
       return {
         activeIndex,
+        tabViewKey,
         canUserDispatchOrders: computed(() => store.getters.canUserDispatchOrders),
         ifUserWorksOffline: computed(() => store.getters.ifUserWorksOffline),
         isDSP_or_DSPoperator,

@@ -474,7 +474,7 @@
       OrderNumber,
     },
 
-    setup(props, { emit }) {
+    setup(props, { emit }) { console.log('rendered')
       const store = useStore();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
@@ -709,7 +709,7 @@
       useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
         showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan, lastOtherToSendSource,
       });
-      useWatchOperationsResults({ state, store, props, showSuccessMessage, showErrMessage });
+      useWatchOperationsResults({ state, store, props, emit, isECD, showSuccessMessage, showErrMessage });
 
       useWatchOrderPatterns({
         state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,

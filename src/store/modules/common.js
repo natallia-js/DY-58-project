@@ -56,7 +56,7 @@ export const common = {
   },
 
   mutations: {
-    [SET_ALL_DATA_LOADED_ON_APP_RELOAD] (state) {
+    [SET_ALL_DATA_LOADED_ON_APP_RELOAD] (state) { console.log('loaded')
       state.allDataLoadedOnApplicationReload = true;
     },
 

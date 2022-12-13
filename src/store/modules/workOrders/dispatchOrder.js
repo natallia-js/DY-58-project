@@ -187,6 +187,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
             draftId,
           }
         );
+        context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_DISPATCH_ORDER_RESULT, {
           error: false,
           orderId: responseData.order._id,
@@ -194,7 +195,6 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
           message: responseData.message,
         });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
-        context.commit(ADD_ORDER, responseData.order);
         context.commit(SET_LAST_ORDERS_NUMBER, {
           ordersType: !context.getters.isECD ? responseData.order.type : ALL_ORDERS_TYPE_ECD,
           number: +responseData.order.number,

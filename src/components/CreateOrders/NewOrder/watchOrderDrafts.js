@@ -61,9 +61,12 @@ export const useWatchOrderDrafts = (inputVals) => {
   watch(currentOrderDraft, (newVal) => {
     applySelectedOrderDraft();
     emit('changeProps', {
-      orderType: props.orderType,
-      prevOrderId: props.prevOrderId,
-      orderDraftId: newVal ? newVal._id : null,
+      newRouteParams: {
+        orderType: props.orderType,
+        prevOrderId: props.prevOrderId,
+        orderDraftId: newVal ? newVal._id : null,
+      },
+      rerender: false,
     });
   });
 

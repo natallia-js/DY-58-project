@@ -296,6 +296,34 @@ export const orderPatterns = {
       };
     },
 
+    /**
+     * Позволяет найти id шаблона распоряжения указанного типа, который связан с шаблоном распоряжения с id = orderPatternId.
+     * Связь распоряжений ищется как в направлении: распоряжение с id = orderPatternId => дочернее распоряжение типа orderType,
+     * так и в направлении: распоряжение типа orderType => дочернее распоряжение с id = orderPatternId.
+     * Будет найден только первый шаблон, удовлетворяющий заданным значениям!
+     */
+    getConnectedOrderPatternId(state, getters) {
+      return (orderType, orderPatternId) => {
+        if (!orderType || !orderPatternId) {
+          return null;
+        }
+        // вначале пробуем найти дочернее распоряжение (для распоряжения с id = orderPatternId) типа orderType
+        const childPatterns = getters.getOrderPatternChildPatterns(orderPatternId);
+        let foundPatternId = null;
+        if (childPatterns?.length) {
+          foundPatternId = childPatterns.find((el) => el.type === orderType)?.id;
+        }
+        // если не вышло, то ищем распоряжение типа orderType, у которого есть дочернее распоряжение с id = orderPatternId
+        if (!foundPatternId) {
+          const orderPattern = state.patterns.find((pattern) => pattern.type === orderType);
+          if (orderPattern?.childPatterns?.length) {
+            foundPatternId = orderPattern.childPatterns.find((el) => el.childPatternId === orderPatternId) ? orderPattern._id : null;
+          }
+        }
+        return foundPatternId;
+      };
+    },
+
     getOrderCategoryModifyResult(state) {
       return state.modifyOrderCategoryTitleResult;
     },
