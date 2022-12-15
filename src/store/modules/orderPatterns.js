@@ -368,6 +368,24 @@ export const orderPatterns = {
         return pattern.specialTrainCategories;
       };
     },
+
+    getOrderPatternsReferringSpecialTrainCategories(state) {
+      return (specialTrainCategories) => {
+        if (!specialTrainCategories || !specialTrainCategories.length) {
+          return 0;
+        }
+        return state.patterns.filter((pattern) => {
+          if (!pattern.specialTrainCategories?.length) {
+            return false;
+          }
+          return specialTrainCategories.filter((el) => pattern.specialTrainCategories.includes(el)).length ? true : false;
+        });
+      };
+    },
+
+    getOrderPatternsNumberReferringSpecialTrainCategories(_state, getters) {
+      return (specialTrainCategories) => getters.getOrderPatternsReferringSpecialTrainCategories(specialTrainCategories).length;
+    },
   },
 
   mutations: {

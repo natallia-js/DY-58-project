@@ -108,6 +108,9 @@ export const SPECIAL_PD_ORDER_SIGN = 'ПД';
 export const SPECIAL_PVPD_ORDER_SIGN = 'ПВД';
 //
 export const SPECIAL_SP_ORDER_SIGN = 'СП';
+//
+export const SPECIAL_TY_ORDER_SIGN = 'ТУ';
+
 
 // Поначалу данное поле нужно было для обозначения особых категорий поездов, к которым
 // имеет отношение распоряжение. Но в дальнейшем значение данного поля стало шире, и

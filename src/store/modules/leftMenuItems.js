@@ -15,12 +15,32 @@ import {
   SPECIAL_PD_ORDER_SIGN,
   SPECIAL_PVPD_ORDER_SIGN,
   SPECIAL_SP_ORDER_SIGN,
+  SPECIAL_TY_ORDER_SIGN,
 } from '@/constants/orderPatterns';
 import { createOrderOfGivenType, createECDOrderOfGivenType } from '@/additional/createOrderOfGivenType';
 
 
+function createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign, itemsCommandCallback }) {
+  if (!specialOrderPatterns?.length) {
+    return () => {};
+  }
+  if (specialOrderPatterns.length == 1) {
+    return () => itemsCommandCallback({ orderPatternId: null, orderSign: specialOrdersSign });
+  }
+  return () => specialOrderPatterns.map((pattern) => {
+    return {
+      label: `${pattern.category}. ${pattern.title}`,
+      command: () => itemsCommandCallback({ orderPatternId: pattern._id, orderSign: specialOrdersSign}),
+    };
+  });
+}
+
+
 export const leftMenuItems = {
   getters: {
+    /**
+     *
+     */
     getCommonLeftMenuItemsAtTheBeginning(_state, getters) {
       return [
         {
@@ -44,6 +64,9 @@ export const leftMenuItems = {
       ];
     },
 
+    /**
+     *
+     */
     getCommonLeftMenuItemsAtTheEnd() {
       return [
         {
@@ -56,6 +79,9 @@ export const leftMenuItems = {
       ];
     },
 
+    /**
+     *
+     */
     getDSPLeftMenuItems(_state, getters) {
       const items = [];
       if (getters.canUserDispatchDSPTakeDutyOrder) {
@@ -88,62 +114,86 @@ export const leftMenuItems = {
       ];
     },
 
+    /**
+     *
+     */
     getDNCLeftMenuItems(_state, getters) {
       const items = [];
+      let specialOrderPatterns = [];
       if (getters.canUserDispatchDNCTakeDutyOrder) {
-        items.push({
-          label: 'Циркулярное распоряжение',
-          imgURL: require('@/assets/img/takePassDuty.png'),
-          command: () => createOrderOfGivenType(SPECIAL_CIRCULAR_ORDER_SIGN),
-        });
+        specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_CIRCULAR_ORDER_SIGN]);
+        if (specialOrderPatterns.length > 0) {
+          items.push({
+            label: 'Циркулярное распоряжение',
+            imgURL: require('@/assets/img/takePassDuty.png'),
+            command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_CIRCULAR_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
+          });
+        }
       }
-      return [
-        ...items,
-        ...getters.getCommonLeftMenuItemsAtTheBeginning,
-        {
-          label: 'Создать распоряжение о поезде ДР',
+      items.push(...getters.getCommonLeftMenuItemsAtTheBeginning);
+      specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_DR_ORDER_SIGN]);
+      if (specialOrderPatterns.length > 0) {
+        items.push({
+          label: `Создать распоряжение о поезде ${SPECIAL_DR_ORDER_SIGN}`,
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_DR_ORDER_SIGN]),
           imgURL: require('@/assets/img/DR.png'),
-          command: () => createOrderOfGivenType(SPECIAL_DR_ORDER_SIGN),
-        },
-        {
-          label: 'Создать распоряжение о поезде Н',
+          command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_DR_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
+        });
+      }
+      specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_N_ORDER_SIGN]);
+      if (specialOrderPatterns.length > 0) {
+        items.push({
+          label: `Создать распоряжение о поезде ${SPECIAL_N_ORDER_SIGN}`,
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_N_ORDER_SIGN]),
           imgURL: require('@/assets/img/N.png'),
-          command: () => createOrderOfGivenType(SPECIAL_N_ORDER_SIGN),
-        },
-        {
-          label: 'Создать распоряжение о поезде ПВ / ПД / ПВД / СП',
+          command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_N_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
+        });
+      }
+      specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_PV_ORDER_SIGN, SPECIAL_PD_ORDER_SIGN, SPECIAL_PVPD_ORDER_SIGN, SPECIAL_SP_ORDER_SIGN]);
+      if (specialOrderPatterns.length > 0) {
+        items.push({
+          label: `Создать распоряжение о поезде ${SPECIAL_PV_ORDER_SIGN} / ${SPECIAL_PD_ORDER_SIGN} / ${SPECIAL_PVPD_ORDER_SIGN} / ${SPECIAL_SP_ORDER_SIGN}`,
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([
             SPECIAL_PV_ORDER_SIGN, SPECIAL_PD_ORDER_SIGN, SPECIAL_PVPD_ORDER_SIGN]),
           imgURL: require('@/assets/img/P.png'),
           command: () => {
+            specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_PV_ORDER_SIGN]);
             return [
-              { label: SPECIAL_PV_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PV_ORDER_SIGN) },
-              { label: SPECIAL_PD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PD_ORDER_SIGN) },
-              { label: SPECIAL_PVPD_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_PVPD_ORDER_SIGN) },
-              { label: SPECIAL_SP_ORDER_SIGN, command: () => createOrderOfGivenType(SPECIAL_SP_ORDER_SIGN) },
+              { label: SPECIAL_PV_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_PV_ORDER_SIGN }) },
+              { label: SPECIAL_PD_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_PD_ORDER_SIGN }) },
+              { label: SPECIAL_PVPD_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_PVPD_ORDER_SIGN }) },
+              { label: SPECIAL_SP_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_SP_ORDER_SIGN }) },
             ];
           },
-        },
-        {
-          label: 'Создать распоряжение о поезде ВМ',
+        });
+      }
+      specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_VM_ORDER_SIGN]);
+      if (specialOrderPatterns.length > 0) {
+        items.push({
+          label: `Создать распоряжение о поезде ${SPECIAL_VM_ORDER_SIGN}`,
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_VM_ORDER_SIGN]),
           imgURL: require('@/assets/img/VM.png'),
-          command: () => createOrderOfGivenType(SPECIAL_VM_ORDER_SIGN),
-        },
-        ...getters.getCommonLeftMenuItemsAtTheEnd,
-      ];
+          command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_VM_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
+        });
+      }
+      items.push(...getters.getCommonLeftMenuItemsAtTheEnd);
+      return items;
     },
 
+    /**
+     *
+     */
     getECDLeftMenuItems(_state, getters) {
       const items = [];
       if (getters.canUserDispatchECDTakeDutyOrder) {
-        items.push({
-          label: 'Циркулярный приказ',
-          imgURL: require('@/assets/img/takePassDuty.png'),
-          command: () => createECDOrderOfGivenType(SPECIAL_CIRCULAR_ORDER_SIGN),
-        });
+        const specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_CIRCULAR_ORDER_SIGN]);
+        if (specialOrderPatterns.length > 0) {
+          items.push({
+            label: 'Циркулярный приказ',
+            imgURL: require('@/assets/img/takePassDuty.png'),
+            command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_CIRCULAR_ORDER_SIGN, itemsCommandCallback: createECDOrderOfGivenType }),
+          });
+        }
       }
       items.push(...getters.getCommonLeftMenuItemsAtTheBeginning);
       if (getters.canUserDispatchOrders) {
@@ -156,10 +206,22 @@ export const leftMenuItems = {
           },
         });
       }
+      const specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_TY_ORDER_SIGN]);
+      if (specialOrderPatterns.length > 0) {
+        items.push({
+          label: `Создать распоряжение о поезде ${SPECIAL_TY_ORDER_SIGN}`,
+          info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_TY_ORDER_SIGN]),
+          imgURL: require('@/assets/img/TY.png'),
+          command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_TY_ORDER_SIGN, itemsCommandCallback: createECDOrderOfGivenType }),
+        });
+      }
       items.push(...getters.getCommonLeftMenuItemsAtTheEnd);
       return items;
     },
 
+    /**
+     *
+     */
     getLeftMenuItems(_state, getters) {
       if (getters.isStationWorkPoligonSpecialist || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
         return getters.getDSPLeftMenuItems;

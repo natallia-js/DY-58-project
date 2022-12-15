@@ -1,12 +1,12 @@
 import router from '@/router';
 import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
 
-export function createOrderOfGivenType(orderSign) {
+export function createOrderOfGivenType({ orderPatternId, orderSign }) {
   router.push({
     name: 'NewOrderPage',
     params: {
       orderType: ORDER_PATTERN_TYPES.ORDER,
-      orderPatternId: null,
+      orderPatternId,
       orderPatternSpecialSign: orderSign,
       prevOrderId: null,
       orderDraftId: null,
@@ -14,12 +14,12 @@ export function createOrderOfGivenType(orderSign) {
   });
 }
 
-export function createECDOrderOfGivenType(orderSign) {
+export function createECDOrderOfGivenType({ orderPatternId, orderSign }) {
   router.push({
     name: 'NewOrderPage',
     params: {
       orderType: ORDER_PATTERN_TYPES.ECD_ORDER,
-      orderPatternId: null,
+      orderPatternId,
       orderPatternSpecialSign: orderSign,
       prevOrderId: null,
       orderDraftId: null,

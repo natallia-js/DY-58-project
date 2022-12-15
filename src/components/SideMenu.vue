@@ -17,7 +17,7 @@
     <AppSettings />
   </OverlayPanel>
 
-  <ContextMenu ref="submenu" :model="submenuItems" />
+  <ContextMenu ref="submenu" :model="submenuItems" style="minWidth:400px" />
 
   <OverlayPanel
     ref="orderDraftsOverlayPanel"

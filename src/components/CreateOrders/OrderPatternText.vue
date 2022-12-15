@@ -219,7 +219,6 @@
           }
           switch (elementRef) {
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION:
-              console.log('getting stations',this.getSectorStations)
               return this.getSectorStations.map((station) => ({
                 label: station.St_Title,
                 value: station.St_Title,

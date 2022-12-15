@@ -250,7 +250,7 @@
 
       watch(() => store.getters.getDataForDROrderFromClipboard, (newDRTrainData) => {
         if (newDRTrainData) {
-          createOrderOfGivenType(SPECIAL_DR_ORDER_SIGN);
+          createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_DR_ORDER_SIGN });
         }
       });
 
