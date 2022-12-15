@@ -474,7 +474,7 @@
       OrderNumber,
     },
 
-    setup(props, { emit }) { console.log('rendered')
+    setup(props, { emit }) {
       const store = useStore();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();

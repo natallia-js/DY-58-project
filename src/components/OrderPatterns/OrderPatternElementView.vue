@@ -498,6 +498,8 @@
         newMultipleValue: null,
       });
 
+      watch(() => props.selectMultipleValues, (value) => state.multipleValuesForSelection = value || []);
+
       const addNewMultipleValue = () => {
         if (state.newMultipleValue && !state.multipleValuesForSelection.find((el) => el.value === state.newMultipleValue)) {
           state.multipleValuesForSelection.push({
@@ -524,8 +526,7 @@
       // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке
       // циркулярного распоряжения)
       const watchedRawWorkingOrders = ref(false);
-      const stopWatchingRawWorkingOrders = watch(() => store.getters.ifAllDataLoadedOnApplicationReload/*getRawWorkingOrders*/, (value) => {
-        console.log('loaded', value)
+      const stopWatchingRawWorkingOrders = watch(() => store.getters.ifAllDataLoadedOnApplicationReload/*getRawWorkingOrders*/, () => {
         if (watchedRawWorkingOrders.value === false && !state.elementModelValue) {
           watchedRawWorkingOrders.value = true;
           state.elementModelValue = getDefaultElementModelValue();
