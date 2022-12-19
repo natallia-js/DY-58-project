@@ -41,10 +41,10 @@
           <span class="p-text-bold">Содержание записи</span>
         </label>
         <div>
-          <Button
+          <!--<Button
             label="Вставить перенос строки"
             @click="handleInsertRowbreak"
-          />
+          />-->
         </div>
         <textarea
           id="order-text"

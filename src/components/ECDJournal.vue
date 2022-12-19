@@ -73,8 +73,8 @@
         <template #body="slotProps">
           <div
             v-if="[
-              getECDJournalTblColumnsTitles.orderContent,
               getECDJournalTblColumnsTitles.toWhom,
+              getECDJournalTblColumnsTitles.orderContent,
               getECDJournalTblColumnsTitles.orderSender,
               getECDJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"

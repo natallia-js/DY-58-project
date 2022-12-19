@@ -36,10 +36,10 @@
       />
     </div>
     <div v-if="state.orderTextSource === ORDER_TEXT_SOURCE.nopattern" class="p-col-12">
-      <Button
+      <!--<Button
         label="Вставить перенос строки"
         @click="handleInsertRowbreak"
-      />
+      />-->
       <textarea
         v-model="state.orderText"
         rows="5"

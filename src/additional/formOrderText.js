@@ -20,7 +20,7 @@ import { upperCaseFirst } from '@/additional/stringFunctions';
  * (а оно именно в виде строки и хранится в БД)
  * преобразует в нужный тип данных (в зависимости от типа элемента шаблона) и возвращает его.
  */
-export function getOrderTextElementTypedValue(element/*, parseIfNecessary*/) {
+export function getOrderTextElementTypedValue(element) {
   if (!element) {
     return '';
   }
@@ -28,23 +28,42 @@ export function getOrderTextElementTypedValue(element/*, parseIfNecessary*/) {
     case OrderPatternElementType.DATE:
     case OrderPatternElementType.TIME:
     case OrderPatternElementType.DATETIME:
-      return element.value ? new Date(element.value) : '';
+      return {
+        edit: element.value ? new Date(element.value) : '',
+        view: element.value ? new Date(element.value) : '',
+      };
     case OrderPatternElementType.TIMETIME_OR_TILL_NOTICE:
       if (!element.value)
-        return '';
+        return { edit: '', view: '' };
       // строка element.value может быть как с булевым значением, так и со
       // значением даты-времени
       if (['true','false'].includes(element.value))
-        return element.value === 'true' ? true : false;
+        return {
+          edit: element.value === 'true' ? true : false,
+          view: element.value === 'true' ? true : false,
+        };
       return new Date(element.value);
     case OrderPatternElementType.MULTIPLE_SELECT:
-      return JSON.parse(element.value) || [];
+      return {
+        edit: JSON.parse(element.value) || [],
+        view: JSON.parse(element.value) || [],
+      };
     case OrderPatternElementType.DR_TRAIN_TABLE:
     case OrderPatternElementType_Future.OBJECT:
     case OrderPatternElementType_Future.OBJECTS_LIST:
-      return JSON.parse(element.value);
+      return {
+        edit: JSON.parse(element.value),
+        view: JSON.parse(element.value),
+      };
+    // Сохраняем форматирование текста
+    case OrderPatternElementType.TEXT:
+    case OrderPatternElementType.TEXT_AREA:
+      return {
+        edit: element.value || '',
+        view: `<span class="dy58-order-text-block">${element.value || ''}</span>`,
+      };
     default:
-      return element.value;
+      return { edit: element.value, view: element.value };
   }
 }
 
@@ -112,11 +131,14 @@ export function formOrderText(props) {
     switch (currVal.type) {
       case OrderPatternElementType.TEXT:
       case OrderPatternElementType.INPUT:
-      case OrderPatternElementType.TEXT_AREA:
       case OrderPatternElementType.SELECT:
       case OrderPatternElementType.MULTIPLE_SELECT:
       case OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING:
         substring = currVal.value || '';
+        break;
+      // Сохраняем форматирование и все переносы в рамках области с произвольным текстом
+      case OrderPatternElementType.TEXT_AREA:
+        substring = `<div class="dy58-order-text-block">${currVal.value || ''}</div>`;
         break;
       case OrderPatternElementType.DATE:
         substring = getLocaleDateString(currVal.value);

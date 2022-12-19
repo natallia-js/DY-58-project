@@ -398,7 +398,7 @@
   } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
-  import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
+  import { getOrderTextParamValue } from '@/additional/getOrderTextParamValue';
   import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
   import CheckboxAndInputOrNothingComponent from '@/components/OrderPatterns/CheckboxAndInputOrNothingComponent';
   import AutoWidthInputText from '@/components/OrderPatterns/AutoWidthInputText';

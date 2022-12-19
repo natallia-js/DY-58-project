@@ -41,7 +41,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
           order.orderText.orderText.map((el) => {
             return {
               ...el,
-              value: getOrderTextElementTypedValue(el),
+              value: getOrderTextElementTypedValue(el).view,
             };
           })
       },
@@ -51,7 +51,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
           order.connectedOrder.orderText.map((el) => {
             return {
               ...el,
-              value: getOrderTextElementTypedValue(el),
+              value: getOrderTextElementTypedValue(el).view,
             };
           })
       },

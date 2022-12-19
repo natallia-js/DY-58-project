@@ -100,9 +100,11 @@ export function getWorkOrderGeneralInfoObject(order) {
       ...order.orderText,
       orderText: !order.orderText.orderText ? null :
         order.orderText.orderText.map((el) => {
+          const val = getOrderTextElementTypedValue(el);
           return {
             ...el,
-            value: getOrderTextElementTypedValue(el),
+            value: val.view,
+            editValue: val.edit,
           };
         })
     },

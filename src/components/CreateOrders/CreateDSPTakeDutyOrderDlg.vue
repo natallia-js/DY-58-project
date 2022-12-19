@@ -238,10 +238,10 @@
           <span class="p-text-bold">Дополнительная информация</span>
         </label>
         <div>
-          <Button
+          <!--<Button
             label="Вставить перенос строки"
             @click="handleInsertRowbreak"
-          />
+          />-->
         </div>
         <textarea
           id="additional-order-text"
@@ -294,7 +294,7 @@
   import isValidDateTime from '@/additional/isValidDateTime';
   import isNumber from '@/additional/isNumber';
   import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
-  import getOrderTextParamValue from '@/additional/getOrderTextParamValue';
+  import { getOrderTextParamValue, getOrderTextParamValueToEdit } from '@/additional/getOrderTextParamValue';
   import { getUserPostFIOString } from '@/store/modules/personal/transformUserData';
   import OrderNumber from '@/components/CreateOrders/OrderNumber';
   import getStationWorkPlaceFullCode from '@/additional/getStationWorkPlaceFullCode';
@@ -568,7 +568,7 @@
 
       const initAdditionalOrderText = () => {
         if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {
-          state.additionalOrderText = getOrderTextParamValue(FILLED_ORDER_INPUT_ELEMENTS.NOTE, existingDSPTakeDutyOrder.value.orderText.orderText);
+          state.additionalOrderText = getOrderTextParamValueToEdit(FILLED_ORDER_INPUT_ELEMENTS.NOTE, existingDSPTakeDutyOrder.value.orderText.orderText);
         } else {
           state.additionalOrderText = null;
         }
@@ -653,8 +653,8 @@
 
       const getOrderTextObject = () => {
         // flattening arrays
-        const selectedTakeDutyUsersArray = [].concat.apply([], Object.values(state.selectedTakeDutyUsers));
-        const selectedPassDutyUsersArray = [].concat.apply([], Object.values(state.selectedPassDutyUsers));
+        const selectedTakeDutyUsersArray = [].concat.apply([], Object.values(state.selectedTakeDutyUsers).filter((el) => el));
+        const selectedPassDutyUsersArray = [].concat.apply([], Object.values(state.selectedPassDutyUsers).filter((el) => el));
 
         const orderText = [
           { type: OrderPatternElementType.TEXT, ref: null, value: `Дежурство принял${selectedTakeDutyUsersArray.length ? 'и:' : ''}` },

@@ -62,7 +62,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           order.orderText.orderText.map((el) => {
             return {
               ...el,
-              value: getOrderTextElementTypedValue(el),
+              value: getOrderTextElementTypedValue(el).view,
             };
           })
       },
