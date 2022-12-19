@@ -196,11 +196,28 @@
        * Обработка нажатия на кнопку бокового меню.
        */
       const handlePerformItemCommand = (event, item) => {
-        if (item && item.command) {
-          const result = item.command(event);
+        if (item?.command) {
+          let result = item.command(event);
           // Если массив, то необходимо отобразить подпункты меню
           if (result instanceof Array) {
+            /*result = result.map((resItem) => {
+              return {
+                ...resItem,
+                command: () => {
+
+                  handlePerformItemCommand(event, resItem)
+                  //if (resItem.command) {
+                  //  let result2 = resItem.command({ ...event, target: submenu.value });
+                  //  if (result2 instanceof Array) {
+                  //    submenuItems2.value = [...result2];
+                  //    submenu2.value.show(event);
+                  //  }
+                  }
+                },
+              };
+            });*/
             submenuItems.value = [...result];
+            //submenu.value.hide();
             submenu.value.show(event);
           }
         }
@@ -208,13 +225,13 @@
 
       return {
         state,
+        submenu,
         submenuItems,
         getLeftMenuItems: computed(() => store.getters.getLeftMenuItems),
         showCreateDSPTakeDutyOrderDlg: computed(() => store.getters.showCreateDSPTakeDutyOrderDlg),
         getIdsOfDraftsBeingDeleted: computed(() => store.getters.getIdsOfDraftsBeingDeleted),
         appSettingsOverlayPanel,
         orderDraftsOverlayPanel,
-        submenu,
         handleEditOrderDraft,
         handleDelOrderDraft,
         hidePreviewNewDSPCreateTakeDutyOrderDlg,

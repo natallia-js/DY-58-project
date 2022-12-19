@@ -180,7 +180,7 @@
             (!this.selectedPatternElement.value || this.selectedPatternElement.value.trim() === '')) {
           return;
         }
-        if (this.selectedPatternElement.type !== OrderPatternElementType.TEXT) {
+        if (![OrderPatternElementType.TEXT, OrderPatternElementType.TEXT_AREA].includes(this.selectedPatternElement.type)) {
           this.selectedPatternElement.value = null;
         }
         if ([OrderPatternElementType.DATE, OrderPatternElementType.TIME,
