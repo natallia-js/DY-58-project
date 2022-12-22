@@ -200,24 +200,7 @@
           let result = item.command(event);
           // Если массив, то необходимо отобразить подпункты меню
           if (result instanceof Array) {
-            /*result = result.map((resItem) => {
-              return {
-                ...resItem,
-                command: () => {
-
-                  handlePerformItemCommand(event, resItem)
-                  //if (resItem.command) {
-                  //  let result2 = resItem.command({ ...event, target: submenu.value });
-                  //  if (result2 instanceof Array) {
-                  //    submenuItems2.value = [...result2];
-                  //    submenu2.value.show(event);
-                  //  }
-                  }
-                },
-              };
-            });*/
             submenuItems.value = [...result];
-            //submenu.value.hide();
             submenu.value.show(event);
           }
         }

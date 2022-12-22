@@ -237,19 +237,12 @@
         <label for="additional-order-text" :class="{'p-error':v$.additionalOrderText.$invalid && submitted}">
           <span class="p-text-bold">Дополнительная информация</span>
         </label>
-        <div>
-          <!--<Button
-            label="Вставить перенос строки"
-            @click="handleInsertRowbreak"
-          />-->
-        </div>
         <textarea
           id="additional-order-text"
           v-model="state.additionalOrderText"
           rows="5"
           :style="{ width: '100%', minWidth: '100%', maxWidth: '100%' }"
           class="p-component p-p-2"
-          ref="textarea"
         />
         <small
           v-if="(v$.additionalOrderText.$invalid && submitted) || v$.additionalOrderText.$pending.$response"
@@ -372,8 +365,6 @@
         selectedPassDutyUsers: {},
         additionalOrderText: {},
       });
-
-      const textarea = ref(null);
 
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state, { $scope: false });
@@ -626,12 +617,6 @@
 
       const closeDialog = () => { emit('close') };
 
-      // Вставка html-символа переноса строки в поле Дополнительной информации
-      const handleInsertRowbreak = () => {
-        state.additionalOrderText += '<br />';
-        textarea.value.focus();
-      };
-
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
@@ -803,9 +788,7 @@
         expandedTakeDutyUsersRows,
         submitted,
         v$,
-        textarea,
         editExistingTakeDutyOrder,
-        handleInsertRowbreak,
         getCurrStationDSPUsers,
         newNumberOverlayPanel,
         changeOrderNumber,

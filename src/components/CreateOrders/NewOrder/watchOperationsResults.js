@@ -35,12 +35,15 @@ export const useWatchOperationsResults = (inputVals) => {
         setTimeout(() => {
           // id шаблона связанного документа (который нужно издать после успешного издания предыдущего документа)
           const patternId = store.getters.getConnectedOrderPatternId(ORDER_PATTERN_TYPES.ECD_NOTIFICATION, state.orderText?.patternId);
+
           // переходим на закладку создания нового документа
           emit('changeProps', {
             newRouteParams: {
               orderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION,
               prevOrderId: newVal.orderId,
               orderPatternId: patternId,
+              orderDraftId: null,
+              orderPatternSpecialSign: null,
             },
             rerender: true,
           });

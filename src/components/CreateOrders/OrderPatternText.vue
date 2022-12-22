@@ -110,6 +110,7 @@
           }
           switch (elementRef) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION:
               return this.getSectorStations.map((station) => ({
@@ -117,10 +118,11 @@
                 value: station.St_Title,
               })).sort();
             case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_TRACK:
-              return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.STATION).map((track) => ({
-                label: track.ST_Name,
-                value: track.ST_Name,
-              }));
+              return this.getStationTracks([FILLED_ORDER_DROPDOWN_ELEMENTS.STATION, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE])
+                .map((track) => ({
+                  label: track.ST_Name,
+                  value: track.ST_Name,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_TRACK:
               return this.getStationTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION).map((track) => ({
                 label: track.ST_Name,
@@ -132,6 +134,7 @@
                 value: track.ST_Name,
               }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE:
               return this.getSectorBlocks.map((block) => ({
                 label: block.Bl_Title,
                 value: block.Bl_Title,
@@ -142,10 +145,11 @@
                 value: block.Bl_Title,
               })).sort();
             case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_TRACK:
-              return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK).map((track) => ({
-                label: track.BT_Name,
-                value: track.BT_Name,
-              }));
+              return this.getBlockTracks([FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE])
+                .map((track) => ({
+                  label: track.BT_Name,
+                  value: track.BT_Name,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK_TRACK:
               return this.getBlockTracks(FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK).map((track) => ({
                 label: track.BT_Name,
@@ -280,8 +284,8 @@
         this.orderPatternArrays = orderPatternToDraw;
       },
 
-      getStationTracks(stationElementRef) {
-        const patternStationElement = this.value.find((el) => el.ref === stationElementRef);
+      getStationTracks(stationElementRefs) {
+        const patternStationElement = this.value.find((el) => stationElementRefs.includes(el.ref));
         if (patternStationElement) {
           const stationObject = this.getSectorStationByTitle(patternStationElement.value);
           if (stationObject) {
@@ -300,8 +304,8 @@
         return [];
       },
 
-      getBlockTracks(blockElementRef) {
-        const patternBlockElement = this.value.find((el) => el.ref === blockElementRef);
+      getBlockTracks(blockElementRefs) {
+        const patternBlockElement = this.value.find((el) => blockElementRefs.includes(el.ref));
         if (patternBlockElement) {
           const blockObject = this.getSectorBlockByTitle(patternBlockElement.value);
           if (blockObject) {

@@ -29,13 +29,15 @@ export const useWatchRelatedOrder = (inputVals) => {
         }
       }
     }
-    emit('changeProps', {
-      newRouteParams: {
-        orderType: props.orderType,
-        prevOrderId: newVal,
-        orderDraftId: props.orderDraftId,
-      },
-      rerender: false,
-    });
+    if (props.prevOrderId !== newVal) {
+      emit('changeProps', {
+        newRouteParams: {
+          orderType: props.orderType,
+          prevOrderId: newVal,
+          orderDraftId: props.orderDraftId,
+        },
+        rerender: false,
+      });
+    }
   });
 };

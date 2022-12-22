@@ -40,19 +40,12 @@
         <label for="order-text" :class="{'p-error':v$.orderText.$invalid && submitted}">
           <span class="p-text-bold">Содержание записи</span>
         </label>
-        <div>
-          <!--<Button
-            label="Вставить перенос строки"
-            @click="handleInsertRowbreak"
-          />-->
-        </div>
         <textarea
           id="order-text"
           v-model="state.orderText"
           rows="5"
           :style="{ width: '100%', minWidth: '100%', maxWidth: '100%' }"
           class="p-component p-p-2"
-          ref="textarea"
         />
         <small
           v-if="(v$.orderText.$invalid && submitted) || v$.orderText.$pending.$response"
@@ -124,8 +117,6 @@
         orderText: {},
       });
 
-      const textarea = ref(null);
-
       const submitted = ref(false);
       const v$ = useVuelidate(rules, state, { $scope: false });
 
@@ -135,12 +126,6 @@
       watch(() => props.showDlg, (newVal) => state.dlgVisible = newVal);
 
       const closeDialog = () => { emit('close') };
-
-      //
-      const handleInsertRowbreak = () => {
-        state.orderText += '<br />';
-        textarea.value.focus();
-      };
 
       const handleSubmit = (isFormValid) => {
         confirm.require({
@@ -212,8 +197,6 @@
         state,
         submitted,
         v$,
-        textarea,
-        handleInsertRowbreak,
         closeDialog,
         handleSubmit,
         // Количество распоряжений текущего типа, для которых в настоящее время запущен процесс издания (сохранения на сервере)

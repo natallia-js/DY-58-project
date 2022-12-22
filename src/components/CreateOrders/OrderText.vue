@@ -36,16 +36,11 @@
       />
     </div>
     <div v-if="state.orderTextSource === ORDER_TEXT_SOURCE.nopattern" class="p-col-12">
-      <!--<Button
-        label="Вставить перенос строки"
-        @click="handleInsertRowbreak"
-      />-->
       <textarea
         v-model="state.orderText"
         rows="5"
         :style="{ width: '100%', minWidth: '100%', maxWidth: '100%' }"
         class="p-component p-p-2"
-        ref="textarea"
       />
     </div>
     <div v-else-if="state.orderPattern" class="dy58-order-pattern-border p-col-12" style="overflow-x:scroll;">
@@ -59,7 +54,7 @@
 
 
 <script>
-  import { computed, reactive, ref, watch } from 'vue';
+  import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import OrderPatternText from '@/components/CreateOrders/OrderPatternText';
   import { OrderPatternElementType } from '@/constants/orderPatterns';
@@ -91,8 +86,6 @@
 
     setup(props, { emit }) {
       const store = useStore();
-
-      const textarea = ref(null);
 
       const state = reactive({
         // источник текста распоряжения (шаблон либо не шаблон)
@@ -182,7 +175,10 @@
           const parentMatch = parentChildRelations.patternsParamsMatchingTable.find((match) => match.childParamId === element._id);
           if (parentMatch) {
             const parentParam = parentOrderText.value.orderText.find((el) => el._id === parentMatch.baseParamId);
-            const parentParamValue = parentParam ? parentParam.value : null;
+            // Здесь берем именно editValue, а не value, т.к. значение может быть изменено пользователем;
+            // к тому же, value презназначено для просмотра, а editValue - для редактирования и не содержит "лишних" символов,
+            // которые используются в value для более удобного просмотра
+            const parentParamValue = parentParam ? parentParam.editValue : null;
             if (parentParamValue !== state.orderPatternText[index].value) {
               state.orderPatternText[index].value = parentParamValue;
             }
@@ -294,10 +290,12 @@
           }
           switch (event.elementRef) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION:
               break;
             case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK:
+            case FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK:
               break;
           }
@@ -310,15 +308,8 @@
         });
       };
 
-      // Вставка переноса строки в текст распоряжения
-      const handleInsertRowbreak = () => {
-        state.orderText += '<br />';
-        textarea.value.focus();
-      };
-
       return {
         state,
-        textarea,
         ORDER_TEXT_SOURCE,
         getOrderPatterns,
         getSelectedOrderPattern,
@@ -327,7 +318,6 @@
         handleFocusInput,
         handleChangeOrderTitle,
         handleChangeOrderPatternElementValue,
-        handleInsertRowbreak,
       };
     },
   };

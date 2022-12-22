@@ -157,7 +157,6 @@ export const leftMenuItems = {
             SPECIAL_PV_ORDER_SIGN, SPECIAL_PD_ORDER_SIGN, SPECIAL_PVPD_ORDER_SIGN]),
           imgURL: require('@/assets/img/P.png'),
           command: () => {
-            specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_PV_ORDER_SIGN]);
             return [
               { label: SPECIAL_PV_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_PV_ORDER_SIGN }) },
               { label: SPECIAL_PD_ORDER_SIGN, command: () => createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_PD_ORDER_SIGN }) },

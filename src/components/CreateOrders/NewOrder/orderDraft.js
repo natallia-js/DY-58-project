@@ -32,7 +32,9 @@ import {
   const handleSaveOrderDraft = (event) => {
     const orderPlaceFromText = getOrderPatternElementValue({ elTypesRefs: [
       [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK],
+      [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE],
       [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION],
+      [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
     ] }) || '?';
