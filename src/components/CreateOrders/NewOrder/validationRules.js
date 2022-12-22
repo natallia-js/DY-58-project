@@ -112,7 +112,6 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
       //rules.cancelOrderDateTime = { required, isValidDateTime, cancelOrderDateTimeNoLessOrderStartDate };
       break;
     case ORDER_PATTERN_TYPES.REQUEST:
-    case ORDER_PATTERN_TYPES.NOTIFICATION:
       rules.allAddressees = { atLeastOneAddresseeIsRequired };
       break;
     default:

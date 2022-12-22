@@ -144,8 +144,6 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
     }
 
     // перегон
-    changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
-      store.getters.getBlockTitleByStationsUNMCs(selectedOkno.value.sta1, selectedOkno.value.sta2));
     changeOrderPatternElementValue(OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE,
         store.getters.getBlockTitleByStationsUNMCs(selectedOkno.value.sta1, selectedOkno.value.sta2));
 
@@ -188,7 +186,6 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
     let placeSet = false;
 
     const stationActionPlaceElements = event.orderText.filter((el) => el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE);
-    console.log('stationActionPlaceElements',stationActionPlaceElements);
     const otherStationElements = event.orderText.filter((el) =>
       [FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
@@ -239,7 +236,6 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
     // 'Перегон', 'Перегон(место действия)', 'Перегон станции отправления'.
 
     const blockActionPlaceElements = event.orderText.filter((el) => el.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE);
-    console.log('blockActionPlaceElements',blockActionPlaceElements)
     const otherBlockElements = event.orderText.filter((el) =>
       [FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
        FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK].includes(el.ref));
@@ -254,7 +250,6 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
       };
       if (blockElement.value) {
         const blockId = store.getters.getSectorBlockIdByTitle(blockElement.value);
-        console.log('blockId',blockId)
         if (blockId) {
           // Если установлен флаг необходимости определения места действия распоряжения (отображения на ГИД),
           // при этом место действия распоряжения ранее не было определено, то определяется место действия распоряжения

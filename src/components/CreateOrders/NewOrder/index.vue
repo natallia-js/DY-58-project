@@ -330,7 +330,8 @@
       <p class="p-mb-2">
         <label for="addressees" :class="{'p-error': submitted && v$.allAddressees.$invalid}">
           <span class="p-text-bold p-mr-2">
-            <span v-if="!isECD" class="dy58-required-field">*</span> Кому адресовать
+            <span v-if="!isECD && !(isDNC && orderType === ORDER_PATTERN_TYPES.NOTIFICATION)" class="dy58-required-field">*</span>
+            Кому адресовать
           </span>
           <Button
             icon="pi pi-times"
