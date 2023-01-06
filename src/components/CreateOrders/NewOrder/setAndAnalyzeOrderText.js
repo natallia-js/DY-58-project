@@ -9,6 +9,7 @@ import {
 import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  SPECIAL_DR_ORDER_SIGN,
   OrderPatternElementType,
 } from '@/constants/orderPatterns';
 import {
@@ -177,6 +178,25 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
 
     // id станций, которым необходимо отправить оригинал документа
     const stationsToSendOrder = [];
+
+    // Для документа с особой отметкой "ДР":
+    // Если в тексте документа содержится поле ввода со смысловым значением "Номер" и в этом поле есть значение, то
+    // это значение полагается номером поезда и добавляется в конец строки с названием распоряжения.
+    // Если в тексте распоряжения несколько полей "Номер", то берется первое из них.
+    if (state.specialTrainCategories?.includes(SPECIAL_DR_ORDER_SIGN)) {
+      const firstTrainNumberElement = event.orderText.find((el) => el.ref === FILLED_ORDER_INPUT_ELEMENTS.NUMBER);
+      if (firstTrainNumberElement && firstTrainNumberElement.value) {
+        const trainNumSubstring = ', поезд №';
+        if (state.orderText.orderTitle) {
+          const trainNumSubstringIndex = state.orderText.orderTitle.indexOf(trainNumSubstring);
+          if (trainNumSubstringIndex === -1) {
+            state.orderText.orderTitle += trainNumSubstring + firstTrainNumberElement.value;
+          } else {
+            state.orderText.orderTitle = state.orderText.orderTitle.slice(0, trainNumSubstringIndex) + trainNumSubstring + firstTrainNumberElement.value;
+          }
+        }
+      }
+    }
 
     // Если в тексте распоряжения встречается поле 'Станция(место действия)',
     // то значение этого поля (первого встречающегося) устанавливается в качестве места действия

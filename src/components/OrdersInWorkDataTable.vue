@@ -62,16 +62,16 @@
             </div>
             <!-- столбец наименования документа -->
             <div v-else-if="col.field == getWorkMessTblColumnsTitles.extendedOrderTitle">
-              <div>
+              <div style="overflow-wrap:break-word">
                 {{ slotProps.data[col.field] }}
               </div>
               <div v-if="slotProps.data.shortOrderInfo" class="p-mt-2">
-                {{slotProps.data.shortOrderInfo}}
+                {{ slotProps.data.shortOrderInfo }}
               </div>
             </div>
             <!-- столбец статуса -->
             <div v-else-if="col.field === getWorkMessTblColumnsTitles.orderReceiveStatus">
-              <div v-if="isStationWorkPoligonSpecialist || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
+              <div v-if="isStationWorkPoligonSpecialist || ((isRevisor || isViewer) && getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0 || slotProps.data[col.field].notDeliveredNotConfirmedOnStation > 0">
                   <span class="p-mr-2">Не доставлено:</span>
                   <Badge class="dy58-not-delivered-order" :value="`${slotProps.data[col.field].notDeliveredNotConfirmed}/${slotProps.data[col.field].notDeliveredNotConfirmedOnStation}`"></Badge>
@@ -81,7 +81,7 @@
                   <Badge class="dy58-not-confirmed-order" :value="`${slotProps.data[col.field].deliveredButNotConfirmed}/${slotProps.data[col.field].deliveredButNotConfirmedOnStation}`"></Badge>
                 </p>
               </div>
-              <div v-else-if="isDNC || isECD || (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.ECD_SECTOR].includes(getUserWorkPoligon.type))">
+              <div v-else-if="isDNC || isECD || ((isRevisor || isViewer) && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.ECD_SECTOR].includes(getUserWorkPoligon.type))">
                 <p v-if="slotProps.data[col.field].notDeliveredNotConfirmed > 0">
                   <span class="p-mr-2">Не доставлено:</span>
                   <Badge class="dy58-not-delivered-order" :value="slotProps.data[col.field].notDeliveredNotConfirmed"></Badge>
@@ -109,7 +109,11 @@
                     @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
-                <div v-if="canOrdersChainBeDeleted(slotProps.data.id)" class="p-mb-1">
+                <div v-if="canOrdersChainBeDeleted({
+                  orderId: slotProps.data.id,
+                  orderChainId: slotProps.data.orderChainId,
+                  orderChainEndDateTime: slotProps.data.orderChainEndDateTime,
+                })" class="p-mb-1">
                   <Button
                     icon="pi pi-times"
                     class="p-button-secondary p-button dy58-order-action-button"
@@ -158,7 +162,7 @@
             <!-- Текст распоряжения -->
 
             <div class="dy58-additional-order-info-subblock">
-              <div v-html="slotProps.data.orderText"></div>
+              <p style="overflow-wrap:break-word;" v-html="slotProps.data.orderText"></p>
               <div>Передал: {{ `${slotProps.data.post} ${slotProps.data.fio} ${slotProps.data.place}` }}</div>
               <div v-if="slotProps.data.assertDateTime">
                 <b>Утверждение:</b> {{ slotProps.data.assertDateTime }}
@@ -178,7 +182,7 @@
                     :field="col2.field"
                     :header="col2.title"
                     :key="col2.field"
-                    :style="{ width: col2.width, }"
+                    :style="{ minWidth: col2.width, maxWidth: col2.width, }"
                     headerClass="dy58-table-header-cell-class"
                     bodyClass="dy58-table-middle-content-cell-class dy58-send-table-data-cell"
                   >
@@ -632,6 +636,7 @@
         isECD: computed(() => store.getters.isECD),
         isStationWorkPoligonSpecialist: computed(() => store.getters.isStationWorkPoligonSpecialist),
         isRevisor: computed(() => store.getters.isRevisor),
+        isViewer: computed(() => store.getters.isViewer),
         isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         WORK_POLIGON_TYPES,
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),

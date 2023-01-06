@@ -3,7 +3,7 @@
   <Menubar :model="getMainMenuItems">
     <template #end>
       <Button
-        :label="`${getUserPost} ${getUserFIO} ${getUserWorkPoligonName(false)}`"
+        :label="`${getUserPost} ${getUserFIO({})} ${getUserWorkPoligonName(false)}`"
         icon="pi pi-user"
         @click="showUserInfo"
         v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"

@@ -446,7 +446,7 @@
         if (props.element.type === OrderPatternElementType.SELECT) {
           switch (props.element.ref) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
-              return store.getters.getUserPostFIO;
+              return store.getters.getUserPostFIO({});
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
               // Если существует (ранее изданное) распоряжение ДНЦ/ЭЦД о принятии дежурства НА ДАННОМ РАБОЧЕМ МЕСТЕ,
               // то извлекаем из него должность и ФИО лица для заполнения поля о лице, сдавшем дежурство
@@ -682,8 +682,9 @@
         const trainTimeTable = [];
         let nonExistingStationItemId = -1;
         for (let el of obj) {
-          // Определяем объект станции по коду станции, считанному из буфера обмена
-          const stationObject = store.getters.getSectorStationByESRCode(el.Station);
+          // Определяем объект станции по коду станции ГИД, считанному из буфера обмена
+          const stationObject = store.getters.getSectorStationByGID_ESRCode(el.Station);
+
           // Если объект станции известен, то отображаем наименование станции, в противном случае
           // отобразим считанный из буфера обмена код станции
           const dispStationNameCode = (stationObject && stationObject.St_Title)

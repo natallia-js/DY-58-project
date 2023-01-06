@@ -22,7 +22,7 @@
         <div class="dy58-shadowed-block" style="max-width:400px;">
           <Toast />
           <div v-if="canUserWorkWithSystem || isUserAuthenticated" class="p-mb-3">
-            <Button :label="`Продолжить как ${getUserFIO}`" @click="handleContinueLogin" />
+            <Button :label="`Продолжить как ${getUserFIO({})}`" @click="handleContinueLogin" />
           </div>
           <form @submit.prevent="handleSubmit(!v$.$invalid)" class="p-grid">
             <div class="p-field p-col-12 p-d-flex p-flex-column">

@@ -124,7 +124,6 @@
     ADD_OTHER_GET_ORDER_RECORD,
     EDIT_OTHER_GET_ORDER_RECORD,
     DEL_OTHER_GET_ORDER_RECORD,
-    CLEAR_OTHER_SHIFT,
   } from '@/store/mutation-types';
   import ShowOtherReceiverDlg from '@/components/CreateOrders/ShowOtherReceiverDlg';
   import ShowChooseOtherPersonalDlg from '@/components/CreateOrders/ShowChooseOtherPersonalDlg';
@@ -139,9 +138,6 @@
       value: {
         type: Object,
       },
-      lastOtherToSendSource: {
-        type: Array,
-      },
     },
 
     data() {
@@ -153,7 +149,6 @@
         addNewRec: true, // true = add, false = edit
         showChooseOtherReceiversDlg: false,
         sectorPersonal: [],
-        //selectedSectorPeople: [],
         selectedSectorsPeople: [],
         sectorId: -1,
         sectorName: null,
@@ -195,40 +190,7 @@
       },
     },
 
-    mounted() {
-      this.$store.commit(CLEAR_OTHER_SHIFT);
-      this.$emit('input', this.getOtherShiftForSendingData
-        ? this.getOtherShiftForSendingData
-          .filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)
-          : []);
-    },
-
     watch: {
-      // Реакция на изменение источника "иных" адресатов (связанный документ, черновик документа).
-      //
-      // Теоретически сюда же можно добавить обработку изменения списка "иных" адресатов в случае
-      // реакции на последнее циркулярное распоряжение, изданное ЭЦД, но пока этого нет.
-      lastOtherToSendSource(newValue) {
-        if (!newValue) {
-          return;
-        }
-        this.selectedSectorsPeople = [];
-        newValue.forEach((el) => {
-          this.$store.commit(ADD_OTHER_GET_ORDER_RECORD, el);
-          if (el.additionalId) {
-            const sector = this.selectedSectorsPeople.find((item) => item.placeTitle === el.placeTitle);
-            if (sector) {
-              sector.selectedPeople.push(el.additionalId);
-            } else {
-              this.selectedSectorsPeople.push({
-                placeTitle: el.placeTitle,
-                selectedPeople: [el.additionalId],
-              });
-            }
-          }
-        });
-      },
-
       getOtherShiftForSendingData(newVal) {
         this.$emit('input', newVal
           ? newVal.filter((item) => item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend)

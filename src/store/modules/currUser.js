@@ -150,8 +150,8 @@ function checkUserAuthData(payload) {
       // filter, а не find, несмотря на то что все равно будет найден максимум 1 элемент (нужен пустой
       // массив, если ничего не будет найдено)
       obj.poligons = workPoligons.filter((poligon) => poligon.type === WORK_POLIGON_TYPES.ECD_SECTOR);
-    // ---> Ревизор
-    } else if (cred === APP_CREDENTIALS.REVISOR) {
+    // ---> Ревизор, пользователь с правом чтения информации
+    } else if ([APP_CREDENTIALS.REVISOR, APP_CREDENTIALS.VIEWER].includes(cred)) {
       obj.poligons = [...workPoligons];
     }
     if (obj.poligons && obj.poligons.length) {
@@ -218,11 +218,34 @@ export const currUser = {
     getUserService(state) {
       return state.service;
     },
+    /**
+     * Возвращает строку с ФИО текущего пользователя
+     */
     getUserFIO(state) {
-      return getUserFIOString({ name: state.name, fatherName: state.fatherName, surname: state.surname });
+      // additionalInfo - строка с дополнительной информацией, которая добавляется в конец строки с ФИО пользователя
+      return ({ additionalInfo = null }) => {
+        return getUserFIOString({
+          name: state.name,
+          fatherName: state.fatherName,
+          surname: state.surname,
+          additionalInfo,
+        });
+      };
     },
+    /**
+     * Возвращает строку с должностью и ФИО текущего пользователя
+     */
     getUserPostFIO(state) {
-      return getUserPostFIOString({ post: state.post, name: state.name, fatherName: state.fatherName, surname: state.surname });
+      // additionalInfo - строка с дополнительной информацией, которая добавляется в конец строки с должностью и ФИО пользователя
+      return ({ additionalInfo = null }) => {
+        return getUserPostFIOString({
+          post: state.post,
+          name: state.name,
+          fatherName: state.fatherName,
+          surname: state.surname,
+          additionalInfo,
+        });
+      };
     },
     getUserToken(state) {
       return state.token;
@@ -282,6 +305,9 @@ export const currUser = {
     },
     isRevisor(state) {
       return state.credential === APP_CREDENTIALS.REVISOR;
+    },
+    isViewer(state) {
+      return state.credential === APP_CREDENTIALS.VIEWER;
     },
     getStartLogout(state) {
       return state.startLogout;

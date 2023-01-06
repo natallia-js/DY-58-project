@@ -68,6 +68,15 @@ export function getOrderTextElementTypedValue(element) {
 }
 
 
+// Анализируя данное значение sendOriginal, определяет соответствующее ему значение из перечисления
+// CurrShiftGetOrderStatus. Значение sendOriginal может быть булевым (именно так оно и хранится в БД)
+// либо числовым - одним из CurrShiftGetOrderStatus. Числовыми значениями оперирует текущее прилоэение.
+export const getDY58OriginalFlag = (sendOriginal) => {
+  if (typeof sendOriginal === 'boolean')
+    return sendOriginal ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
+  return sendOriginal;
+};
+
 
 // Данная функция позволяет проверить, что отправлять: оригинал или копию.
 // Причем в зависимости от того, какой тип входного параметра.
@@ -85,10 +94,9 @@ export const sendOriginal = (dataToCheck) => {
  * Позволяет сформировать подстроки, которые войдут в строку "Кому".
  */
 const toSubstring = (array, substringFunction, separateRows = false) => {
-  if (array.length) {
+  if (array?.length && substringFunction) {
     const divider = separateRows ? ',<br/>' : ', ';
-    return array.reduce((accumulator, currentValue, index) =>
-      accumulator + substringFunction(currentValue) + `${index === array.length - 1 ? '' : divider}`, '');
+    return array.map((el) => substringFunction(el)).join(divider);
   }
   return '';
 };
@@ -110,6 +118,8 @@ const toSubstring = (array, substringFunction, separateRows = false) => {
  *                             3) toWhomCopy: строка "Копия" (подстроки с местом, должностью, ФИО через запятую)
  * @param {Boolean} includeFIO - если true, то в строки "Кому" и "Копия" включается информация о ФИО адресатов,
  *                               в противном случае не включается
+ * @param {Boolean} includePost - если true, то в строки "Кому" и "Копия" включается информация о должности адресатов,
+ *                               в противном случае не включается
  * @param {Boolean} insertEmptyLineBeforeText - если true, то текст документа предваряется пробельной строкой
  * @returns - строку с полным текстом распоряжения либо массив отдельных строк, каждая из которых
  *            включает определенную информацию из полного текста распоряжения
@@ -123,6 +133,7 @@ export function formOrderText(props) {
     otherToSend,
     asString = true,
     includeFIO = true,
+    includePost = true,
     insertEmptyLineBeforeText = false,
   } = props;
 
@@ -214,7 +225,7 @@ export function formOrderText(props) {
   const formSubstring = (defPost) => {
     return (obj) => {
       const post = obj.post ? obj.post : (!obj.fio && defPost) ? defPost : '';
-      return `${obj.placeTitle} ${post}${includeFIO && obj.fio ? ' ' + obj.fio : ''}`;
+      return `${obj.placeTitle}${includePost ? ' ' + post : ''}${includeFIO && obj.fio ? ' ' + obj.fio : ''}`;
     };
   };
 
@@ -235,7 +246,7 @@ export function formOrderText(props) {
   }
 
   const emptyLineBeforeText = insertEmptyLineBeforeText ? '<p style="line-height:50%"><br/></p>' : '';
-  const finalOrderTextString = `${emptyLineBeforeText}<div style="text-align:justify;font-weight:bold">${orderText}</div>`;
+  const finalOrderTextString = `${emptyLineBeforeText}<div style="text-align:justify;font-weight:bold;">${orderText}</div>`;
 
   if (asString) {
     let addresses = originalToString ? `Кому: ${originalToString}<br/>` : '';
@@ -343,6 +354,6 @@ export function getExtendedOrderTitle(order) {
     return '';
   }
   return order.specialTrainCategories?.includes(SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN) ?
-  `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${order.orderText.orderTitle}` :
-  `${upperCaseFirst(order.type)}. ${order.orderText.orderTitle}`;
+    `${upperCaseFirst(SPECIAL_ORDER_SUBPATTERN_TYPES.RECORD)}. ${order.orderText.orderTitle}` :
+    `${upperCaseFirst(order.type)}. ${order.orderText.orderTitle}`;
 }

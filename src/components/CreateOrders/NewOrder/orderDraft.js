@@ -4,6 +4,7 @@ import {
   EDIT_ORDER_DRAFT_ACTION,
 } from '@/store/action-types';
 import {
+  FILLED_ORDER_INPUT_ELEMENTS,
   FILLED_ORDER_DROPDOWN_ELEMENTS,
   FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
 } from '@/constants/orders';
@@ -38,9 +39,12 @@ import {
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
     ] }) || '?';
+    const orderTrackFromText = getOrderPatternElementValue({ elTypesRefs: [
+      [OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.TRACK],
+    ] }) || '?';
     const fullOrderTitle =
       `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') : '?'}. ` +
-      `${orderPlaceFromText}. ${state.orderText.orderTitle}`;
+      `${orderPlaceFromText}. Путь ${orderTrackFromText}. ${state.orderText.orderTitle}`;
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',

@@ -1,4 +1,9 @@
 import { OrderPatternElementType } from '@/constants/orderPatterns';
+import {
+  FILLED_ORDER_INPUT_ELEMENTS,
+  FILLED_ORDER_DROPDOWN_ELEMENTS,
+  FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
+} from '@/constants/orders';
 
 /**
  * Позволяет сформировать краткую информацию о распоряжении (информация извлекается из текста
@@ -9,47 +14,45 @@ import { OrderPatternElementType } from '@/constants/orderPatterns';
  *   Для ЭЦД краткая информация предсталяется в виде строк, разделенных пробелами, где
  * каждая отдельная строка - значение одного из параметров, соответствующих элементу "выпадающий список"
  * со смысловым значением «Станция» / «Перегон» / «Наряд-допуск/заявка», либо элементу "поле ввода" со
- * смысловым значением «Номер*».
+ * смысловым значением «Номер*» / "Путь".
  * В строке с краткой информацией о распоряжении должны присутствовать все установленные (не пустые)
  * значения указанных выше параметров.
  * Дополнительно к указанной выше информации для ЭЦД указывается информация об "иных" адресатах. А именно:
  * место, куда отправлено распоряжение (документ).
  */
-
-const STATION_ELEMENT_REF = 'Станция';
-const SPAN_ELEMENT_REF = 'Перегон';
-const NARYAD_DOPUSK_REQUEST_REF = 'Наряд-допуск/заявка';
-const SPECIAL_NUMBER_REF = 'Номер*';
-
 export function formShortOrderInfo(orderTextArray, isDNC, isECD, otherToSend) {
   if (!orderTextArray?.length || (!isDNC && !isECD))
     return '';
 
-  let resultString = orderTextArray.reduce((prevVal, currVal) => {
-    let substring = '';
-    switch (currVal.type) {
+  const additionalInfoArray = [];
+  orderTextArray.forEach((el) => {
+    switch (el.type) {
       case OrderPatternElementType.INPUT:
-        if (currVal.ref === SPECIAL_NUMBER_REF && currVal.value) {
-          substring = currVal.value;
+        if (el.ref === FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF && el.value) {
+          additionalInfoArray.push(el.value);
+        }
+        if (el.ref === FILLED_ORDER_INPUT_ELEMENTS.TRACK && el.value) {
+          additionalInfoArray.push('Путь ' + el.value);
         }
         break;
       case OrderPatternElementType.SELECT:
-        if ([STATION_ELEMENT_REF, SPAN_ELEMENT_REF, NARYAD_DOPUSK_REQUEST_REF].includes(currVal.ref) && currVal.value) {
-          substring = currVal.value;
+        if ([FILLED_ORDER_DROPDOWN_ELEMENTS.STATION, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.NARYAD_DOPUSK_REQUEST_REF].includes(el.ref) && el.value) {
+          additionalInfoArray.push(el.value);
         }
         break;
       case OrderPatternElementType.MULTIPLE_SELECT:
-        if ([STATION_ELEMENT_REF, SPAN_ELEMENT_REF].includes(currVal.ref) && currVal.value) {
-          substring = currVal.value;
+        if ([FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK].includes(el.ref)
+             && el.value) {
+          additionalInfoArray.push(el.value);
         }
         break;
     }
-    return prevVal + ' ' + substring;
-  }, '');
+  });
 
   if (otherToSend?.length) {
-    resultString += otherToSend.map(val => val.placeTitle).join(', ');
+    additionalInfoArray.push(otherToSend.map(val => val.placeTitle).join(', '));
   }
 
-  return resultString;
+  return additionalInfoArray.join(' / ');
 }

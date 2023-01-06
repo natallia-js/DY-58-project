@@ -3,14 +3,19 @@ import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import { getUserFIOString } from './transformUserData';
 import {
   SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS,
-  SET_OTHER_SHIFT_FOR_SENDING_DATA,
   CLEAR_SHIFT_FOR_SENDING_DATA,
   SET_USER_CHOSEN_STATUS,
   DEL_CURR_SECTORS_SHIFT,
   CLEAR_OTHER_SHIFT,
+  ADD_OTHER_GET_ORDER_RECORD,
+  SET_LAST_CIRCULAR_ORDER_OTHER_PERSONAL,
+  SET_LAST_CIRCULAR_ORDER_DSP,
+  SET_LAST_DNC_CIRCULAR_ORDER_DSP_FOR_ECD,
+  SET_DEFAULT_DSP_ADDRESSES,
 } from '@/store/mutation-types';
 import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
 import { store } from '@/store';
+import { getDY58OriginalFlag } from '@/additional/formOrderText';
 
 
 /**
@@ -44,9 +49,7 @@ export const common = {
       if (state.sectorPersonal.sectorStationsShift) {
         state.sectorPersonal.sectorStationsShift.forEach((el) => clearSendItem(el));
       }
-      if (state.sectorPersonal.otherShift) {
-        store.commit(CLEAR_OTHER_SHIFT);
-      }
+      store.commit(CLEAR_OTHER_SHIFT);
     },
 
     /**
@@ -171,6 +174,45 @@ export const common = {
     [DEL_CURR_SECTORS_SHIFT] (state) {
       state.sectorPersonal = {};
     },
+
+    /**
+     * Для отображения "иных" адресатов из последнего циркуляра ДНЦ/ЭЦД (когда ДНЦ/ЭЦД издает новое распоряжение).
+     */
+    [SET_LAST_CIRCULAR_ORDER_OTHER_PERSONAL] (_state, { existingDNC_ECDTakeDutyOrder }) {
+      if (existingDNC_ECDTakeDutyOrder?.otherToSend) {
+        existingDNC_ECDTakeDutyOrder.otherToSend.forEach((el) =>
+          store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...el, sendOriginal: CurrShiftGetOrderStatus.doNotSend }));
+      }
+    },
+
+    /**
+     * Для отображения ДСП из последнего циркуляра ДНЦ (когда ДНЦ издает новое распоряжение).
+     */
+    [SET_LAST_CIRCULAR_ORDER_DSP] (_state, { existingDNC_ECDTakeDutyOrder }) {
+      if (existingDNC_ECDTakeDutyOrder?.dspToSend) {
+        store.commit(SET_DEFAULT_DSP_ADDRESSES, existingDNC_ECDTakeDutyOrder.dspToSend.map((el) => ({
+          stationId: el.id,
+          post: el.post,
+          fio: el.fio,
+        })));
+      }
+    },
+
+    /**
+     * Для отображения ДСП из последнего циркуляра ДНЦ у ЭЦД (когда ЭЦД издает новое распоряжение).
+     */
+    [SET_LAST_DNC_CIRCULAR_ORDER_DSP_FOR_ECD] (_state, { existingDNCTakeDutyOrders_ForECD }) {
+      if (existingDNCTakeDutyOrders_ForECD?.length) {
+        existingDNCTakeDutyOrders_ForECD.forEach((order) => {
+          if (order.dspToSend)
+            store.commit(SET_DEFAULT_DSP_ADDRESSES, order.dspToSend.map((el) => ({
+              stationId: el.id,
+              post: el.post,
+              fio: el.fio,
+            })));
+        });
+      }
+    },
   },
 
   actions: {
@@ -178,13 +220,8 @@ export const common = {
      * Устанавливает списки персонала, которому необходимо адресовать распоряжение.
      * Причем установка персонала производится с установкой статуса отправки оригинала / копии документа.
      */
-    [APPLY_PERSONAL_FOR_SENDING_DATA_ACTION] (context, { dspToSend, dncToSend, ecdToSend, otherToSend }) {
-      // Позволяет определить, отослать оригинал либо копию документа
-      const getAppSendOriginalStatusFrom = (status) => {
-        if (typeof status === 'boolean')
-          return status ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;
-        return status;
-      };
+    [APPLY_PERSONAL_FOR_SENDING_DATA_ACTION] (context, props) {
+      const { dspToSend, dncToSend, ecdToSend, otherToSend, rewriteOtherToSend } = props;
 
       if (dspToSend)
         context.commit(SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS, {
@@ -192,7 +229,7 @@ export const common = {
           sectorsGetOrderStatuses: dspToSend.map((el) =>
             ({
               ...el,
-              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              sendOriginal: getDY58OriginalFlag(el.sendOriginal),
               confirmDateTime: null,
             })
           ),
@@ -203,7 +240,7 @@ export const common = {
           sectorsGetOrderStatuses: dncToSend.map((el) =>
             ({
               ...el,
-              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              sendOriginal: getDY58OriginalFlag(el.sendOriginal),
               confirmDateTime: null,
             })
           ),
@@ -214,19 +251,25 @@ export const common = {
           sectorsGetOrderStatuses: ecdToSend.map((el) =>
             ({
               ...el,
-              sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
+              sendOriginal: getDY58OriginalFlag(el.sendOriginal),
               confirmDateTime: null,
             })
           ),
         });
-      if (otherToSend)
-        context.commit(SET_OTHER_SHIFT_FOR_SENDING_DATA, otherToSend.map((el) =>
-          ({
-            ...el,
-            sendOriginal: getAppSendOriginalStatusFrom(el.sendOriginal),
-            confirmDateTime: null,
-          })
-        ));
+      if (otherToSend) {
+        if (rewriteOtherToSend) {
+          // Чистим список "иных" адресатов
+          store.commit(CLEAR_OTHER_SHIFT);
+          // Заполняем список "иных" адресатов соответствующими данными из последнего циркуляра
+          const existingDNC_ECDTakeDutyOrder = context.getters.getExistingDNC_ECDTakeDutyOrder;
+          if (existingDNC_ECDTakeDutyOrder) {
+            context.commit(SET_LAST_CIRCULAR_ORDER_OTHER_PERSONAL, { existingDNC_ECDTakeDutyOrder });
+          }
+        }
+        // Применяем список "иных" адресатов, переданный в параметрах
+        otherToSend.forEach((el) =>
+          context.commit(ADD_OTHER_GET_ORDER_RECORD, { ...el, sendOriginal: getDY58OriginalFlag(el.sendOriginal) }));
+      }
     },
   },
 }

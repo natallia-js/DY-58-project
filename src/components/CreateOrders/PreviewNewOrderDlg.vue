@@ -6,7 +6,7 @@
     :modal="true"
     @hide="closeDialog"
   >
-    <p class="p-text-center p-text-bold p-text-capitalize p-mb-2">
+    <p class="p-text-center p-text-bold p-text-capitalize p-mb-2 dy58-title-medium">
       {{ getCurrDateTimeString }} &#160; {{ type }} &#160; {{ number ? '№ ' + number : '№ ?' }}
     </p>
     <p v-if="prevRelatedOrder"><span class="p-text-bold">На документ:</span> &#160;
@@ -20,13 +20,15 @@
     <p v-if="specialTrainCategories && specialTrainCategories.length">
       <span class="p-text-bold">Особые отметки:</span> &#160; {{ specialTrainCategories.join(', ') }}
     </p>
-    <p>
+    <p style="overflow-wrap:break-word">
       <span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
-    <p><span v-html="getOrderText"></span></p>
+    <p style="overflow-wrap:break-word">
+      <span v-html="getOrderText"></span>
+    </p>
     <p>Передал: &#160;
-      {{ getUserPost }} &#160; {{ getUserFIO }} &#160;
+      {{ getUserPost }} &#160; {{ getUserFIO({ additionalInfo: getLastDNC_ECDTakeDutyOrderAdditionalWorkers }) }} &#160;
       <span v-if="createdOnBehalfOf">(от имени {{ createdOnBehalfOf }}) &#160; </span>
       {{ getUserWorkPoligonName(false) }}
     </p>
@@ -124,6 +126,7 @@
         'getUserFIO',
         'getUserWorkPoligonName',
         'isECD',
+        'getLastDNC_ECDTakeDutyOrderAdditionalWorkers',
       ]),
 
       getOrderText() {

@@ -434,7 +434,10 @@
       const initOrderTakeData = () => {
         if (!editExistingTakeDutyOrder.value) {
           state.takeDutyUserPostFIO = !store.getters.getUserId ? null :
-            { userId: store.getters.getUserId, userPostFIO: store.getters.getUserPostFIO };
+            {
+              userId: store.getters.getUserId,
+              userPostFIO: store.getters.getUserPostFIO({}),
+            };
           state.takeDutyDateTime = store.getters.getLastTakeDutyTime;
 
         } else if (existingDSPTakeDutyOrder.value && existingDSPTakeDutyOrder.value.orderText) {

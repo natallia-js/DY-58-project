@@ -120,6 +120,7 @@ export const useDispatchOrder = (inputVals) => {
           const existingDNCTakeDutyOrder = store.getters.getExistingDNC_ECDTakeDutyOrder;
           return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
         })() : null,
+      additionalWorkers: store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers,
     });
     // Отменяем проверку правильности введенных данных для всех полей (до следующего издания распоряжения)
     submitted.value = false;

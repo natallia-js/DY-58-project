@@ -73,6 +73,7 @@
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
             :class="journalTableCellStyleClasses(slotProps.data)"
+            style="overflow-wrap:break-word"
           ></div>
           <div
             v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
@@ -391,6 +392,10 @@
 
 
 <style lang="scss" scoped>
+  :deep(.p-datatable-responsive-scroll > .p-datatable-wrapper > table) {
+    table-layout: fixed;
+  }
+
   :deep(.p-column-header-content) {
     width: 100%;
     height: 100%;

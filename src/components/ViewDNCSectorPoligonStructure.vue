@@ -15,7 +15,7 @@
                 <Fieldset
                   v-for="station of trainSector.TStations"
                   :key="station.St_ID"
-                  :legend="`${station.St_Title} (${station.St_UNMC})`"
+                  :legend="`${station.St_Title} (${station.St_UNMC}/ГИД:${station.St_GID_UNMC})`"
                   :toggleable="true"
                 >
                   <p class="p-mb-2">

@@ -66,6 +66,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         insertEmptyLineBeforeText: true,
         asString: false,
         includeFIO: false,
+        includePost: false,
       });
 
       let toWhomString = orderTextData.toWhom;

@@ -166,11 +166,13 @@ export const checkUserAuthority = {
     },
 
     /**
-     * Просматривать Журнал распоряжений может ДНЦ, ЭЦД, ДСП, Оператор при ДСП, Ревизор и Руководитель работ на станции.
+     * Просматривать Журнал распоряжений может ДНЦ, ЭЦД, ДСП, Оператор при ДСП, Ревизор, Руководитель работ на станции
+     * и пользователь, имеющий право лишь на чтение информации.
      */
     canUserReadOrderJournal(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD || getters.isRevisor) ? true : false;
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD ||
+         getters.isRevisor || getters.isViewer) ? true : false;
     },
 
     /**

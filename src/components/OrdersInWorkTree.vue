@@ -45,7 +45,12 @@
           />
           <Button
             v-if="chosenOrder && (chosenOrder.key === slotProps.node.key) &&
-              slotProps.node.topLevelNode && canOrdersChainBeDeleted(slotProps.node.key)"
+              slotProps.node.topLevelNode &&
+              canOrdersChainBeDeleted({
+                orderId: slotProps.node.key,
+                orderChainId: slotProps.node.orderChainId,
+                orderChainEndDateTime: slotProps.node.orderChainEndDateTime,
+              })"
             icon="pi pi-times"
             class="p-button-secondary p-button p-mr-1 dy58-order-action-button"
             v-tooltip.bottom="slotProps.node.children && slotProps.node.children.length ? 'Не показывать цепочку' : 'Не показывать'"

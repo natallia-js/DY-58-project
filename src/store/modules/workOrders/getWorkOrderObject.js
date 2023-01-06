@@ -117,6 +117,7 @@ export function getWorkOrderGeneralInfoObject(order) {
       type: order.workPoligon.type,
     } : null,
     orderChainId: order.orderChain.chainId,
+    orderChainEndDateTime: order.orderChain.chainEndDateTime ? new Date(order.orderChain.chainEndDateTime) : null,
     specialTrainCategories: order.specialTrainCategories,
     assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
     dispatchedOnOrder: order.dispatchedOnOrder,

@@ -185,9 +185,9 @@ export const tablesColumns = {
     getWorkMessReceiversTblColumns(_state, _getters, _rootState, rootGetters) {
       let tblCols = [
         { field: WorkMessReceiversTblColumnsTitles.place, title: 'Станция/Участок', width: '25%', },
-        { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '25%', },
+        { field: WorkMessReceiversTblColumnsTitles.post, title: 'Должность', altTitle: 'Принадлежность', width: '18%', },
         { field: WorkMessReceiversTblColumnsTitles.fio, title: 'ФИО', width: '20%', },
-        { field: WorkMessReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '30%', },
+        { field: WorkMessReceiversTblColumnsTitles.confirmDateTime, title: 'Подтверждение', width: '37%', },
       ];
       if (!rootGetters.isECD) {
         return tblCols;
@@ -234,9 +234,9 @@ export const tablesColumns = {
     getDNC_DSPJournalTblColumns() {
       return [
         { field: DNC_DSPJournalTblColumnsTitles.assertDateTime, title: 'Время создания/утверждения распоряжения', width: '10%', align: 'left', },
-        { field: DNC_DSPJournalTblColumnsTitles.number, title: '№ распоряжения', width: '8%', align: 'left', },
-        { field: DNC_DSPJournalTblColumnsTitles.orderContent, title: 'Содержание распоряжения', width: '57%', align: 'left', },
-        { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '25%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.number, title: '№ распоряжения', width: '5%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.orderContent, title: 'Содержание распоряжения', width: '55%', align: 'left', },
+        { field: DNC_DSPJournalTblColumnsTitles.orderAcceptor, title: 'Кто принял Фамилия И.О., время подтверждения', width: '30%', align: 'left', },
       ];
     },
 

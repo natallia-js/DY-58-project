@@ -24,7 +24,7 @@ export const ORDER_PLACE_VALUES = Object.freeze({
 
 // Смысловые значения элементов шаблонов распоряжений, которые разрешается не заполнять при издании распоряжения
 export const ORDER_ELEMENTS_CAN_BE_EMPTY = [
-  'Примечание', 'Место работ',
+  'Примечание', 'Место работ', 'Дополнительные работники',
 ];
 
 export const FILLED_ORDER_TIME_ELEMENTS = Object.freeze({
@@ -60,6 +60,10 @@ export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
   BLOCK_TRACKS: 'Пути перегона',
   WORKS_HEADS: 'Руководители',
   OKNO_DURATION: 'Продолжительность "окна"',
+  NUMBER: 'Номер',
+  SPECIAL_NUMBER_REF: 'Номер*',
+  ADDITIONAL_WORKERS: 'Дополнительные работники',
+  TRACK: 'Путь',
 });
 
 export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
@@ -104,6 +108,7 @@ export const FILLED_ORDER_DROPDOWN_ELEMENTS = Object.freeze({
   NARYAD_DOPUSK: 'Наряд допуск',
   TRACK_SECTION_BEFORE: 'Участок пути до',
   SPEED: 'Скорость',
+  NARYAD_DOPUSK_REQUEST_REF: 'Наряд-допуск/заявка',
 });
 
 export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({

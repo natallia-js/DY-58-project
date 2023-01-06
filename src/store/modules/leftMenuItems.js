@@ -222,11 +222,11 @@ export const leftMenuItems = {
      *
      */
     getLeftMenuItems(_state, getters) {
-      if (getters.isStationWorkPoligonSpecialist || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
+      if (getters.isStationWorkPoligonSpecialist || ((getters.isRevisor || getters.isViewer) && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.STATION)) {
         return getters.getDSPLeftMenuItems;
-      } else if (getters.isDNC || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR)) {
+      } else if (getters.isDNC || ((getters.isRevisor || getters.isViewer) && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.DNC_SECTOR)) {
         return getters.getDNCLeftMenuItems;
-      } else if (getters.isECD || (getters.isRevisor && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)) {
+      } else if (getters.isECD || ((getters.isRevisor || getters.isViewer) && getters.getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)) {
         return getters.getECDLeftMenuItems;
       }
       return [];

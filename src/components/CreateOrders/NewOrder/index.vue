@@ -299,7 +299,7 @@
         <div class="p-col-12 p-d-flex p-mt-2 p-flex-wrap">
           <div class="p-text-bold p-grid" style="width:70%">
             <div class="p-col-12">
-              {{ getUserPostFIO }}
+              {{ getUserPostFIO({ additionalInfo: getLastDNC_ECDTakeDutyOrderAdditionalWorkers }) }}
             </div>
             <div
               v-if="[ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION].includes(orderType)"
@@ -387,7 +387,6 @@
           <OtherToSendOrderDataTable
             :value="v$.otherSectorsToSendOrder.$model"
             @input="v$.otherSectorsToSendOrder.$model = $event"
-            :lastOtherToSendSource="lastOtherToSendSource"
           />
         </AccordionTab>
       </Accordion>
@@ -585,11 +584,13 @@
         }*/],
         getOknaDataError: null,
         selectedOknoInDataTable: null,
+        // true - обновить данные в окне создания нового распоряжения из разных источников (выбранный черновик
+        // документа, выбранный связанный документ, текущее циркулярное распоряжение) при монтировании компонента
+        // (хук mounted), false - не обновлять
+        updateFormDataOnMounted: true,
       });
 
       const selectedOkno = computed(() => store.getters.getSelectedOkno);
-
-      const lastOtherToSendSource = ref(null);
 
       const {
         showOrderDrafts,
@@ -609,20 +610,7 @@
         defineOrderTimeSpanOptions,
       });
 
-      onMounted(() => {
-        state.currentOrderDraftId = props.orderDraftId;
-        state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
-        state.orderText = initialOrderText();
-        // флаг необходимости указывать место действия документа
-        state.showOnGID = getUserDutyToDefineOrderPlace.value;
-        // флаг необходимости явно определить время действия документа
-        state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
-        // Удаляем (если есть) выбранное "окно"
-        store.commit(SET_SELECTED_OKNO, { okno: null });
-      });
-
-      //const { /*existingDNC_ECDTakeDutyOrder, displayLastCircularOrderOtherPersonal*/ } =
-        useWatchExistingDNC_ECDTakeDutyOrder({ store, isDNC, isECD /*, lastOtherToSendSource */ });
+      const { existingDNC_ECDTakeDutyOrder } = useWatchExistingDNC_ECDTakeDutyOrder({ state, store, isDNC, isECD });
 
       useWatchCurrentDateTime({ state, props, store });
 
@@ -705,11 +693,13 @@
         handleSaveOrderDraft,
       } = useOrderDraft({ state, props, store, confirm, getOrderPatternElementValue });
 
-      useWatchAllAppDataLoad({ store, relatedOrderObject, currentOrderDraft, /*existingDNC_ECDTakeDutyOrder,*/
-        lastOtherToSendSource/*, displayLastCircularOrderOtherPersonal*/ });
-      useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
-        showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan, lastOtherToSendSource,
+      const { applySelectedOrderDraft } =
+        useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,
+        showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan,
       });
+      const { updateFormData } =
+        useWatchAllAppDataLoad({ state, store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
+        handleClearOrderAddressesLists, applySelectedOrderDraft });
       useWatchOperationsResults({ state, store, props, emit, isECD, showSuccessMessage, showErrMessage });
 
       useWatchOrderPatterns({
@@ -718,11 +708,33 @@
       });
 
       useWatchRelatedOrder({
-        props, emit, store, relatedOrderId, relatedOrderObject,
-        setRelatedOrderNumberInOrderText, lastOtherToSendSource,
+        props, emit, store, relatedOrderId, relatedOrderObject, setRelatedOrderNumberInOrderText,
       });
 
       const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields, selectedOkno });
+
+      /**
+       * Монтирование компонента.
+       */
+      onMounted(() => {
+        state.currentOrderDraftId = props.orderDraftId;
+        state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
+        state.orderText = initialOrderText();
+        // флаг необходимости указывать место действия документа
+        state.showOnGID = getUserDutyToDefineOrderPlace.value;
+        // флаг необходимости явно определить время действия документа
+        state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
+        // Удаляем (если есть) выбранное "окно"
+        store.commit(SET_SELECTED_OKNO, { okno: null });
+
+        // данный код выполняем только в том случае, если он не был выполнен, когда поступила информация
+        // об окончании загрузки всех данных приложения (соответствующий watch); т.е. данный код выполняется
+        // при нормальной работе приложения, когда пользователь осуществляет переход от страницы к странице,
+        // а не в случае перезагрузки приложения
+        if (store.getters.ifAllDataLoadedOnApplicationReload && state.updateFormDataOnMounted) {
+          updateFormData();
+        }
+      });
 
       /**
        * Скрытие диалогового окна просмотра информации об издаваемом распоряжении.
@@ -751,7 +763,6 @@
 
       return {
         state,
-        lastOtherToSendSource,
         showOnGIDOptions,
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,
@@ -761,6 +772,7 @@
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         isDNC,
         isECD,
+        getLastDNC_ECDTakeDutyOrderAdditionalWorkers: computed(() => store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers),
         isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         getOknaTblColumns: computed(() => store.getters.getOknaTblColumns),
         v$,

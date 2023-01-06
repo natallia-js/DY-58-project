@@ -1,7 +1,7 @@
 <template>
   <div v-if="canUserReadOrderJournal">
     <div
-      v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
+      v-if="isECD || ((isRevisor || isViewer) && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
       class="p-mt-3 p-mb-3"
     >
       <h2 class="p-text-center p-mb-2">
@@ -16,7 +16,7 @@
     </div>
     <div
       v-else-if="isDSP_or_DSPoperator || isDNC || isStationWorksManager ||
-        (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
+        ((isRevisor || isViewer) && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
       class="p-mt-3 p-mb-3"
     >
       <h2 class="p-text-center p-m-2">
@@ -30,7 +30,7 @@
       </h3>
     </div>
     <search-orders-params
-      :displayVerifyFunctions="isRevisor"
+      :displayVerifyFunctions="isRevisor || isViewer"
       @input="searchParams = $event"
       @print="printParams = $event"
       @createCheckRecord="checkDocs = true"
@@ -38,7 +38,7 @@
     />
     <div class="dy58-journal-container">
       <ECDJournal
-        v-if="isECD || (isRevisor && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
+        v-if="isECD || ((isRevisor || isViewer) && getUserWorkPoligon.type === WORK_POLIGON_TYPES.ECD_SECTOR)"
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"
@@ -47,7 +47,7 @@
       />
       <DNCandDSPJournal
         v-else-if="isDSP_or_DSPoperator || isDNC || isStationWorksManager ||
-          (isRevisor && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
+          ((isRevisor || isViewer) && [WORK_POLIGON_TYPES.DNC_SECTOR, WORK_POLIGON_TYPES.STATION].includes(getUserWorkPoligon.type))"
         :searchParams="searchParams"
         :printParams="printParams"
         :checkDocs="checkDocs"
@@ -107,6 +107,7 @@
         isDNC: computed(() => store.getters.isDNC),
         isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
         isRevisor: computed(() => store.getters.isRevisor),
+        isViewer: computed(() => store.getters.isViewer),
         isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         canUserReadOrderJournal: computed(() => store.getters.canUserReadOrderJournal),
         getUserWorkPoligon: computed(() => store.getters.getUserWorkPoligon),

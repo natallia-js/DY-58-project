@@ -6,7 +6,7 @@ import {
   SPECIAL_CIRCULAR_ORDER_SIGN,
 } from '@/constants/orderPatterns';
 import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
-import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS } from '@/constants/orders';
+import { DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS, FILLED_ORDER_INPUT_ELEMENTS } from '@/constants/orders';
 import { getUserFIOString } from '@/store/modules/personal/transformUserData';
 
 
@@ -525,6 +525,22 @@ export const activeOrders = {
           }),
         };
       };
+    },
+
+    /**
+     * Из последнего циркулярного распоряжения ДНЦ / ЭЦД извлекает значение поля "Дополнительные работники".
+     * Полагается, что эти дополнительные работники - стажеры, которые вместе с ДНЦ / ЭЦД заступили на дежурство.
+     * Их ФИО необходимо указывать при издании новых распоряжений наряду с ФИО ДНЦ / ЭЦД.
+     */
+    getLastDNC_ECDTakeDutyOrderAdditionalWorkers(_state, getters) {
+      const lastTakeDutyOrder = getters.getExistingDNC_ECDTakeDutyOrder;
+      if (!lastTakeDutyOrder) {
+        return null;
+      }
+      const neededTextElement = lastTakeDutyOrder.orderText.orderText.find((el) =>
+        el.ref === FILLED_ORDER_INPUT_ELEMENTS.ADDITIONAL_WORKERS
+      );
+      return neededTextElement?.value || null;
     },
   },
 };

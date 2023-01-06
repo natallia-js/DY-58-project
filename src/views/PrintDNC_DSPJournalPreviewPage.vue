@@ -46,6 +46,7 @@
               getDNC_DSPJournalTblColumnsTitles.orderAcceptor].includes(col.field)"
             v-html="slotProps.data[col.field]"
             :class="journalTableCellStyleClasses(slotProps.data)"
+            style="overflow-wrap:break-word"
           ></div>
           <div
             v-else-if="col.field === getDNC_DSPJournalTblColumnsTitles.number && !slotProps.data.sendOriginal"
@@ -232,5 +233,9 @@
 
   :deep(td) {
     border-width: 2px !important;
+  }
+
+  :deep(.p-datatable table) {
+    width: fit-content;
   }
 </style>

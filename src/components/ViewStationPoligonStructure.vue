@@ -1,7 +1,10 @@
 <template>
   <div v-if="!stationObj">Структура участка не определена</div>
   <div v-else>
-    <Fieldset :legend="`${stationObj.type} ${stationObj.St_Title} (${stationObj.St_UNMC})`" :toggleable="true">
+    <Fieldset
+      :legend="`${stationObj.type} ${stationObj.St_Title} (${stationObj.St_UNMC}/ГИД:${stationObj.St_GID_UNMC})`"
+      :toggleable="true"
+    >
       <p class="p-mb-2">
         <span class="p-text-bold">Пути:</span>
       </p>

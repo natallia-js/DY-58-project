@@ -327,6 +327,7 @@
             dncToSend: tmp.dncToSend,
             ecdToSend: tmp.ecdToSend,
             otherToSend: tmp.otherToSend,
+            rewriteOtherToSend: false,
           });
         };
 

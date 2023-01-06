@@ -89,6 +89,51 @@ export const getWorkOrders = {
     },
 
     /**
+     * Анализирует переданную дату окончания действия цепочки распоряжений (orderChainEndDateTime).
+     * Если она установлена и меньше текущей даты, то цепочка распоряжений считается недействующей.
+     * Если дополнительно передан флаг considerAllOrdersConfirmation = true, то цепочка распоряжений
+     * полагается недействующей только в том случае, если все распоряжения, входящие в ее состав,
+     * являются утвержденными.
+     * Возвращает true, если цепочка распоряжений недействующая, false - в противном случае.
+     */
+    workOrderChainIsInactive(state) {
+      return ({ orderChainId, orderChainEndDateTime, considerAllOrdersConfirmation }) => {
+        const now = new Date();
+        return Boolean(
+          orderChainEndDateTime && orderChainEndDateTime.getTime() < now.getTime() &&
+          (
+            !considerAllOrdersConfirmation ||
+            !state.data.find((order) => order.orderChainId === orderChainId && !order.assertDateTime)
+          )
+        );
+      };
+    },
+
+    /**
+     * Позволяет получить массив рабочих распоряжений для отображения пользователю, а именно:
+     * отображению подлежат все распоряжения, возвращаемые getters.getRawWorkingOrders, кроме:
+     * недействующих цепочек для ЭЦД.
+     */
+    getWorkingOrdersToDisplay(_state, getters) {
+      if (!getters.isECD)
+        return getters.getRawWorkingOrders;
+      // Теперь для ЭЦД:
+      return getters.getRawWorkingOrders.filter((order) => {
+        // смотрим на дату окончания действия цепочки, которой принадлежит распоряжение:
+        // если она установлена и меньше текущей даты, то распоряжение, принадлежащее этой цепочке,
+        // не отображаем для ЭЦД
+        if (getters.workOrderChainIsInactive({
+          orderChainId: order.orderChainId,
+          orderChainEndDateTime: order.orderChainEndDateTime,
+          considerAllOrdersConfirmation: true,
+        })) {
+          return false;
+        }
+        return true;
+      });
+    },
+
+    /**
      * Позволяет получить массив рабочих распоряжений, у элементов которого могут быть дочерние
      * элементы - распоряжения, изданные в рамках этой же цепочки распоряжений, но позднее.
      * Возвращаемый массив может использоваться для отображения рабочих распоряжений в виде
@@ -97,7 +142,7 @@ export const getWorkOrders = {
     getWorkingOrdersToDisplayAsTree(_state, getters) {
       // Распоряжения в массиве рабочих распоряжений идут в хронологическом порядке (по возрастанию
       // времени их издания). Это обязательно в момент формирования дерева!!!
-      const workingOrders = getters.getRawWorkingOrders.sort((a, b) => {
+      const workingOrders = getters.getWorkingOrdersToDisplay.sort((a, b) => {
         if (a.createDateTime < b.createDateTime) {
           return -1;
         }
@@ -145,6 +190,7 @@ export const getWorkOrders = {
           }),
           assertDateTime: order.assertDateTime ? getLocaleDateTimeString(order.assertDateTime, false) : null,
           orderChainId: order.orderChainId,
+          orderChainEndDateTime: order.orderChainEndDateTime,
           specialTrainCategories: order.specialTrainCategories,
           invalid: order.invalid,
           children: [],
@@ -176,7 +222,7 @@ export const getWorkOrders = {
      * Данная функция может использоваться для отображения списка рабочих распоряжений в табличном виде.
      */
     getWorkingOrders(_state, getters) {
-      return getters.getRawWorkingOrders
+      return getters.getWorkingOrdersToDisplay
         .sort((a, b) => {
           if (a.timeSpan.start > b.timeSpan.start) {
             return -1;
@@ -231,6 +277,7 @@ export const getWorkOrders = {
                 item.stationWorkPlacesToSend ? item.stationWorkPlacesToSend.filter((el) => el.deliverDateTime && !el.confirmDateTime).length : 0,
             },
             orderChainId: item.orderChainId,
+            orderChainEndDateTime: item.orderChainEndDateTime,
             chainMembersNumber: getters.getRawWorkingOrders.filter((el) => el.orderChainId === item.orderChainId).length,
             receivers: [
               ...(!item.dspToSend ? [] : item.dspToSend.map((dsp) => {
@@ -363,6 +410,9 @@ export const getWorkOrders = {
       return [notConfirmedInstances, notConfirmedInstancesOnStation];
     },
 
+    /**
+     *
+     */
     getOrdersInChain(state) {
       return (chainId) => {
         return state.data.filter((item) => item.orderChainId === chainId).sort((a, b) => {

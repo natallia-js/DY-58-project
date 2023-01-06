@@ -1,6 +1,8 @@
 import { watch } from 'vue';
 import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
 
+
+// Модуль для работы с выбранным черновиком распоряжения
 export const useWatchOrderDrafts = (inputVals) => {
   const {
     state, store, props, emit, currentOrderDraft,
@@ -9,15 +11,34 @@ export const useWatchOrderDrafts = (inputVals) => {
     defaultOrderPlace,
     defaultOrderText,
     defaultTimeSpan,
-    lastOtherToSendSource,
   } = inputVals;
 
   watch(() => props.orderDraftId, () => {
     state.currentOrderDraftId = props.orderDraftId;
   });
 
-  // Способствует отображению на полях формы данных из черновика распоряжения
-  const applySelectedOrderDraft = () => {
+  /**
+   * Позволяет отобразить персонал из выбранного черновика распоряжения.
+   */
+  const applySelectedOrderDraftPersonal = ({ setOtherShift }) => {
+    if (!currentOrderDraft.value) {
+      return;
+    }
+    // установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
+    // таблицы персонала работают с глобальным store
+    store.dispatch(APPLY_PERSONAL_FOR_SENDING_DATA_ACTION, {
+      dspToSend: currentOrderDraft.value.dspToSend,
+      dncToSend: currentOrderDraft.value.dncToSend,
+      ecdToSend: currentOrderDraft.value.ecdToSend,
+      otherToSend: setOtherShift ? currentOrderDraft.value.otherToSend : null,
+      rewriteOtherToSend: true,
+    });
+  };
+
+  /**
+   * Способствует отображению на полях формы данных из выбранного черновика распоряжения.
+   */
+  const applySelectedOrderDraft = ({ setOtherShift }) => {
     if (!currentOrderDraft.value) {
       return;
     }
@@ -37,17 +58,8 @@ export const useWatchOrderDrafts = (inputVals) => {
           currentOrderDraft.value.orderText.orderText.map((el) => ({ ... el})) : null,
       } : { ...defaultOrderText };
 
-    // отображению персонала из выбранного черновика распоряжения;
-    // установка значений идет через глобальный store, т.к. через локальное состояние не сработает:
-    // таблицы персонала работают с глобальным store (информация о персонале может быть недоступна в момент
-    // перезагрузки страницы, в связи с чем этот код будет повторен при появлении информации)
-    store.dispatch(APPLY_PERSONAL_FOR_SENDING_DATA_ACTION, {
-      dspToSend: currentOrderDraft.value.dspToSend,
-      dncToSend: currentOrderDraft.value.dncToSend,
-      ecdToSend: currentOrderDraft.value.ecdToSend,
-      otherToSend: currentOrderDraft.value.otherToSend,
-    });
-    lastOtherToSendSource.value = currentOrderDraft.value.otherToSend;
+    // отображение персонала из выбранного черновика распоряжения
+    applySelectedOrderDraftPersonal({ setOtherShift });
 
     // порядок присвоения важен! (после выполнения данного куска кода state.resetValueOnWatchChanges
     // примет значение true)
@@ -57,9 +69,19 @@ export const useWatchOrderDrafts = (inputVals) => {
       { ...currentOrderDraft.value.timeSpan } : { ...defaultTimeSpan };
   };
 
-  // При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей
+  /**
+   * При выборе черновика распоряжения производим заполнение полей состояния (формы) значениями его полей.
+   */
   watch(currentOrderDraft, (newVal) => {
-    applySelectedOrderDraft();
+    // Применяем выбранный черновик распоряжения только в том случае, когда пользователь выбирает черновик, находясь на странице
+    // создания нового распоряжения. В иных случаях - обновление этой страницы, переход на эту страницу - данные черновика
+    // устанавливаются в watch на загрузку всех данных приложения
+    if (store.getters.ifAllDataLoadedOnApplicationReload && !state.updateFormDataOnMounted) {
+      applySelectedOrderDraft({
+        setOtherShift: store.getters.ifAllDataLoadedOnApplicationReload && !state.updateFormDataOnMounted,
+      });
+    }
+
     emit('changeProps', {
       newRouteParams: {
         orderType: props.orderType,
@@ -70,15 +92,7 @@ export const useWatchOrderDrafts = (inputVals) => {
     });
   });
 
-  // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны черновики распоряжений
-  // (id нужного черновика может быть, а вот подгрузки всех черновиков нужно подождать)
-  watch(() => store.getters.getAllOrderDrafts, (newVal) => {
-    if (!state.currentOrderDraftId || !newVal || !newVal.length) {
-      return;
-    }
-    // Искусственно вызываем отображение данных выбранного черновика
-    const tmp = state.currentOrderDraftId;
-    state.currentOrderDraftId = null;
-    state.currentOrderDraftId = tmp;
-  });
+  return {
+    applySelectedOrderDraft,
+  };
 };

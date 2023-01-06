@@ -85,10 +85,28 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
     },
 
     [ADD_ORDER] (state, newOrder) {
-      state.data = [
-        ...state.data,
-        getWorkOrderObject(newOrder),
-      ];
+      // Прежде чем добавить новое распоряжение в общий список, проверяем, не содержится ли оно уже там.
+      // Такое может произойти, когда распоряжение было издано, отправлено на сервер, им сохранено в БД,
+      // после чего сработал запрос со стороны ДУ-58 на сервер об обновлении рабочих распоряжений.
+      // Новое распоряжение (изданное) после выполнения запроса появилось в списке рабочих распоряжений,
+      // и только после этого ДУ-58 получила ответ от сервера об успешном сохранении нового
+      // распоряжения и добавила это распоряжение в уже обновленный с сервера набор данных.
+      // Т.о., в этом наборе данных (рабочих распоряжениях) появятся 2 одинаковые записи.
+      if (!state.data.find((order) => order._id === newOrder._id)) {
+        // преобразуем полученный объект к тому виду, с которым работает программа
+        const newWorkOrderObject = getWorkOrderObject(newOrder);
+        state.data = [
+          // параллельно с добавлением распоряжения в общий список производим обновление тех данных для связанных с ним распоряжений
+          // (находящихся в одной цепочке), которые пока не известны ДУ-58, но уже известны серверу, а именно:
+          // дата-время окончания действия цепочки распоряжений
+          ...state.data.map((order) => {
+            if (order.orderChainId === newWorkOrderObject.orderChainId)
+              order.orderChainEndDateTime = newWorkOrderObject.orderChainEndDateTime;
+            return order;
+          }),
+          newWorkOrderObject,
+        ];
+      }
     },
   },
 
@@ -115,6 +133,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
         specialTrainCategories,
         idOfTheOrderToCancel = null,
         draftId = null,
+        additionalWorkers = null,
       } = params;
 
       if (!context.getters.canUserDispatchOrders && !context.getters.canUserCreateCheckOrders) {
@@ -185,6 +204,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
             specialTrainCategories,
             idOfTheOrderToCancel,
             draftId,
+            additionalWorkers,
           }
         );
         context.commit(ADD_ORDER, responseData.order);

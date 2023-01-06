@@ -160,9 +160,13 @@ export const checkIfOrderActionCanBePerformed = {
      * Проверка возможности удалить цепочку распоряжений текущим пользователем.
      */
     canOrdersChainBeDeleted(_state, getters) {
-      return (orderId) => (
+      return ({ orderId, orderChainId, orderChainEndDateTime }) => (
+        // над распоряжением можно в данный момент выполнять какие-либо действия
         getters.canUserPerformAnyActionOnOrder(orderId) &&
-        getters.canUserDelConfirmedOrdersChains
+        // пользователь имеет право удалять цепочки распоряжений
+        getters.canUserDelConfirmedOrdersChains &&
+        // цепочка, которой принадлежит распоряжение, не является действующей
+        getters.workOrderChainIsInactive({ orderChainId, orderChainEndDateTime, considerAllOrdersConfirmation: true })
       ) ? true : false;
     },
 

@@ -103,7 +103,9 @@ export const dispatchOrderToServer = async (params) => {
     specialTrainCategories,
     idOfTheOrderToCancel,
     draftId,
+    additionalWorkers,
   } = params;
+
   const response = await makeServerRequest({
     url: DY58_SERVER_ACTIONS_PATHS.dispatchOrder,
     method: 'POST',
@@ -127,6 +129,7 @@ export const dispatchOrderToServer = async (params) => {
       specialTrainCategories,
       idOfTheOrderToCancel,
       draftId,
+      additionalWorkers,
     },
   });
   return response.data;

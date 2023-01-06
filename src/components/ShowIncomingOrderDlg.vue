@@ -9,19 +9,19 @@
     <p class="p-text-bold p-text-uppercase" style="text-align:center">
       {{ (order && order.sendOriginal) ? 'Оригинал' : 'Копия' }}
     </p>
-    <p class="p-text-bold" style="text-align:center">
+    <p class="p-text-bold p-text-capitalize" style="text-align:center">
       {{ (order && order.time) ? order.time : '?' }} &#160;
       {{ (order && order.type) ? order.type : '?' }} &#160;
       {{ (order && order.orderNum) ? '№ ' + order.orderNum : '№ ?' }}
     </p>
-    <p style="text-align:center">
+    <p style="text-align:center;overflow-wrap:break-word">
       {{ (order && order.orderTitle) ? order.orderTitle : '?' }}
     </p>
     <p v-if="order && order.specialTrainCategories && order.specialTrainCategories.length">
       Особые отметки: &#160; {{ order.specialTrainCategories.join(', ') }}
     </p>
-    <p>
-      <span v-if="order" v-html="order.orderText"></span>
+    <p v-if="order" style="overflow-wrap:break-word">
+      <span v-html="order.orderText"></span>
     </p>
     <p>Передал: &#160;
       {{ (order && order.post) ? order.post : '?' }} &#160;

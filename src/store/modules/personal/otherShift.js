@@ -145,7 +145,14 @@ export const otherShift = {
       if (!state.sectorPersonal.otherShift) {
         state.sectorPersonal.otherShift = [];
       }
-      if (additionalId > 0 && state.sectorPersonal.otherShift.find((el) => el.additionalId === additionalId)) {
+
+      // Если в списке "иных" присутствует аналогичная запись, но ее статус sendOriginal отличен от
+      // передаваемого, то редактируем существующую запись
+      const theSameRec = state.sectorPersonal.otherShift.find((el) => el.additionalId === additionalId);
+      if (additionalId > 0 && theSameRec) {
+        if (theSameRec.sendOriginal !== sendOriginal) {
+          theSameRec.sendOriginal = sendOriginal;
+        }
         return;
       }
       const trimmedPlaceTitle = placeTitle ? placeTitle.trim() : '';
@@ -193,6 +200,7 @@ export const otherShift = {
         ];
         return;
       }
+
       // Прежде чем создавать новую запись проверяем, есть ли уже запись с такими же данными
       const theSameObject = state.sectorPersonal.otherShift.find((el) =>
         JSON.stringify({
