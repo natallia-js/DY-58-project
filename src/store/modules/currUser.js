@@ -289,6 +289,9 @@ export const currUser = {
     isStationWorksManager(state) {
       return state.credential === APP_CREDENTIALS.STATION_WORKS_MANAGER;
     },
+    // true - если текущий пользователь - специалист, работающий исключительно на станции (ДСП / оператор при ДСП / руководитель работ),
+    // false - если текущий пользователь не работает на рабочем полигоне "станция" либо может в силу специфики своей работы менять
+    // рабочий полигон (т.е. пользователь ревизор либо лицо, имеющее право лишь на просмотр информации в системе)
     isStationWorkPoligonSpecialist(state) {
       return state.credential === APP_CREDENTIALS.DSP_FULL ||
              state.credential === APP_CREDENTIALS.DSP_Operator ||

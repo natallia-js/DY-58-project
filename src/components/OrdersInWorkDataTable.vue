@@ -176,7 +176,7 @@
               <!-- Если таблица основных адресатов распоряжения на глобальных рабочих полигонах пуста, не отображаем ее -->
 
               <div v-if="slotProps.data.receivers && slotProps.data.receivers.length">
-                <p>Адресаты:</p>
+                <p class="p-text-bold">Адресаты:</p>
                 <DataTable :value="slotProps.data.receivers" breakpoint="200px">
                   <Column v-for="col2 of getWorkMessReceiversTblColumns"
                     :field="col2.field"
@@ -255,7 +255,7 @@
 
               <!-- Блок с информацией о подтверждении распоряжения "Иными" адресатами-->
               <div v-if="getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length">
-                <div>
+                <div class="p-text-bold">
                   Не подтверждено иными адресатами ({{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).length }}):
                   {{ getOrderOtherUnconfirmedWorkPoligons(slotProps.data.otherReceivers).map((el) => `${el.placeTitle}${el.post ? ' ' + el.post : ''}${el.fio ? ' ' + el.fio : ''}`).join(', ') }}
                 </div>
@@ -279,7 +279,7 @@
               будет отображаться только работнику станции (ДСП, Оператору при ДСП, Руководителю работ). -->
 
               <div v-if="slotProps.data.stationReceivers && slotProps.data.stationReceivers.length">
-                <p>Получатели на станции:</p>
+                <p class="p-text-bold">Получатели на станции:</p>
                 <DataTable :value="slotProps.data.stationReceivers" breakpoint="200px">
                   <Column v-for="col3 of getWorkMessStationReceiversTblColumns"
                     :field="col3.field"
@@ -358,6 +358,38 @@
                       })))"
                   />
                 </div>
+                <br />
+              </div>
+
+              <!-- Блок дополнительной информации о получателях распоряжения - лицах, дополнительно с ним ознакомленных. -->
+
+              <div v-if="canSetAdditionallyInformedPeopleForOrder">
+                <p class="p-text-bold">Дополнительно ознакомлены:</p>
+                <div v-if="slotProps.data.id !== state.orderIdBeingEdited">
+                  <p>{{ slotProps.data.additionallyInformedPeople }}</p>
+                  <Button
+                    label="Редактировать"
+                    @click="handleStartEditAdditionallyInformedPeopleInfo({
+                      orderType: slotProps.data.type,
+                      orderId: slotProps.data.id,
+                      additionallyInformedPeopleDataToEdit: slotProps.data.additionallyInformedPeople,
+                    })"
+                  />
+                </div>
+                <div v-else>
+                  <InputText type="text" v-model="state.additionallyInformedPeopleBeingEdited" style="width:100%" />
+                  <div class="p-d-flex p-jc-between">
+                    <Button
+                      v-if="handleCheckAdditionallyInformedPeopleDataChanged(slotProps.data.additionallyInformedPeople)"
+                      label="Сохранить"
+                      @click="handleSaveAdditionallyInformedPeopleInfo({ orderType: slotProps.data.type, orderId: slotProps.data.id})"
+                    />
+                    <Button
+                      label="Отменить"
+                      @click="handleCancelEditAdditionallyInformedPeopleInfo"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -417,6 +449,7 @@
     CONFIRM_ORDER_FOR_OTHER_RECEIVERS_ACTION,
     DEL_STATION_WORK_PLACE_RECEIVER_ACTION,
     SET_DOCUMENT_INVALID_MARK,
+    EDIT_DISPATCHED_ORDER_ACTION,
   } from '@/store/action-types';
   import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
   import workOrderNumberInWorkTableClassStyles from '@/additional/styleClasses/workOrderNumberInWorkTableClassStyles';
@@ -438,6 +471,10 @@
         expandedRows: [],
         showIncomingOrderDlg: false,
         chosenOrder: null,
+        orderIdBeingEdited: null, // id текущего редактируемого распоряжения
+        orderTypeLastEdited: null, // если есть orderIdBeingEdited, orderTypeLastEdited - тип соответствующего распоряжения,
+                                   // в противном случае это тип последнего распоряжения, которое вводилось в режим редактирования
+        additionallyInformedPeopleBeingEdited: null,
       });
 
       const getWorkMessTblColumns = computed(() => store.getters.getWorkMessTblColumns);
@@ -630,6 +667,53 @@
         return workOrderNumberInWorkTableClassStyles(order, isOrderDispatchedOnCurrentWorkPoligon(order?.senderWorkPoligon));
       };
 
+      // ------------------ Работа с информацией о лицах, которые дополнительно ознакомлены с распоряжением
+
+      const handleStartEditAdditionallyInformedPeopleInfo = ({ orderType, orderId, additionallyInformedPeopleDataToEdit }) => {
+        state.orderTypeLastEdited = orderType;
+        state.orderIdBeingEdited = orderId;
+        state.additionallyInformedPeopleBeingEdited = additionallyInformedPeopleDataToEdit;
+      };
+
+      const handleSaveAdditionallyInformedPeopleInfo = ({ orderType, orderId }) => {
+        store.dispatch(EDIT_DISPATCHED_ORDER_ACTION, {
+          type: orderType,
+          id: orderId,
+          additionallyInformedPeople: state.additionallyInformedPeopleBeingEdited,
+        });
+        handleCancelEditAdditionallyInformedPeopleInfo();
+      };
+
+      /**
+       * Для отображения результата операции редактирования информации о дополнительных адресатах распоряжения.
+       */
+      watch(() => store.getters.getEditDispatchedOrderResult, (newVal) => {
+        if (!newVal || newVal.orderType !== state.orderTypeLastEdited) {
+          return;
+        }
+        if (!newVal.error) {
+          showSuccessMessage(newVal.message);
+        } else {
+          showErrMessage(newVal.message);
+        }
+      });
+
+      const handleCancelEditAdditionallyInformedPeopleInfo = () => {
+        state.orderIdBeingEdited = null;
+        state.additionallyInformedPeopleBeingEdited = null;
+      };
+
+      const handleCheckAdditionallyInformedPeopleDataChanged = (initialData) => {
+        return !(
+          (!initialData && !state.additionallyInformedPeopleBeingEdited) ||
+          (!initialData && state.additionallyInformedPeopleBeingEdited?.length === 0) ||
+          (initialData?.length === 0 && !state.additionallyInformedPeopleBeingEdited) ||
+          (initialData === state.additionallyInformedPeopleBeingEdited)
+        );
+      };
+
+      // --------------------------------------------------------------------------------------
+
       return {
         state,
         isDNC: computed(() => store.getters.isDNC),
@@ -655,6 +739,7 @@
         canMarkOrderAsValid: computed(() => store.getters.canMarkOrderAsValid),
         getOrdersChainsBeingDeleted: computed(() => store.getters.getOrdersChainsBeingDeleted),
         canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
+        canSetAdditionallyInformedPeopleForOrder: computed(() => store.getters.canSetAdditionallyInformedPeopleForOrder),
         getWorkMessTblColumnsTitles,
         getWorkMessTblColumnsExceptExpander,
         getExpanderColumnObject,
@@ -674,6 +759,10 @@
         expandOrCollapseRow,
         setDocumentInvalidMark,
         getWorkOrderNumberInWorkTableClassStyles,
+        handleStartEditAdditionallyInformedPeopleInfo,
+        handleSaveAdditionallyInformedPeopleInfo,
+        handleCancelEditAdditionallyInformedPeopleInfo,
+        handleCheckAdditionallyInformedPeopleDataChanged,
       };
     },
   }

@@ -135,12 +135,11 @@ export const dispatchOrderToServer = async (params) => {
   return response.data;
 };
 
-export const editDispatchedOrderOnServer = async (params) => {
-  const { id, timeSpan, orderText } = params;
+export const editDispatchedOrderOnServer = async (requestParams) => {
   const response = await makeServerRequest({
     url: DY58_SERVER_ACTIONS_PATHS.editDispatchedOrder,
     method: 'POST',
-    params: { id, timeSpan, orderText },
+    params: requestParams,
   });
   return response.data;
 };

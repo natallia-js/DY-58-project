@@ -320,6 +320,7 @@ export const getWorkOrders = {
             otherReceivers: item.otherToSend || [],
             assertDateTime: item.assertDateTime ? getLocaleDateTimeString(item.assertDateTime, false) : null,
             invalid: item.invalid,
+            additionallyInformedPeople: item.additionallyInformedPeople,
           };
         });
     },

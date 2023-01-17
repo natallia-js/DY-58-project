@@ -33,7 +33,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     }
     return displayString;
   };
-  const isStationWorkPoligonSpecialist = store.getters.isStationWorkPoligonSpecialist;
+  const isStationWorkPoligon = store.getters.isStationWorkPoligon;
   return responseData
     .map((order) => ({
       ...order,
@@ -49,7 +49,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
         order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
       // ДСП нужна информация лишь по своей станции, ДНЦ - по всем станциям
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
-        !isStationWorkPoligonSpecialist ?
+        !isStationWorkPoligon ?
         // Исключаем главных ДСП (они будут в списке dspToSend)
         order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
           .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})) :
@@ -92,17 +92,17 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           // ДСП нужна информация только по своей станции,
           // ДНЦ в случае ВХОДЯЩЕГО документа нужна информация только по тому лицу в рамках своего участка ДНЦ,
           // который подтвердил этот документ
-          dncToSend: isStationWorkPoligonSpecialist
+          dncToSend: isStationWorkPoligon
             ? []
             : (
                 orderWasCreatedOnThisWorkPoligon
                   ? order.dncToSend
                   : order.dncToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
               ),
-          dspToSend: (isStationWorkPoligonSpecialist || !orderWasCreatedOnThisWorkPoligon) ? [] : order.dspToSend,
-          ecdToSend: (isStationWorkPoligonSpecialist || !orderWasCreatedOnThisWorkPoligon) ? [] : order.ecdToSend,
-          otherToSend: (isStationWorkPoligonSpecialist || !orderWasCreatedOnThisWorkPoligon) ? [] : order.otherToSend,
-          stationWorkPlacesToSend: (isStationWorkPoligonSpecialist || orderWasCreatedOnThisWorkPoligon) ? order.stationWorkPlacesToSend : [],
+          dspToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.dspToSend,
+          ecdToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.ecdToSend,
+          otherToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.otherToSend,
+          stationWorkPlacesToSend: (isStationWorkPoligon || orderWasCreatedOnThisWorkPoligon) ? order.stationWorkPlacesToSend : [],
         }),
         // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
         // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,

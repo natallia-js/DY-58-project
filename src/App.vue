@@ -18,6 +18,7 @@
   import FooterBar from '@/components/FooterBar';
   import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
   import useWebSocket from '@/hooks/useWebSocket.hook';
+  //import showMessage from '@/hooks/showMessage.hook';
   import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
   import {
     DETERMINE_LOGOUT_ITEM_ACTION,
@@ -60,6 +61,7 @@
   import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
   import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
   import wait from '@/additional/wait';
+  import useNotifications from '@/hooks/useNofitications.hook';
 
   export default {
     name: 'dy-58-app',
@@ -72,6 +74,8 @@
 
     setup() {
       const store = useStore();
+      //const { showErrMessage } = showMessage();
+      const pushNotifications = useNotifications();
 
       if (router.currentRoute.offline === 'true') {
         store.commit(SET_USER_OFFLINE_STATUS, true);
@@ -80,12 +84,19 @@
       // для общения с сервером по протоколу WebSocket
       const wsClient = useWebSocket({ socketUrl: WS_SERVER_ADDRESS });
 
-      // для звукового уведомления о входящих распоряжениях
+      // для звукового уведомления о новых входящих распоряжениях
       const newIncomingOrdersSound = new Audio(incomingOrderSound);
       if (newIncomingOrdersSound) {
         newIncomingOrdersSound.crossOrigin = 'anonymous';
         newIncomingOrdersSound.autoplay = true;
       }
+
+      // для push-уведомления о новых входящих распоряжениях
+      /*try {
+        registerServiceWorker();
+      } catch (error) {
+        showErrMessage(error.message);
+      }*/
 
       // для отображения текущих даты и времени
       let timerId;
@@ -165,13 +176,19 @@
        */
       watch(() => store.getters.thereAreNewIncomingOrders, (thereAreNewOrders) => {
         if (thereAreNewOrders) {
+          // звуковое уведомление
           if (newIncomingOrdersSound) {
             newIncomingOrdersSound.volume = store.getters.getSoundsVolume;
             newIncomingOrdersSound.play();
           }
+          // push-уведомление
+          pushNotifications.showNotification('', 'Новые входящие уведомления');
           store.commit(NOTIFIED_ABOUT_NEW_INCOMING_ORDERS);
         }
       });
+
+      // Когда окно программы ДУ-58 получает фокус, все активные push-уведомления автоматически закрываются
+      window.addEventListener('focus', () => pushNotifications.closeAllNotifications());
 
       /**
        * При появлении каких-либо изменений в рабочих распоряжениях принимаем меры по

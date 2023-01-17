@@ -122,6 +122,7 @@ export function getWorkOrderGeneralInfoObject(order) {
     assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
     dispatchedOnOrder: order.dispatchedOnOrder,
     invalid: order.invalid,
+    additionallyInformedPeople: order.additionallyInformedPeople,
   };
 }
 

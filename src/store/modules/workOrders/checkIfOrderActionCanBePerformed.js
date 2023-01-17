@@ -111,6 +111,20 @@ export const checkIfOrderActionCanBePerformed = {
     },
 
     /**
+     * Проверка возможности определить дополнительных адресатов распоряжения
+     * (лиц, которые дополнительно ознакомились с ним).
+     * Делать это может только ДСП, находящийся на дежурстве (не оператор, а именно сам ДСП - главный на станции!).
+     */
+    canSetAdditionallyInformedPeopleForOrder(_state, getters) {
+      return (order) => (
+        order &&
+        getters.canUserPerformAnyActionOnOrder(order.id) &&
+        getters.isDSP &&
+        getters.isUserOnDuty
+      ) ? true : false;
+    },
+
+    /**
      * Возвращает true, если возможно удаление адресата распоряжения из списка адресатов на рабочих
      * местах станции, false - в противном случае.
      * Удаление адресата - лишь удаление его из списка адресатов (рабочих мест) станции, это удаление

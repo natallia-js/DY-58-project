@@ -203,10 +203,12 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
   actions: {
     /**
      * Делает запрос на сервер с целью редактирования существующего распоряжения.
-     * В настоящее время отредактировать можно только запись о принятии дежурства на станции.
+     * В настоящее время отредактировать можно только:
+     *   - запись о принятии дежурства на станции,
+     *   - информацию о лицах, дополнительно ознакомленных с изданным документом.
      */
      async [EDIT_DISPATCHED_ORDER_ACTION] (context, params) {
-      const { type, id, timeSpan, orderText } = params;
+      const { type, id, timeSpan, orderText, additionallyInformedPeople } = params;
 
       if (!context.getters.canUserDispatchOrders) {
         const errMessage = 'У вас нет права на редактирование документов';
@@ -217,14 +219,13 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
 
       context.commit(CLEAR_EDIT_DISPATCHED_ORDER_RESULT);
 
+      const requestParams = { id };
+      if (Object.prototype.hasOwnProperty.call(params, 'timeSpan')) requestParams.timeSpan = timeSpan;
+      if (Object.prototype.hasOwnProperty.call(params, 'orderText')) requestParams.orderText = getOrderTextForSendingToServer(orderText);
+      if (Object.prototype.hasOwnProperty.call(params, 'additionallyInformedPeople')) requestParams.additionallyInformedPeople = additionallyInformedPeople;
+
       try {
-        const responseData = await editDispatchedOrderOnServer(
-          {
-            id,
-            timeSpan,
-            orderText: getOrderTextForSendingToServer(orderText),
-          }
-        );
+        const responseData = await editDispatchedOrderOnServer(requestParams);
         context.commit(SET_EDIT_DISPATCHED_ORDER_RESULT, { error: false, orderType: type, message: responseData.message });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(EDIT_ORDER_TEXT, responseData.order);

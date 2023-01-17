@@ -194,6 +194,11 @@ export const currWorkPoligonStructure = {
       return workPoligon?.type === WORK_POLIGON_TYPES.ECD_SECTOR;
     },
 
+    isStationWorkPoligon(_state, getters) {
+      const workPoligon = getters.getUserWorkPoligon;
+      return workPoligon?.type === WORK_POLIGON_TYPES.STATION;
+    },
+
     /**
      * По заданному id станции / перегона (placeType) позволяет получить ее / его наименование.
      * Рабочий полигон - как участок ДНЦ / ЭЦД, так и станция.
