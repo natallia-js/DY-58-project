@@ -386,7 +386,7 @@
       const initOrderCreateDateTime = () => {
         if (!editExistingTakeDutyOrder.value) {
           state.createDateTime = store.getters.getCurrDateTimeWithoutMilliseconds;
-          state.createDateTimeString = store.getters.getCurrDateString;
+          state.createDateTimeString = store.getters.getCurrDateTimeString;
 
         } else if (existingDSPTakeDutyOrder.value) {
           state.createDateTime = existingDSPTakeDutyOrder.value.createDateTime;

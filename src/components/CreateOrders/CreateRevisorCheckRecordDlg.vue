@@ -106,7 +106,7 @@
       const state = reactive({
         dlgVisible: false,
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
-        createDateTimeString: store.getters.getCurrDateString,
+        createDateTimeString: store.getters.getCurrDateTimeString,
         updateCreateDateTimeRegularly: true,
         orderText: null,
       });

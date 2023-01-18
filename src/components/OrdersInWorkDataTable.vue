@@ -362,8 +362,7 @@
               </div>
 
               <!-- Блок дополнительной информации о получателях распоряжения - лицах, дополнительно с ним ознакомленных. -->
-
-              <div v-if="canSetAdditionallyInformedPeopleForOrder">
+              <div v-if="canSetAdditionallyInformedPeopleForOrder(slotProps.data)">
                 <p class="p-text-bold">Дополнительно ознакомлены:</p>
                 <div v-if="slotProps.data.id !== state.orderIdBeingEdited">
                   <p>{{ slotProps.data.additionallyInformedPeople }}</p>

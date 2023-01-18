@@ -481,6 +481,7 @@
 
       const isECD = computed(() => store.getters.isECD);
       const isDNC = computed(() => store.getters.isDNC);
+      const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
 
       // Уточнять время действия издаваемого распоряжения либо не уточнять
       const defineOrderTimeSpanOptions = ([
@@ -531,8 +532,8 @@
         selectedOrderInputType: OrderInputTypes[0],
         number: store.getters.getNextOrdersNumber(!isECD.value ? props.orderType : ALL_ORDERS_TYPE_ECD),
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
-        createDateTimeString: store.getters.getCurrDateString,
-        updateCreateDateTimeRegularly: true,
+        createDateTimeString: store.getters.getCurrDateTimeString,
+        updateCreateDateTimeRegularly: (isDNC.value || isDSP_or_DSPoperator.value) ? false : true,
         prevRelatedOrder: null,
         //cancelOrderDateTime: null,
         orderPlace: defaultOrderPlace,
@@ -769,7 +770,7 @@
         SPECIAL_CIRCULAR_ORDER_SIGN,
         SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
         SPECIAL_OPEN_BLOCK_ORDER_SIGN,
-        isDSP_or_DSPoperator: computed(() => store.getters.isDSP_or_DSPoperator),
+        isDSP_or_DSPoperator,
         isDNC,
         isECD,
         getLastDNC_ECDTakeDutyOrderAdditionalWorkers: computed(() => store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers),

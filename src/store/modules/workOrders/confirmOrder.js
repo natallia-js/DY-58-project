@@ -418,7 +418,7 @@ export const confirmOrder = {
     /**
      * Позволяет для данного входящего документа (распоряжения) выставить статус "подтверждено" на сервере.
      */
-    async [CONFIRM_ORDER_ACTION] (context, { orderId }) {
+    async [CONFIRM_ORDER_ACTION] (context, { orderId, additionalConfirmPeople }) {
       if (!context.getters.canUserConfirmOrder) {
         const errMessage = 'У вас нет прав на подтверждение распоряжения';
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: true, message: errMessage });
@@ -435,7 +435,7 @@ export const confirmOrder = {
       context.commit(SET_ORDER_BEING_CONFIRMED, orderId);
       const confirmDateTime = new Date();
       try {
-        const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime });
+        const responseData = await confirmOrderForMyself({ id: orderId, confirmDateTime, additionalConfirmPeople });
         context.commit(SET_CONFIRM_ORDER_RESULT, { orderId, error: false, message: responseData.message });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
         context.commit(SET_ORDER_CONFIRMED, {

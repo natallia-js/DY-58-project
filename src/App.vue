@@ -18,8 +18,7 @@
   import FooterBar from '@/components/FooterBar';
   import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
   import useWebSocket from '@/hooks/useWebSocket.hook';
-  //import showMessage from '@/hooks/showMessage.hook';
-  import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
+    import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
   import {
     DETERMINE_LOGOUT_ITEM_ACTION,
     DEL_CURR_LAST_ORDERS_PARAMS,
@@ -58,8 +57,8 @@
     UPDATE_CURR_DATE_TIME_INTERVAL,
     REQUEST_NEW_ORDERS_FROM_SERVER_INTERVAL,
   } from '@/constants/appSettings';
-  import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
-  import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
+  //import { createOrderOfGivenType } from '@/additional/createOrderOfGivenType';
+  //import { SPECIAL_DR_ORDER_SIGN } from '@/constants/orderPatterns';
   import wait from '@/additional/wait';
   import useNotifications from '@/hooks/useNofitications.hook';
 
@@ -74,7 +73,6 @@
 
     setup() {
       const store = useStore();
-      //const { showErrMessage } = showMessage();
       const pushNotifications = useNotifications();
 
       if (router.currentRoute.offline === 'true') {
@@ -90,13 +88,6 @@
         newIncomingOrdersSound.crossOrigin = 'anonymous';
         newIncomingOrdersSound.autoplay = true;
       }
-
-      // для push-уведомления о новых входящих распоряжениях
-      /*try {
-        registerServiceWorker();
-      } catch (error) {
-        showErrMessage(error.message);
-      }*/
 
       // для отображения текущих даты и времени
       let timerId;
@@ -265,11 +256,16 @@
         }
       });
 
+      /*
+      // Если пользователь копирует в буфер обмена расписание плановой нитки, то система полагает, что
+      // он хочет издать распоряжение о проследовании поезда диспетчерским расписанием (ДР) и автоматичеки
+      // открывает страницу издания распоряжения по соответствующему шаблону
       watch(() => store.getters.getDataForDROrderFromClipboard, (newDRTrainData) => {
         if (newDRTrainData) {
           createOrderOfGivenType({ orderPatternId: null, orderSign: SPECIAL_DR_ORDER_SIGN });
         }
       });
+      */
 
       const hideBeforeLogoutDlg = () => {
         state.showBeforeLogoutDlg = false;

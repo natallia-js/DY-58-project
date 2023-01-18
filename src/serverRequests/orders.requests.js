@@ -19,11 +19,11 @@ export const getOrdersAddressedToThisPoligonFromGivenDate = async ({ datetime })
   return response.data;
 };
 
-export const confirmOrderForMyself = async ({ id, confirmDateTime }) => {
+export const confirmOrderForMyself = async ({ id, confirmDateTime, additionalConfirmPeople }) => {
   const response = await makeServerRequest({
     url: DY58_SERVER_ACTIONS_PATHS.confirmOrder,
     method: 'POST',
-    params: { id, confirmDateTime },
+    params: { id, confirmDateTime, additionalConfirmPeople },
   });
   return response.data;
 };
@@ -88,6 +88,7 @@ export const dispatchOrderToServer = async (params) => {
     orderNumSaveType,
     number,
     createDateTime,
+    actualCreateDateTime,
     place,
     timeSpan,
     orderText,
@@ -114,6 +115,7 @@ export const dispatchOrderToServer = async (params) => {
       orderNumSaveType,
       number,
       createDateTime,
+      actualCreateDateTime,
       place,
       timeSpan,
       orderText,

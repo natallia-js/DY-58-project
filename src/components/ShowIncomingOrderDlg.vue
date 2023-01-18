@@ -90,6 +90,7 @@
     computed: {
       ...mapGetters([
         'canUserConfirmOrder',
+        'getLastDNC_ECDTakeDutyOrderAdditionalWorkers',
       ]),
     },
 
@@ -116,7 +117,10 @@
     methods: {
       confirmOrder() {
         if (this.order && this.orderNeedsToBeConfirmed && !this.orderIsBeingConfirmed) {
-          this.$store.dispatch(CONFIRM_ORDER_ACTION, { orderId: this.order.id });
+          this.$store.dispatch(CONFIRM_ORDER_ACTION, {
+            orderId: this.order.id,
+            additionalConfirmPeople: this.getLastDNC_ECDTakeDutyOrderAdditionalWorkers,
+          });
         }
         this.closeDialog();
       },

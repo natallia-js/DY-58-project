@@ -34,6 +34,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     return displayString;
   };
   const isStationWorkPoligon = store.getters.isStationWorkPoligon;
+  const isDSP = store.getters.isDSP;
   return responseData
     .map((order) => ({
       ...order,
@@ -66,6 +67,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
             };
           })
       },
+      additionallyInformedPeople: order.additionallyInformedPeople,
     }))
     .map((order, index) => {
       const orderWasCreatedOnThisWorkPoligon = orderDispatchedOnThisWorkPoligon(order);
@@ -103,6 +105,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           ecdToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.ecdToSend,
           otherToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.otherToSend,
           stationWorkPlacesToSend: (isStationWorkPoligon || orderWasCreatedOnThisWorkPoligon) ? order.stationWorkPlacesToSend : [],
+          additionallyInformedPeople: isDSP ? order.additionallyInformedPeople : null,
         }),
         // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
         // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,
@@ -124,6 +127,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
           )
         ),
         invalid: order.invalid,
+        additionallyInformedPeople: order.additionallyInformedPeople,
       };
     });
 }

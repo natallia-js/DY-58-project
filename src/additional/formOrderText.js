@@ -279,7 +279,15 @@ export function formOrderText(props) {
  * @param {Boolean} isTYOrder - если true, то в итоговой строке необходима особая отметка по телеуправлению
  */
 export function formAcceptorsStrings(props) {
-  const { dncToSend, dspToSend, ecdToSend, otherToSend, stationWorkPlacesToSend, isTYOrder } = props;
+  const {
+    dncToSend,
+    dspToSend,
+    ecdToSend,
+    otherToSend,
+    stationWorkPlacesToSend,
+    isTYOrder,
+    additionallyInformedPeople,
+  } = props;
 
   let originalToString = '';
   let copyToString = '';
@@ -327,6 +335,10 @@ export function formAcceptorsStrings(props) {
 
   if (otherToSend && otherToSend.length) {
     formAcceptorStrings(otherToSend, formSubstring(null));
+  }
+
+  if (additionallyInformedPeople) {
+    originalToString += !originalToString ? additionallyInformedPeople : `,<br/>${additionallyInformedPeople}`;
   }
 
   let res = isTYOrder ? SPECIAL_TELECONTROL_ORDER_SIGN : '';

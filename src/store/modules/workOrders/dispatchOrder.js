@@ -154,6 +154,7 @@ import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
             orderNumSaveType: !context.getters.isECD ? type : ALL_ORDERS_TYPE_ECD,
             number,
             createDateTime: createDateTime.toISOString(),
+            actualCreateDateTime: context.getters.getCurrDateTimeWithoutMilliseconds.toISOString(),
             place,
             timeSpan,
             orderText: getOrderTextForSendingToServer(orderText),
