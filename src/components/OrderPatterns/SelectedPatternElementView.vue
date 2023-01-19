@@ -59,10 +59,15 @@
     v-else-if="element.type === getOrderPatternElementTypes.TIMETIME_OR_TILL_NOTICE"
     :placeholder="'время'"
   />
+  <!-- ранее было:
   <CheckboxAndInputOrNothingComponent
     v-else-if="element.type === getOrderPatternElementTypes.CHECKBOX_AND_INPUT_OR_NOTHING"
     :checkboxText="'Выдано запрещение ДСП'"
     :placeholder="'запрещение ДСП'"
+  />-->
+  <CheckboxComponent
+    v-else-if="element.type === getOrderPatternElementTypes.CHECKBOX"
+    :checkboxText="'Выдано запрещение ДСП'"
   />
   <Calendar
     v-else-if="element.type === getOrderPatternElementTypes.DATETIME"
@@ -108,7 +113,7 @@
   } from '@/constants/orderPatterns';
   import AllowClearInputText from '@/components/AllowClearInputText';
   import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
-  import CheckboxAndInputOrNothingComponent from '@/components/OrderPatterns/CheckboxAndInputOrNothingComponent';
+  import CheckboxComponent from '@/components/OrderPatterns/CheckboxComponent';
 
   export default {
     name: 'dy58-selected-pattern-element-view',
@@ -128,7 +133,7 @@
     components: {
       AllowClearInputText,
       TimeOrTillNoticeComponent,
-      CheckboxAndInputOrNothingComponent,
+      CheckboxComponent,
     },
 
     watch: {

@@ -29,6 +29,7 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
     for (let orderTextElement of orderText) {
       if (![OrderPatternElementType.MULTIPLE_SELECT, OrderPatternElementType.LINEBREAK,
             OrderPatternElementType.TEXT_AREA, OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING,
+            OrderPatternElementType.CHECKBOX,
           ].includes(orderTextElement.type) &&
           !ORDER_ELEMENTS_CAN_BE_EMPTY.includes(orderTextElement.ref) && !orderTextElement.value)
       {

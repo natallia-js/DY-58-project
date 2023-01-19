@@ -143,11 +143,18 @@
   />
 
   <!-- Элемент "Выдано запрещение ДСП" -->
-
+  <!-- ранее было:
   <CheckboxAndInputOrNothingComponent
     v-else-if="element.type === OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING"
     :checkboxText="'Выдано запрещение ДСП'"
     :placeholder="element.ref || 'запрещение ДСП'"
+    v-tooltip="element.ref"
+    :value="state.elementModelValue"
+    @input="state.elementModelValue = $event"
+  />-->
+  <CheckboxComponent
+    v-else-if="element.type === OrderPatternElementType.CHECKBOX"
+    :checkboxText="'Выдано запрещение ДСП'"
     v-tooltip="element.ref"
     :value="state.elementModelValue"
     @input="state.elementModelValue = $event"
@@ -400,7 +407,7 @@
   import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
   import { getOrderTextParamValue } from '@/additional/getOrderTextParamValue';
   import TimeOrTillNoticeComponent from '@/components/OrderPatterns/TimeOrTillNoticeComponent';
-  import CheckboxAndInputOrNothingComponent from '@/components/OrderPatterns/CheckboxAndInputOrNothingComponent';
+  import CheckboxComponent from '@/components/OrderPatterns/CheckboxComponent';
   import AutoWidthInputText from '@/components/OrderPatterns/AutoWidthInputText';
   import AutoWidthDropdown from '@/components/OrderPatterns/AutoWidthDropdown';
 
@@ -424,7 +431,7 @@
 
     components: {
       TimeOrTillNoticeComponent,
-      CheckboxAndInputOrNothingComponent,
+      CheckboxComponent,
       AutoWidthInputText,
       AutoWidthDropdown,
     },

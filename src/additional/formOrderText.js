@@ -144,6 +144,7 @@ export function formOrderText(props) {
       case OrderPatternElementType.INPUT:
       case OrderPatternElementType.SELECT:
       case OrderPatternElementType.MULTIPLE_SELECT:
+      case OrderPatternElementType.CHECKBOX:
       case OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING:
         substring = currVal.value || '';
         break;
