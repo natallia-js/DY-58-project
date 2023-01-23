@@ -42,7 +42,10 @@ export function getOrderTextElementTypedValue(element) {
           edit: element.value === 'true' ? true : false,
           view: element.value === 'true' ? true : false,
         };
-      return new Date(element.value);
+      return {
+        edit: new Date(element.value),
+        view: new Date(element.value),
+      };
     case OrderPatternElementType.MULTIPLE_SELECT:
       return {
         edit: JSON.parse(element.value) || [],
