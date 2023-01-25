@@ -146,10 +146,12 @@ export function formOrderText(props) {
       case OrderPatternElementType.TEXT:
       case OrderPatternElementType.INPUT:
       case OrderPatternElementType.SELECT:
-      case OrderPatternElementType.MULTIPLE_SELECT:
       case OrderPatternElementType.CHECKBOX:
       case OrderPatternElementType.CHECKBOX_AND_INPUT_OR_NOTHING:
         substring = currVal.value || '';
+        break;
+      case OrderPatternElementType.MULTIPLE_SELECT:
+        substring = (currVal.value || []).join(', ');
         break;
       // Сохраняем форматирование и все переносы в рамках области с произвольным текстом
       case OrderPatternElementType.TEXT_AREA:

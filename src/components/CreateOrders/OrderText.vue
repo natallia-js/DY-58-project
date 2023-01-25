@@ -59,6 +59,7 @@
   import OrderPatternText from '@/components/CreateOrders/OrderPatternText';
   import { OrderPatternElementType } from '@/constants/orderPatterns';
   import { ORDER_TEXT_SOURCE, FILLED_ORDER_DROPDOWN_ELEMENTS } from '@/constants/orders';
+  import getChildOrderPatternElementValueByParentElementValue from '@/additional/getChildOrderPatternElementValueByParentElementValue';
 
   export default {
     name: 'dy58-order-text',
@@ -175,13 +176,13 @@
           const parentMatch = parentChildRelations.patternsParamsMatchingTable.find((match) => match.childParamId === element._id);
           if (parentMatch) {
             const parentParam = parentOrderText.value.orderText.find((el) => el._id === parentMatch.baseParamId);
+            // Определяем значение параметра элемента дочернего шаблона распоряжения на основании его типа, типа соответствующего
+            // элемента родительского шаблона и значения, содержащегося в этом родительском элементе.
             // Здесь берем именно editValue, а не value, т.к. значение может быть изменено пользователем;
             // к тому же, value презназначено для просмотра, а editValue - для редактирования и не содержит "лишних" символов,
             // которые используются в value для более удобного просмотра
-            const parentParamValue = parentParam ? parentParam.editValue : null;
-            if (parentParamValue !== state.orderPatternText[index].value) {
-              state.orderPatternText[index].value = parentParamValue;
-            }
+            state.orderPatternText[index].value =
+              getChildOrderPatternElementValueByParentElementValue(parentParam.type, parentParam.editValue, state.orderPatternText[index].type);
           }
         });
         // сюда попадем только в случае когда родительское и дочернее распоряжения - шаблонные

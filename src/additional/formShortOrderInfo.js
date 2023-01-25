@@ -5,6 +5,13 @@ import {
   FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
 } from '@/constants/orders';
 
+function elementValueIsNotEmpty(value) {
+  return value && (
+         (typeof value === 'string' && value !== '') ||
+         (value instanceof Array && value.length > 0)
+  );
+}
+
 /**
  * Позволяет сформировать краткую информацию о распоряжении (информация извлекается из текста
  * документа, изданного по шаблону).
@@ -26,9 +33,11 @@ export function formShortOrderInfo(orderTextArray, isDNC, isECD, otherToSend) {
 
   const additionalInfoArray = [];
   orderTextArray.forEach((el) => {
+    if (!elementValueIsNotEmpty(el.value))
+      return;
     switch (el.type) {
       case OrderPatternElementType.INPUT:
-        if (el.ref === FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF && el.value) {
+        if (el.ref === FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF) {
           additionalInfoArray.push(el.value);
         }
         if (el.ref === FILLED_ORDER_INPUT_ELEMENTS.TRACK && el.value) {
