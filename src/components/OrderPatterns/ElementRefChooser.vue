@@ -27,6 +27,7 @@
 <script>
   import { mapGetters } from 'vuex';
   import ViewOrderPatternElementRefsDlg from '../ViewOrderPatternElementRefsDlg';
+  import compareStrings from '@/additional/compareStrings';
 
   export default {
     name: 'dy58-element-ref-chooser',
@@ -63,10 +64,8 @@
       },
 
       getPossibleElementRefsFullData() {
-        const elementRefs = this.getOrderPatternsElementsRefsForGivenElementType({ elementType: this.elementType });
-        if (elementRefs)
-          return elementRefs.possibleRefs;
-        return null;
+        return this.getOrderPatternsElementsRefsForGivenElementType({ elementType: this.elementType })
+          .sort((a, b) => compareStrings(a.refName.toLowerCase(), b.refName.toLowerCase()));
       },
     },
 
