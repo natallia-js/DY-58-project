@@ -1,23 +1,25 @@
 <template>
-  <ShowUserDataDlg :showDlg="showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
-  <Menubar :model="getMainMenuItems">
-    <template #end>
-      <Button
-        :label="`${getUserPost} ${getUserFIO({})} ${getUserWorkPoligonName(false)}`"
-        icon="pi pi-user"
-        @click="showUserInfo"
-        v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
-        style="width:100%;height:100%"
-        :class="{
-          'p-button-raised': true,
-          'p-button-danger': ifUserWorksOffline,
-          'p-button-secondary': !ifUserWorksOffline && isUserOnDuty,
-          'p-button-warning': !ifUserWorksOffline && !isUserOnDuty,
-          'dy58-blinking-button': ifUserWorksOffline && isWebSocketConnectionActive,
-        }"
-      />
-    </template>
-  </Menubar>
+  <div>
+    <ShowUserDataDlg :showDlg="showUserDataDlg" @close="hideUserInfo"></ShowUserDataDlg>
+    <Menubar :model="getMainMenuItems">
+      <template #end>
+        <Button
+          :label="`${getUserPost} ${getUserFIO({})} ${getUserWorkPoligonName(false)}`"
+          icon="pi pi-user"
+          @click="showUserInfo"
+          v-tooltip.bottom="'Просмотреть информацию о текущем пользователе'"
+          style="width:100%;height:100%"
+          :class="{
+            'p-button-raised': true,
+            'p-button-danger': ifUserWorksOffline,
+            'p-button-secondary': !ifUserWorksOffline && isUserOnDuty,
+            'p-button-warning': !ifUserWorksOffline && !isUserOnDuty,
+            'dy58-blinking-button': ifUserWorksOffline && isWebSocketConnectionActive,
+          }"
+        />
+      </template>
+    </Menubar>
+  </div>
 </template>
 
 
