@@ -55,14 +55,17 @@
         'getOrderPatternsElementsRefsForGivenElementType',
       ]),
 
+      // Для отображения наименований смысловых значений в выпадающем списке
       getPossibleElementRefsStrings() {
         return this.getOrderPatternsElementsRefsForGivenElementType({
           elementType: this.elementType,
           onlyRefStrings: true,
           includeEmptyString: true,
-        });
+        })
+        .sort((a, b) => compareStrings(a.toLowerCase(), b.toLowerCase()));
       },
 
+      // Для отображения таблицы смысловых значений
       getPossibleElementRefsFullData() {
         return this.getOrderPatternsElementsRefsForGivenElementType({ elementType: this.elementType })
           .sort((a, b) => compareStrings(a.refName.toLowerCase(), b.refName.toLowerCase()));

@@ -9,6 +9,7 @@ import {
 import { LOAD_ORDER_PATTERNS_ELEMENTS_REFS_ACTION } from '@/store/action-types';
 import { getOrderPatternsElementsRefs } from '@/serverRequests/orderPatterns.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
+import checkWorkPoligonsEquality from '@/additional/checkWorkPoligonsEquality';
 
 
 /**
@@ -30,25 +31,50 @@ export const orderPatternsElementsRefs = {
       return state.loadingRefsResult;
     },
 
-    getOrderPatternsElementsRefsForGivenElementType: (state) =>
-      ({ elementType, onlyRefStrings = false, includeEmptyString = false }) => {
+    /**
+     * Для данного типа элемента шаблона возвращает список всех его возможных смысловых значений.
+     */
+    getOrderPatternsElementsRefsForGivenElementType: (state, getters) =>
+      ({ elementType, onlyRefStrings = false, includeEmptyString = false, considerCurrentWorkPoligon = false }) => {
         const refs = state.refs.find((item) => item.elementType === elementType);
         if (!refs)
           return [];
         if (onlyRefStrings) {
-          const refNames = refs.possibleRefs.map((ref) => ref.refName);
+          // Для случая, когда возвращаются только строки с наименованиями смысловых значений,
+          // не допускаем дублирования строк
+          const refNames = [...new Set((refs.possibleRefs || []).map((ref) => ref.refName))];
           if (includeEmptyString)
             return ['', ...refNames];
           else
             return refNames;
         }
-        return refs.possibleRefs;
+        if (considerCurrentWorkPoligon) {
+          // Если необходимо учесть текущий рабочий полигон, то принцип выбора такой:
+          // - в первую очередь, выбираются смысловые значения, которые явно принадлежат только этому рабочему полигону,
+          // - далее, к ним добавляются те смысловые значения, которые являются общими для всех рабочих полигонов,
+          //   но при этом их наименованиям не должны пересекаться с наименованиями смысловых значений, которые
+          //   принадлежат исключительно текущему рабочему полигону
+          const currentWorkPoligon = getters.getUserWorkPoligon || {};
+          const possibleRefs = (refs.possibleRefs || []).filter((ref) =>
+            checkWorkPoligonsEquality(ref.workPoligon, { type: currentWorkPoligon.type, id: currentWorkPoligon.code }));
+          (refs.possibleRefs || []).forEach((ref) => {
+            if (possibleRefs.find((el) => el.refName !== ref.refName)) {
+              possibleRefs.push(ref);
+            }
+          });
+          return possibleRefs;
+        } else
+          return refs.possibleRefs;
       },
 
+    /**
+     * Для данного типа элемента шаблона и его смыслового значения возвращает все возможные значения,
+     * которые может принимать данный элемент с данным смысловым значением на текущем полигоне управления.
+     */
     getOrderPatternElementRefMeanings: (_state, getters) =>
       ({ elementType, elementRef }) => {
         const ref = getters
-          .getOrderPatternsElementsRefsForGivenElementType({ elementType })
+          .getOrderPatternsElementsRefsForGivenElementType({ elementType, considerCurrentWorkPoligon: true })
           .find((el) => el.refName === elementRef);
         if (!ref || !ref.possibleMeanings) {
           return [];

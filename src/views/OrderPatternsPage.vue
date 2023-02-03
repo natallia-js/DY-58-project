@@ -6,7 +6,7 @@
     <TabPanel header="Шаблоны по категориям">
       <order-patterns-tree />
     </TabPanel>
-    <TabPanel v-if="!isDNC && !isECD && !isDSP_or_DSPoperator && !isStationWorksManager" header="Создать шаблон">
+    <TabPanel v-if="/*!isDNC && !isECD && !isDSP_or_DSPoperator && !isStationWorksManager*/true" header="Создать шаблон">
       <create-order-pattern />
     </TabPanel>
   </TabView>
