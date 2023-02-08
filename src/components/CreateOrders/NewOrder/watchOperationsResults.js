@@ -1,8 +1,12 @@
 import { watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ORDER_PATTERN_TYPES, SPECIAL_TELECONTROL_ORDER_SIGN } from '@/constants/orderPatterns';
+import { SET_ALLOW_APPLICATION_NAVIGATION } from '@/store/mutation-types';
 
-
+/**
+ * Данный модуль предназначен для обработки результатов и выполнения разного рода действий, связанных
+ * с появлением результатов выполненных операций.
+ */
 export const useWatchOperationsResults = (inputVals) => {
   const { state, store, props, emit, isECD, showSuccessMessage, showErrMessage } = inputVals;
 
@@ -49,6 +53,9 @@ export const useWatchOperationsResults = (inputVals) => {
           });
         }, 1000);
       } else {
+        // Если не установить данный флаг, приложение будет полагать, что в документе есть изменения и
+        // перед переходом на главную страницу спросит пользователя, действительно ли тот хочет покинуть страницу
+        store.commit(SET_ALLOW_APPLICATION_NAVIGATION);
         // Даем пользователю просмотреть сообщение об успешном издании документа прежде чем переходить
         // на главную страницу
         setTimeout(() => router.push({ name: 'MainPage' }), 1000);

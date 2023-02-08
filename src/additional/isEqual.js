@@ -107,7 +107,9 @@ var freeProcess = moduleExports && freeGlobal.process;
 var nodeUtil = (function() {
   try {
     return freeProcess && freeProcess.binding && freeProcess.binding('util');
-  } catch (e) {}
+  } catch (e) {
+    // empty
+  }
 }());
 
 /* Node.js helper references. */
@@ -1142,7 +1144,7 @@ function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
       }
       object = object.buffer;
       other = other.buffer;
-
+      /* falls through */
     case arrayBufferTag:
       if ((object.byteLength != other.byteLength) ||
           !equalFunc(new Uint8Array(object), new Uint8Array(other))) {
@@ -1169,7 +1171,7 @@ function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
 
     case mapTag:
       var convert = mapToArray;
-
+      /* falls through */
     case setTag:
       var isPartial = bitmask & COMPARE_PARTIAL_FLAG;
       convert || (convert = setToArray);
@@ -1328,7 +1330,9 @@ function getRawTag(value) {
   try {
     value[symToStringTag] = undefined;
     var unmasked = true;
-  } catch (e) {}
+  } catch (e) {
+    // empty
+  }
 
   var result = nativeObjectToString.call(value);
   if (unmasked) {
@@ -1467,10 +1471,14 @@ function toSource(func) {
   if (func != null) {
     try {
       return funcToString.call(func);
-    } catch (e) {}
+    } catch (e) {
+      // empty
+    }
     try {
       return (func + '');
-    } catch (e) {}
+    } catch (e) {
+      // empty
+    }
   }
   return '';
 }
