@@ -13,6 +13,7 @@ import HelpPage from '@/views/HelpPage';
 import { store } from '@/store';
 import isElectron from '@/additional/isElectron';
 import { TRY_LOGIN_VIA_SESSION_ACTION, LOGIN_VIA_LOCAL_STORAGE_ACTION } from '@/store/action-types';
+import requireConfirmOnDataLoss from '@/additional/requireConfirmOnDataLoss';
 
 const routes = [
   {
@@ -132,6 +133,12 @@ router.beforeEach(async (to, from, next) => {
     else if (store.getters.canUserWorkWithSystem || to.params.offline === 'true') {
       // Пользователь работает offline и не осуществил выход из системы
       await store.dispatch(LOGIN_VIA_LOCAL_STORAGE_ACTION)}
+  }
+
+  // Если в данный момент необходимо спросить разрешения у пользователя на переход между страницами приложения, делаем это
+  if (from.path.startsWith('/newOrderPage') && !store.getters.ifAllowApplicationNavigation) {
+    if (!requireConfirmOnDataLoss())
+      return next(false);
   }
 
   // Если пользователь полностью аутентифицирован, то он не может попасть на страницы, требующие

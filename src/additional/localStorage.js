@@ -1,6 +1,5 @@
 import { LOCAL_STORAGE_KEY } from '@/constants/appCredentials';
 
-
 export const saveInLocalStorage = (key, value) => {
   if (key) {
     localStorage.setItem(key, value);

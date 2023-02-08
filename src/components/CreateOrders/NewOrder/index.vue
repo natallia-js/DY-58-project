@@ -396,7 +396,7 @@
 
 
 <script>
-  import { reactive, ref, computed, onMounted } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useVuelidate } from '@vuelidate/core';
   import { useConfirm } from 'primevue/useconfirm';
@@ -417,8 +417,10 @@
     SPECIAL_OPEN_BLOCK_ORDER_SIGN,
     ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
-  import { ORDER_TEXT_SOURCE } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
+  import { useDefaultAndInitialValues } from './defaultAndInitialValues';
+  import { usePossibleOptions } from './possibleOptions';
+  import { useWatchOrderDataChanges } from './watchOrderDataChanges';
   import { useStoreData } from './storeData';
   import { useShowFormElements } from './showFormElements';
   import { useWatchCurrentDateTime } from './watchCurrentDateTime';
@@ -436,7 +438,8 @@
   import { useWatchRelatedOrder } from './watchRelatedOrder';
   import { useOkna } from './okna';
   import { useWatchExistingDNC_ECDTakeDutyOrder } from './watchExistingDNC_ECDTakeDutyOrder';
-  import { SET_SELECTED_OKNO } from '@/store/mutation-types';
+  import { useBeforeWindowUnload } from './beforeWindowUnload';
+  import { SET_ALLOW_APPLICATION_NAVIGATION, SET_SELECTED_OKNO } from '@/store/mutation-types';
 
   export default {
     name: 'dy58-new-order-block',
@@ -478,55 +481,27 @@
       const store = useStore();
       const confirm = useConfirm();
       const { showSuccessMessage, showErrMessage } = showMessage();
+      useBeforeWindowUnload({ store });
+      const {
+        defaultOrderText,
+        defaultOrderPlace,
+        defaultTimeSpan,
+        initialOrderData,
+        initialOrderText,
+      } = useDefaultAndInitialValues({ store, props });
+
+      // При загрузке компонента полагаем, что пока изменений в данных не было
+      store.commit(SET_ALLOW_APPLICATION_NAVIGATION);
 
       const isECD = computed(() => store.getters.isECD);
       const isDNC = computed(() => store.getters.isDNC);
       const isDSP_or_DSPoperator = computed(() => store.getters.isDSP_or_DSPoperator);
 
-      // Уточнять время действия издаваемого распоряжения либо не уточнять
-      const defineOrderTimeSpanOptions = ([
-        { name: 'Время действия по умолчанию', value: false },
-        { name: 'Уточнить время действия', value: true },
-      ]);
-      // Отображать издаваемое распоряжение на ГИД, или не отображать
-      const showOnGIDOptions = ([
-        { name: !isECD.value ? 'Не отображать на ГИД' : 'Не указывать место действия', value: false },
-        { name: !isECD.value ? 'Отобразить на ГИД': 'Определить место действия', value: true },
-      ]);
+      const { defineOrderTimeSpanOptions, showOnGIDOptions } = usePossibleOptions({ isECD });
 
+      // Получение черновиков распоряжений заданного типа
       const getOrderDraftsOfGivenType = computed(() =>
         [{ _id: null, displayTitle: '-' }, ...store.getters.getOrderDraftsOfGivenType(props.orderType)]);
-
-      const defaultOrderText = {
-        orderTextSource: null,
-        patternId: null,
-        orderTitle: null,
-        orderText: null,
-      };
-
-      const initialOrderText = () => {
-        const orderPattern = store.getters.getOrderPatternById(props.orderPatternId);
-        if (orderPattern) {
-          return {
-            orderTextSource: ORDER_TEXT_SOURCE.pattern,
-            patternId: orderPattern._id,
-            orderTitle: orderPattern.title,
-            orderText: orderPattern.elements,
-          };
-        }
-        return defaultOrderText;
-      };
-
-      const defaultOrderPlace = {
-        place: null,
-        value: null,
-      };
-
-      const defaultTimeSpan = {
-        start: null,
-        end: null,
-        tillCancellation: null,
-      };
 
       const state = reactive({
         selectedOrderInputType: OrderInputTypes[0],
@@ -536,16 +511,19 @@
         updateCreateDateTimeRegularly: (isDNC.value || isDSP_or_DSPoperator.value) ? false : true,
         prevRelatedOrder: null,
         //cancelOrderDateTime: null,
-        orderPlace: defaultOrderPlace,
-        timeSpan: defaultTimeSpan,
         defineOrderTimeSpan: defineOrderTimeSpanOptions[0],
         showOnGID: showOnGIDOptions[0],
         specialTrainCategories: null,
-        orderText: defaultOrderText,
-        dncSectorsToSendOrder: [],
-        dspSectorsToSendOrder: [],
-        ecdSectorsToSendOrder: [],
-        otherSectorsToSendOrder: [],
+
+        // На эти параметры идет реакция в плане отслеживания изменений по отношению к исходным данным
+        orderPlace: initialOrderData.orderPlace,
+        timeSpan: initialOrderData.timeSpan,
+        orderText: initialOrderData.orderText,
+        dncSectorsToSendOrder: initialOrderData.dncSectorsToSendOrder,
+        dspSectorsToSendOrder: initialOrderData.dspSectorsToSendOrder,
+        ecdSectorsToSendOrder: initialOrderData.ecdSectorsToSendOrder,
+        otherSectorsToSendOrder: initialOrderData.otherSectorsToSendOrder,
+
         // от имени кого издается распоряжение
         createdOnBehalfOf: null,
         // Ошибки, выявленные серверной частью в информационных полях, в процессе обработки
@@ -559,30 +537,7 @@
         // id текущего черновика распоряжения
         currentOrderDraftId: null,
         gettingOknasData: false,
-        oknaData: [/*{
-          idPlan: 579649,
-          nppPlan: 21,
-          idSpan: 53,
-          day: '25.04.2022',
-          fullNumDoc: '15-07-15/2119 от 15.04.2022',
-          beginStr: '15.04.2022 10:00',
-          endStr: '15.04.2022 15:30',
-          typeWork: 'работы по демонтажу ...',
-          km1: 166,
-          pk1: 6,
-          km2: 173,
-          pk2: 4,
-          comment: '',
-          mainLine: '',
-          line: '',
-          sta1: '151130',
-          sta2: '151304',
-          mainPerf: [{ post: 'ПМС', fio: 'Санчук А.А.' }, { post: 'ПМС', fio: 'Санчук А.А.' }, { post: 'ПРК', fio: 'Прихач А.П.' }],
-          dopPerf: [{ post: 'ПМЗС', fio: 'Лицкевич В.Н.' }, { post: 'ПМЗС', fio: 'Попко С.Е.' }],
-          duration: 330,
-          performer: 'ПМС Барановичи',
-          placeWorkPlan: 'Буйничи-Черноземовка 166 км ПК 6 - 173 км ПК 4',
-        }*/],
+        oknaData: [],
         getOknaDataError: null,
         selectedOknoInDataTable: null,
         // true - обновить данные в окне создания нового распоряжения из разных источников (выбранный черновик
@@ -590,6 +545,9 @@
         // (хук mounted), false - не обновлять
         updateFormDataOnMounted: true,
       });
+
+      // Отслеживание изменений в данных распоряжения
+      useWatchOrderDataChanges({ state, store, initialOrderData });
 
       const selectedOkno = computed(() => store.getters.getSelectedOkno);
 

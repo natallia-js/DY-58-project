@@ -51,14 +51,14 @@ export const orderPatternsElementsRefs = {
         if (considerCurrentWorkPoligon) {
           // Если необходимо учесть текущий рабочий полигон, то принцип выбора такой:
           // - в первую очередь, выбираются смысловые значения, которые явно принадлежат только этому рабочему полигону,
-          // - далее, к ним добавляются те смысловые значения, которые являются общими для всех рабочих полигонов,
-          //   но при этом их наименованиям не должны пересекаться с наименованиями смысловых значений, которые
-          //   принадлежат исключительно текущему рабочему полигону
           const currentWorkPoligon = getters.getUserWorkPoligon || {};
           const possibleRefs = (refs.possibleRefs || []).filter((ref) =>
             checkWorkPoligonsEquality(ref.workPoligon, { type: currentWorkPoligon.type, id: currentWorkPoligon.code }));
+          // - далее, к ним добавляются те смысловые значения, которые являются общими для всех рабочих полигонов,
+          //   но при этом их наименования не должны пересекаться с наименованиями смысловых значений, которые
+          //   принадлежат исключительно текущему рабочему полигону
           (refs.possibleRefs || []).forEach((ref) => {
-            if (possibleRefs.find((el) => el.refName !== ref.refName)) {
+            if (!possibleRefs.find((el) => el.refName === ref.refName)) {
               possibleRefs.push(ref);
             }
           });

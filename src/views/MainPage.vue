@@ -42,7 +42,11 @@
             </p>
           </div>
         </div>
-        <TabView class="dy58-work-orders-tabview">
+        <TabView
+          v-model:activeIndex="state.activeWorkOrdersTabsIndex"
+          @tabClick="(event) => state.activeWorkOrdersTabsIndex = event.index"
+          class="dy58-work-orders-tabview"
+        >
           <TabPanel header="Табличный вид">
             <!-- Таблица распоряжений в работе -->
             <orders-in-work-data-table />
@@ -90,6 +94,7 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
+        activeWorkOrdersTabsIndex: 0,
         startDateToGetData: store.getters.getStartDateToGetData || new Date(),
       });
 

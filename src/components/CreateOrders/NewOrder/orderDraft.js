@@ -15,7 +15,7 @@ import {
 /**
  * Данный модуль предназначен для работы с черновиком распоряжения.
  */
- export const useOrderDraft = (inputVals) => {
+export const useOrderDraft = (inputVals) => {
   const { state, props, store, confirm, getOrderPatternElementValue } = inputVals;
 
   // Объект текущего черновика распоряжения (объект либо null)

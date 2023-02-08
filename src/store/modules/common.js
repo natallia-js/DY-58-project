@@ -5,6 +5,8 @@ import {
   SET_SYSTEM_MESSAGE,
   DELETE_ALL_SYSTEM_MESSAGES,
   SET_ALL_DATA_LOADED_ON_APP_RELOAD,
+  SET_ALLOW_APPLICATION_NAVIGATION,
+  SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION,
 } from '@/store/mutation-types';
 import { MAX_SYSTEM_MESSAGES_STORED } from '@/constants/appSettings';
 
@@ -23,9 +25,16 @@ export const common = {
     printPreview: false,
     // Последние сообщения о выполнении системой работы (результаты общения с сервером)
     lastNSystemMessages: [],
+    // Определяет, хочет ли пользователь в данный момент перемещаться между вкладками (пунктами меню) приложения.
+    // Он может не хотеть, если в данный момент, например, заполняет форму для создания нового распоряжения.
+    allowApplicationNavigation: true,
   },
 
   getters: {
+    ifAllowApplicationNavigation(state) {
+      return state.allowApplicationNavigation;
+    },
+
     ifAllDataLoadedOnApplicationReload(state) {
       return state.allDataLoadedOnApplicationReload;
     },
@@ -56,6 +65,16 @@ export const common = {
   },
 
   mutations: {
+    [SET_ALLOW_APPLICATION_NAVIGATION] (state) {
+      if (!state.allowApplicationNavigation)
+        state.allowApplicationNavigation = true;
+    },
+
+    [SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION] (state) {
+      if (state.allowApplicationNavigation)
+        state.allowApplicationNavigation = false;
+    },
+
     [SET_ALL_DATA_LOADED_ON_APP_RELOAD] (state) {
       state.allDataLoadedOnApplicationReload = true;
     },

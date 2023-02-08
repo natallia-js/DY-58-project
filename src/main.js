@@ -54,6 +54,22 @@ import Menu from 'primevue/menu';
 import InputMask from 'primevue/inputmask';
 import Password from 'primevue/password';
 
+/*
+ * Put this after you import TabView.
+ * Данный код предотвратит автоматическое переключение закладок в компоненте TabView,
+ * но будет продолжать emit события в приложение.
+ * Это нам нужно для того чтобы при создании распоряжения пользователь переходом на
+ * закладку другого типа документа не потерял введенные данные: каждый раз при переходе
+ * на другую закладку, при условии наличия изменений в создаваемом документе, будем спрашивать
+ * пользователя, действительно ли он этого хочет, ибо есть несохраненные данные, которые можно потерять.
+*/
+TabView.methods.onTabClick = function(event, i) {
+  this.$emit('tab-click', {
+    originalEvent: event,
+    index: i,
+  });
+};
+
 const app = createApp(App);
 
 app.use(store);

@@ -1,6 +1,12 @@
 <template>
   <!-- Параметр lazy должен быть обязательно, иначе придется переписывать код! -->
-  <TabView v-if="canUserDispatchOrders" v-model:activeIndex="activeIndex" lazy @tabChange="handleTabChange" :key="tabViewKey">
+  <TabView v-if="canUserDispatchOrders"
+    v-model:activeIndex="activeIndex"
+    lazy
+    @tabClick="handleTabClick"
+    @tabChange="handleTabChange"
+    :key="tabViewKey"
+  >
     <TabPanel v-if="isDNC" :header="ORDER_PATTERN_TYPES.ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
@@ -78,6 +84,7 @@
     SET_ACTIVE_MAIN_MENU_ITEM,
   } from '@/store/mutation-types';
   import { ORDER_PATTERN_TYPES } from '@/constants/orderPatterns';
+  import requireConfirmOnDataLoss from '@/additional/requireConfirmOnDataLoss';
 
   const TABS_INDEXES = {
     FIRST_TAB: 0,
@@ -211,6 +218,20 @@
       });
 
       /**
+       * Если пользователь переходит с закладки на закладку, при этом есть несохраненные изменения,
+       * предупреждаем его о потере данных.
+       */
+      const handleTabClick = (event) => {
+        const goToNextTab = () => { activeIndex.value = event.index };
+        if (!store.getters.ifAllowApplicationNavigation) {
+          if (requireConfirmOnDataLoss())
+            goToNextTab();
+        } else {
+          goToNextTab();
+        }
+      };
+
+      /**
        * При смене закладок меняем url.
        */
       const handleTabChange = (event) => {
@@ -264,6 +285,7 @@
         isStationWorksManager,
         ORDER_PATTERN_TYPES,
         TABS_INDEXES,
+        handleTabClick,
         handleTabChange,
         handleChangeRouteParams,
         getOrderPatternIdPropValue,
