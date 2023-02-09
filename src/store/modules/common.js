@@ -9,7 +9,7 @@ import {
   SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION,
 } from '@/store/mutation-types';
 import { MAX_SYSTEM_MESSAGES_STORED } from '@/constants/appSettings';
-
+import { store } from '@/store';
 
 export const common = {
   state: {
@@ -71,6 +71,10 @@ export const common = {
     },
 
     [SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION] (state) {
+      // Для ЭЦД временно выключаем функционал проверки наличия изменений в издаваемом документе
+      // и уточнения у пользователя, действительно ли он хочет покинуть текущую страницу
+      if (store.getters.isECD)
+        return;
       if (state.allowApplicationNavigation)
         state.allowApplicationNavigation = false;
     },
