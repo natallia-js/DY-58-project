@@ -15,6 +15,13 @@ import { setOrderInvalidMark } from '@/serverRequests/orders.requests';
 
 export const invalidOrders = {
   getters: {
+    isOrderValid(state) {
+      return (orderId) => {
+        const order = state.data.find((el) => el._id == orderId);
+        return order?.invalid === false ? true : false;
+      };
+    },
+
     /**
      * Возвращает true, если распоряжение с заданным id в данный момент времени проходит
      * процедуру установки его статуса действительности / недействительности, false - в противном случае.

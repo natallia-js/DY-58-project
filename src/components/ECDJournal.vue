@@ -182,7 +182,7 @@
   import { GET_ALL_LOCALLY_SAVED_ORDERS } from '@/store/action-types';
   import journalTableCellStyleClasses from '@/additional/styleClasses/journalTableCellStyleClasses';
 
-  const DEF_ROWS_PER_PAGE = 10;
+  const DEF_ROWS_PER_PAGE = 20;
 
   export default {
     name: 'dy58-ecd-journal',

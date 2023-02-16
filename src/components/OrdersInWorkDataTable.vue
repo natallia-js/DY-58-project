@@ -101,6 +101,7 @@
               ></i>
               <!-- кнопки допустимых действий над распоряжением -->
               <div v-else>
+                <!-- показать подробную информацию о распоряжении -->
                 <div class="p-mb-1">
                   <Button
                     icon="pi pi-ellipsis-h"
@@ -109,6 +110,7 @@
                     @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
+                <!-- удалить распоряжение / цепочку распоряжений -->
                 <div v-if="canOrdersChainBeDeleted({
                   orderId: slotProps.data.id,
                   orderChainId: slotProps.data.orderChainId,
@@ -121,6 +123,15 @@
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
+                <!-- принудительно завершить цепочку распоряжений pi-replay -->
+                <div class="p-mb-1">
+                  <Button
+                    icon="pi pi-pause"
+                    class="p-button-primary p-button dy58-order-action-button"
+                    @click="() => {}"
+                  />
+                </div>
+                <!-- создать распоряжение, связанное с текущим -->
                 <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id) &&
                   createRelativeOrderContextMenuItems(slotProps.data.id) &&
                   createRelativeOrderContextMenuItems(slotProps.data.id).length"

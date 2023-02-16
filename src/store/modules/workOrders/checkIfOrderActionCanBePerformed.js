@@ -8,7 +8,7 @@ export const checkIfOrderActionCanBePerformed = {
     /**
      * Проверка возможности выполнения любого действия над рабочим распоряжением с точки зрения
      * "свободности" данного распоряжения для выполнения над ним каких-либо действий:
-     * 1) в настоящее время не должна удаляться цепочка распоряжения,
+     * 1) в настоящее время не должна удаляться цепочка, которой принадлежит это распоряжение,
      * 2) распоряжение не должно проходить процедуру подтверждения за других,
      * 3) у распоряжения не должен удаляться его получатель на станции.
      * Все вышеуказанные операции - длительные: требуют обращения к серверу.
@@ -56,6 +56,8 @@ export const checkIfOrderActionCanBePerformed = {
     /**
      * Проверка возможности подтвердить распоряжение за других лиц - адресатов данного распоряжения
      * в текущий момент времени текущим пользователем.
+     *
+     * Не запрещается подтверждать недействительные документы.
      */
     canOrderBeConfirmedFor(_state, getters) {
       return (order) => (
@@ -100,6 +102,8 @@ export const checkIfOrderActionCanBePerformed = {
     /**
      * Проверка возможности подтвердить распоряжение за других лиц - получателей копии данного распоряжения -
      * на станции в текущий момент времени текущим пользователем.
+     *
+     * Не запрещается подтверждать недействительные документы.
      */
     canOrderBeConfirmedForOnStation(_state, getters) {
       return (order) => (
@@ -114,6 +118,8 @@ export const checkIfOrderActionCanBePerformed = {
      * Проверка возможности определить дополнительных адресатов распоряжения
      * (лиц, которые дополнительно ознакомились с ним).
      * Делать это может только ДСП, находящийся на дежурстве (не оператор, а именно сам ДСП - главный на станции!).
+     *
+     * Не запрещается делать это в отношении недействительных документов.
      */
     canSetAdditionallyInformedPeopleForOrder(_state, getters) {
       return (order) => (
@@ -160,6 +166,8 @@ export const checkIfOrderActionCanBePerformed = {
     /**
      * Проверка возможности удалить получателя распоряжения на станции в текущий момент времени
      * текущим пользователем.
+     *
+     * Не запрещается делать это в отношении недействительных документов.
      */
     canOrderBeDeletedStationWorkPlaceReceiver(_state, getters) {
       return (order) => (
@@ -172,6 +180,7 @@ export const checkIfOrderActionCanBePerformed = {
 
     /**
      * Проверка возможности удалить цепочку распоряжений текущим пользователем.
+     * Цепочка распоряжений удаляется только из коллекции рабочих распоряжений.
      */
     canOrdersChainBeDeleted(_state, getters) {
       return ({ orderId, orderChainId, orderChainEndDateTime }) => (
@@ -179,7 +188,10 @@ export const checkIfOrderActionCanBePerformed = {
         getters.canUserPerformAnyActionOnOrder(orderId) &&
         // пользователь имеет право удалять цепочки распоряжений
         getters.canUserDelConfirmedOrdersChains &&
-        // цепочка, которой принадлежит распоряжение, не является действующей
+        // цепочка, которой принадлежит распоряжение, не является действующей - это очень важное условие,
+        // т.к. если пользователь удалит действующую цепочку, то она так и останется действующей навсегда,
+        // будет вечно висеть в основной коллекции распоряжений как действующая, поправить ситуацию сможет только
+        // программист или системный администратор
         getters.workOrderChainIsInactive({ orderChainId, orderChainEndDateTime, considerAllOrdersConfirmation: true })
       ) ? true : false;
     },
@@ -191,7 +203,8 @@ export const checkIfOrderActionCanBePerformed = {
       return (orderId) => (
         getters.canUserPerformAnyActionOnOrder(orderId) &&
         getters.canUserDispatchOrders &&
-        getters.isOrderActive(orderId)
+        getters.isOrderActive(orderId) &&
+        getters.isOrderValid(orderId)
       ) ? true : false;
     },
 
