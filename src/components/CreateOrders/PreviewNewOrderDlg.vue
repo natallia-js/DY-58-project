@@ -37,8 +37,8 @@
         <Checkbox id="if-del-order-draft" v-model="delOrderDraft" :binary="true" />
         <label for="if-del-order-draft">&#160; Удалить черновик</label>
       </div>
-      <Button label="Издать" @click="dispatchOrder" />
-      <Button label="Отмена" @click="closeDialog" class="p-button-secondary" />
+      <Button label="Издать" @click="dispatchOrder" :disabled="getDispatchOrdersBeingProcessedNumber >= 1" />
+      <Button label="Закрыть" @click="closeDialog" class="p-button-secondary" />
     </template>
   </Dialog>
 </template>
@@ -127,6 +127,7 @@
         'getUserWorkPoligonName',
         'isECD',
         'getLastDNC_ECDTakeDutyOrderAdditionalWorkers',
+        'getDispatchOrdersBeingProcessed',
       ]),
 
       getOrderText() {
@@ -152,6 +153,10 @@
           return 'Время издания';
         }
         return getTimeSpanString(this.type, this.timeSpan, this.isECD, this.specialTrainCategories);
+      },
+
+      getDispatchOrdersBeingProcessedNumber() {
+        return this.$store.getters.getDispatchOrdersBeingProcessed(this.type);
       },
     },
 

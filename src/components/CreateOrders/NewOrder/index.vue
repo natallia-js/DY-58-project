@@ -314,10 +314,20 @@
           </div>
           <div class="p-grid" style="width:30%">
             <div class="p-col-12">
-              <Button type="submit" label="Просмотреть и издать" class="p-mb-2" />
+              <Button
+                type="submit"
+                label="Просмотреть и издать"
+                class="p-mb-2"
+                :disabled="getDispatchOrdersBeingProcessed >= 1"
+              />
             </div>
             <div class="p-col-12">
-              <Button v-if="isECD" label="Сохранить черновик" class="p-button-secondary" @click="handleSaveOrderDraft($event)" />
+              <Button v-if="isECD"
+                label="Сохранить черновик"
+                class="p-button-secondary"
+                @click="handleSaveOrderDraft($event)"
+                :disabled="getDispatchOrdersBeingProcessed >= 1"
+              />
             </div>
           </div>
         </div>

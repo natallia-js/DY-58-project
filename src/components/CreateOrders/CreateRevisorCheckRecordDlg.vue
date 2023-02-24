@@ -59,7 +59,7 @@
         <div v-if="getDispatchOrdersBeingProcessed > 0" class="dy58-warning p-mb-2">
           На сервер отправлено {{ getDispatchOrdersBeingProcessed }} запросов на издание документа текущего типа. Ожидаю ответ...
         </div>
-        <Button type="submit" class="p-mr-2" label="Сохранить" />
+        <Button type="submit" class="p-mr-2" label="Сохранить" :disabled="getDispatchOrdersBeingProcessed >= 1" />
         <Button class="p-button-secondary" label="Закрыть" @click="closeDialog" />
       </div>
     </form>
