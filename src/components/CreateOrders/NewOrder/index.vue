@@ -266,7 +266,7 @@
         <!-- ОСОБЫЕ ОТМЕТКИ РАСПОРЯЖЕНИЯ -->
 
         <div
-          v-if="state.specialTrainCategories && state.specialTrainCategories.length"
+          v-if="state.specialTrainCategories?.length"
           class="p-field p-col-12 p-m-0"
         >
           <span class="p-text-bold">Особые отметки документа:</span>&#160;
@@ -423,8 +423,6 @@
   import {
     ORDER_PATTERN_TYPES,
     SPECIAL_CIRCULAR_ORDER_SIGN,
-    SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
-    SPECIAL_OPEN_BLOCK_ORDER_SIGN,
     ALL_ORDERS_TYPE_ECD,
   } from '@/constants/orderPatterns';
   import showMessage from '@/hooks/showMessage.hook';
@@ -736,12 +734,18 @@
         defineOrderTimeSpanOptions,
         ORDER_PATTERN_TYPES,
         SPECIAL_CIRCULAR_ORDER_SIGN,
-        SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
-        SPECIAL_OPEN_BLOCK_ORDER_SIGN,
         isDSP_or_DSPoperator,
         isDNC,
         isECD,
-        getLastDNC_ECDTakeDutyOrderAdditionalWorkers: computed(() => store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers),
+        getLastDNC_ECDTakeDutyOrderAdditionalWorkers: computed(() => {
+          // Для распоряжений, которые не являются циркулярами, из последнего циркуляра "подтягивается"
+          // информация о дополнительных работниках, которые приняли дежурство вместе основным работником
+          if (!state.specialTrainCategories?.includes(SPECIAL_CIRCULAR_ORDER_SIGN))
+            return store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers;
+          // Для циркуляров информация о дополнительных работниках не нужна, т.к. именно в них эта информация
+          // зарождается
+          return null;
+        }),
         isStationWorksManager: computed(() => store.getters.isStationWorksManager),
         getOknaTblColumns: computed(() => store.getters.getOknaTblColumns),
         v$,
