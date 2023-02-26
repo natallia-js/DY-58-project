@@ -7,7 +7,7 @@
     @hide="handleCloseDialog"
   >
     <div v-if="!isLogoutProcessUnderway">
-      <span v-if="!getlogoutWithDutyPass">Вы уверены, что хотите выйти из системы?</span>
+      <span v-if="!getLogoutWithDutyPass">Вы уверены, что хотите выйти из системы?</span>
       <span v-else>Вы уверены, что хотите выйти из системы со сдачей дежурства?</span>
       <br/>
       <div v-if="getLogoutError" class="dy58-bold-error-message">
@@ -50,7 +50,7 @@
 
     computed: {
       ...mapGetters([
-        'getlogoutWithDutyPass',
+        'getLogoutWithDutyPass',
         'isLogoutProcessUnderway',
         'getLogoutError',
       ]),

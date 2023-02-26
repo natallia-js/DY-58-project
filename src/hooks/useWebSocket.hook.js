@@ -69,7 +69,10 @@ export default function useWebSocket({ socketUrl }) {
     };
 
     function getUserDataStringToSendToWSServer() {
-      return `${store.getters.getUserId},${store.getters.getUserWorkPoligon.type},${store.getters.getUserWorkPoligon.code},${store.getters.getUserWorkPoligon.subCode}`;
+      const userId = store.getters.getUserId;
+      const userWorkPoligon = store.getters.getUserWorkPoligon;
+      const isUserOnDuty = store.getters.isUserOnDuty;
+      return `${userId},${userWorkPoligon?.type},${userWorkPoligon?.code},${userWorkPoligon?.subCode},${isUserOnDuty}`;
     }
 
     /**

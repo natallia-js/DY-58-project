@@ -315,7 +315,7 @@ export const currUser = {
     getStartLogout(state) {
       return state.startLogout;
     },
-    getlogoutWithDutyPass(state) {
+    getLogoutWithDutyPass(state) {
       return state.logoutWithDutyPass;
     },
     isLogoutProcessUnderway(state) {

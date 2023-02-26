@@ -75,6 +75,7 @@ export const common = {
             item.lastUserChoice = null;
             item.lastUserChoiceId = null;
             item.lastUserChoiceOnline = false;
+            item.lastUserChoiceOnDuty = null;
             if (resetSendOriginal)
               item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
           }
@@ -105,6 +106,7 @@ export const common = {
                   surname: neededUser.surname,
                 });
                 sector.lastUserChoiceOnline = neededUser.online;
+                sector.lastUserChoiceOnDuty = neededUser.onDuty;
               }
             }
           }
@@ -155,6 +157,7 @@ export const common = {
               surname: neededUser.surname,
             }) : null;
             sector.lastUserChoiceOnline = chooseUser ? neededUser.online : false;
+            sector.lastUserChoiceOnline = chooseUser ? neededUser.onDuty : null;
           }
         });
       }

@@ -12,7 +12,9 @@ import {
 
 export const webSocket = {
   state: {
+    // массив из заданного количества сообщений, полученных от сервера
     lastNServerMessages: [],
+    // последнее состояние, в котором было обнаружено websocket-соединение, и дата-время перехода в это состояние
     readyState: {
       ready: false,
       datetime: null,
