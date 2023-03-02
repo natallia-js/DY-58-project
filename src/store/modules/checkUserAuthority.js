@@ -177,11 +177,11 @@ export const checkUserAuthority = {
 
     /**
      * Пользователь, принявший дежурство, может пометить документ как действительный / недействительный,
-     * если этот пользователь - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * если этот пользователь - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserToggleOrderInvalidMark(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },
   },
