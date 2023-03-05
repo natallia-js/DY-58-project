@@ -3,8 +3,9 @@
     <h2 class="p-text-center p-mt-3 p-mb-3">Персонал рабочего полигона</h2>
     <p>
       <span class="p-text-italic">Примечание:</span>
-      <span class="dy58-info"> Данным цветом</span> выделен персонал, находящийся в сети (online), а
-      <span class="dy58-error-message"> таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке,
+      <span class="dy58-online-onduty"> Данным цветом</span> выделен персонал, находящийся в сети (online) и на дежурстве,
+      <span class="dy58-online-notonduty">этим цветом</span> выделен персонал, находящийся в сети (online), но не на дежурстве, а
+      <span class="dy58-error-message">таким цветом</span> выделен персонал, зарегистрированный на соответствующем участке,
       но не имеющий полномочий ДНЦ (DNC_FULL), ЭЦД (ECD_FULL), ДСП (DSP_FULL), Оператора при ДСП (DSP_Operator)
       либо Руководителя работ (STATION_WORKS_MANAGER)
     </p>

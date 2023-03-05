@@ -75,6 +75,7 @@ export const dnc = {
           fio: item.lastUserChoice || '',
           fioId: item.lastUserChoiceId,
           fioOnline: item.lastUserChoiceOnline,
+          fioOnDuty: item.lastUserChoiceOnDuty,
           people: item.people
             .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DNC_FULL))
             .map((el) => {
@@ -83,6 +84,7 @@ export const dnc = {
                 post: el.post,
                 fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                 online: el.online,
+                onDuty: el.onDuty,
               };
             }),
           sendOriginal: item.sendOriginal,

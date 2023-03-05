@@ -86,7 +86,7 @@ export default function useWebSocket({ socketUrl }) {
         sendMessageToServer(WS_SERVER_PARAMS.PONG_MESSAGE(getUserDataStringToSendToWSServer()));
         return;
       }
-      // Обработка сообщения от сервера, содержащего информацию об id online-пользователей
+      // Обработка сообщения от сервера, содержащего информацию об online-пользователях
       if (msg.match(WS_SERVER_PARAMS.ONLINE_USERS_MESSAGE_PATTERN)) {
         const onlineUsers = JSON.parse(msg.slice(7));
         store.commit(SET_ONLINE_SHIFT_PERSONAL, onlineUsers);

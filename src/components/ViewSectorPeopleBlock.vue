@@ -8,7 +8,8 @@
       :key="user._id"
       :class="[
         'p-ml-4',
-        { 'dy58-info': user.online },
+        { 'dy58-online-onduty': user.online && user.onDuty },
+        { 'dy58-online-notonduty': user.online && !user.onDuty },
         { 'dy58-error-message': !user.appsCredentials || user.appsCredentials.length == 0 }
       ]"
     >

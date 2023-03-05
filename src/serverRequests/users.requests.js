@@ -2,7 +2,8 @@ import { AUTH_SERVER_ACTIONS_PATHS } from '@/constants/servers';
 import { DY58_CREDENTIALS_GROUP_NAME, APP_CREDENTIALS } from '@/constants/appCredentials';
 import { makeServerRequest } from './common';
 
-// На участках ДНЦ нас интересуют только пользователи с полномочиями DNC_FULL, REVISOR и VIEWER
+// На участках ДНЦ нас интересуют только пользователи с полномочиями DNC_FULL, REVISOR и VIEWER.
+// onlyOnline параметр на сервере не реализован
 export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getDNCSectorsWorkPoligonsUsers,
@@ -19,7 +20,9 @@ export const getDNCSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) 
   return response.data;
 };
 
-// На станциях нас интересуют только пользователи с полномочиями DSP_FULL, DSP_Operator, STATION_WORKS_MANAGER, REVISOR и VIEWER
+// На станциях нас интересуют только пользователи с полномочиями DSP_FULL, DSP_Operator,
+// STATION_WORKS_MANAGER, REVISOR и VIEWER.
+// onlyOnline параметр на сервере не реализован
 export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline, includeWorkPlaces }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getStationsWorkPoligonsUsers,
@@ -43,7 +46,8 @@ export const getStationsWorkPoligonsUsers = async ({ stationIds, onlyOnline, inc
   return response.data;
 };
 
-// На участках ЭЦД нас интересуют только пользователи с полномочиями ECD_FULL, REVISOR и VIEWER
+// На участках ЭЦД нас интересуют только пользователи с полномочиями ECD_FULL, REVISOR и VIEWER.
+// onlyOnline параметр на сервере не реализован
 export const getECDSectorsWorkPoligonsUsers = async ({ sectorIds, onlyOnline }) => {
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.getECDSectorsWorkPoligonsUsers,

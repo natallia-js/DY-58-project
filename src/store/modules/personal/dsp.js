@@ -161,6 +161,7 @@ export const dsp = {
             fio: item.lastUserChoice || '',
             fioId: item.lastUserChoiceId,
             fioOnline: item.lastUserChoiceOnline,
+            fioOnDuty: item.lastUserChoiceOnDuty,
             people: item.people
               .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL))
               .map((el) => {
@@ -169,6 +170,7 @@ export const dsp = {
                   post: el.post,
                   fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                   online: el.online,
+                  onDuty: el.onDuty,
                 };
               }),
             sendOriginal: item.sendOriginal,

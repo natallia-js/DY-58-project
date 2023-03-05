@@ -33,6 +33,14 @@ h4 {
   color: var(--blue-500);
 }
 
+.dy58-online-notonduty {
+  color: var(--green-500);
+}
+
+.dy58-online-onduty {
+  color: var(--blue-500);
+}
+
 @mixin generalErrorStyles() {
   color: red;
 }

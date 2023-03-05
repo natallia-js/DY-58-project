@@ -37,6 +37,7 @@ export const common = {
           item.lastUserChoice = null;
           item.lastUserChoiceId = null;
           item.lastUserChoiceOnline = false;
+          item.lastUserChoiceOnDuty = null;
           item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
         }
       }

@@ -21,7 +21,7 @@ export const onlinePersonal = {
      * значения true, false, null).
      */
     [SET_ONLINE_SHIFT_PERSONAL] (state, onlineUsers) {
-      if (!onlineUsers || !Array.isArray(onlineUsers) || !state.sectorPersonal) {
+      if (!Array.isArray(onlineUsers) || !state.sectorPersonal) {
         return;
       }
       function setOnlineSectorsShift(sectorsArray, sectorType) {
@@ -42,7 +42,7 @@ export const onlinePersonal = {
           // для каждого пользователя рассматриваемого полигона управления проверяем online-статус и меняем,
           // при необходимости
           sectorData.people.forEach((user) => {
-            let userOnlineStatus;
+            let userOnlineStatus; // объект с полями clientId, isClientOnDuty
             if (sectorType === WORK_POLIGON_TYPES.STATION) {
               // среди online-пользователей текущего полигона управления ищем информацию о текущем пользователе
               const currUserInfo = newSectorUsersInfo.find((item) =>
@@ -53,9 +53,21 @@ export const onlinePersonal = {
             } else {
               userOnlineStatus = newSectorUsersInfo?.people?.find((el) => el.clientId === user._id);
             }
+            // Пользователь online, если объект с его id присутствует в ответе от сервера
             if (user.online !== Boolean(userOnlineStatus)) {
               user.online = Boolean(userOnlineStatus);
-              user.onDuty = userOnlineStatus ? userOnlineStatus.isClientOnDuty : null;
+            }
+            // Если пользователь online, то проверяем его статус "на дежурстве" и, при необходимости, корректируем
+            if (userOnlineStatus) {
+              const newOnDutyStatus = userOnlineStatus.isClientOnDuty === 'true' ? true :
+                userOnlineStatus.isClientOnDuty === 'false' ? false : null;
+              if (user.onDuty !== newOnDutyStatus)
+                user.onDuty = newOnDutyStatus;
+            }
+            // В противном случае статус "на дежурстве" пользователя сбрасываем, если он не сброшен
+            else {
+              if (user.onDuty !== null)
+                user.onDuty = null;
             }
           });
           // если у полигона управления не определен default online-пользователь, то в зависимости от типа полигона
@@ -102,10 +114,11 @@ export const onlinePersonal = {
      * Он вызывается при открытии данного окна и позволяет заполнить таблицы в секции "Кому".
      * Заполнение происходит путем определения для каждого участка / станции первого ПОДХОДЯЩЕГО из
      * online-пользователей данного участка / станции.
+     * Подходящим считается тот пользователь, который в данный момент находится на дежурстве.
      */
     [CHOOSE_ONLY_ONLINE_PERSONAL] (state) {
       function setOnlineSectorsShift(sectorsArray, userCredsCheckFunction) {
-        if (sectorsArray && sectorsArray.length) {
+        if (sectorsArray?.length) {
           sectorsArray.forEach((sector) => {
             if (sector.people) {
               const onlineUser = sector.people.find((user) =>
