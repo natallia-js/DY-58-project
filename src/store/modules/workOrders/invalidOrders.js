@@ -91,12 +91,14 @@ export const invalidOrders = {
     },
 
     /**
-     * Для заданного документа позволяет установить отметку о его действительности.
+     * Для заданного документа позволяет установить отметку о его недействительности.
      */
-    [SET_ORDER_INVALID_MARK] (state, { orderId, invalid }) {
+    [SET_ORDER_INVALID_MARK] (state, { orderId, orderChainId, orderChainEndDateTime }) {
       const orderIndex = state.data.findIndex((el) => el._id === orderId);
       if (orderIndex >= 0) {
-        state.data[orderIndex].invalid = invalid;
+        state.data[orderIndex].invalid = true;
+        state.data[orderIndex].orderChainId = orderChainId;
+        state.data[orderIndex].orderChainEndDateTime = orderChainEndDateTime ? new Date(orderChainEndDateTime) : null;
       }
     },
 
@@ -126,10 +128,9 @@ export const invalidOrders = {
 
   actions: {
     /**
-     * Для документа с documentId позволяет установить отметку о его действительности / недействительности в БД
-     * (invalid = true - документ должен быть отмечен как недействительный, invalid = false - как действительный).
+     * Для документа с documentId позволяет установить отметку о его недействительности в БД.
      */
-    async [SET_DOCUMENT_INVALID_MARK] (context, { orderId, invalid }) {
+    async [SET_DOCUMENT_INVALID_MARK] (context, { orderId }) {
       if (!context.getters.canUserToggleOrderInvalidMark) {
         const errMessage = 'У вас нет прав поменять отметку о действительности документа';
         context.commit(SET_CHANGE_ORDER_INVALID_MARK_RESULT, { orderId, error: true, message: errMessage });
@@ -145,13 +146,11 @@ export const invalidOrders = {
       context.commit(CLEAR_CHANGE_ORDER_INVALID_MARK_RESULT, orderId);
       context.commit(SET_ORDER_BEING_CHANGED_ITS_INVALID_MARK, orderId);
       try {
-        const responseData = await setOrderInvalidMark({ orderId, invalid });
+        const responseData = await setOrderInvalidMark({ orderId });
         context.commit(SET_CHANGE_ORDER_INVALID_MARK_RESULT, { orderId, error: false, message: responseData.message });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
-        context.commit(SET_ORDER_INVALID_MARK, {
-          orderId: responseData.orderId,
-          invalid: responseData.invalid,
-        });
+        context.commit(SET_ORDER_INVALID_MARK, { orderId: responseData.orderId, orderChainId: responseData.orderChainId,
+          orderChainEndDateTime: responseData.orderChainEndDateTime, });
 
       } catch (error) {
         const errMessage = formErrorMessageInCatchBlock(error, 'Ошибка смены отметки о действительности документа');

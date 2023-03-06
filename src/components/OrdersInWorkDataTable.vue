@@ -413,22 +413,7 @@
                 $event,
                 slotProps.data.id,
                 slotProps.data[getWorkMessTblColumnsTitles.orderNum],
-                slotProps.data[getWorkMessTblColumnsTitles.extendedOrderTitle],
-                true)"
-            />
-          </div>
-          <div v-if="canMarkOrderAsValid(slotProps.data)">
-            <span class="p-m-2">Документ недействителен</span>
-            <Button
-              icon="pi pi-check"
-              class="p-button-warning p-button dy58-order-action-button"
-              v-tooltip="`Действителен`"
-              @click="setDocumentInvalidMark(
-                $event,
-                slotProps.data.id,
-                slotProps.data[getWorkMessTblColumnsTitles.orderNum],
-                slotProps.data[getWorkMessTblColumnsTitles.extendedOrderTitle],
-                false)"
+                slotProps.data[getWorkMessTblColumnsTitles.extendedOrderTitle])"
             />
           </div>
         </div>
@@ -661,14 +646,14 @@
       /**
        *
        */
-      const setDocumentInvalidMark = (event, documentId, documentNumber, documentTitle, invalid) => {
+      const setDocumentInvalidMark = (event, documentId, documentNumber, documentTitle) => {
         confirm.require({
           target: event.currentTarget,
           group: 'confirmMarkDocumentAsInvalid',
-          message: `Пометить документ №${documentNumber} "${documentTitle}" как ${invalid ? 'не' : ''}действительный?`,
+          message: `Пометить документ №${documentNumber} "${documentTitle}" как недействительный?`,
           icon: 'pi pi-exclamation-triangle',
           accept: () => {
-            store.dispatch(SET_DOCUMENT_INVALID_MARK, { orderId: documentId, invalid });
+            store.dispatch(SET_DOCUMENT_INVALID_MARK, { orderId: documentId });
           },
         });
       };
@@ -746,7 +731,6 @@
         canOrderBeConfirmedForOnStation: computed(() => store.getters.canOrderBeConfirmedForOnStation),
         canOrderBeDeletedStationWorkPlaceReceiver: computed(() => store.getters.canOrderBeDeletedStationWorkPlaceReceiver),
         canMarkOrderAsInvalid: computed(() => store.getters.canMarkOrderAsInvalid),
-        canMarkOrderAsValid: computed(() => store.getters.canMarkOrderAsValid),
         getOrdersChainsBeingDeleted: computed(() => store.getters.getOrdersChainsBeingDeleted),
         canUserConfirmOrdersForOthersOnStationWorkPlaces: computed(() => store.getters.canUserConfirmOrdersForOthersOnStationWorkPlaces),
         canSetAdditionallyInformedPeopleForOrder: computed(() => store.getters.canSetAdditionallyInformedPeopleForOrder),

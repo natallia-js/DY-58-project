@@ -232,23 +232,5 @@ export const checkIfOrderActionCanBePerformed = {
         !order.invalid
       ) ? true : false;
     },
-
-    /**
-     * Проверка возможности отметить рабочий документ как действительный.
-     * Возвращает true, если пользователь может пометить распоряжение как действительное.
-     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-     * котором работает пользователь, и именно этим пользователем, при этом это распоряжение является
-     * помеченным как недействительное. Пользователь должен быть на дежурстве.
-     * Возвращает false, если текущий пользователь не имеет права пометить распоряжение как действительное.
-     */
-    canMarkOrderAsValid(_state, getters) {
-      return (order) => (
-        getters.canUserPerformAnyActionOnOrder(order.id) &&
-        getters.canUserToggleOrderInvalidMark &&
-        getters.orderDispatchedOnCurrentWorkPoligon(order) &&
-        getters.orderDispatchedByTheCurrentUser(order) &&
-        order.invalid
-      ) ? true : false;
-    },
   },
 };
