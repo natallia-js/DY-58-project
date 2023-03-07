@@ -144,3 +144,6 @@ export const DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS =  Object.freeze({
   TAKE_DUTY_PERSONAL: 'Персонал, принимающий дежурство',
   PASS_DUTY_PERSONAL: 'Персонал, сдающий дежурство',
 });
+
+export const STATION_PREFIX = 'ст.';
+export const BLOCK_PREFIX = 'пер.';

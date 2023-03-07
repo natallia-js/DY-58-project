@@ -47,6 +47,8 @@
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DROPDOWN_ELEMENTS,
     FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
+    STATION_PREFIX,
+    BLOCK_PREFIX,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -224,13 +226,13 @@
           switch (elementRef) {
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION:
               return this.getSectorStations.map((station) => ({
-                label: station.St_Title,
-                value: station.St_Title,
+                label: STATION_PREFIX + station.St_Title,
+                value: STATION_PREFIX + station.St_Title,
               })).sort();
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK:
               return this.getSectorBlocks.map((block) => ({
-                label: block.Bl_Title,
-                value: block.Bl_Title,
+                label: BLOCK_PREFIX + block.Bl_Title,
+                value: BLOCK_PREFIX + block.Bl_Title,
               })).sort();
             default:
               return this.getOrderPatternElementRefMeanings({ elementType, elementRef }).map((item) => ({ label: item, value: item }));
