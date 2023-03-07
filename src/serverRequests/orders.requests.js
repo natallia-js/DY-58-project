@@ -82,6 +82,15 @@ export const setOrderInvalidMark = async ({ orderId }) => {
   return response.data;
 };
 
+export const forceCloseOrOpenOrdersChain = async ({ orderChainId, forceClose }) => {
+  const response = await makeServerRequest({
+    url: DY58_SERVER_ACTIONS_PATHS.forceCloseOrOpenOrdersChain,
+    method: 'POST',
+    params: { orderChainId, forceClose },
+  });
+  return response.data;
+};
+
 export const dispatchOrderToServer = async (params) => {
   const {
     type,
@@ -106,8 +115,6 @@ export const dispatchOrderToServer = async (params) => {
     draftId,
     additionalWorkers,
   } = params;
-
-  console.log('actualCreateDateTime',actualCreateDateTime)
 
   const response = await makeServerRequest({
     url: DY58_SERVER_ACTIONS_PATHS.dispatchOrder,

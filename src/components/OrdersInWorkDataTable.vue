@@ -124,11 +124,12 @@
                   />
                 </div>
                 <!-- принудительно завершить цепочку распоряжений pi-replay -->
-                <div class="p-mb-1">
+                <div v-if="canForcelyCloseOrderChain(slotProps.data)" class="p-mb-1">
                   <Button
                     icon="pi pi-pause"
                     class="p-button-primary p-button dy58-order-action-button"
-                    @click="() => {}"
+                    v-tooltip.bottom="'Принудительно завершить цепочку'"
+                    @click="forcelyCloseOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
                 <!-- создать распоряжение, связанное с текущим -->
@@ -438,6 +439,8 @@
     CLEAR_ALL_DEL_STATION_WORK_PLACE_RECEIVER_RESULTS_SEEN_BY_USER,
     SET_CHANGE_ORDER_INVALID_MARK_RESULTS_SEEN_BY_USER,
     CLEAR_ALL_CHANGE_ORDER_INVALID_MARK_RESULTS_SEEN_BY_USER,
+    SET_FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
+    CLEAR_ALL_FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN_RESULTS_SEEN_BY_USER,
   } from '@/store/mutation-types';
   import {
     CONFIRM_ORDER_FOR_OTHERS_ACTION,
@@ -482,6 +485,7 @@
         getWorkMessTblColumns.value.find((el) => el.field === getWorkMessTblColumnsTitles.value.expander));
 
       const getDeleteOrdersChainAction = computed(() => store.getters.getDeleteOrdersChainAction);
+      const getForcelyCloseOrdersChainAction = computed(() => store.getters.getForcelyCloseOrdersChainAction);
       const getCreateRelativeOrderContextMenu = computed(() => store.getters.getCreateRelativeOrderContextMenu);
 
       const createRelativeOrderContextMenuItems = computed(() =>
@@ -500,6 +504,10 @@
 
       const deleteOrdersChain = (chainId) => {
         getDeleteOrdersChainAction.value(chainId, confirm);
+      };
+
+      const forcelyCloseOrdersChain = (chainId) => {
+        getForcelyCloseOrdersChainAction.value(chainId, confirm);
       };
 
       const getDateTimeString = (datetime, showSeconds = false) => {
@@ -632,6 +640,23 @@
       });
 
       /**
+       * Отображение результатов процедуры [отмены] принудительного завершения цепочки документов в БД (на сервере).
+       */
+      watch(() => store.getters.getForcelyCloseOrOpenOrderChainResultsUnseenByUserNumber, () => {
+        const seenOrderChainIdsResults = [];
+        store.getters.getForcelyCloseOrOpenOrderChainResultsUnseenByUser.forEach((result) => {
+          if (result.error) {
+            showErrMessage(result.message);
+          } else {
+            showSuccessMessage(result.message);
+          }
+          seenOrderChainIdsResults.push(result.orderChainId);
+        });
+        store.commit(SET_FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN_RESULTS_SEEN_BY_USER, seenOrderChainIdsResults);
+        store.commit(CLEAR_ALL_FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN_RESULTS_SEEN_BY_USER);
+      });
+
+      /**
        *
        */
       const expandOrCollapseRow = (event) => {
@@ -644,7 +669,7 @@
       };
 
       /**
-       *
+       * Для установки у документа отметки "недействителен".
        */
       const setDocumentInvalidMark = (event, documentId, documentNumber, documentTitle) => {
         confirm.require({
@@ -726,6 +751,7 @@
         getWorkMessStationReceiversTblColumns: computed(() => store.getters.getWorkMessStationReceiversTblColumns),
         canUserPerformAnyActionOnOrder: computed(() => store.getters.canUserPerformAnyActionOnOrder),
         canOrdersChainBeDeleted: computed(() => store.getters.canOrdersChainBeDeleted),
+        canForcelyCloseOrderChain: computed(() => store.getters.canForcelyCloseOrderChain),
         canDispatchOrdersConnectedToGivenOrder: computed(() => store.getters.canDispatchOrdersConnectedToGivenOrder),
         canOrderBeConfirmedFor: computed(() => store.getters.canOrderBeConfirmedFor),
         canOrderBeConfirmedForOnStation: computed(() => store.getters.canOrderBeConfirmedForOnStation),
@@ -742,6 +768,7 @@
         showOrderInfo,
         hideOrderInfo,
         deleteOrdersChain,
+        forcelyCloseOrdersChain,
         getDateTimeString,
         confirmOrderForOthers,
         confirmOrderForOtherReceivers,

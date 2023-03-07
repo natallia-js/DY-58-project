@@ -13,6 +13,7 @@ import { checkIfOrderActionCanBePerformed } from './checkIfOrderActionCanBePerfo
 import { checkClipboard } from './checkClipboard';
 import { okna } from './okna';
 import { invalidOrders } from './invalidOrders';
+import { forcelyClosedOrderChains } from './forcelyClosedOrderChains';
 
 
 export const workOrders = {
@@ -67,6 +68,13 @@ export const workOrders = {
     // массив результатов установки отметки о действительности / недействительности распоряжений
     changeOrdersInvalidMarksResults: [],
 
+    // массив id цепочек, для которых идет процесс [отмены] принудительного их завершения
+    orderChainsBeingChangedTheirChainEndDateTime: [],
+    // массив id распоряжений, для которых идет процесс [отмены] принудительного завершения их цепочки
+    ordersBeingChangedTheirChainEndDateTime: [],
+    // массив результатов процесса [отмены] принудительного завершения цепочки распоряжений
+    changeChainEndDateTimeResults: [],
+
     editDispatchedOrderResult: null,
     editDispatchedOrdersBeingProcessed: 0,
 
@@ -98,6 +106,7 @@ export const workOrders = {
     ...okna.getters,
     ...checkClipboard.getters,
     ...invalidOrders.getters,
+    ...forcelyClosedOrderChains.getters,
   },
 
   mutations: {
@@ -112,6 +121,7 @@ export const workOrders = {
     ...okna.mutations,
     ...checkClipboard.mutations,
     ...invalidOrders.mutations,
+    ...forcelyClosedOrderChains.mutations,
   },
 
   actions: {
@@ -124,5 +134,6 @@ export const workOrders = {
     ...editOrder.actions,
     ...checkClipboard.actions,
     ...invalidOrders.actions,
+    ...forcelyClosedOrderChains.actions,
   },
 };

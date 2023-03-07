@@ -10,7 +10,9 @@ export const checkIfOrderActionCanBePerformed = {
      * "свободности" данного распоряжения для выполнения над ним каких-либо действий:
      * 1) в настоящее время не должна удаляться цепочка, которой принадлежит это распоряжение,
      * 2) распоряжение не должно проходить процедуру подтверждения за других,
-     * 3) у распоряжения не должен удаляться его получатель на станции.
+     * 3) у распоряжения не должен удаляться его получатель на станции,
+     * 4) у распоряжения не должен меняться его флаг валидности,
+     * 5) цепочка, которой принадлежит распоряжение, не должна находиться в процессе [отмены] принудительного завершения.
      * Все вышеуказанные операции - длительные: требуют обращения к серверу.
      */
     canUserPerformAnyActionOnOrder(_state, getters) {
@@ -18,7 +20,8 @@ export const checkIfOrderActionCanBePerformed = {
         !getters.getOrdersChainsBeingDeleted.includes(orderId) &&
         !getters.isOrderBeingConfirmedForOthers(orderId) &&
         !getters.isOrderBeingDeletedStationWorkPlaceReceiver(orderId) &&
-        !getters.isOrderBeingChangedItsInvalidMark(orderId)
+        !getters.isOrderBeingChangedItsInvalidMark(orderId) &&
+        !getters.isOrderBelongsToChainBeingForcelyClosedOrOpened(orderId)
       ) ? true : false;
     },
 
@@ -218,9 +221,10 @@ export const checkIfOrderActionCanBePerformed = {
     /**
      * Проверка возможности отметить рабочий документ как недействительный.
      * Возвращает true, если пользователь может пометить распоряжение как недействительное.
-     * Это возможно в том случае, если распоряжение было издано на том рабочем полигоне, на
-     * котором работает пользователь, и именно этим пользователем, при этом это распоряжение не является
-     * помеченным как недействительное. Пользователь должен быть на дежурстве.
+     * Это возможно в том случае, если:
+     *   - распоряжение было издано на том рабочем полигоне, на котором работает пользователь, и именно этим пользователем,
+     *   - распоряжение не является помеченным как недействительное,
+     *   - пользователь должен быть на дежурстве.
      * Возвращает false, если текущий пользователь не имеет права пометить распоряжение как недействительное.
      */
     canMarkOrderAsInvalid(_state, getters) {
@@ -229,7 +233,27 @@ export const checkIfOrderActionCanBePerformed = {
         getters.canUserToggleOrderInvalidMark &&
         getters.orderDispatchedOnCurrentWorkPoligon(order) &&
         getters.orderDispatchedByTheCurrentUser(order) &&
-        !order.invalid
+        getters.isOrderValid(order.id)
+      ) ? true : false;
+    },
+
+    /**
+     * Проверка возможности запуска процесса принудительного завершения цепочки, которой принадлежит заданное распоряжение, в БД.
+     * Возвращает true, если пользователь может это сделать.
+     * Это возможно в том случае, если:
+     *   - распоряжение было издано на том рабочем полигоне, на котором работает пользователь,
+     *   - это распоряжение не является помеченным как недействительное,
+     *   - цепочка, которой принадлежит распоряжение, не должна иметь даты окончания действия,
+     *   - пользователь должен быть на дежурстве и обладать соответствующими правами.
+     * Возвращает false, если текущий пользователь не имеет права выполнить указанное действие.
+     */
+    canForcelyCloseOrderChain(_state, getters) {
+      return (order) => (
+        getters.canUserPerformAnyActionOnOrder(order.id) &&
+        getters.canUserForcelyCloseOrOpenOrdersChain &&
+        getters.orderDispatchedOnCurrentWorkPoligon(order) &&
+        !order.orderChainEndDateTime &&
+        getters.isOrderValid(order.id)
       ) ? true : false;
     },
   },

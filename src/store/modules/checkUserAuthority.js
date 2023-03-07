@@ -184,5 +184,15 @@ export const checkUserAuthority = {
         (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
         getters.isUserOnDuty ? true : false;
     },
+
+    /**
+     * Пользователь, принявший дежурство, может запустить процесс [отмены] принудительного завершения цепочки распоряжений,
+     * если этот пользователь - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
+     */
+    canUserForcelyCloseOrOpenOrdersChain(_state, getters) {
+      return getters.canUserWorkWithSystem &&
+        (getters.isDSP_or_DSPoperator || getters.isStationWorksManager || getters.isDNC || getters.isECD) &&
+        getters.isUserOnDuty ? true : false;
+    },
   },
 };

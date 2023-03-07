@@ -1,6 +1,6 @@
 import router from '@/router';
 import { store } from '@/store';
-import { DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION } from '@/store/action-types';
+import { DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION, FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN } from '@/store/action-types';
 
 
 /**
@@ -10,7 +10,8 @@ import { DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION } from '@/store/action-types';
 export const contextMenus = {
   getters: {
     /**
-     *
+     * Позволяет выполнить действие по удалению из таблицы рабочих распоряжений документа / цепочки документов.
+     * Предварительно требует у пользователя подтверждения этого действия.
      */
     getDeleteOrdersChainAction(_state, getters) {
       return (chainId, confirmInstance) => {
@@ -26,6 +27,29 @@ export const contextMenus = {
           defaultFocus: 'reject',
           accept: () => {
             store.dispatch(DEL_CONFIRMED_ORDERS_FROM_CHAIN_ACTION, chainId);
+          },
+        });
+      };
+    },
+
+    /**
+     * Позволяет выполнить действие по принудительному завершению указанной цепочки документов.
+     * Предварительно требует у пользователя подтверждения этого действия.
+     */
+    getForcelyCloseOrdersChainAction(_state, getters) {
+      return (chainId, confirmInstance) => {
+        const ordersInChain = getters.getOrdersInChain(chainId);
+        const confirmDlgMessage = ordersInChain.length === 1
+          ? 'Завершить цепочку, которой принадлежит только текущий документ (операция необратима)?'
+          : `Завершить цепочку документов (${ordersInChain.reduce((accumulator, currentValue, index) =>
+            accumulator + currentValue.type + ' № ' + currentValue.number + `${index === ordersInChain.length - 1 ? '' : ', '}`, '')}) (операция необратима)?`;
+        confirmInstance.require({
+          header: 'Подтвердите принудительное завершение цепочки',
+          message: confirmDlgMessage,
+          icon: 'pi pi-exclamation-circle',
+          defaultFocus: 'reject',
+          accept: () => {
+            store.dispatch(FORCE_CLOSE_OR_OPEN_ORDERS_CHAIN, { orderChainId: chainId, forceClose: true });
           },
         });
       };
