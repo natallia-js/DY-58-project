@@ -72,7 +72,8 @@ export default function useWebSocket({ socketUrl }) {
       const userId = store.getters.getUserId;
       const userWorkPoligon = store.getters.getUserWorkPoligon;
       const isUserOnDuty = store.getters.isUserOnDuty;
-      return `${userId},${userWorkPoligon?.type},${userWorkPoligon?.code},${userWorkPoligon?.subCode},${isUserOnDuty}`;
+      const userCredential = store.getters.getUserCredential;
+      return `${userId},${userWorkPoligon?.type},${userWorkPoligon?.code},${userWorkPoligon?.subCode},${isUserOnDuty},${userCredential}`;
     }
 
     /**

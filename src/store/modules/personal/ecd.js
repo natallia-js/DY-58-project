@@ -62,6 +62,8 @@ export const ecd = {
      * Возвращает информацию о всех ЭЦД участков ЭЦД, связанных с текущим полигоном управления
      * (если текущий полигон управления - участок ЭЦД, то он в выборку не включается).
      * Данным ЭЦД и может адресоваться информация, отправляемая текущим пользователем.
+     * Метод возвращает абсолютно всех пользователей, зарегистрированных как ЭЦД, находятся они в
+     * данный момент на дежурстве или нет.
      */
     getECDShiftForSendingData: (state, getters) => {
       if (!state.sectorPersonal || !state.sectorPersonal.ECDSectorsShift) {
@@ -84,7 +86,9 @@ export const ecd = {
               post: el.post,
               fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
               online: el.online,
-              onDuty: el.onDuty,
+              // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
+              // запись "на дежурстве" с полномочием ЭЦД
+              onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.ECD_FULL)),
             };
           }),
         sendOriginal: item.sendOriginal,

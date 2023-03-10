@@ -33,12 +33,20 @@ h4 {
   color: var(--blue-500);
 }
 
-.dy58-online-notonduty {
+.dy58-online-notonduty-color {
   color: var(--green-400);
 }
 
-.dy58-online-onduty {
+.dy58-online-onduty-color {
   color: var(--blue-500);
+}
+
+.dy58-online-notonduty-fill {
+  background-color: var(--green-400);
+}
+
+.dy58-online-onduty-fill {
+  background-color: var(--blue-500);
 }
 
 @mixin generalErrorStyles() {

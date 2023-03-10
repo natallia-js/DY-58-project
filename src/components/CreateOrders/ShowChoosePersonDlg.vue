@@ -17,10 +17,12 @@
         <div v-on:dblclick="() => chooseUser(slotProps.option.id)">
           <span
             :class="{
-              'dy58-online-onduty': slotProps.option.online && slotProps.option.onDuty,
-              'dy58-online-notonduty': slotProps.option.online && !slotProps.option.onDuty,
+              'dy58-online-onduty-color': slotProps.option.online && slotProps.option.onDuty,
+              'dy58-online-notonduty-color': slotProps.option.online && !slotProps.option.onDuty,
             }"
-          >{{ slotProps.option.postFio }}</span>
+          >
+            {{ slotProps.option.postFio }}
+          </span>
         </div>
       </template>
     </Listbox>

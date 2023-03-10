@@ -36,8 +36,8 @@
             </span>
             <span v-else
               :class="{
-                'dy58-online-onduty': slotProps.data.fioOnline && slotProps.data.fioOnDuty,
-                'dy58-online-notonduty': slotProps.data.fioOnline && !slotProps.data.fioOnDuty,
+                'dy58-online-onduty-color': slotProps.data.fioOnline && slotProps.data.fioOnDuty,
+                'dy58-online-notonduty-color': slotProps.data.fioOnline && !slotProps.data.fioOnDuty,
               }"
             >
               {{ slotProps.data[col.field] }}
@@ -49,9 +49,7 @@
                     .map((item) => ({ ...item, postFio: `${item.post} ${item.fio}` }))
                     // Удаляем повторяющиеся элементы
                     .filter((item, index, array) => array.findIndex((el) => el.postFio === item.postFio) === index),
-                  slotProps.data.fioId
-                    ? { id: slotProps.data.fioId, fio: slotProps.data.fio, online: slotProps.data.fioOnline, onDuty: slotProps.data.fioOnDuty }
-                    : null,
+                  slotProps.data.fioId ? { id: slotProps.data.fioId } : null,
                   slotProps.data.id,
                   slotProps.data.sector
                 )"

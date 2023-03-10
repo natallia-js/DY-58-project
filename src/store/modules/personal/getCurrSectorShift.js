@@ -223,6 +223,7 @@ export const getCurrSectorShift = {
       // (для пользователей извлекаются только те полномочия, которые "известны" текущему приложению на станции)
       if (stationsIds.length) {
         const responseData = await getStationsWorkPoligonsUsers({ stationIds: stationsIds, onlyOnline: false, includeWorkPlaces: true });
+        console.log(responseData)
         setStationsShift(responseData, shiftPersonal);
       }
       context.commit(SET_SECTOR_PERSONAL, shiftPersonal);

@@ -132,6 +132,8 @@ export const dsp = {
      * Если текущий полигон управления - участок ДСП, то в выборке данный участок не участвует (только смежные).
      * Еще один нюанс: один и тот же пользователь может быть зарегистрирован как в качестве ДСП,
      * так и как Оператор при ДСП одной и той же станции. Будет выбрана только информация по ДСП.
+     * Метод возвращает абсолютно всех пользователей, зарегистрированных как ДСП, находятся они в
+     * данный момент на дежурстве или нет.
      */
     getDSPShiftForSendingData(state, getters) {
       if (!state.sectorPersonal || !state.sectorPersonal.sectorStationsShift ||
@@ -170,7 +172,9 @@ export const dsp = {
                   post: el.post,
                   fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                   online: el.online,
-                  onDuty: el.onDuty,
+                  // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
+                  // запись "на дежурстве" с полномочием ДСП
+                  onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.DSP_FULL)),
                 };
               }),
             sendOriginal: item.sendOriginal,

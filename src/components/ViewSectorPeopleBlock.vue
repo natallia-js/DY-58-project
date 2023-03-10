@@ -3,18 +3,36 @@
     -
   </div>
   <div v-else>
-    <p
+    <div
       v-for="user of getSortedUsersData(peopleArray, ifStationPeople)"
       :key="user._id"
       :class="[
         'p-ml-4',
-        { 'dy58-online-onduty': user.online && user.onDuty },
-        { 'dy58-online-notonduty': user.online && !user.onDuty },
         { 'dy58-error-message': !user.appsCredentials || user.appsCredentials.length == 0 }
       ]"
     >
+      <span
+        v-for="onlineStatus of user.onlineStatuses"
+        :key="onlineStatus.clientIP + onlineStatus.userAgent"
+        :class="[
+          'dy58-online-marker',
+          { 'dy58-online-onduty-fill': onlineStatus.onDuty },
+          { 'dy58-online-notonduty-fill': !onlineStatus.onDuty },
+        ]"
+      />
       {{ user.userStringInfo }}
-    </p>
+      <p
+        v-for="onlineStatus of user.onlineStatuses"
+        :key="onlineStatus.clientIP + onlineStatus.userAgent"
+        :class="[
+          'p-ml-4',
+          { 'dy58-online-onduty-color': onlineStatus.onDuty },
+          { 'dy58-online-notonduty-color': !onlineStatus.onDuty },
+        ]"
+      >
+        - вошел как {{ onlineStatus.currentCredential }} ({{ onlineStatus.clientIP }}, {{ onlineStatus.userAgent }})
+      </p>
+    </div>
   </div>
 </template>
 

@@ -67,9 +67,8 @@ export const common = {
      */
     [SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS] (state, { poligonsType, sectorsGetOrderStatuses }) {
       function setChosenPoligonStatuses(sectorsShift) {
-        if (!sectorsShift || !sectorsShift.length) {
-          return;
-        }
+        if (!sectorsShift?.length) return;
+
         const clearSendItem = (item, resetSendOriginal = false) => {
           if (item.lastUserChoice || item.sendOriginal !== CurrShiftGetOrderStatus.doNotSend) {
             item.lastUserChoicePost = null;
@@ -95,7 +94,7 @@ export const common = {
             if (!sectStat.fioId || !sector.people || !sector.people.length) {
               clearSendItem(sector);
             } else {
-              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);
+              const neededUser = sector.people.find((u) => u._id === sectStat.fioId); console.log(neededUser)
               if (!neededUser) {
                 clearSendItem(sector);
               } else {
@@ -107,6 +106,7 @@ export const common = {
                   surname: neededUser.surname,
                 });
                 sector.lastUserChoiceOnline = neededUser.online;
+                // TODO ...
                 sector.lastUserChoiceOnDuty = neededUser.onDuty;
               }
             }
@@ -146,7 +146,7 @@ export const common = {
         }
         neededSectors.forEach((sector) => {
           if (sector.people && sector.people.length) {
-            const neededUser = sector.people.find((user) => user._id === userId);
+            const neededUser = sector.people.find((user) => user._id === userId); console.log(neededUser)
             if (!neededUser) {
               return;
             }
@@ -158,7 +158,8 @@ export const common = {
               surname: neededUser.surname,
             }) : null;
             sector.lastUserChoiceOnline = chooseUser ? neededUser.online : false;
-            sector.lastUserChoiceOnline = chooseUser ? neededUser.onDuty : null;
+            // TODO ...
+            sector.lastUserChoiceOnDuty = chooseUser ? neededUser.onDuty : null;
           }
         });
       }

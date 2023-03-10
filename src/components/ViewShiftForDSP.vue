@@ -57,6 +57,7 @@
   import { computed } from 'vue';
   import { useStore } from 'vuex';
   import ViewSectorPeopleBlock from '@/components/ViewSectorPeopleBlock';
+  import { APP_CREDENTIALS } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-view-shift-for-dsp',
@@ -65,22 +66,38 @@
       ViewSectorPeopleBlock,
     },
 
-    setup() {
+    props: {
+      showOnlyDNC_ECD_DSPUsers: {
+        type: Boolean,
+        required: false,
+      },
+      showOnlyOnlineUsers: {
+        type: Boolean,
+        required: false,
+      },
+    },
+
+    setup(props) {
       const store = useStore();
 
       const getSectorPersonal = computed(() => store.getters.getSectorPersonal);
       const getUserWorkPoligonData = computed(() => store.getters.getUserWorkPoligonData);
 
       const currentStationShift = computed(() => {
-        if (!getSectorPersonal.value || !getSectorPersonal.value.sectorStationsShift || !getUserWorkPoligonData.value) {
+        if (!getSectorPersonal.value?.sectorStationsShift || !getUserWorkPoligonData.value) {
           return [];
         }
-        return getSectorPersonal.value.sectorStationsShift.find((shift) =>
+        let currentStationPeople = getSectorPersonal.value.sectorStationsShift.find((shift) =>
           shift.stationId === getUserWorkPoligonData.value.St_ID)?.people || [];
+        if (props.showOnlyOnlineUsers)
+          currentStationPeople = currentStationPeople.filter((person) => person.online);
+        if (props.showOnlyDNC_ECD_DSPUsers)
+          currentStationPeople = currentStationPeople.filter((person) => person.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL));
+        return currentStationPeople;
       })
 
       const adjacentStationsShift = computed(() => {
-        if (!getSectorPersonal.value || !getSectorPersonal.value.sectorStationsShift || !getUserWorkPoligonData.value) {
+        if (!getSectorPersonal.value?.sectorStationsShift || !getUserWorkPoligonData.value) {
           return [];
         }
         return getSectorPersonal.value.sectorStationsShift.filter((shift) =>
