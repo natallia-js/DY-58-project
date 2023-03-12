@@ -85,7 +85,9 @@ export const ecd = {
               id: el._id,
               post: el.post,
               fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
-              online: el.online,
+              // полагаем, что пользователь online как ЭЦД на текущем полигоне управления, если у него в массиве
+              // onlineStatuses есть хотя бы одна запись с полномочием ЭЦД
+              online: el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.ECD_FULL),
               // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
               // запись "на дежурстве" с полномочием ЭЦД
               onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.ECD_FULL)),

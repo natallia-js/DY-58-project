@@ -63,7 +63,7 @@ export const dnc = {
      * (если текущий полигон управления - участок ДНЦ, то он в выборку не включается).
      * Данным ДНЦ и может адресоваться информация, отправляемая текущим пользователем.
      * Метод возвращает абсолютно всех пользователей, зарегистрированных как ДНЦ, находятся они в
-     * данный момент на дежурстве либо просто online или нет.
+     * данный момент на дежурстве либо нет.
      */
     getDNCShiftForSendingData: (state, getters) => {
       if (!state.sectorPersonal?.DNCSectorsShift) {
@@ -85,7 +85,9 @@ export const dnc = {
                 id: el._id,
                 post: el.post,
                 fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
-                online: el.online,
+                // полагаем, что пользователь online как ДНЦ на текущем полигоне управления, если у него в массиве
+                // onlineStatuses есть хотя бы одна запись с полномочием ДНЦ
+                online: el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.DNC_FULL),
                 // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
                 // запись "на дежурстве" с полномочием ДНЦ
                 onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.DNC_FULL)),

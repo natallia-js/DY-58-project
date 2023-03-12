@@ -1,4 +1,4 @@
-import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
+import { APP_CREDENTIALS, WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 import { CurrShiftGetOrderStatus } from '@/constants/orders';
 import { getUserFIOString } from './transformUserData';
 import {
@@ -66,7 +66,7 @@ export const common = {
      *     fioId - идентификатор лица, которому отсылается документ
      */
     [SET_GET_ORDER_STATUSES_TO_ONLY_DEFINIT_SECTORS] (state, { poligonsType, sectorsGetOrderStatuses }) {
-      function setChosenPoligonStatuses(sectorsShift) {
+      function setChosenPoligonStatuses(sectorsShift, userCredential) {
         if (!sectorsShift?.length) return;
 
         const clearSendItem = (item, resetSendOriginal = false) => {
@@ -74,12 +74,13 @@ export const common = {
             item.lastUserChoicePost = null;
             item.lastUserChoice = null;
             item.lastUserChoiceId = null;
-            item.lastUserChoiceOnline = false;
+            item.lastUserChoiceOnline = null;
             item.lastUserChoiceOnDuty = null;
             if (resetSendOriginal)
               item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
           }
         };
+
         sectorsShift.forEach((sector) => {
           let sectStat;
           if (sectorsGetOrderStatuses) {
@@ -91,10 +92,10 @@ export const common = {
             if (sector.sendOriginal !== sectStat.sendOriginal) {
               sector.sendOriginal = sectStat.sendOriginal;
             }
-            if (!sectStat.fioId || !sector.people || !sector.people.length) {
+            if (!sectStat.fioId || !sector.people?.length) {
               clearSendItem(sector);
             } else {
-              const neededUser = sector.people.find((u) => u._id === sectStat.fioId); console.log(neededUser)
+              const neededUser = sector.people.find((u) => u._id === sectStat.fioId);
               if (!neededUser) {
                 clearSendItem(sector);
               } else {
@@ -105,9 +106,12 @@ export const common = {
                   fatherName: neededUser.fatherName,
                   surname: neededUser.surname,
                 });
-                sector.lastUserChoiceOnline = neededUser.online;
-                // TODO ...
-                sector.lastUserChoiceOnDuty = neededUser.onDuty;
+                // полагаем, что пользователь online на текущем полигоне управления, если в его onlineStatuses есть
+                // запись с указанным полномочием
+                sector.lastUserChoiceOnline = neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === userCredential);
+                // полагаем, что пользователь на дежурстве на текущем полигоне управления, если в его onlineStatuses есть
+                // запись с указанным полномочием и статусом "на дежурстве"
+                sector.lastUserChoiceOnDuty = Boolean(neededUser.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === userCredential));
               }
             }
           }
@@ -115,13 +119,13 @@ export const common = {
       }
       switch (poligonsType) {
         case WORK_POLIGON_TYPES.STATION:
-          setChosenPoligonStatuses(state.sectorPersonal.sectorStationsShift);
+          setChosenPoligonStatuses(state.sectorPersonal.sectorStationsShift, APP_CREDENTIALS.DSP_FULL);
           break;
         case WORK_POLIGON_TYPES.DNC_SECTOR:
-          setChosenPoligonStatuses(state.sectorPersonal.DNCSectorsShift);
+          setChosenPoligonStatuses(state.sectorPersonal.DNCSectorsShift, APP_CREDENTIALS.DNC_FULL);
           break;
         case WORK_POLIGON_TYPES.ECD_SECTOR:
-          setChosenPoligonStatuses(state.sectorPersonal.ECDSectorsShift);
+          setChosenPoligonStatuses(state.sectorPersonal.ECDSectorsShift, APP_CREDENTIALS.ECD_FULL);
           break;
       }
     },
@@ -140,13 +144,28 @@ export const common = {
         if (!sectorsArray || !sectorsArray.length) {
           return;
         }
+        // определяем полигоны управления, по которы необходимо обновить информацию о выбранном пользователе
         const neededSectors = sectorsArray.filter((item) => item.stationId === workPoligonId || item.sectorId === workPoligonId);
         if (!neededSectors.length) {
           return;
         }
+        // определяем, какое полномочие нас интересует у выбранного пользователя
+        let neededCredential;
+        switch (workPoligonType) {
+          case WORK_POLIGON_TYPES.STATION:
+            neededCredential = APP_CREDENTIALS.DSP_FULL;
+            break;
+          case WORK_POLIGON_TYPES.DNC_SECTOR:
+            neededCredential = APP_CREDENTIALS.DNC_FULL;
+            break;
+          case WORK_POLIGON_TYPES.ECD_SECTOR:
+            neededCredential = APP_CREDENTIALS.ECD_FULL;
+            break;
+        }
         neededSectors.forEach((sector) => {
-          if (sector.people && sector.people.length) {
-            const neededUser = sector.people.find((user) => user._id === userId); console.log(neededUser)
+          if (sector.people?.length) {
+            // ищем пользователя в очередном найденном полигоне управления
+            const neededUser = sector.people.find((user) => user._id === userId);
             if (!neededUser) {
               return;
             }
@@ -157,9 +176,16 @@ export const common = {
               fatherName: neededUser.fatherName,
               surname: neededUser.surname,
             }) : null;
-            sector.lastUserChoiceOnline = chooseUser ? neededUser.online : false;
-            // TODO ...
-            sector.lastUserChoiceOnDuty = chooseUser ? neededUser.onDuty : null;
+            // полагаем, что пользователь online на текущем полигоне управления, если в его onlineStatuses есть
+            // запись с найденным выше полномочием
+            sector.lastUserChoiceOnline = chooseUser
+              ? neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === neededCredential)
+              : null;
+            // полагаем, что пользователь на дежурстве на текущем полигоне управления, если в его onlineStatuses есть
+            // запись с найденным выше полномочием и статусом "на дежурстве"
+            sector.lastUserChoiceOnDuty = chooseUser
+              ? Boolean(neededUser.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === neededCredential))
+              : null;
           }
         });
       }
