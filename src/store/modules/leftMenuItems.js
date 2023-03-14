@@ -208,7 +208,7 @@ export const leftMenuItems = {
       const specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_TY_ORDER_SIGN]);
       if (specialOrderPatterns.length > 0) {
         items.push({
-          label: `Создать распоряжение о поезде ${SPECIAL_TY_ORDER_SIGN}`,
+          label: `Переключение коммутационных аппаратов`,
           info: getters.getWorkingOrdersNumberReferringSpecialTrainCategories([SPECIAL_TY_ORDER_SIGN]),
           imgURL: require('@/assets/img/TY.png'),
           command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_TY_ORDER_SIGN, itemsCommandCallback: createECDOrderOfGivenType }),

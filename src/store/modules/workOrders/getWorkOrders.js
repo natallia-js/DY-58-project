@@ -77,11 +77,11 @@ export const getWorkOrders = {
      */
     getWorkingOrdersNumberReferringSpecialTrainCategories(_state, getters) {
       return (specialTrainCategories) => {
-        if (!specialTrainCategories || !specialTrainCategories.length) {
+        if (!specialTrainCategories?.length) {
           return 0;
         }
-        return getters.getRawWorkingOrders.filter((order) => {
-          if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
+        return getters.getWorkingOrdersToDisplay.filter((order) => {
+          if (!order.specialTrainCategories?.length) {
             return false;
           }
           return specialTrainCategories.filter((el) => order.specialTrainCategories.includes(el)).length ? true : false;

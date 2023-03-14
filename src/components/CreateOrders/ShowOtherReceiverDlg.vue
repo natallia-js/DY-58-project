@@ -60,7 +60,7 @@
       </div>
       <div class="p-field p-col-12 p-d-flex p-jc-end">
         <Button class="p-mr-2" label="Сохранить" type="submit" />
-        <Button label="Отмена" @click="closeDialog" />
+        <Button label="Закрыть" @click="closeDialog" />
       </div>
     </form>
   </Dialog>
@@ -143,6 +143,7 @@
           fio: state.fio,
           additionalId: props.user ? props.user.additionalId : null,
         });
+        closeDialog();
       };
 
       const closeDialog = () => {
