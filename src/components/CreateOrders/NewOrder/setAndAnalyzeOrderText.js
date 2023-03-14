@@ -318,12 +318,14 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
     // Если установлен флаг определения времени действия распоряжения, то при изменении ряда полей
     // в тексте шаблонного распоряжения их значения устанавливаются в качестве времени действия распоряжения
     if (state.defineOrderTimeSpan.value === true) {
-      // Если в тексте распоряжения встречается поле даты-времени 'Дата-время закрытия перегона',
-      // то значение этого поля (первого встречающегося) устанавливается в качестве даты-времени
-      // начала действия распоряжения
+      // Если в тексте распоряжения встречается поле даты-времени со смысловым значением 'Дата-время закрытия перегона' либо
+      // смысловым значением 'Дата-время начала действия документа', то значение этого поля (первого встречающегося)
+      // устанавливается в качестве даты-времени начала действия распоряжения
       let timeSet = false;
-      const closeBlockDateTimeElement = event.orderText.find((el) =>
-        el.ref === FILLED_ORDER_DATETIME_ELEMENTS.CLOSE_BLOCK_DATETIME);
+      const isElementWithOrderStartTimespanMarker = (element) =>
+        element.ref === FILLED_ORDER_DATETIME_ELEMENTS.CLOSE_BLOCK_DATETIME ||
+        element.ref === FILLED_ORDER_DATETIME_ELEMENTS.DOCUMENT_START_DATETIME;
+      const closeBlockDateTimeElement = event.orderText.find((el) => isElementWithOrderStartTimespanMarker(el));
       if (closeBlockDateTimeElement) {
         if (closeBlockDateTimeElement.value) {
           state.timeSpan = { start: closeBlockDateTimeElement.value, end: null, tillCancellation: true };
@@ -332,13 +334,15 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
           state.timeSpan = { start: null, end: null, tillCancellation: false };
         }
       }
-      // Если в тексте распоряжения встречается поле даты-времени 'Дата-время открытия перегона',
-      // то значение этого поля (первого встречающегося) устанавливается в качестве даты-времени
-      // начала и окончания действия распоряжения. Но только при условии что ранее (см. выше)
+      // Если в тексте распоряжения встречается поле даты-времени со смысловым значением 'Дата-время открытия перегона' либо
+      // смысловым значением 'Дата-время окончания действия документа', то значение этого поля (первого встречающегося)
+      // устанавливается в качестве даты-времени начала и окончания действия распоряжения. Но только при условии что ранее (см. выше)
       // не было установлено время действия!
       if (!timeSet) {
-        const openBlockDateTimeElement = event.orderText.find((el) =>
-          el.ref === FILLED_ORDER_DATETIME_ELEMENTS.OPEN_BLOCK_DATETIME);
+        const isElementWithOrderEndTimespanMarker = (element) =>
+          element.ref === FILLED_ORDER_DATETIME_ELEMENTS.OPEN_BLOCK_DATETIME ||
+          element.ref === FILLED_ORDER_DATETIME_ELEMENTS.DOCUMENT_END_DATETIME;
+        const openBlockDateTimeElement = event.orderText.find((el) => isElementWithOrderEndTimespanMarker(el));
         if (openBlockDateTimeElement) {
           if (openBlockDateTimeElement.value) {
             state.timeSpan = {

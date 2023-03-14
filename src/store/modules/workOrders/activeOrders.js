@@ -23,6 +23,12 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  *     ДНЦ             Распоряжение на закрытие перегона        Распоряжение, Заявка, Уведомление
  *     ДСП             Распоряжение на закрытие перегона        Заявка, Уведомление
  *     ЭЦД             Распоряжение на закрытие перегона        Запрещение
+ *     ДНЦ             Действующее распоряжение (действует      Распоряжение, Заявка, Уведомление
+ *                     до отмены)
+ *     ДСП             Действующее распоряжение (действует      Заявка, Уведомление
+ *                     до отмены)
+ *     ЭЦД             Действующее распоряжение (действует      Приказ, Запрещение, Уведомление / отмена запрещения ЭЦД
+ *                     до отмены)
  *     ДНЦ             Заявка (ДСП)                             Распоряжение, Заявка, Уведомление
  *     ДСП, руково-    Заявка (ДСП)                             Заявка, Уведомление
  *     дитель работ
@@ -37,10 +43,11 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  *     ДСП             Запрещение ЭЦД                           -
  *     ЭЦД             Запрещение ЭЦД                           Уведомление ЭЦД об отмене запрещения ЭЦД
  */
-const possibleDocsConnections = [
+const POSSIBLE_DOCS_CONNECTIONS = [
   {
     initialDocType: ORDER_PATTERN_TYPES.ORDER,
     initialDocSpecialMarks: [SPECIAL_CLOSE_BLOCK_ORDER_SIGN],
+    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN],
     newDocsInfo: [
       {
         userCredentials: [APP_CREDENTIALS.DNC_FULL],
@@ -53,6 +60,24 @@ const possibleDocsConnections = [
       {
         userCredentials: [APP_CREDENTIALS.ECD_FULL],
         possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_PROHIBITION],
+      },
+    ],
+  },
+  {
+    initialDocType: ORDER_PATTERN_TYPES.ORDER,
+    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN],
+    newDocsInfo: [
+      {
+        userCredentials: [APP_CREDENTIALS.DNC_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ORDER, ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.DSP_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.REQUEST, ORDER_PATTERN_TYPES.NOTIFICATION],
+      },
+      {
+        userCredentials: [APP_CREDENTIALS.ECD_FULL],
+        possibleNewDocTypes: [ORDER_PATTERN_TYPES.ECD_ORDER, ORDER_PATTERN_TYPES.ECD_PROHIBITION, ORDER_PATTERN_TYPES.ECD_NOTIFICATION],
       },
     ],
   },
@@ -203,30 +228,53 @@ export const activeOrders = {
     },
 
     /**
-     * Для данного типа базового документа (распоряжения) с заданными особыми отметками возвращает
+     * Для данного типа базового документа с заданными особыми отметками (при наличии) возвращает
      * типы документов, которые текущий пользователь может издать на основании базового документа.
+     * Ожидается, что базовый документ - действующий (никаких дополнительных проверок в этом отношении не делается).
      */
     getPossibleNewOrderTypesForBaseOrder(_state, getters) {
       return (baseOrderType, specialOrderMarks = null) => {
-        const possibleDocs = possibleDocsConnections.find((el) => el.initialDocType === baseOrderType);
-        if (!possibleDocs) {
+        // В массиве допустимых взаимосвязей между документами ищем информацию о документе типа baseOrderType.
+        const allBaseDocumentPossibleConnectionsByType = POSSIBLE_DOCS_CONNECTIONS.filter((el) => el.initialDocType === baseOrderType);
+        if (!allBaseDocumentPossibleConnectionsByType.length)
           return [];
+        // Сюда поместим информацию о возможных взаимосвязях базового документа типа baseOrderType с отметками specialOrderMarks
+        // с другими документами
+        let possibleDocs;
+        // Если у базового документа с baseOrderType нет особых отметок, то в allBaseDocumentPossibleConnectionsByType также
+        // ищем элемент без требований к наличию особых отметок
+        if (!specialOrderMarks?.length) {
+          possibleDocs = allBaseDocumentPossibleConnectionsByType.find((el) => !el.initialDocSpecialMarks?.length);
         }
-        if (possibleDocs.initialDocSpecialMarks && possibleDocs.initialDocSpecialMarks.length) {
-          if (!specialOrderMarks || !specialOrderMarks.length) {
-            return [];
-          }
-          if (specialOrderMarks.find((mark) => !possibleDocs.initialDocSpecialMarks.includes(mark))) {
-            return [];
-          }
+        // Если же у базового документа с baseOrderType есть особые отметки, то в этом случае необходимо в
+        // allBaseDocumentPossibleConnectionsByType, в первую очередь, попытаться найти такой элемент, который содержит
+        // требования к особым отметкам, и базовый документ им удовлетворяет; если такой элемент не будет найден, то
+        // необходимо взять первый в allBaseDocumentPossibleConnectionsByType элемент, у которого нет требований к особым отметкам
+        else {
+          possibleDocs = allBaseDocumentPossibleConnectionsByType.find((el) =>
+            (
+              el.initialDocSpecialMarks?.length &&
+              !el.initialDocSpecialMarks.find((mark) => !specialOrderMarks.includes(mark))
+            ) &&
+            (
+              !el.excludeInitialDocSpecialMarks?.length ||
+              !el.excludeInitialDocSpecialMarks.find((mark) => specialOrderMarks.includes(mark))
+            )
+          );
+          if (!possibleDocs)
+            possibleDocs = allBaseDocumentPossibleConnectionsByType.find((el) =>
+              !el.initialDocSpecialMarks?.length &&
+              (
+                !el.excludeInitialDocSpecialMarks?.length ||
+                !el.excludeInitialDocSpecialMarks.find((mark) => specialOrderMarks.includes(mark))
+              )
+            );
         }
-        if (possibleDocs.excludeInitialDocSpecialMarks && possibleDocs.excludeInitialDocSpecialMarks.length) {
-          if (specialOrderMarks && specialOrderMarks.find((mark) => possibleDocs.excludeInitialDocSpecialMarks.includes(mark))) {
-            return [];
-          }
-        }
-        const currentUserCredentials = getters.getUserCredential;
-        const userInfo = possibleDocs.newDocsInfo.find((el) => el.userCredentials.includes(currentUserCredentials));
+        if (!possibleDocs)
+          return [];
+        // Осталось только определить те типы документов среди найденных, которые может издавать текущий пользователь
+        const currentUserCredential = getters.getUserCredential;
+        const userInfo = possibleDocs.newDocsInfo.find((el) => el.userCredentials.includes(currentUserCredential));
         if (!userInfo) {
           return [];
         }
@@ -241,10 +289,10 @@ export const activeOrders = {
      */
     getPossibleBaseOrderTypesForNewOrder(_state, getters) {
       return (newOrderType) => {
-        const currentUserCredentials = getters.getUserCredential;
-        return possibleDocsConnections.filter((el) =>
+        const currentUserCredential = getters.getUserCredential;
+        return POSSIBLE_DOCS_CONNECTIONS.filter((el) =>
           el.newDocsInfo.find((dt) =>
-            dt.userCredentials.includes(currentUserCredentials) &&
+            dt.userCredentials.includes(currentUserCredential) &&
             dt.possibleNewDocTypes.includes(newOrderType))
         ).map((el) => ({
           initialDocType: el.initialDocType,
@@ -257,42 +305,69 @@ export const activeOrders = {
     /**
      * Возвращает действующие рабочие распоряжения (в рамках своих цепочек распоряжений),
      * на базе которых можно создать новое распоряжение заданного типа.
+     * Если указан параметр restrictToOrderType, то он определяет тот тип распоряжений, которые
+     * нужно, чтобы метод возвратил.
+     */
+    getPossibleBaseActiveOrdersForNewOrder(_state, getters) {
+      return (newOrderType, restrictToOrderType = null, restrictToOrderSpecialOrderSign = null) => {
+        // Возможные типы базовых документов для создаваемого документа
+        const possibleBaseOrderTypes = getters.getPossibleBaseOrderTypesForNewOrder(newOrderType);
+        if (!possibleBaseOrderTypes.length) {
+          return [];
+        }
+        // Выбираем среди действующих распоряжений подходящие
+        const activeOrders = getters.getActiveOrders;
+        const necessaryOrders = activeOrders.filter((order) => {
+          // действующее распоряжение может рассматриваться как базовое для создаваемого документа?
+          return possibleBaseOrderTypes.find((el) =>
+            // совпадение по типу документа
+            (el.initialDocType === order.type) &&
+            // особые отметки, которые должны быть у базового документа
+            (
+              !el.initialDocSpecialMarks?.length ||
+              (
+                order.specialTrainCategories?.length &&
+                !el.initialDocSpecialMarks.find((mark) => !order.specialTrainCategories.includes(mark))
+              )
+            ) &&
+            // особые отметки, которых у базового документа быть не должно
+            (
+              !el.excludeInitialDocSpecialMarks?.length ||
+              (
+                !order.specialTrainCategories?.length ||
+                !el.excludeInitialDocSpecialMarks.find((mark) => order.specialTrainCategories.includes(mark))
+              )
+            )
+          ) ? true : false;
+        });
+        if (restrictToOrderType || restrictToOrderSpecialOrderSign)
+          return necessaryOrders.filter((order) =>
+            (
+              !restrictToOrderType || order.type === restrictToOrderType
+            ) &&
+            (
+              !restrictToOrderSpecialOrderSign ||
+              order.specialTrainCategories?.includes(restrictToOrderSpecialOrderSign)
+            )
+          );
+        return necessaryOrders;
+      };
+    },
+
+    /**
+     * Возвращает действующие рабочие распоряжения (в рамках своих цепочек распоряжений),
+     * на базе которых можно создать новое распоряжение заданного типа.
      * Результат метода предназначен для отображения в компоненте TreeSelect.
      */
     getActiveOrdersToDisplayInTreeSelect(_state, getters) {
       return (newOrderType) => {
-        // Возможные типы базовых документов для создаваемого документа
-        const possibleBaseOrderTypes = getters.getPossibleBaseOrderTypesForNewOrder(newOrderType);
+        // Сюда помещается информация, подлежащая возврату из метода: документы, сгруппированные по типам
         const groupedOrders = [{
           key: null,
           label: '-',
           data: null,
         }];
-        if (!possibleBaseOrderTypes.length) {
-          return groupedOrders;
-        }
-        // Действующие распоряжения
-        const orders = getters.getActiveOrders;
-        orders.forEach((order) => {
-          // действующее распоряжение может рассматриваться как базовое для создаваемого документа?
-          const possibleBaseOrderInfo = possibleBaseOrderTypes.find((el) => el.initialDocType === order.type);
-          if (!possibleBaseOrderInfo) {
-            return;
-          }
-          // особые отметки действующего распоряжения позволяют его рассматривать как базовое для создаваемого документа?
-          if (possibleBaseOrderInfo.initialDocSpecialMarks && possibleBaseOrderInfo.initialDocSpecialMarks.length) {
-            if (!order.specialTrainCategories || !order.specialTrainCategories.length) {
-              return;
-            }
-            if (possibleBaseOrderInfo.initialDocSpecialMarks.find((mark) => !order.specialTrainCategories.includes(mark))) {
-              return;
-            }
-          }
-          if (possibleBaseOrderInfo.excludeInitialDocSpecialMarks && possibleBaseOrderInfo.excludeInitialDocSpecialMarks.length) {
-            if (order.specialTrainCategories && possibleBaseOrderInfo.excludeInitialDocSpecialMarks.find((mark) => order.specialTrainCategories.includes(mark))) {
-              return;
-            }
-          }
+        getters.getPossibleBaseActiveOrdersForNewOrder(newOrderType).forEach((order) => {
           const typeGroup = groupedOrders.find((group) => group.key === order.type);
           const childItem = {
             key: order._id,
@@ -344,7 +419,7 @@ export const activeOrders = {
 
     /**
      * Возвращает действующие распоряжения заданного типа. Если указана специальная отметка, которую
-     * должны иметь искомые распоряжения, то данная отметка также учитывается при поиске.
+     * должны иметь искомые распоряжения, то данная отметка учитывается при поиске. Если указана
      */
     getActiveOrdersOfGivenType(_state, getters) {
       return (ordersType, specialOrderSign = null) => {

@@ -161,9 +161,9 @@ export const dsp = {
             sector: item.trainSectorTitle || '',
             post: item.lastUserChoicePost || '',
             fio: item.lastUserChoice || '',
-            fioId: item.lastUserChoiceId,
-            fioOnline: item.lastUserChoiceOnline,
-            fioOnDuty: item.lastUserChoiceOnDuty,
+            lastUserChoiceFIOId: item.lastUserChoiceId,
+            lastUserChoiceFIOOnline: item.lastUserChoiceOnline,
+            lastUserChoiceFIOOnDuty: item.lastUserChoiceOnDuty,
             people: item.people
               .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL))
               .map((el) => {
@@ -173,7 +173,7 @@ export const dsp = {
                   fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
                   // полагаем, что пользователь online как ДСП на текущем полигоне управления, если у него в массиве
                   // onlineStatuses есть хотя бы одна запись с полномочием ДСП
-                  online: el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.DSP_FULL),
+                  online: Boolean(el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.DSP_FULL)),
                   // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
                   // запись "на дежурстве" с полномочием ДСП
                   onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.DSP_FULL)),

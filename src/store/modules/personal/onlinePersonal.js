@@ -38,7 +38,7 @@ export const onlinePersonal = {
           }
           // среди входных данных ищем online-пользователей текущего рассматриваемого полигона управления sectorData
           // (newSectorUsersInfo - объект в случае, если sectorType - участок ДНЦ либо ЭЦД; если же sectorType - станция, то
-          // newSectorUsersInfo - массив, поскольку на станции может быть более одного рабочего места)
+          // newSectorUsersInfo - массив, поскольку на рабочем полигоне "станция" могут существовать полигоны типа "рабочее место на станции")
           let newSectorUsersInfo;
           if (sectorType === WORK_POLIGON_TYPES.STATION) {
             newSectorUsersInfo = onlineUsers.filter((item) => item.type === sectorType && String(item.id) === String(sectorData.stationId));
@@ -87,7 +87,7 @@ export const onlinePersonal = {
 
             // для текущего пользователя user ищет информацию о его online-статусе в объекте workPoligonOnlineData,
             // переданном сервером; в зависимости от результата поиска устанавливает online-статус пользователя
-            const analyzeCurrentUserOnlineStatus = (workPoligonOnlineData) => {
+            const analyzeCurrentUserOnlineStatusOnWorkPoligon = (workPoligonOnlineData) => {
               // среди online-пользователей рабочего полигона ищем текущего пользователя user
               const currUserOnlineInfoArray = workPoligonOnlineData?.people?.filter((el) => el.clientId === user._id);
               // если текущий пользователь online, сохраняем об этом информацию в объекте user
@@ -109,26 +109,33 @@ export const onlinePersonal = {
                   (!user.stationWorkPlaceId && !poligonOnlineData.workPlaceId) ||
                   (user.stationWorkPlaceId && poligonOnlineData.workPlaceId && String(user.stationWorkPlaceId) === String(poligonOnlineData.workPlaceId))
                 )
+                // на каждом рабочем месте отмечаем факт наличия пользователя user на дежурстве
                 .forEach((poligonOnlineData) => {
-                  analyzeCurrentUserOnlineStatus(poligonOnlineData);
+                  analyzeCurrentUserOnlineStatusOnWorkPoligon(poligonOnlineData);
                 });
             } else {
-              analyzeCurrentUserOnlineStatus(newSectorUsersInfo);
+              analyzeCurrentUserOnlineStatusOnWorkPoligon(newSectorUsersInfo);
             }
           });
 
           // если у полигона управления не определен default online-пользователь, то в зависимости от типа полигона
           // управления выбираем первого интересующего online-пользователя и закрепляем его за данным полигоном управления;
-          // интересующий пользователь - тот, который на дежурстве; если на дежурстве никого нет, то null
+          // интересующий пользователь - тот, который на дежурстве и имеет указанное полномочие, связанное в качестве основного
+          // с полигоном управления определенного типа; если на дежурстве никого нет, то null
+
+          const isUserOnDuty = (userToCheck) => Boolean(
+            userToCheck &&
+            (
+              (sectorType === WORK_POLIGON_TYPES.STATION && userToCheck.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.DSP_FULL)) ||
+              (sectorType === WORK_POLIGON_TYPES.DNC_SECTOR && userToCheck.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.DNC_FULL)) ||
+              (sectorType === WORK_POLIGON_TYPES.ECD_SECTOR && userToCheck.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.ECD_FULL))
+            ));
+
           if (!sectorData.lastUserChoiceId) {
-            const onlineUser = !sectorData?.people?.length ? null :
-              sectorData.people.find((user) => user.online && user.onDuty &&
-                (
-                  (sectorType === WORK_POLIGON_TYPES.STATION && user.currentCredential === APP_CREDENTIALS.DSP_FULL) ||
-                  (sectorType === WORK_POLIGON_TYPES.DNC_SECTOR && user.currentCredential === APP_CREDENTIALS.DNC_FULL) ||
-                  (sectorType === WORK_POLIGON_TYPES.ECD_SECTOR && user.currentCredential === APP_CREDENTIALS.ECD_FULL)
-                )
-              );
+            const onlineUser = !sectorData?.people?.length
+              ? null
+              : sectorData.people.find((user) => user.online && isUserOnDuty(user));
+
             // если нашли походящего online-пользователя текущего рабочего полигона, устанавливаем его
             if (onlineUser) {
               sectorData.lastUserChoicePost = onlineUser.post;
@@ -139,18 +146,19 @@ export const onlinePersonal = {
                 surname: onlineUser.surname,
               });
               sectorData.lastUserChoiceOnline = onlineUser.online;
-              sectorData.lastUserChoiceOnDuty = onlineUser.onDuty;
+              sectorData.lastUserChoiceOnDuty = isUserOnDuty(onlineUser);
             }
           }
           // если для текущего рабочего полигона online-пользователь найден не был, то меняем у текущего рабочего
           // полигона информацию, связанную с последним зафиксированным на нем online-пользователем (если таков был)
           else {
             const lastChosenUser = sectorData.people.find((user) => user._id === sectorData.lastUserChoiceId);
+
             if (sectorData.lastUserChoiceOnline !== (lastChosenUser?.online || null)) {
               sectorData.lastUserChoiceOnline = lastChosenUser?.online || null;
             }
-            if (sectorData.lastUserChoiceOnDuty !== (lastChosenUser.onDuty || null)) {
-              sectorData.lastUserChoiceOnDuty = lastChosenUser?.onDuty || null;
+            if (sectorData.lastUserChoiceOnDuty !== (lastChosenUser?.onDuty || null)) {
+              sectorData.lastUserChoiceOnDuty = isUserOnDuty(lastChosenUser) || null;
             }
           }
         });

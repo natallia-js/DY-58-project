@@ -11,6 +11,9 @@
         { 'dy58-error-message': !user.appsCredentials || user.appsCredentials.length == 0 }
       ]"
     >
+      <!-- отображение значков, которые указывают на online-статусы "на дежурстве" / "не на дежурстве" текущего пользователя
+      (например, если пользователь зашел с одного браузера одного рабочего места, то количество значков = 1; если пользователь
+      зашел с двух разных рабочих мест либо браузеров, то значков уже будет два) -->
       <span
         v-for="onlineStatus of user.onlineStatuses"
         :key="onlineStatus.clientIP + onlineStatus.userAgent"
@@ -21,6 +24,9 @@
         ]"
       />
       {{ user.userStringInfo }}
+      <!-- отображение online-статусов "на дежурстве" / "не на дежурстве" текущего пользователя, а также полномочия, с которым он
+      вошел в систему, ip-адреса, с которого он вошел, а также наименования серии браузеров, которой принадлежит тот браузер, с
+      которого пользователь вошел в систему) -->
       <p
         v-for="onlineStatus of user.onlineStatuses"
         :key="onlineStatus.clientIP + onlineStatus.userAgent"
@@ -30,7 +36,7 @@
           { 'dy58-online-notonduty-color': !onlineStatus.onDuty },
         ]"
       >
-        - вошел как {{ onlineStatus.currentCredential }} ({{ onlineStatus.clientIP }}, {{ onlineStatus.userAgent }})
+        - вошел как {{ onlineStatus.currentCredential }} <!--({{ onlineStatus.clientIP }}; {{ onlineStatus.userAgent }}) -->
       </p>
     </div>
   </div>

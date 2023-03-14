@@ -65,10 +65,11 @@ export const getWorkOrders = {
     },
 
     /**
-     * Позволяет получить количество распоряжений, находящихся в работе.
+     * Позволяет получить количество документов, находящихся в работе.
+     * Для ЭЦД в подсчете не участвуют недействующие цепочки документов.
      */
     getWorkingOrdersNumber(_state, getters) {
-      return getters.getRawWorkingOrders.length;
+      return getters.getWorkingOrdersToDisplay.length;
     },
 
     /**

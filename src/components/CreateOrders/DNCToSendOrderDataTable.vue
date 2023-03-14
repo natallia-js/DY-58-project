@@ -26,18 +26,18 @@
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrSectorsShiftTblColumnNames.notification"
-              :class="[
-                {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
-                {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
-              ]"
+            :class="[
+              {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
+              {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
+            ]"
           >
             <span v-if="col.field !== getCurrSectorsShiftTblColumnNames.fio">
               {{ slotProps.data[col.field] }}
             </span>
             <span v-else
               :class="{
-                'dy58-online-onduty-color': slotProps.data.fioOnline && slotProps.data.fioOnDuty,
-                'dy58-online-notonduty-color': slotProps.data.fioOnline && !slotProps.data.fioOnDuty,
+                'dy58-online-onduty-color': slotProps.data.lastUserChoiceFIOOnline && slotProps.data.lastUserChoiceFIOOnDuty,
+                'dy58-online-notonduty-color': slotProps.data.lastUserChoiceFIOOnline && !slotProps.data.lastUserChoiceFIOOnDuty,
               }"
             >
               {{ slotProps.data[col.field] }}
@@ -49,7 +49,7 @@
                     .map((item) => ({ ...item, postFio: `${item.post} ${item.fio}` }))
                     // Удаляем повторяющиеся элементы
                     .filter((item, index, array) => array.findIndex((el) => el.postFio === item.postFio) === index),
-                  slotProps.data.fioId ? { id: slotProps.data.fioId } : null,
+                  slotProps.data.lastUserChoiceFIOId ? { id: slotProps.data.lastUserChoiceFIOId } : null,
                   slotProps.data.id,
                   slotProps.data.sector
                 )"

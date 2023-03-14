@@ -33,18 +33,18 @@
       >
         <template #body="slotProps">
           <div v-if="col.field !== getCurrShiftTblColumnNames.notification"
-              :class="[
-                {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
-                {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
-              ]"
+            :class="[
+              {'dy58-send-original': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendOriginal},
+              {'dy58-send-copy': slotProps.data.sendOriginal === getCurrShiftGetOrderStatus.sendCopy},
+            ]"
           >
             <span v-if="col.field !== getCurrShiftTblColumnNames.fio">
               {{ slotProps.data[col.field] }}
             </span>
             <span v-else
               :class="{
-                'dy58-online-onduty-color': slotProps.data.fioOnline && slotProps.data.fioOnDuty,
-                'dy58-online-notonduty-color': slotProps.data.fioOnline && !slotProps.data.fioOnDuty,
+                'dy58-online-onduty-color': slotProps.data.lastUserChoiceFIOOnline && slotProps.data.lastUserChoiceFIOOnDuty,
+                'dy58-online-notonduty-color': slotProps.data.lastUserChoiceFIOOnline && !slotProps.data.lastUserChoiceFIOOnDuty,
               }"
             >
               {{ slotProps.data[col.field] }}
@@ -58,7 +58,7 @@
                     // рассматривается лишь 1 рабочее место; но если у 2 пользователей одинаковые должности и ФИО,
                     // то дубликатов действительно не будет)
                     .filter((item, index, array) => array.findIndex((el) => el.postFio === item.postFio) === index),
-                  slotProps.data.fioId ? { id: slotProps.data.fioId } : null,
+                  slotProps.data.lastUserChoiceFIOId ? { id: slotProps.data.lastUserChoiceFIOId } : null,
                   slotProps.data.id,
                   slotProps.data.station
                 )"

@@ -149,10 +149,8 @@
       },
 
       orderTimeSpanString() {
-        if (!this.timeSpan) {
-          return 'Время издания';
-        }
-        return getTimeSpanString(this.type, this.timeSpan, this.isECD, this.specialTrainCategories);
+        return (!this.timeSpan) ? 'Время издания' :
+          getTimeSpanString(this.type, this.timeSpan, this.isECD, this.specialTrainCategories);
       },
 
       getDispatchOrdersBeingProcessedNumber() {

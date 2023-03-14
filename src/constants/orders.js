@@ -51,6 +51,8 @@ export const FILLED_ORDER_DATETIME_ELEMENTS = Object.freeze({
   CLOSE_BLOCK_DATETIME: 'Дата-время закрытия перегона',
   OPEN_BLOCK_DATETIME: 'Дата-время открытия перегона',
   CURR_DATETIME: 'Текущее время',
+  DOCUMENT_START_DATETIME: 'Дата-время начала действия документа',
+  DOCUMENT_END_DATETIME: 'Дата-время окончания действия документа',
 });
 
 export const FILLED_ORDER_INPUT_ELEMENTS = Object.freeze({
@@ -119,6 +121,8 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   BLOCK: 'Перегон',
   OBJECT: 'Объект',
   TRACK: 'Путь',
+  ECD_ACTIVE_ORDER: 'Действующий приказ',
+  ECD_ACTIVE_PROHIBITION: 'Действующее запрещение',
 });
 
 export const GID_EVENT_TYPE = Object.freeze({

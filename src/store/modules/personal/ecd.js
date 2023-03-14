@@ -75,9 +75,9 @@ export const ecd = {
         sector: item.sectorTitle,
         post: item.lastUserChoicePost || '',
         fio: item.lastUserChoice || '',
-        fioId: item.lastUserChoiceId,
-        fioOnline: item.lastUserChoiceOnline,
-        fioOnDuty: item.lastUserChoiceOnDuty,
+        lastUserChoiceFIOId: item.lastUserChoiceId,
+        lastUserChoiceFIOOnline: item.lastUserChoiceOnline,
+        lastUserChoiceFIOOnDuty: item.lastUserChoiceOnDuty,
         people: item.people
           .filter((el) => el.appsCredentials.includes(APP_CREDENTIALS.ECD_FULL))
           .map((el) => {
@@ -87,7 +87,7 @@ export const ecd = {
               fio: getUserFIOString({ name: el.name, fatherName: el.fatherName, surname: el.surname }),
               // полагаем, что пользователь online как ЭЦД на текущем полигоне управления, если у него в массиве
               // onlineStatuses есть хотя бы одна запись с полномочием ЭЦД
-              online: el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.ECD_FULL),
+              online: Boolean(el.online && el.onlineStatuses?.find((status) => status.currentCredential === APP_CREDENTIALS.ECD_FULL)),
               // полагаем, что пользователь на дежурстве, если у него в массиве onlineStatuses есть хотя бы одна
               // запись "на дежурстве" с полномочием ЭЦД
               onDuty: Boolean(el.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === APP_CREDENTIALS.ECD_FULL)),

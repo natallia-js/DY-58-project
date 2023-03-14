@@ -3,7 +3,7 @@
   <div v-else>
     <Fieldset legend="Персонал станции" :toggleable="true">
       <ViewSectorPeopleBlock
-        :peopleArray="currentStationShift || []"
+        :peopleArray="getFilteredPeople(currentStationShift, APP_CREDENTIALS.DSP_FULL)"
         :ifStationPeople="true"
       />
     </Fieldset>
@@ -15,7 +15,7 @@
         <div v-for="station of adjacentStationsShift" :key="station.stationId" class="p-ml-4">
           <span class="p-text-bold">{{ station.stationTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="station.people || []"
+            :peopleArray="getFilteredPeople(station.people, APP_CREDENTIALS.DSP_FULL)"
             :ifStationPeople="true"
           />
         </div>
@@ -29,7 +29,7 @@
         <div v-for="adjSector of getSectorPersonal.DNCSectorsShift" :key="adjSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ adjSector.sectorTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="adjSector.people || []"
+            :peopleArray="getFilteredPeople(adjSector.people, APP_CREDENTIALS.DNC_FULL)"
             :ifStationPeople="false"
           />
         </div>
@@ -43,7 +43,7 @@
         <div v-for="nearSector of getSectorPersonal.ECDSectorsShift" :key="nearSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ nearSector.sectorTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="nearSector.people || []"
+            :peopleArray="getFilteredPeople(nearSector.people, APP_CREDENTIALS.ECD_FULL)"
             :ifStationPeople="false"
           />
         </div>
@@ -87,14 +87,9 @@
         if (!getSectorPersonal.value?.sectorStationsShift || !getUserWorkPoligonData.value) {
           return [];
         }
-        let currentStationPeople = getSectorPersonal.value.sectorStationsShift.find((shift) =>
-          shift.stationId === getUserWorkPoligonData.value.St_ID)?.people || [];
-        if (props.showOnlyOnlineUsers)
-          currentStationPeople = currentStationPeople.filter((person) => person.online);
-        if (props.showOnlyDNC_ECD_DSPUsers)
-          currentStationPeople = currentStationPeople.filter((person) => person.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL));
-        return currentStationPeople;
-      })
+        return getSectorPersonal.value.sectorStationsShift.find((shift) =>
+          shift.stationId === getUserWorkPoligonData.value.St_ID)?.people;
+      });
 
       const adjacentStationsShift = computed(() => {
         if (!getSectorPersonal.value?.sectorStationsShift || !getUserWorkPoligonData.value) {
@@ -104,10 +99,22 @@
           shift.stationId !== getUserWorkPoligonData.value.St_ID);
       });
 
+      const getFilteredPeople = (people, neededCredential) => {
+        if (!people?.length) return [];
+        let filteredPeople = people;
+        if (props.showOnlyOnlineUsers)
+          filteredPeople = filteredPeople.filter((person) => person.online);
+        if (props.showOnlyDNC_ECD_DSPUsers)
+          filteredPeople = filteredPeople.filter((person) => person.appsCredentials.includes(neededCredential));
+        return filteredPeople;
+      };
+
       return {
+        APP_CREDENTIALS,
         getSectorPersonal,
         currentStationShift,
         adjacentStationsShift,
+        getFilteredPeople,
       };
     },
   };

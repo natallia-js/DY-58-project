@@ -2,9 +2,11 @@ import { computed } from 'vue';
 import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CIRCULAR_ORDER_SIGN,
-  SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
-  SPECIAL_OPEN_BLOCK_ORDER_SIGN,
 } from '@/constants/orderPatterns';
+import {
+  FILLED_ORDER_DROPDOWN_ELEMENTS,
+  FILLED_ORDER_DATETIME_ELEMENTS,
+} from '@/constants/orders';
 
 /**
  * Данный модуль предназначен для определения необходимости отображения на форме создания
@@ -48,14 +50,16 @@ import {
 
   // Определяет необходимость указывать место действия распоряжения.
   // Для этого не обязательно видеть соответствующий флаг.
-  // Так, для распоряжений ДНЦ о закрытии и открытии перегона поля места
-  // действия распоряжения не будут отображаться, но их заполнение обязательно!
-  // Данные будут браться из текста распоряжения.
-  const getUserDutyToDefineOrderPlace = computed(() =>
-    (state.specialTrainCategories && (
-      state.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) ||
-      state.specialTrainCategories.includes(SPECIAL_OPEN_BLOCK_ORDER_SIGN)
-    )) ? showOnGIDOptions[1] : showOnGIDOptions[0]);
+  // Если в тексте шаблонного распоряжения содержится элемент с одним из заданных
+  // смысловых значений, то полагается, что из него будет взята информация о месте действия документа.
+  const getUserDutyToDefineOrderPlace = computed(() => {
+    const isElementWithOrderPlaceMarker = (element) =>
+      element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE ||
+      element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE;
+    return state.orderText?.orderText?.find((el) => isElementWithOrderPlaceMarker(el) ) != null
+      ? showOnGIDOptions[1]
+      : showOnGIDOptions[0];
+  });
 
   // Отображать ли флаг выбора временного промежутка действия распоряжения.
   // Для всех распоряжений ДНЦ эти поля будут отсутствовать. Если их необходимо будет включить,
@@ -72,15 +76,18 @@ import {
 
   // Определяет необходимость указывать время действия распоряжения.
   // Для этого не обязательно видеть соответствующий флаг.
-  // Так, для распоряжений ДНЦ о закрытии и открытии перегона поля времени
-  // действия распоряжения не будут отображаться, но их заполнение обязательно!
-  // Данные будут браться из текста распоряжения.
-  // Для остальных типов распоряжений заполнение поля времени действия не является обязательным.
-  const getUserDutyToDefineOrderTimeSpan = computed(() =>
-    (state.specialTrainCategories && (
-      state.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) ||
-      state.specialTrainCategories.includes(SPECIAL_OPEN_BLOCK_ORDER_SIGN)
-    )) ? defineOrderTimeSpanOptions[1] : defineOrderTimeSpanOptions[0]);
+  // Если в тексте шаблонного распоряжения содержится элемент с одним из заданных
+  // смысловых значений, то полагается, что из него будет взята информация о времени действия документа.
+  const getUserDutyToDefineOrderTimeSpan = computed(() => {
+    const isElementWithOrderTimespanMarker = (element) =>
+      element.ref === FILLED_ORDER_DATETIME_ELEMENTS.CLOSE_BLOCK_DATETIME ||
+      element.ref === FILLED_ORDER_DATETIME_ELEMENTS.OPEN_BLOCK_DATETIME ||
+      element.ref === FILLED_ORDER_DATETIME_ELEMENTS.DOCUMENT_START_DATETIME ||
+      element.ref === FILLED_ORDER_DATETIME_ELEMENTS.DOCUMENT_END_DATETIME;
+    return state.orderText?.orderText?.find((el) => isElementWithOrderTimespanMarker(el) ) != null
+      ? defineOrderTimeSpanOptions[1]
+      : defineOrderTimeSpanOptions[0];
+  });
 
   return {
     showOrderDrafts,

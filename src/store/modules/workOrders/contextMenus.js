@@ -77,6 +77,7 @@ export const contextMenus = {
         const childPatterns = order?.orderText?.patternId ? getters.getOrderPatternChildPatterns(order.orderText.patternId) : null;
 
         const possibleNewOrderTypes = getters.getPossibleNewOrderTypesForBaseOrder(order.type, order.specialTrainCategories);
+
         if (!possibleNewOrderTypes || !possibleNewOrderTypes.length) {
           return items;
         }

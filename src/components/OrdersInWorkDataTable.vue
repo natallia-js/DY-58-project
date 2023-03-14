@@ -123,18 +123,8 @@
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
-                <!-- принудительно завершить цепочку распоряжений pi-replay -->
-                <div v-if="canForcelyCloseOrderChain(slotProps.data)" class="p-mb-1">
-                  <Button
-                    icon="pi pi-pause"
-                    class="p-button-primary p-button dy58-order-action-button"
-                    v-tooltip.bottom="'Принудительно завершить цепочку'"
-                    @click="forcelyCloseOrdersChain(slotProps.data.orderChainId)"
-                  />
-                </div>
                 <!-- создать распоряжение, связанное с текущим -->
                 <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id) &&
-                  createRelativeOrderContextMenuItems(slotProps.data.id) &&
                   createRelativeOrderContextMenuItems(slotProps.data.id).length"
                 >
                   <TieredMenu
@@ -405,7 +395,8 @@
             </div>
           </div>
 
-          <div v-if="canMarkOrderAsInvalid(slotProps.data)">
+          <!-- Отметить распоряжение как ошибочно изданное -->
+          <div v-if="canMarkOrderAsInvalid(slotProps.data)" class="p-mr-2 p-mt-2 p-d-inline-block">
             <Button
               icon="pi pi-times"
               class="p-button-warning p-button dy58-order-action-button"
@@ -415,6 +406,15 @@
                 slotProps.data.id,
                 slotProps.data[getWorkMessTblColumnsTitles.orderNum],
                 slotProps.data[getWorkMessTblColumnsTitles.extendedOrderTitle])"
+            />
+          </div>
+          <!-- Принудительно завершить цепочку распоряжений -->
+          <div v-if="canForcelyCloseOrderChain(slotProps.data)" class="p-mt-2 p-d-inline-block">
+            <Button
+              icon="pi pi-pause"
+              class="p-button-primary p-button dy58-order-action-button"
+              v-tooltip.bottom="'Принудительно завершить цепочку'"
+              @click="forcelyCloseOrdersChain(slotProps.data.orderChainId)"
             />
           </div>
         </div>

@@ -12,7 +12,7 @@
           :binary="true"
           v-model="showOnlyOnlineUsers"
         />
-        <label for="show-only-online-users">&#160;показать только online-пользователей</label>
+        <label for="show-only-online-users">&#160;показать только пользователей, находящихся в сети</label>
       </div>
       <div class="p-mb-2">
         <Checkbox
@@ -76,7 +76,7 @@
     setup() {
       const store = useStore();
 
-      const showOnlyOnlineUsers = ref(false);
+      const showOnlyOnlineUsers = ref(true);
       const showOnlyDNC_ECD_DSPUsers = ref(true);
 
       store.commit(SET_ACTIVE_MAIN_MENU_ITEM, MainMenuItemsKeys.currShift);

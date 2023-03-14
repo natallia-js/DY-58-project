@@ -3,7 +3,7 @@
   <div v-else>
     <Fieldset legend="Персонал текущего участка ДНЦ" :toggleable="true">
       <ViewSectorPeopleBlock
-        :peopleArray="getCurrentDNCSectorShift ? (getCurrentDNCSectorShift.people || []) : []"
+        :peopleArray="getFilteredPeople((getCurrentDNCSectorShift || {}).people, APP_CREDENTIALS.DNC_FULL)"
         :ifStationPeople="false"
       />
     </Fieldset>
@@ -15,7 +15,7 @@
         <div v-for="station of getSectorPersonal.sectorStationsShift" :key="station.stationId" class="p-ml-4">
           <span class="p-text-bold">{{ station.stationTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="station.people || []"
+            :peopleArray="getFilteredPeople(station.people, APP_CREDENTIALS.DSP_FULL)"
             :ifStationPeople="true"
           />
         </div>
@@ -29,7 +29,7 @@
         <div v-for="adjSector of getAllDNCShiftExceptCurrent" :key="adjSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ adjSector.sectorTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="adjSector.people || []"
+            :peopleArray="getFilteredPeople(adjSector.people, APP_CREDENTIALS.DNC_FULL)"
             :ifStationPeople="false"
           />
         </div>
@@ -43,7 +43,7 @@
         <div v-for="nearSector of getSectorPersonal.ECDSectorsShift" :key="nearSector.sectorId" class="p-ml-4">
           <span class="p-text-bold">{{ nearSector.sectorTitle }}</span>
           <ViewSectorPeopleBlock
-            :peopleArray="nearSector.people || []"
+            :peopleArray="getFilteredPeople(nearSector.people, APP_CREDENTIALS.ECD_FULL)"
             :ifStationPeople="false"
           />
         </div>
@@ -54,8 +54,10 @@
 
 
 <script>
-  import { mapGetters } from 'vuex';
+  import { computed } from 'vue';
+  import { useStore } from 'vuex';
   import ViewSectorPeopleBlock from '@/components/ViewSectorPeopleBlock';
+  import { APP_CREDENTIALS } from '@/constants/appCredentials';
 
   export default {
     name: 'dy58-view-shift-for-dnc',
@@ -64,12 +66,37 @@
       ViewSectorPeopleBlock,
     },
 
-    computed: {
-      ...mapGetters([
-        'getSectorPersonal',
-        'getCurrentDNCSectorShift',
-        'getAllDNCShiftExceptCurrent',
-      ]),
+    props: {
+      showOnlyDNC_ECD_DSPUsers: {
+        type: Boolean,
+        required: false,
+      },
+      showOnlyOnlineUsers: {
+        type: Boolean,
+        required: false,
+      },
+    },
+
+    setup(props) {
+      const store = useStore();
+
+      const getFilteredPeople = (people, neededCredential) => {
+        if (!people?.length) return [];
+        let filteredPeople = people;
+        if (props.showOnlyOnlineUsers)
+          filteredPeople = filteredPeople.filter((person) => person.online);
+        if (props.showOnlyDNC_ECD_DSPUsers)
+          filteredPeople = filteredPeople.filter((person) => person.appsCredentials.includes(neededCredential));
+        return filteredPeople;
+      };
+
+      return {
+        APP_CREDENTIALS,
+        getSectorPersonal: computed(() => store.getters.getSectorPersonal),
+        getCurrentDNCSectorShift: computed(() => store.getters.getCurrentDNCSectorShift),
+        getAllDNCShiftExceptCurrent: computed(() => store.getters.getAllDNCShiftExceptCurrent),
+        getFilteredPeople,
+      };
     },
   };
 </script>

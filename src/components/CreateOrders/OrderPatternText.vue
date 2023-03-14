@@ -62,6 +62,8 @@
     props: {
       // массив элементов шаблона распоряжения
       value: Array,
+      // тип документа
+      orderType: String,
     },
 
     data() {
@@ -87,7 +89,6 @@
         'getSectorBlocks',
         'getSectorBlocksByStationTitle',
         'getSectorBlockByTitle',
-        'getActiveOrdersOfGivenType',
         'getActiveOrderByNumber',
         'getCurrDNCSectorWorkPoligonUsers',
         'getCurrECDSectorWorkPoligonUsers',
@@ -95,6 +96,7 @@
         'isDNC',
         'isECD',
         'getOrderPatternElementRefMeanings',
+        'getPossibleBaseActiveOrdersForNewOrder',
       ]),
 
       getOrderPatternElementTypes() {
@@ -157,36 +159,44 @@
                 label: track.BT_Name,
                 value: track.BT_Name,
               }));
+            // Список действующих распоряжений ДНЦ; но нас интересуют не все действующие распоряжения, а только те, на основании
+            // которых можно создать документ типа this.orderType
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ORDER_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ORDER, null)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.CLOSE_BLOCK_ORDER_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ORDER, SPECIAL_CLOSE_BLOCK_ORDER_SIGN)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.REQUEST_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.REQUEST).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.REQUEST)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.NOTIFICATION_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.NOTIFICATION).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.NOTIFICATION)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_ORDER_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_ORDER).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_ORDER)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.ECD_PROHIBITION_NUMBER:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION).map((order) => ({
-                label: order.number,
-                value: order.number,
-              }));
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_PROHIBITION)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             case FILLED_ORDER_DROPDOWN_ELEMENTS.PASS_DUTY:
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:
               if (this.isDNC)
@@ -234,8 +244,25 @@
                 label: BLOCK_PREFIX + block.Bl_Title,
                 value: BLOCK_PREFIX + block.Bl_Title,
               })).sort();
+            // Список действующих приказов ЭЦД; но нас интересуют не все действующие приказы, а только те, на основании
+            // которых можно создать документ типа this.orderType
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ECD_ACTIVE_ORDER:
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_ORDER, null)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
+            // Список действующих запрещений ЭЦД; но нас интересуют не все действующие запрещения, а только те, на основании
+            // которых можно создать документ типа this.orderType
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ECD_ACTIVE_PROHIBITION:
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_ACTIVE_PROHIBITION, null)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
             default:
-              return this.getOrderPatternElementRefMeanings({ elementType, elementRef }).map((item) => ({ label: item, value: item }));
+              return this.getOrderPatternElementRefMeanings({ elementType, elementRef })
+                .map((item) => ({ label: item, value: item }));
           }
         };
       },

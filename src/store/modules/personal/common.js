@@ -36,7 +36,7 @@ export const common = {
           item.lastUserChoicePost = null;
           item.lastUserChoice = null;
           item.lastUserChoiceId = null;
-          item.lastUserChoiceOnline = false;
+          item.lastUserChoiceOnline = null;
           item.lastUserChoiceOnDuty = null;
           item.sendOriginal = CurrShiftGetOrderStatus.doNotSend;
         }
@@ -108,7 +108,7 @@ export const common = {
                 });
                 // полагаем, что пользователь online на текущем полигоне управления, если в его onlineStatuses есть
                 // запись с указанным полномочием
-                sector.lastUserChoiceOnline = neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === userCredential);
+                sector.lastUserChoiceOnline = Boolean(neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === userCredential));
                 // полагаем, что пользователь на дежурстве на текущем полигоне управления, если в его onlineStatuses есть
                 // запись с указанным полномочием и статусом "на дежурстве"
                 sector.lastUserChoiceOnDuty = Boolean(neededUser.onlineStatuses?.find((status) => status.onDuty && status.currentCredential === userCredential));
@@ -179,7 +179,7 @@ export const common = {
             // полагаем, что пользователь online на текущем полигоне управления, если в его onlineStatuses есть
             // запись с найденным выше полномочием
             sector.lastUserChoiceOnline = chooseUser
-              ? neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === neededCredential)
+              ? Boolean(neededUser.online && neededUser.onlineStatuses?.find((status) => status.currentCredential === neededCredential))
               : null;
             // полагаем, что пользователь на дежурстве на текущем полигоне управления, если в его onlineStatuses есть
             // запись с найденным выше полномочием и статусом "на дежурстве"
