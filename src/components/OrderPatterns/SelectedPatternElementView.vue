@@ -5,10 +5,13 @@
     style="width:100%"
     @input="elementValue = $event"
   />
-  <InputText
-    v-else-if="element.type === getOrderPatternElementTypes.INPUT"
-    :style="{width:getElementSizesCorrespondence[element.size]}"
-  />
+  <div v-else-if="element.type === getOrderPatternElementTypes.INPUT">
+    <InputText
+      :style="{width:getElementSizesCorrespondence[element.size]}"
+      v-model="elementValue"
+    />
+    <div>*Текст, введенный в поле выше, будет полагаться значением по умолчанию</div>
+  </div>
   <div v-else-if="element.type === getOrderPatternElementTypes.TEXT_AREA">
     <Textarea
       :autoResize="true"

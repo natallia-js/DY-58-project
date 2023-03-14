@@ -180,7 +180,12 @@
             (!this.selectedPatternElement.value || this.selectedPatternElement.value.trim() === '')) {
           return;
         }
-        if (![OrderPatternElementType.TEXT, OrderPatternElementType.TEXT_AREA].includes(this.selectedPatternElement.type)) {
+        // Значение по умолчанию разрешаем иметь только элементам указанных типов
+        if (![
+          OrderPatternElementType.TEXT,
+          OrderPatternElementType.TEXT_AREA,
+          OrderPatternElementType.INPUT].includes(this.selectedPatternElement.type))
+        {
           this.selectedPatternElement.value = null;
         }
         if ([OrderPatternElementType.DATE, OrderPatternElementType.TIME,

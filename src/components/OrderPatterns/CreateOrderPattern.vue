@@ -145,6 +145,7 @@
   import EditOrderPattern from './EditOrderPattern';
   import OrderPatternPreview from './OrderPatternPreview';
   import { CREATE_ORDER_PATTERN_ACTION } from '@/store/action-types';
+  import compareStrings from '@/additional/compareStrings';
 
   export default {
     name: 'dy58-create-order-pattern',
@@ -190,6 +191,7 @@
         store.getters.getCurrentUserOrderCategories
           .filter((item) => item.orderType === state.orderType)
           .map((item) => item.category)
+          .sort((a, b) => compareStrings(a.toLowerCase(), b.toLowerCase()))
       );
 
       const getCreateOrderPatternRecsBeingProcessed = computed(() => {
