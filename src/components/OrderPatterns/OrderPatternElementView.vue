@@ -89,6 +89,16 @@
           />
         </div>
       </template>
+      <template #option="slotProps">
+        <div>
+          {{ slotProps.option.label }}&#160;
+          <i v-if="isBlockMultipleSelectElement(element)"
+            class="pi pi-double-side-arrow"
+            @click.stop="handleReverseBlockTitle(slotProps.option.label)"
+            v-tooltip="'Поменять названия станций местами'"
+          />
+        </div>
+      </template>
     </MultiSelect>
   </div>
 
@@ -402,6 +412,8 @@
     FILLED_ORDER_DATETIME_ELEMENTS,
     FILLED_ORDER_DATE_ELEMENTS,
     FILLED_ORDER_TIME_ELEMENTS,
+    FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
+    BLOCK_PREFIX,
   } from '@/constants/orders';
   import showMessage from '@/hooks/showMessage.hook';
   import { getLocaleTimeString } from '@/additional/dateTimeConvertions';
@@ -501,11 +513,11 @@
 
       const state = reactive({
         elementModelValue: getDefaultElementModelValue(),
-        multipleValuesForSelection: props.selectMultipleValues || [],
+        multipleValuesForSelection: props.selectMultipleValues ? [...props.selectMultipleValues] : [],
         newMultipleValue: null,
       });
 
-      watch(() => props.selectMultipleValues, (value) => state.multipleValuesForSelection = value || []);
+      watch(() => props.selectMultipleValues, (value) => state.multipleValuesForSelection = value ? [...value] : []);
 
       const addNewMultipleValue = () => {
         if (state.newMultipleValue && !state.multipleValuesForSelection.find((el) => el.value === state.newMultipleValue)) {
@@ -758,7 +770,7 @@
             }
           })
           .catch((err) => {
-            showErrMessage('Что пошло не так: ' + err);
+            showErrMessage('Что-то пошло не так: ' + err);
           });
       };
 
@@ -967,6 +979,7 @@
         }
       };
 
+      // Определяем, какие элементв шаблона типа "Выпадающий список одиночного выбора" могут редактироваться пользователем
       const isDropdownEditable = computed(() =>
         props.element &&
         props.element.type === OrderPatternElementType.SELECT &&
@@ -975,6 +988,44 @@
           props.element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.SPEED
         )
       );
+
+      // Данный метод предназначен для использования с отдельным значением элемента 'Множественный выбор'.
+      // Причем только с элементом типа 'Перегон'.
+      // Позволяет поменять местами названия станций в наименовании перегона.
+      // Например, из 'пер.Осиновка - Хлюстино' получаем 'пер.Хлюстино - Осиновка'.
+      const handleReverseBlockTitle = (blockTitle) => {
+        // !!! Полагаем, что в списке multipleValuesForSelection у всех элементов значения полей label и value одинаковы.
+        // Нам необходимо внести изменения во все списки в состоянии компонента, в которые выходит выбранное пользователем значение
+        // blockTitle (т.е. в списки multipleValuesForSelection и elementModelValue)
+
+        // Получаем "чистое" наименование перегона (пез префикса, если он в нем присутствует)
+        const pureBlockTitle = blockTitle.startsWith(BLOCK_PREFIX) ? blockTitle.split(BLOCK_PREFIX)[1] : blockTitle;
+
+        // Смотрим, какой разделитель используется для разделения наименований станций в наименовании перегона
+        let stationNamesDividerIndex = pureBlockTitle.indexOf('-');
+        if (stationNamesDividerIndex < 0) stationNamesDividerIndex = pureBlockTitle.indexOf('–');
+        if (stationNamesDividerIndex < 0) return;
+
+        // Выделяем из наименования перегона наименования станций
+        const stationTitles = pureBlockTitle.split(pureBlockTitle[stationNamesDividerIndex]).map((title) => title.trim());
+
+        // Формируем новое (перевернутое) наименование перегона
+        const reversedBlockTitle = (blockTitle.startsWith(BLOCK_PREFIX) ? BLOCK_PREFIX : '') +
+          `${stationTitles[1]} ${pureBlockTitle[stationNamesDividerIndex]} ${stationTitles[0]}`;
+
+        // Редактируем при помощи нового наименования перегона состояние компонента
+        state.multipleValuesForSelection = state.multipleValuesForSelection.map((el) => {
+          if (el.value !== blockTitle) return el;
+          return { label: reversedBlockTitle, value: reversedBlockTitle};
+        });
+        if (state.elementModelValue) {
+          for (let key in state.elementModelValue) {
+            if (state.elementModelValue[key] === blockTitle) {
+              state.elementModelValue[key] = reversedBlockTitle;
+            }
+          }
+        }
+      };
 
       return {
         state,
@@ -1015,6 +1066,9 @@
         checkArrivalDepartureTime,
         handleSubmitNewDRRecord,
         isDropdownEditable,
+        isBlockMultipleSelectElement: (multipleSelectElement) =>
+          [FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK].includes(multipleSelectElement?.ref),
+        handleReverseBlockTitle,
       };
     },
   };
