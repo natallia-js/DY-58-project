@@ -49,6 +49,7 @@
     FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
     STATION_PREFIX,
     BLOCK_PREFIX,
+    FILLED_ORDER_INPUT_ELEMENTS,
   } from '@/constants/orders';
   import {
     SET_GET_ORDER_STATUS_TO_ALL_DSP,
@@ -234,6 +235,33 @@
           if (elementType !== OrderPatternElementType.MULTIPLE_SELECT) {
             return null;
           }
+          // В списках множественного выбора приказов и запрещений ЭЦД хотят видеть не просто номера приказов/запрещений, а строки в формате
+          // "<Номер приказа/запрещения> (<список ДСП станций, которым приказ/запрещение было адресовано>; <путь из текста приказа/запрещения>)";
+          // при этом в текст сформированного документа должен попасть из этой строки только номер приказа/запрещения
+          const getMultipleSelectValuesForECDOrdersAndProhibitions = (orderType) => {
+            return this.getActiveOrdersOfGivenType(orderType)
+              .map((order) => {
+                // формируем строку адресатов приказа/запрещения из числа ДСП
+                const stationAddressesInfo = (order.dspToSend || []).map((addresse) => `${addresse.post} ${addresse.placeTitle}`).join(', ');
+                // определяем номер пути в тексте приказа/запрещения
+                const isTrackElement = (element) =>
+                  element?.type === OrderPatternElementType.INPUT &&
+                  [FILLED_ORDER_INPUT_ELEMENTS.TRACK].includes(element?.ref);
+                const orderTrackFromText = order.orderText?.orderText?.find((el) => isTrackElement(el))?.value;
+                // формируем строку с дополнительной информацией, которую необходимо показать пользователю в выпадающем списке
+                let additionalInfo = (!orderTrackFromText && stationAddressesInfo === '')
+                  ? ''
+                  : (orderTrackFromText && stationAddressesInfo !== '')
+                    ? ` (${stationAddressesInfo}; ${orderTrackFromText})`
+                    : orderTrackFromText
+                      ? ` (${orderTrackFromText})`
+                      : ` (${stationAddressesInfo})`;
+                return {
+                  label: order.number + additionalInfo,
+                  value: order.number,
+                };
+              });
+          };
           switch (elementRef) {
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION:
               return this.getSectorStations.map((station) => ({
@@ -263,18 +291,10 @@
                 }));
             // Список абсолютно всех действующих приказов ЭЦД
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ALL_ECD_ACTIVE_ORDERS:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_ORDER)
-                .map((order) => ({
-                  label: order.number,
-                  value: order.number,
-                }));
+              return getMultipleSelectValuesForECDOrdersAndProhibitions(ORDER_PATTERN_TYPES.ECD_ORDER);
             // Список абсолютно всех действующих запрещений ЭЦД
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ALL_ECD_ACTIVE_PROHIBITIONS:
-              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION)
-                .map((order) => ({
-                  label: order.number,
-                  value: order.number,
-                }));
+              return getMultipleSelectValuesForECDOrdersAndProhibitions(ORDER_PATTERN_TYPES.ECD_PROHIBITION);
             default:
               return this.getOrderPatternElementRefMeanings({ elementType, elementRef })
                 .map((item) => ({ label: item, value: item }));

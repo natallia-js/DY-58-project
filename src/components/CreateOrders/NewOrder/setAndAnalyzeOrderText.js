@@ -42,7 +42,7 @@ export const useSetAndAnalyzeOrderText = (inputVals) => {
    * Если firstFilledElement = true, то ищется значение первого заполненного (непустого) элемента шаблона.
    */
   const getOrderPatternElementValue = ({ elTypesRefs, firstFilledElement = true }) => {
-    if (!state.orderText || !state.orderText.orderText || !state.orderText.patternId || !elTypesRefs || !elTypesRefs.length)
+    if (!state.orderText?.orderText || !state.orderText.patternId || !elTypesRefs?.length)
       return null;
     const typesRefsIncludes = (type, ref) =>
       elTypesRefs.find((el) => el && el.length === 2 && el[0] === type && el[1] === ref) ? true : false;
