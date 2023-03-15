@@ -7,9 +7,11 @@ import {
   FILLED_ORDER_INPUT_ELEMENTS,
   FILLED_ORDER_DROPDOWN_ELEMENTS,
   FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS,
+  ORDER_PLACE_VALUES,
 } from '@/constants/orders';
 import {
   OrderPatternElementType,
+  ORDER_PATTERN_TYPES,
 } from '@/constants/orderPatterns';
 
 /**
@@ -38,13 +40,32 @@ export const useOrderDraft = (inputVals) => {
       [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.BLOCK],
       [OrderPatternElementType.MULTIPLE_SELECT, FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.STATION],
-    ] }) || '?';
+    ] });
     const orderTrackFromText = getOrderPatternElementValue({ elTypesRefs: [
       [OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.TRACK],
-    ] }) || '?';
+    ] });
+    const naryadDopuskOrRequestFromText = getOrderPatternElementValue({ elTypesRefs: [
+      [OrderPatternElementType.SELECT, FILLED_ORDER_DROPDOWN_ELEMENTS.NARYAD_DOPUSK_REQUEST_REF],
+    ] });
+    const specialNumberFromText = getOrderPatternElementValue({ elTypesRefs: [
+      [OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF],
+    ] });
+    // Название черновика документа (которое позволит этот черновик в последующем быстро найти)
+    console.log(state.dspSectorsToSendOrder.map(val => 'ДСП ' + store.getters.getSectorStationOrBlockTitleById({ placeType: val.type, id: val.id, addStationUNMC: false }) || '?'))
     const fullOrderTitle =
-      `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') : '?'}. ` +
-      `${orderPlaceFromText}. Путь ${orderTrackFromText}. ${state.orderText.orderTitle}`;
+      // для запрещений ЭЦД в начале строки идет информация по адресатам на станциях, для всех остальных типов документов -
+      // информация об иных адресатах
+      (
+        (props.orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)
+          ? `${state.dspSectorsToSendOrder?.length ? state.dspSectorsToSendOrder.map(val => 'ДСП ' + store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: val.id, addStationUNMC: false }) || '?').join(', ') + '. ' : ''}`
+          : `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') + '. ' : ''}`
+      ) +
+      (orderPlaceFromText ? orderPlaceFromText + '. ' : '') +
+      (orderTrackFromText ? 'Путь ' + orderTrackFromText + '. ' : '' ) +
+      state.orderText.orderTitle + '.' +
+      (naryadDopuskOrRequestFromText ? ' ' + naryadDopuskOrRequestFromText : '') +
+      (specialNumberFromText ? ' ' + specialNumberFromText : '');
+
     confirm.require({
       target: event.currentTarget,
       group: 'confirmSaveOrderDraft',

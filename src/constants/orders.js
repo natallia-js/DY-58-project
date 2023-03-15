@@ -123,6 +123,8 @@ export const FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS = Object.freeze({
   TRACK: 'Путь',
   ECD_ACTIVE_ORDER: 'Действующий приказ',
   ECD_ACTIVE_PROHIBITION: 'Действующее запрещение',
+  ALL_ECD_ACTIVE_ORDERS: 'Все действующие приказы',
+  ALL_ECD_ACTIVE_PROHIBITIONS: 'Все действующие запрещения',
 });
 
 export const GID_EVENT_TYPE = Object.freeze({

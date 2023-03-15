@@ -28,7 +28,6 @@ import {
   delOrderDraftOnServer,
 } from '@/serverRequests/orderDrafts.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
-import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 import getOrderDraftElementValue from '@/additional/getOrderDraftElementValue';
 
 
@@ -38,7 +37,7 @@ function getOrderDraftObject(draft) {
   }
   return {
     ...draft,
-    displayTitle: `${draft.orderText.fullOrderTitle || '?'} от ${getLocaleDateTimeString(new Date(draft.createDateTime))}`,
+    displayTitle: draft.orderText.fullOrderTitle,
     createDateTime: new Date(draft.createDateTime),
     orderText: !draft.orderText ? null : {
       ...draft.orderText,

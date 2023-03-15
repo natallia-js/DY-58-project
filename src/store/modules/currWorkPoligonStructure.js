@@ -204,13 +204,13 @@ export const currWorkPoligonStructure = {
      * Рабочий полигон - как участок ДНЦ / ЭЦД, так и станция.
      * Если метод ничего не находит, то возвращает null.
      */
-    getSectorStationOrBlockTitleById: (_state, getters) => ({ placeType, id }) => {
+    getSectorStationOrBlockTitleById: (_state, getters) => ({ placeType, id, addStationUNMC = true }) => {
       let place;
       switch (placeType) {
         case ORDER_PLACE_VALUES.station:
           place = getters.getSectorStations.find((station) => String(station.St_ID) === String(id));
           if (place) {
-            return `${place.St_Title} (${place.St_UNMC})`;
+            return addStationUNMC ? `${place.St_Title} (${place.St_UNMC})` : place.St_Title;
           }
           break;
         case ORDER_PLACE_VALUES.span:

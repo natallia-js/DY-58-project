@@ -90,6 +90,7 @@
         'getSectorBlocksByStationTitle',
         'getSectorBlockByTitle',
         'getActiveOrderByNumber',
+        'getActiveOrdersOfGivenType',
         'getCurrDNCSectorWorkPoligonUsers',
         'getCurrECDSectorWorkPoligonUsers',
         'getSelectedOkno',
@@ -255,7 +256,21 @@
             // Список действующих запрещений ЭЦД; но нас интересуют не все действующие запрещения, а только те, на основании
             // которых можно создать документ типа this.orderType
             case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ECD_ACTIVE_PROHIBITION:
-              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_ACTIVE_PROHIBITION, null)
+              return this.getPossibleBaseActiveOrdersForNewOrder(this.orderType, ORDER_PATTERN_TYPES.ECD_PROHIBITION, null)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
+            // Список абсолютно всех действующих приказов ЭЦД
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ALL_ECD_ACTIVE_ORDERS:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_ORDER)
+                .map((order) => ({
+                  label: order.number,
+                  value: order.number,
+                }));
+            // Список абсолютно всех действующих запрещений ЭЦД
+            case FILLED_ORDER_SELECT_MULTIPLE_ELEMENTS.ALL_ECD_ACTIVE_PROHIBITIONS:
+              return this.getActiveOrdersOfGivenType(ORDER_PATTERN_TYPES.ECD_PROHIBITION)
                 .map((order) => ({
                   label: order.number,
                   value: order.number,
