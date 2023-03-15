@@ -51,7 +51,6 @@ export const useOrderDraft = (inputVals) => {
       [OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF],
     ] });
     // Название черновика документа (которое позволит этот черновик в последующем быстро найти)
-    console.log(state.dspSectorsToSendOrder.map(val => 'ДСП ' + store.getters.getSectorStationOrBlockTitleById({ placeType: val.type, id: val.id, addStationUNMC: false }) || '?'))
     const fullOrderTitle =
       // для запрещений ЭЦД в начале строки идет информация по адресатам на станциях, для всех остальных типов документов -
       // информация об иных адресатах
