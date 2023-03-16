@@ -992,7 +992,8 @@
       // Данный метод предназначен для использования с отдельным значением элемента 'Множественный выбор'.
       // Причем только с элементом типа 'Перегон'.
       // Позволяет поменять местами названия станций в наименовании перегона.
-      // Например, из 'пер.Осиновка - Хлюстино' получаем 'пер.Хлюстино - Осиновка'.
+      // Например, из 'пер.Осиновка - Хлюстино' получаем 'пер.Хлюстино - Осиновка',
+      // из 'пер.Минск-Сортировочный - Помыслище' получаем 'пер.Помыслище - Минск-Сортировочный'.
       const handleReverseBlockTitle = (blockTitle) => {
         // !!! Полагаем, что в списке multipleValuesForSelection у всех элементов значения полей label и value одинаковы.
         // Нам необходимо внести изменения во все списки в состоянии компонента, в которые выходит выбранное пользователем значение
@@ -1002,16 +1003,23 @@
         const pureBlockTitle = blockTitle.startsWith(BLOCK_PREFIX) ? blockTitle.split(BLOCK_PREFIX)[1] : blockTitle;
 
         // Смотрим, какой разделитель используется для разделения наименований станций в наименовании перегона
-        let stationNamesDividerIndex = pureBlockTitle.indexOf('-');
-        if (stationNamesDividerIndex < 0) stationNamesDividerIndex = pureBlockTitle.indexOf('–');
-        if (stationNamesDividerIndex < 0) return;
+        // (полагаем, что используемый дефисный символ - неважно какой - должен быть отделен от наименований станций
+        // пробелами, это обязательно, т.к. если дефисный символ в строке встречается без пробелов, то полагаем,
+        // что он является частью названия станции)
+        let stationsSeparator;
+        const regexSearchSeparator = /\s+.\s+/;
+        const blockNameSearchResults = pureBlockTitle.match(regexSearchSeparator);
+        if (blockNameSearchResults?.length)
+          stationsSeparator = blockNameSearchResults[0];
+        if (!stationsSeparator)
+          return;
 
         // Выделяем из наименования перегона наименования станций
-        const stationTitles = pureBlockTitle.split(pureBlockTitle[stationNamesDividerIndex]).map((title) => title.trim());
+        const stationTitles = pureBlockTitle.split(stationsSeparator).map((title) => title.trim());
 
         // Формируем новое (перевернутое) наименование перегона
         const reversedBlockTitle = (blockTitle.startsWith(BLOCK_PREFIX) ? BLOCK_PREFIX : '') +
-          `${stationTitles[1]} ${pureBlockTitle[stationNamesDividerIndex]} ${stationTitles[0]}`;
+          `${stationTitles[1]} ${stationsSeparator} ${stationTitles[0]}`;
 
         // Редактируем при помощи нового наименования перегона состояние компонента
         state.multipleValuesForSelection = state.multipleValuesForSelection.map((el) => {

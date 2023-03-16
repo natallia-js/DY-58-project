@@ -252,9 +252,9 @@
                 let additionalInfo = (!orderTrackFromText && stationAddressesInfo === '')
                   ? ''
                   : (orderTrackFromText && stationAddressesInfo !== '')
-                    ? ` (${stationAddressesInfo}; ${orderTrackFromText})`
+                    ? ` (${stationAddressesInfo}; путь ${orderTrackFromText})`
                     : orderTrackFromText
-                      ? ` (${orderTrackFromText})`
+                      ? ` (путь ${orderTrackFromText})`
                       : ` (${stationAddressesInfo})`;
                 return {
                   label: order.number + additionalInfo,
