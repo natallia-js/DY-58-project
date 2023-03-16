@@ -24,53 +24,84 @@
     </div>
 
     <div v-else>
-      <div>
-        <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
-        <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
-          <p class="p-text-bold p-mb-3">Полномочие</p>
-          <div
-            v-for="cred of getAllPossibleCredentialsWithPoligons"
-            :key="cred.cred"
-            class="p-field-radiobutton"
-          >
-            <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
-            <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
-          </div>
+      <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
+      <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
+        <p class="p-text-bold p-mb-3">Полномочие</p>
+        <div
+          v-for="cred of getAllPossibleCredentialsWithPoligons"
+          :key="cred.cred"
+          class="p-field-radiobutton"
+        >
+          <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
+          <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
         </div>
-        <div v-if="state.selectedCredential">
-          <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
-            <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
-            <div style="max-height:35vh;max-width:100vw;overflow:auto">
-              <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type">
-                <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>
-                <div
-                  v-for="workPoligon of sortedWorkPoligonData(typedPoligon.type, typedPoligon.workPoligons)"
-                  :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                  class="p-field-radiobutton"
-                >
+      </div>
+      <div v-if="state.selectedCredential">
+        <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
+          <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
+          <div style="max-height:35vh;max-width:100vw;overflow:auto">
+<!--            <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type" style="max-height:35vh">
+              <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>-->
+
+{{state.selectedCredential}}
+{{state.selectedPoligon}}
+
+              <Listbox
+                v-model="state.selectedPoligon"
+                :options="getSortedWorkPoligonsData()"
+                optionLabel="titleToDisplay"
+                optionGroupLabel="workPoligonType"
+                optionGroupChildren="poligons"
+                listStyle="width:100%"
+              >
+                <template #optiongroup="slotProps">
+                  <div>
+                    <div>Тип полигона: {{ slotProps.option.workPoligonType }}</div>
+                  </div>
+                </template>
+                <template #option="slotProps">
                   <RadioButton
-                    :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                    :id="`${slotProps.option.poligonId}${slotProps.option.subPoligonId || ''}`"
                     name="workPoligon"
-                    :value="{ type: typedPoligon.type, ...workPoligon }"
+                    :value="{ type: slotProps.option.type, ...slotProps.option }"
                     v-model="state.selectedPoligon"
                   />
-                  <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
-                    {{ workPoligon.titleToDisplay }}
+                  <label :for="`${slotProps.option.poligonId}${slotProps.option.subPoligonId || ''}`" class="p-ml-3">
+                    {{ slotProps.option.titleToDisplay }}
                   </label>
-                </div>
-              </div>
-            </div>
+                </template>
+              </Listbox>
+
+
+<!--
+              <div
+                v-for="workPoligon of sortedWorkPoligonData(typedPoligon.type, typedPoligon.workPoligons)"
+                :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                class="p-field-radiobutton"
+              >
+                <RadioButton
+                  :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
+                  name="workPoligon"
+                  :value="{ type: typedPoligon.type, ...workPoligon }"
+                  v-model="state.selectedPoligon"
+                />
+                <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
+                  {{ workPoligon.titleToDisplay }}
+                </label>
+              </div>-->
+
+            <!--</div>-->
           </div>
         </div>
-        <div class="p-col-12">
-          <Button type="button" label="Назад" class="p-button-secondary p-mr-2" @click="goToAuthPage" />
-          <Button
-            v-if="state.selectedCredential && state.selectedPoligon"
-            type="button"
-            label="Продолжить"
-            @click="goToMainPage"
-          />
-        </div>
+      </div>
+      <div class="p-col-12">
+        <Button type="button" label="Назад" class="p-button-secondary p-mr-2" @click="goToAuthPage" />
+        <Button
+          v-if="state.selectedCredential && state.selectedPoligon"
+          type="button"
+          label="Продолжить"
+          @click="goToMainPage"
+        />
       </div>
     </div>
   </div>
@@ -116,6 +147,10 @@
 
       const getAllPossibleCredentialsWithPoligons = computed(() => store.getters.getAllPossibleCredentialsWithPoligons);
       const getUserCredential = computed(() => store.getters.getUserCredential);
+
+      watch(() => state.selectedPoligon, (val) => {
+        console.log('selected:',val)
+      })
 
       watch(() => state.selectedCredential, (val) => {
         if (val.poligons && val.poligons.length === 1 &&
@@ -273,13 +308,29 @@
           : `${workPoligonTitle}, ${workSubPoligonId}`;
       };
 
-      const sortedWorkPoligonData = (poligonsType, workPoligons) => {
-        return workPoligons
+      const getSortedWorkPoligonsData = (/*poligonsType, workPoligons*/) => {
+        const dataToReturn = [];
+        state.selectedCredential.poligons?.forEach((typedPoligon) => {
+          dataToReturn.push({
+            workPoligonType: typedPoligon.type,
+            poligons: typedPoligon.workPoligons
+              .map((poligon) => ({
+                type: typedPoligon.type,
+                ...poligon,
+                titleToDisplay: getWorkPoligonTitle(typedPoligon.type, poligon.poligonId, poligon.subPoligonId),
+              }))
+              .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase())),
+          });
+        });
+        console.log('dataToReturn',dataToReturn)
+        return dataToReturn;
+
+/*        return workPoligons
           .map((poligon) => ({
             ...poligon,
             titleToDisplay: getWorkPoligonTitle(poligonsType, poligon.poligonId, poligon.subPoligonId),
           }))
-          .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase()));
+          .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase()));*/
       };
 
       return {
@@ -289,7 +340,7 @@
         goToAuthPage,
         goToMainPage,
         getWorkPoligonTitle,
-        sortedWorkPoligonData,
+        getSortedWorkPoligonsData,
       };
     }
   };
