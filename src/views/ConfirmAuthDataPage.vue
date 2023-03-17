@@ -23,75 +23,40 @@
       </div>
     </div>
 
-    <div v-else>
+    <div v-else style="maxHeight:90vh;overflow:auto;">
       <div class="dy58-title-small p-mb-4">Определите данные для входа в систему</div>
-      <div v-if="getAllPossibleCredentialsWithPoligons && getAllPossibleCredentialsWithPoligons.length">
+      <div v-if="getAllPossibleCredentialsWithPoligons.length">
         <p class="p-text-bold p-mb-3">Полномочие</p>
-        <div
-          v-for="cred of getAllPossibleCredentialsWithPoligons"
-          :key="cred.cred"
-          class="p-field-radiobutton"
-        >
-          <RadioButton :id="cred.cred" name="cred" :value="cred" v-model="state.selectedCredential" />
-          <label :for="cred.cred" class="p-mr-3">{{ APP_CREDENTIALS_TRANSLATIONS[cred.cred] }}</label>
-        </div>
+        <Listbox
+          v-model="state.selectedCredential"
+          :options="getAllPossibleCredentialsWithPoligons"
+          optionLabel="credTitle"
+          class="dy58-credential-poligon-list"
+        />
       </div>
       <div v-if="state.selectedCredential">
         <div v-if="state.selectedCredential.poligons && state.selectedCredential.poligons.length">
           <p class="p-text-bold p-mt-3 p-mb-3">Полигон</p>
-          <div style="max-height:35vh;max-width:100vw;overflow:auto">
-<!--            <div v-for="typedPoligon of state.selectedCredential.poligons" :key="typedPoligon.type" style="max-height:35vh">
-              <p class="p-mb-3">Тип полигона: {{ typedPoligon.type }}</p>-->
-
-{{state.selectedCredential}}
-{{state.selectedPoligon}}
-
-              <Listbox
-                v-model="state.selectedPoligon"
-                :options="getSortedWorkPoligonsData()"
-                optionLabel="titleToDisplay"
-                optionGroupLabel="workPoligonType"
-                optionGroupChildren="poligons"
-                listStyle="width:100%"
-              >
-                <template #optiongroup="slotProps">
-                  <div>
-                    <div>Тип полигона: {{ slotProps.option.workPoligonType }}</div>
-                  </div>
-                </template>
-                <template #option="slotProps">
-                  <RadioButton
-                    :id="`${slotProps.option.poligonId}${slotProps.option.subPoligonId || ''}`"
-                    name="workPoligon"
-                    :value="{ type: slotProps.option.type, ...slotProps.option }"
-                    v-model="state.selectedPoligon"
-                  />
-                  <label :for="`${slotProps.option.poligonId}${slotProps.option.subPoligonId || ''}`" class="p-ml-3">
-                    {{ slotProps.option.titleToDisplay }}
-                  </label>
-                </template>
-              </Listbox>
-
-
-<!--
-              <div
-                v-for="workPoligon of sortedWorkPoligonData(typedPoligon.type, typedPoligon.workPoligons)"
-                :key="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                class="p-field-radiobutton"
-              >
-                <RadioButton
-                  :id="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`"
-                  name="workPoligon"
-                  :value="{ type: typedPoligon.type, ...workPoligon }"
-                  v-model="state.selectedPoligon"
-                />
-                <label :for="`${workPoligon.poligonId}${workPoligon.subPoligonId || ''}`" class="p-mr-3">
-                  {{ workPoligon.titleToDisplay }}
-                </label>
-              </div>-->
-
-            <!--</div>-->
-          </div>
+          <Listbox
+            v-model="state.selectedPoligon"
+            :options="getSortedWorkPoligonsData()"
+            optionLabel="titleToDisplay"
+            optionGroupLabel="workPoligonType"
+            optionGroupChildren="poligons"
+            listStyle="max-height:35vh;"
+            class="dy58-credential-poligon-list"
+          >
+            <template #optiongroup="slotProps">
+              <div>
+                Тип полигона: {{ slotProps.option.workPoligonType }}
+              </div>
+            </template>
+            <template #option="slotProps">
+              <label :for="`${slotProps.option.poligonId}${slotProps.option.subPoligonId || ''}`">
+                {{ slotProps.option.titleToDisplay }}
+              </label>
+            </template>
+          </Listbox>
         </div>
       </div>
       <div class="p-col-12">
@@ -145,15 +110,17 @@
         getDataError: null,
       });
 
-      const getAllPossibleCredentialsWithPoligons = computed(() => store.getters.getAllPossibleCredentialsWithPoligons);
+      const getAllPossibleCredentialsWithPoligons = computed(() =>
+        (store.getters.getAllPossibleCredentialsWithPoligons || [])
+          .map((cred) => ({
+            ...cred,
+            credTitle: APP_CREDENTIALS_TRANSLATIONS[cred.cred],
+          }))
+      );
       const getUserCredential = computed(() => store.getters.getUserCredential);
 
-      watch(() => state.selectedPoligon, (val) => {
-        console.log('selected:',val)
-      })
-
       watch(() => state.selectedCredential, (val) => {
-        if (val.poligons && val.poligons.length === 1 &&
+        if (val?.poligons?.length === 1 &&
           val.poligons[0].workPoligons && val.poligons[0].workPoligons.length === 1) {
           state.selectedPoligon = { type: val.poligons[0].type, ...val.poligons[0].workPoligons[0] };
         } else {
@@ -193,7 +160,6 @@
               });
             }
           }
-          //throw new Error('sdfsdfsdf')
         } catch (err) {
           state.getDataError = `При попытке получить информацию о рабочих полигонах возникла ошибка: ${err}`;
         } finally {
@@ -308,7 +274,7 @@
           : `${workPoligonTitle}, ${workSubPoligonId}`;
       };
 
-      const getSortedWorkPoligonsData = (/*poligonsType, workPoligons*/) => {
+      const getSortedWorkPoligonsData = () => {
         const dataToReturn = [];
         state.selectedCredential.poligons?.forEach((typedPoligon) => {
           dataToReturn.push({
@@ -322,15 +288,7 @@
               .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase())),
           });
         });
-        console.log('dataToReturn',dataToReturn)
         return dataToReturn;
-
-/*        return workPoligons
-          .map((poligon) => ({
-            ...poligon,
-            titleToDisplay: getWorkPoligonTitle(poligonsType, poligon.poligonId, poligon.subPoligonId),
-          }))
-          .sort((a, b) => compareStrings(a.titleToDisplay.toLowerCase(), b.titleToDisplay.toLowerCase()));*/
       };
 
       return {
@@ -345,3 +303,18 @@
     }
   };
 </script>
+
+<style lang="scss" scoped>
+  @mixin dy58-list-colors {
+    background-color: var(--surface-300);
+  }
+  .dy58-credential-poligon-list {
+    @include dy58-list-colors;
+    width: 100%;
+  }
+  :deep(.p-listbox .p-listbox-list .p-listbox-item-group) {
+    @include dy58-list-colors;
+    font-weight: bold;
+    background-clip: padding-box;
+  }
+</style>
