@@ -231,7 +231,8 @@ export function formOrderText(props) {
   const formSubstring = (defPost) => {
     return (obj) => {
       const post = obj.post ? obj.post : (!obj.fio && defPost) ? defPost : '';
-      return `${obj.placeTitle}${includePost ? ' ' + post : ''}${includeFIO && obj.fio ? ' ' + obj.fio : ''}`;
+      return `${obj.placeTitle}${includePost ? ' ' + post : ''}${includeFIO && obj.fio ? ' ' + obj.fio : ''}` +
+        `${obj.editDateTime ? ' (' + getLocaleDateTimeString(obj.editDateTime) + ')' : ''}`;
     };
   };
 

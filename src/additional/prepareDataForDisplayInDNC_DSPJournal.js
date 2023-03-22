@@ -41,22 +41,46 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
       assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
       dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.dncToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.dspToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.ecdToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.otherToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       // ДСП нужна информация лишь по своей станции, ДНЦ - по всем станциям
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
         !isStationWorkPoligon ?
         // Исключаем главных ДСП (они будут в списке dspToSend)
         order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
-          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})) :
+          .map((el) => ({
+            ...el,
+            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+          })) :
         // Выбираем только работников текущей станции
         order.stationWorkPlacesToSend.filter((el) => el.id === userWorkPoligon.code)
-          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+          .map((el) => ({
+            ...el,
+            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+          })),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :

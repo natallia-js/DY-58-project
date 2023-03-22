@@ -30,6 +30,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
         type: item.type,
         _id: item._id,
+        editDateTime: item.editDateTime ? new Date(item.editDateTime) : null,
       };
     }),
     dspToSend: order.dspToSend.map((item) => {
@@ -44,6 +45,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
         type: item.type,
         _id: item._id,
+        editDateTime: item.editDateTime ? new Date(item.editDateTime) : null,
       };
     }),
     ecdToSend: order.ecdToSend.map((item) => {
@@ -58,6 +60,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         sendOriginal: Boolean(item.sendOriginal),
         type: item.type,
         _id: item._id,
+        editDateTime: item.editDateTime ? new Date(item.editDateTime) : null,
       };
     }),
     otherToSend: order.otherToSend.map((item) => {
@@ -71,6 +74,7 @@ export function getWorkOrderGeneralInfoObject(order) {
         existingStructuralDivision: Boolean(item.existingStructuralDivision),
         sendOriginal: Boolean(item.sendOriginal),
         confirmDateTime: item.confirmDateTime ? new Date(item.confirmDateTime) : null,
+        editDateTime: item.editDateTime ? new Date(item.editDateTime) : null,
       };
     }),
     // Если текущий рабочий полигон - не станция, то это поле останется пустым.
@@ -93,6 +97,7 @@ export function getWorkOrderGeneralInfoObject(order) {
           sendOriginal: Boolean(item.sendOriginal),
           type: item.type,
           _id: item._id,
+          editDateTime: item.editDateTime ? new Date(item.editDateTime) : null,
         };
       }),
     number: order.number,

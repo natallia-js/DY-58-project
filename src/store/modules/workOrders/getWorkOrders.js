@@ -494,7 +494,7 @@ export const getWorkOrders = {
         state.data = [];
         return;
       }
-      if (!state.data || !state.data.length) {
+      if (!state.data?.length) {
         state.data = newData.map((order) => getWorkOrderObject(order));
         if (state.data.find((order) => !order.confirmDateTime)) {
           state.newIncomingOrders = true;
