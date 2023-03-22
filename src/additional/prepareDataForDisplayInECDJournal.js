@@ -24,17 +24,37 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
     .map((order) => ({
       ...order,
       dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.dncToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.dspToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.ecdToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime) })),
+        order.otherToSend.map((el) => ({
+          ...el,
+          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+        })),
       // Исключаем главных ДСП (они будут в списке dspToSend)
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
         order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
-          .map((el) => ({ ...el, confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime)})),
+          .map((el) => ({
+            ...el,
+            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
+            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
+          })),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :
