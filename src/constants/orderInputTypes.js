@@ -1,3 +1,5 @@
+// Голосовой ассистент пока не реализован
+
 export const OrderInputTypesNames = Object.freeze({
   manual: 0,
   voice: 1,

@@ -371,8 +371,8 @@ export const orderPatterns = {
 
     getOrderPatternsReferringSpecialTrainCategories(state) {
       return (specialTrainCategories) => {
-        if (!specialTrainCategories || !specialTrainCategories.length) {
-          return 0;
+        if (!specialTrainCategories?.length) {
+          return [];
         }
         return state.patterns.filter((pattern) => {
           if (!pattern.specialTrainCategories?.length) {

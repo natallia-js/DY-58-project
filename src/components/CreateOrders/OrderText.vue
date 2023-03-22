@@ -48,6 +48,7 @@
         :value="state.orderPatternText"
         :orderType="orderType"
         @input="handleChangeOrderPatternElementValue"
+        :applyDefaultOrderPatternElementValues="applyDefaultOrderPatternElementValues"
       />
     </div>
   </div>
@@ -58,7 +59,7 @@
   import { computed, reactive, watch } from 'vue';
   import { useStore } from 'vuex';
   import OrderPatternText from '@/components/CreateOrders/OrderPatternText';
-  import { OrderPatternElementType } from '@/constants/orderPatterns';
+  import { OrderPatternElementType, PossibleElementSizes } from '@/constants/orderPatterns';
   import { ORDER_TEXT_SOURCE, FILLED_ORDER_DROPDOWN_ELEMENTS } from '@/constants/orders';
   import getChildOrderPatternElementValueByParentElementValue from '@/additional/getChildOrderPatternElementValueByParentElementValue';
 
@@ -84,6 +85,10 @@
       parentOrderText: {
         type: Object,
       },
+      // true - применять к элементам шаблона значения по умолчанию, false - не применять
+      applyDefaultOrderPatternElementValues: {
+        type: Boolean,
+      },
     },
 
     setup(props, { emit }) {
@@ -106,6 +111,10 @@
         }
         let changedOrderTextSource = false;
         let tmp = newVal.orderTextSource || '';
+        let orderPatternObject;
+        const getOrderPatternElementSize =
+          (elementId) => orderPatternObject?.elements?.find((el) => el._id === elementId)?.size || PossibleElementSizes.AUTO;
+
         if (state.orderTextSource !== tmp) {
           state.orderTextSource = tmp;
           changedOrderTextSource = true;
@@ -119,7 +128,12 @@
               (state.orderPattern && tmp && Object.keys(state.orderPattern)[0] !== tmp)) {
               state.orderPattern = { [tmp]: true };
             }
-            tmp = newVal.orderText && newVal.orderText.length ? newVal.orderText.map((el) => ({ ...el })) : null;
+            // для всех элементов шаблонного документа необходимо установить значения их размеров в соответствии
+            // со значениями, указанными при создании данного шаблона документа
+            orderPatternObject = store.getters.getOrderPatternById(newVal.patternId);
+            tmp = newVal.orderText?.length
+              ? newVal.orderText.map((el) => ({ ...el, size: el.size || getOrderPatternElementSize(el._id) }))
+              : null;
             if (JSON.stringify(state.orderPatternText) !== JSON.stringify(tmp)) {
               state.orderPatternText = tmp;
             }

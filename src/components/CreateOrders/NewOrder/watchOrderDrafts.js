@@ -85,6 +85,7 @@ export const useWatchOrderDrafts = (inputVals) => {
     emit('changeProps', {
       newRouteParams: {
         orderType: props.orderType,
+        orderId: null,
         prevOrderId: props.prevOrderId,
         orderDraftId: newVal ? newVal._id : null,
       },

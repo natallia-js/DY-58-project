@@ -73,7 +73,7 @@ export function getOrderTextElementTypedValue(element) {
 
 // Анализируя данное значение sendOriginal, определяет соответствующее ему значение из перечисления
 // CurrShiftGetOrderStatus. Значение sendOriginal может быть булевым (именно так оно и хранится в БД)
-// либо числовым - одним из CurrShiftGetOrderStatus. Числовыми значениями оперирует текущее прилоэение.
+// либо числовым - одним из CurrShiftGetOrderStatus. Числовыми значениями оперирует текущее приложение.
 export const getDY58OriginalFlag = (sendOriginal) => {
   if (typeof sendOriginal === 'boolean')
     return sendOriginal ? CurrShiftGetOrderStatus.sendOriginal : CurrShiftGetOrderStatus.sendCopy;

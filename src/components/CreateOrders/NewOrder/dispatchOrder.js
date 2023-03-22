@@ -1,7 +1,8 @@
 import { computed } from 'vue';
 import { ORDER_PATTERN_TYPES, SPECIAL_CIRCULAR_ORDER_SIGN } from '@/constants/orderPatterns';
-import { ORDERS_RECEIVERS_DEFAULT_POSTS } from '@/constants/orders';
-import { DISPATCH_ORDER_ACTION } from '@/store/action-types';
+import { ORDERS_RECEIVERS_DEFAULT_POSTS, CurrShiftGetOrderStatus } from '@/constants/orders';
+import { DISPATCH_ORDER_ACTION, EDIT_DISPATCHED_ORDER_ACTION } from '@/store/action-types';
+import { WORK_POLIGON_TYPES } from '@/constants/appCredentials';
 
 /**
  * Данный модуль предназначен для сбора данных о распоряжении и для его издания.
@@ -77,51 +78,94 @@ export const useDispatchOrder = (inputVals) => {
   });
 
   /**
-   * Издание распоряжения (отправка на сервер и передача всем причастным).
+   * Издание документа (отправка на сервер и передача всем причастным) либо редактирование документа.
    */
   const dispatchOrder = ({ orderDraftIdToDelete }) => {
-    store.dispatch(DISPATCH_ORDER_ACTION, {
-      type: props.orderType,
-      number: +state.number,
-      createDateTime: state.createDateTime,
-      place: getIssuedOrderPlaceObject.value,
-      timeSpan: getIssuedOrderTimeSpanObject.value,
-      orderText: state.orderText,
-      dncToSend: dncSectorsToSendOrderNoDupl.value
-        ? dncSectorsToSendOrderNoDupl.value.map((el) => {
-            if (el.post) return el;
-            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DNC };
-          })
-        : [],
-      dspToSend: dspSectorsToSendOrderNoDupl.value
-        ? dspSectorsToSendOrderNoDupl.value.map((el) => {
-            if (el.post) return el;
-            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.DSP };
-          })
-        : [],
-      ecdToSend: ecdSectorsToSendOrderNoDupl.value
-        ? ecdSectorsToSendOrderNoDupl.value.map((el) => {
-            if (el.post) return el;
-            return { ...el, post: ORDERS_RECEIVERS_DEFAULT_POSTS.ECD };
-          })
-        : [],
-      otherToSend: state.otherSectorsToSendOrder,
-      orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
-      dispatchedOnOrder: relatedOrderObject.value ? relatedOrderObject.value._id : null,
-      createdOnBehalfOf: state.createdOnBehalfOf,
-      showOnGID: state.showOnGID.value,
-      specialTrainCategories: state.specialTrainCategories,
-      draftId: orderDraftIdToDelete,
-      // При издании циркулярного распоряжения о приеме-сдаче дежурства ДНЦ отменяем предыдущее аналогичное
-      // распоряжение, изданное на этом же рабочем полигоне
-      idOfTheOrderToCancel: state.specialTrainCategories &&
-        state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN) ?
-        (() => {
-          const existingDNCTakeDutyOrder = store.getters.getExistingDNC_ECDTakeDutyOrder;
-          return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
-        })() : null,
-      additionalWorkers: store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers,
-    });
+    const getDSPToSendOrder = (dspSectorsToSendOrderNoDupl.value || []).map((el) => ({
+      _id: el.lastUserChoiceFIOId,
+      id: el.id,
+      type: el.type,
+      post: el.post || ORDERS_RECEIVERS_DEFAULT_POSTS.DSP,
+      fio: el.fio,
+      placeTitle: el.station,
+      sendOriginal: el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+    }));
+    const getDNCToSendOrder = (dncSectorsToSendOrderNoDupl.value || []).map((el) => ({
+      _id: el.lastUserChoiceFIOId,
+      id: el.id,
+      type: el.type,
+      post: el.post || ORDERS_RECEIVERS_DEFAULT_POSTS.DNC,
+      fio: el.fio,
+      placeTitle: el.sector,
+      sendOriginal: el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+    }));
+    // Если издается циркулярное распоряжение ДНЦ, то его необходимо также направить ЭЦД всех смежных участков.
+    // Они не должны об этом знать и видеть это распоряжение. Оно лишь необходимо им для быстрого заполнения таблицы
+    // "Кому" по ДСП (ведь только ДНЦ знает, кто с ним заступает на дежурство на станциях, ЭЦД - нет)
+    const getECDToSendOrder = store.getters.isDNC && state.specialTrainCategories?.includes(SPECIAL_CIRCULAR_ORDER_SIGN)
+      ? store.getters.getNearestECDSectors?.map((item) => ({
+          id: item.ECDS_ID,
+          type: WORK_POLIGON_TYPES.ECD_SECTOR,
+          sendOriginal: false,
+          placeTitle: item.ECDS_Title,
+        }))
+      : (ecdSectorsToSendOrderNoDupl.value || []).map((el) => ({
+          _id: el.lastUserChoiceFIOId,
+          id: el.id,
+          type: el.type,
+          post: el.post || ORDERS_RECEIVERS_DEFAULT_POSTS.ECD,
+          fio: el.fio,
+          placeTitle: el.sector,
+          sendOriginal: el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+        }));
+    const getOtherToSendOrder = (state.otherSectorsToSendOrder || []).map((el) => ({
+      ...el,
+      sendOriginal: el.sendOriginal === CurrShiftGetOrderStatus.sendOriginal ? true : false,
+    }));
+
+    // Создание нового документа
+    if (state.createOrder) {
+      store.dispatch(DISPATCH_ORDER_ACTION, {
+        type: props.orderType,
+        number: +state.number,
+        createDateTime: state.createDateTime,
+        place: getIssuedOrderPlaceObject.value,
+        timeSpan: getIssuedOrderTimeSpanObject.value,
+        orderText: state.orderText,
+        dncToSend: getDNCToSendOrder,
+        dspToSend: getDSPToSendOrder,
+        ecdToSend: getECDToSendOrder,
+        otherToSend: getOtherToSendOrder,
+        orderChainId: relatedOrderObject.value ? relatedOrderObject.value.orderChainId : null,
+        dispatchedOnOrder: relatedOrderObject.value ? relatedOrderObject.value._id : null,
+        createdOnBehalfOf: state.createdOnBehalfOf,
+        showOnGID: state.showOnGID.value,
+        specialTrainCategories: state.specialTrainCategories,
+        draftId: orderDraftIdToDelete,
+        // При издании циркулярного распоряжения о приеме-сдаче дежурства ДНЦ отменяем предыдущее аналогичное
+        // распоряжение, изданное на этом же рабочем полигоне
+        idOfTheOrderToCancel: state.specialTrainCategories &&
+          state.specialTrainCategories.includes(SPECIAL_CIRCULAR_ORDER_SIGN) ?
+          (() => {
+            const existingDNCTakeDutyOrder = store.getters.getExistingDNC_ECDTakeDutyOrder;
+            return existingDNCTakeDutyOrder ? existingDNCTakeDutyOrder._id : null;
+          })() : null,
+        additionalWorkers: store.getters.getLastDNC_ECDTakeDutyOrderAdditionalWorkers,
+      });
+    }
+    // Редактирование существующего документа
+    else {
+      store.dispatch(EDIT_DISPATCHED_ORDER_ACTION, {
+        type: props.orderType,
+        id: props.orderId,
+        timeSpan: state.timeSpan,
+        orderText: state.orderText,
+        dncToSend: getDNCToSendOrder,
+        dspToSend: getDSPToSendOrder,
+        ecdToSend: getECDToSendOrder,
+        otherToSend: getOtherToSendOrder,
+      });
+    }
     // Отменяем проверку правильности введенных данных для всех полей (до следующего издания распоряжения)
     submitted.value = false;
   };

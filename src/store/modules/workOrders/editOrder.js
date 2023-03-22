@@ -205,10 +205,12 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
      * Делает запрос на сервер с целью редактирования существующего распоряжения.
      * В настоящее время отредактировать можно только:
      *   - запись о принятии дежурства на станции,
-     *   - информацию о лицах, дополнительно ознакомленных с изданным документом.
+     *   - информацию о лицах, дополнительно ознакомленных с изданным документом,
+     *   - приказ ЭЦД о приеме-сдаче дежурства.
      */
      async [EDIT_DISPATCHED_ORDER_ACTION] (context, params) {
-      const { type, id, timeSpan, orderText, additionallyInformedPeople } = params;
+      const { type, id, timeSpan, orderText, additionallyInformedPeople,
+      dncToSend, dspToSend, ecdToSend, otherToSend } = params;
 
       if (!context.getters.canUserDispatchOrders) {
         const errMessage = 'У вас нет права на редактирование документов';
@@ -223,6 +225,10 @@ import { getWorkOrderGeneralInfoObject } from './getWorkOrderObject';
       if (Object.prototype.hasOwnProperty.call(params, 'timeSpan')) requestParams.timeSpan = timeSpan;
       if (Object.prototype.hasOwnProperty.call(params, 'orderText')) requestParams.orderText = getOrderTextForSendingToServer(orderText);
       if (Object.prototype.hasOwnProperty.call(params, 'additionallyInformedPeople')) requestParams.additionallyInformedPeople = additionallyInformedPeople;
+      if (Object.prototype.hasOwnProperty.call(params, 'dncToSend')) requestParams.dncToSend = dncToSend;
+      if (Object.prototype.hasOwnProperty.call(params, 'dspToSend')) requestParams.dspToSend = dspToSend;
+      if (Object.prototype.hasOwnProperty.call(params, 'ecdToSend')) requestParams.ecdToSend = ecdToSend;
+      if (Object.prototype.hasOwnProperty.call(params, 'otherToSend')) requestParams.otherToSend = otherToSend;
 
       try {
         const responseData = await editDispatchedOrderOnServer(requestParams);

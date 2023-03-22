@@ -12,6 +12,15 @@ export const useWatchOperationsResults = (inputVals) => {
 
   const router = useRouter();
 
+  const navigateToMainPage = () => {
+    // Если не установить данный флаг, приложение будет полагать, что в документе есть изменения и
+    // перед переходом на главную страницу спросит пользователя, действительно ли тот хочет покинуть страницу
+    store.commit(SET_ALLOW_APPLICATION_NAVIGATION);
+    // Даем пользователю просмотреть сообщение об успешном издании документа прежде чем переходить
+    // на главную страницу
+    setTimeout(() => router.push({ name: 'MainPage' }), 1000);
+  };
+
   /**
    * Для отображения результата операции издания распоряжения (отправки на сервер).
    */
@@ -48,6 +57,7 @@ export const useWatchOperationsResults = (inputVals) => {
           emit('changeProps', {
             newRouteParams: {
               orderType: ORDER_PATTERN_TYPES.ECD_NOTIFICATION,
+              orderId: null,
               prevOrderId: newVal.orderId,
               orderPatternId: patternId,
               orderDraftId: null,
@@ -57,12 +67,7 @@ export const useWatchOperationsResults = (inputVals) => {
           });
         }, 1000);
       } else {
-        // Если не установить данный флаг, приложение будет полагать, что в документе есть изменения и
-        // перед переходом на главную страницу спросит пользователя, действительно ли тот хочет покинуть страницу
-        store.commit(SET_ALLOW_APPLICATION_NAVIGATION);
-        // Даем пользователю просмотреть сообщение об успешном издании документа прежде чем переходить
-        // на главную страницу
-        setTimeout(() => router.push({ name: 'MainPage' }), 1000);
+        navigateToMainPage();
       }
     } else {
       showErrMessage(newVal.message);
@@ -90,6 +95,21 @@ export const useWatchOperationsResults = (inputVals) => {
   watch(() => state.getOknaDataError, (newVal) => {
     if (newVal) {
       showErrMessage(newVal);
+    }
+  });
+
+  /**
+   * Для отображения результата операции редактирования распоряжения (на сервере).
+   */
+  watch(() => store.getters.getEditDispatchedOrderResult, (newVal) => {
+    if (!newVal || newVal.orderType !== props.orderType) {
+      return;
+    }
+    if (!newVal.error) {
+      showSuccessMessage(newVal.message);
+      navigateToMainPage();
+    } else {
+      showErrMessage(newVal.message);
     }
   });
 };

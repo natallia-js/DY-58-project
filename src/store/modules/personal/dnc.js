@@ -73,7 +73,7 @@ export const dnc = {
           id: item.sectorId,
           type: WORK_POLIGON_TYPES.DNC_SECTOR,
           sector: item.sectorTitle,
-          lastUserChoicePost: item.lastUserChoicePost || '',
+          post: item.lastUserChoicePost || '',
           fio: item.lastUserChoice || '',
           lastUserChoiceFIOId: item.lastUserChoiceId,
           lastUserChoiceFIOOnline: item.lastUserChoiceOnline,

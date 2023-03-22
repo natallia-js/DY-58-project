@@ -151,5 +151,6 @@ export const DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS =  Object.freeze({
   PASS_DUTY_PERSONAL: 'Персонал, сдающий дежурство',
 });
 
+// Префиксы названий станций и перегонов в списках выбора (в элементах шаблонов документов)
 export const STATION_PREFIX = 'ст.';
 export const BLOCK_PREFIX = 'пер.';

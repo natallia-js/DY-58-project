@@ -1,4 +1,5 @@
 import { store } from '@/store';
+import router from '@/router';
 import {
   SHOW_APP_SETTINGS,
   SHOW_ORDER_DRAFTS,
@@ -93,19 +94,21 @@ export const leftMenuItems = {
             store.commit(SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG, true);
           },
         });
-      }
-      // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
-      const existingDSPTakeDutyOrder = getters.getExistingDSPTakeDutyOrder;
-      if (getters.canUserDispatchDSPTakeDutyOrder && existingDSPTakeDutyOrder &&
-        existingDSPTakeDutyOrder.creator && existingDSPTakeDutyOrder.creator.id === getters.getUserId) {
-        items.push({
-          label: 'Редактировать текущую запись о приеме/сдаче дежурства',
-          imgURL: require('@/assets/img/editTakePassDuty.png'),
-          command: () => {
-            store.commit(SET_CAN_EDIT_EXISTING_TAKE_DUTY_ORDER, true);
-            store.commit(SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG, true);
-          },
-        });
+
+        // Текущее распоряжение ДСП о приеме-сдаче дежурства
+        const existingDSPTakeDutyOrder = getters.getExistingDSPTakeDutyOrder;
+
+        // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
+        if (existingDSPTakeDutyOrder?.creator && existingDSPTakeDutyOrder.creator.id === getters.getUserId) {
+          items.push({
+            label: 'Редактировать текущую запись о приеме/сдаче дежурства',
+            imgURL: require('@/assets/img/editTakePassDuty.png'),
+            command: () => {
+              store.commit(SET_CAN_EDIT_EXISTING_TAKE_DUTY_ORDER, true);
+              store.commit(SET_SHOW_CREATE_DSP_TAKE_DUTY_ORDER_DLG, true);
+            },
+          });
+        }
       }
       return [
         ...items,
@@ -127,6 +130,30 @@ export const leftMenuItems = {
             label: 'Циркулярное распоряжение',
             imgURL: require('@/assets/img/takePassDuty.png'),
             command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_CIRCULAR_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
+          });
+        }
+
+        // Текущее распоряжение ДНЦ о приеме-сдаче дежурства
+        const existingDNCTakeDutyOrder = getters.getExistingDNC_ECDTakeDutyOrder;
+
+        // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
+        if (existingDNCTakeDutyOrder?.creator && existingDNCTakeDutyOrder.creator.id === getters.getUserId) {
+          items.push({
+            label: 'Редактировать распоряжение о приеме/сдаче дежурства',
+            imgURL: require('@/assets/img/editTakePassDuty.png'),
+            command: () => {
+              router.push({
+                name: 'NewOrderPage',
+                params: {
+                  orderType: existingDNCTakeDutyOrder.type,
+                  orderId: existingDNCTakeDutyOrder._id,
+                  orderPatternId: null,
+                  orderPatternSpecialSign: null,
+                  prevOrderId: null,
+                  orderDraftId: null,
+                },
+              });
+            },
           });
         }
       }
@@ -191,6 +218,30 @@ export const leftMenuItems = {
             label: 'Циркулярный приказ',
             imgURL: require('@/assets/img/takePassDuty.png'),
             command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_CIRCULAR_ORDER_SIGN, itemsCommandCallback: createECDOrderOfGivenType }),
+          });
+        }
+
+        // Текущее распоряжение ЭЦД о приеме-сдаче дежурства
+        const existingECDTakeDutyOrder = getters.getExistingDNC_ECDTakeDutyOrder;
+
+        // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
+        if (existingECDTakeDutyOrder?.creator && existingECDTakeDutyOrder.creator.id === getters.getUserId) {
+          items.push({
+            label: 'Редактировать приказ о приеме/сдаче дежурства',
+            imgURL: require('@/assets/img/editTakePassDuty.png'),
+            command: () => {
+              router.push({
+                name: 'NewOrderPage',
+                params: {
+                  orderType: existingECDTakeDutyOrder.type,
+                  orderId: existingECDTakeDutyOrder._id,
+                  orderPatternId: null,
+                  orderPatternSpecialSign: null,
+                  prevOrderId: null,
+                  orderDraftId: null,
+                },
+              });
+            },
           });
         }
       }

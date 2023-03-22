@@ -16,6 +16,7 @@
     :createdOnBehalfOf="state.createdOnBehalfOf"
     :specialTrainCategories="state.specialTrainCategories"
     :draftId="currentOrderDraft ? currentOrderDraft._id : null"
+    :previewNewOrder="state.createOrder"
     @dispatch="dispatchOrder"
     @close="hidePreviewNewOrderDlg"
   />
@@ -285,6 +286,7 @@
             :value="v$.orderText.$model"
             @input="setOrderText($event)"
             :parentOrderText="relatedOrderObject ? relatedOrderObject.orderText : null"
+            :applyDefaultOrderPatternElementValues="state.createOrder"
           />
           <small
             v-if="(v$.orderText.$invalid && submitted) || v$.orderText.$pending.$response"
@@ -316,7 +318,7 @@
             <div class="p-col-12">
               <Button
                 type="submit"
-                label="Просмотреть и издать"
+                :label="state.createOrder ? 'Просмотреть и издать' : 'Просмотреть и сохранить изменения'"
                 class="p-mb-2"
                 :disabled="getDispatchOrdersBeingProcessed >= 1"
               />
@@ -457,6 +459,10 @@
         type: String,
         required: true,
       },
+      orderId: {
+        type: String,
+        required: false,
+      },
       orderPatternId: {
         type: String,
         required: false,
@@ -512,6 +518,8 @@
         [{ _id: null, displayTitle: '-' }, ...store.getters.getOrderDraftsOfGivenType(props.orderType)]);
 
       const state = reactive({
+        // true - создается новый документ, false - редактируется существующий документ
+        createOrder: true,
         selectedOrderInputType: OrderInputTypes[0],
         number: store.getters.getNextOrdersNumber(!isECD.value ? props.orderType : ALL_ORDERS_TYPE_ECD),
         createDateTime: store.getters.getCurrDateTimeWithoutMilliseconds,
@@ -665,7 +673,7 @@
         showOnGIDOptions, defaultOrderPlace, defaultOrderText, defaultTimeSpan,
       });
       const { updateFormData } =
-        useWatchAllAppDataLoad({ state, store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
+        useWatchAllAppDataLoad({ props, state, store, relatedOrderObject, currentOrderDraft, existingDNC_ECDTakeDutyOrder,
         handleClearOrderAddressesLists, applySelectedOrderDraft });
       useWatchOperationsResults({ state, store, props, emit, isECD, showSuccessMessage, showErrMessage });
 

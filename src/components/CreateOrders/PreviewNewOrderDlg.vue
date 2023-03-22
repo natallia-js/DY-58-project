@@ -24,7 +24,7 @@
       <span class="p-text-bold">Наименование:</span> &#160;
       {{ (orderText && orderText.orderTitle) ? orderText.orderTitle : '?' }}
     </p>
-    <p style="overflow-wrap:break-word">
+    <p style="white-space: pre-wrap;">
       <span v-html="getOrderText"></span>
     </p>
     <p>Передал: &#160;
@@ -37,8 +37,13 @@
         <Checkbox id="if-del-order-draft" v-model="delOrderDraft" :binary="true" />
         <label for="if-del-order-draft">&#160; Удалить черновик</label>
       </div>
-      <Button label="Издать" @click="dispatchOrder" :disabled="getDispatchOrdersBeingProcessedNumber >= 1" />
+      <Button
+        :label="previewNewOrder ? 'Издать' : 'Сохранить изменения'"
+        @click="dispatchOrder"
+        :disabled="getDispatchOrdersBeingProcessedNumber >= 1"
+      />
       <Button label="Закрыть" @click="closeDialog" class="p-button-secondary" />
+
     </template>
   </Dialog>
 </template>
@@ -116,6 +121,9 @@
       draftId: {
         type: String,
       },
+      previewNewOrder: {
+        type: Boolean,
+      },
     },
 
     computed: {
@@ -149,7 +157,7 @@
       },
 
       orderTimeSpanString() {
-        return (!this.timeSpan) ? 'Время издания' :
+        return (!this.timeSpan) ? 'Время создания' :
           getTimeSpanString(this.type, this.timeSpan, this.isECD, this.specialTrainCategories);
       },
 

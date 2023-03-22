@@ -81,7 +81,13 @@ const routes = [
     },
   },
   {
-    path: '/newOrderPage/:orderType/:orderPatternId/:orderPatternSpecialSign/:prevOrderId/:orderDraftId',
+    // orderType - тип документа (распоряжение, заявка, уведомление, ...)
+    // orderId - id документа, который необходимо отредактировать
+    // orderPatternId - id шаблона, на основании которого документ создается
+    // orderPatternSpecialSign - особая отметка создаваемого документа
+    // prevOrderId - id документа, ранее изданного, с которым необходимо связать документ
+    // orderDraftId - id черновика, по которому создается документ
+    path: '/newOrderPage/:orderType/:orderId/:orderPatternId/:orderPatternSpecialSign/:prevOrderId/:orderDraftId',
     name: 'NewOrderPage',
     component: NewOrderPage,
     meta: {

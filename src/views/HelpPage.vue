@@ -94,7 +94,7 @@
           items: [
             { label: 'Боковое меню', url: '#side-menu-description' },
             { label: 'Запись о приеме-сдаче дежурства ДСП', url: '#dsp-take-pass-order-description' },
-            { label: 'Таблица "Входящие уведомления"', url: '#incoming-notifications-description' },
+            { label: 'Таблица "Входящие документы"', url: '#incoming-notifications-description' },
             { label: 'Секция "Документы в работе"', url: '#orders-in-work-description' },
           ],
         },

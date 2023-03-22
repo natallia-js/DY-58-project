@@ -12,7 +12,7 @@
         -
       </div>
       <div v-else>
-        <div v-for="station of getSectorPersonal.sectorStationsShift" :key="station.stationId" class="p-ml-4">
+        <div v-for="station of getSectorStationsShiftNoDuplicate" :key="station.stationId" class="p-ml-4">
           <span class="p-text-bold">{{ station.stationTitle }}</span>
           <ViewSectorPeopleBlock
             :peopleArray="getFilteredPeople(station.people, APP_CREDENTIALS.DSP_FULL)"
@@ -93,6 +93,7 @@
       return {
         APP_CREDENTIALS,
         getSectorPersonal: computed(() => store.getters.getSectorPersonal),
+        getSectorStationsShiftNoDuplicate: computed(() => store.getters.getSectorStationsShiftNoDuplicate({ sortByStationTitle: true })),
         getCurrentECDSectorShift: computed(() => store.getters.getCurrentECDSectorShift),
         getAllECDShiftExceptCurrent: computed(() => store.getters.getAllECDShiftExceptCurrent),
         getFilteredPeople,

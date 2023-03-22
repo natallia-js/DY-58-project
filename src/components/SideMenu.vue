@@ -135,13 +135,14 @@
       });
 
       /**
-       * Обработка запроса на редактирование черновика распоряжения
+       * Обработка запроса на редактирование черновика документа
        */
       const handleEditOrderDraft = (orderDraftId, orderType) => {
         router.push({
           name: 'NewOrderPage',
           params: {
             orderType: orderType,
+            orderId: null,
             orderPatternId: null,
             orderPatternSpecialSign: null,
             prevOrderId: null,

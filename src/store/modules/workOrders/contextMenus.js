@@ -90,6 +90,7 @@ export const contextMenus = {
                   name: 'NewOrderPage',
                   params: {
                     orderType: newOrderType,
+                    orderId: null,
                     orderPatternId: null,
                     orderPatternSpecialSign: null,
                     prevOrderId: orderId,
@@ -111,6 +112,7 @@ export const contextMenus = {
                         name: 'NewOrderPage',
                         params: {
                           orderType: childPattern.type,
+                          orderId: null,
                           orderPatternId: childPattern.id,
                           orderPatternSpecialSign: null,
                           prevOrderId: orderId,

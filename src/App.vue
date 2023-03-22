@@ -173,7 +173,7 @@
             newIncomingOrdersSound.play();
           }
           // push-уведомление
-          pushNotifications.showNotification('', 'Новые входящие уведомления');
+          pushNotifications.showNotification('', 'Новые входящие документы');
           store.commit(NOTIFIED_ABOUT_NEW_INCOMING_ORDERS);
         }
       });

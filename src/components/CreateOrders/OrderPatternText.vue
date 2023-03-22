@@ -6,7 +6,10 @@
         class="p-mr-2 p-mb-2"
         :style="{ display: 'inline' }"
       >
-        <order-pattern-element-view :element="patternElement" />
+        <order-pattern-element-view
+          :element="patternElement"
+          :applyDefaultOrderPatternElementValues="applyDefaultOrderPatternElementValues"
+        />
       </span>
       <div
         v-else
@@ -25,6 +28,7 @@
           :dropdownValues="getElementDropdownValues(patternElement.type, patternElement.ref)"
           :selectMultipleValues="getElementMultipleSelectValues(patternElement.type, patternElement.ref)"
           @input="handleChangeElementValue"
+          :applyDefaultOrderPatternElementValues="applyDefaultOrderPatternElementValues"
         />
       </div>
     </template>
@@ -65,6 +69,8 @@
       value: Array,
       // тип документа
       orderType: String,
+      // true - применять к элементам шаблона значения по умолчанию, false - не применять
+      applyDefaultOrderPatternElementValues: Boolean,
     },
 
     data() {
@@ -257,8 +263,8 @@
                       ? ` (путь ${orderTrackFromText})`
                       : ` (${stationAddressesInfo})`;
                 return {
-                  label: order.number + additionalInfo,
-                  value: order.number,
+                  label: '№' + order.number + additionalInfo,
+                  value: '№' + order.number,
                 };
               });
           };

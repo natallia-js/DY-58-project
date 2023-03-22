@@ -6,6 +6,7 @@ export function createOrderOfGivenType({ orderPatternId, orderSign }) {
     name: 'NewOrderPage',
     params: {
       orderType: ORDER_PATTERN_TYPES.ORDER,
+      orderId: null,
       orderPatternId,
       orderPatternSpecialSign: orderSign,
       prevOrderId: null,
@@ -19,6 +20,7 @@ export function createECDOrderOfGivenType({ orderPatternId, orderSign }) {
     name: 'NewOrderPage',
     params: {
       orderType: ORDER_PATTERN_TYPES.ECD_ORDER,
+      orderId: null,
       orderPatternId,
       orderPatternSpecialSign: orderSign,
       prevOrderId: null,

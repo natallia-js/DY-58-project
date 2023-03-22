@@ -35,6 +35,7 @@ export const useWatchRelatedOrder = (inputVals) => {
       emit('changeProps', {
         newRouteParams: {
           orderType: props.orderType,
+          orderId: null,
           prevOrderId: newVal,
           orderDraftId: props.orderDraftId,
         },

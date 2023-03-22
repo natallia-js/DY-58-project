@@ -10,6 +10,7 @@
     <TabPanel v-if="isDNC" :header="ORDER_PATTERN_TYPES.ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ORDER"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ORDER)"
@@ -19,6 +20,7 @@
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_ORDER">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_ORDER"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_ORDER)"
@@ -28,6 +30,7 @@
     <TabPanel v-if="isECD" :header="ORDER_PATTERN_TYPES.ECD_PROHIBITION">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.ECD_PROHIBITION"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_PROHIBITION)"
@@ -37,6 +40,7 @@
     <TabPanel v-if="isDNC || isDSP_or_DSPoperator || isStationWorksManager" :header="ORDER_PATTERN_TYPES.REQUEST">
       <new-order
         :orderType="ORDER_PATTERN_TYPES.REQUEST"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.REQUEST)"
@@ -50,6 +54,7 @@
       <new-order
         v-if="isDNC || isDSP_or_DSPoperator || isStationWorksManager"
         :orderType="ORDER_PATTERN_TYPES.NOTIFICATION"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.NOTIFICATION)"
@@ -58,6 +63,7 @@
       <new-order
         v-if="isECD"
         :orderType="ORDER_PATTERN_TYPES.ECD_NOTIFICATION"
+        :orderId="getOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         :orderPatternId="getOrderPatternIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         :prevOrderId="getPrevOrderIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
         :orderDraftId="getOrderDraftIdPropValue(ORDER_PATTERN_TYPES.ECD_NOTIFICATION)"
@@ -196,6 +202,7 @@
             name: 'NewOrderPage',
             params: {
               orderType: getOrderTypeByTabIndex(activeIndex.value),
+              orderId: null,
               orderPatternId: null,
               orderPatternSpecialSign: null,
               prevOrderId: null,
@@ -239,6 +246,7 @@
           name: 'NewOrderPage',
           params: {
             orderType: getOrderTypeByTabIndex(event.index),
+            orderId: null,
             orderPatternId: null,
             orderPatternSpecialSign: null,
             prevOrderId: null,
@@ -256,6 +264,9 @@
             }
           });
       };
+
+      const getOrderIdPropValue = (orderType) =>
+        (route.params.orderType === orderType && route.params.orderId !== 'null') ? route.params.orderId : null;
 
       const getOrderPatternIdPropValue = (orderType) =>
         (
@@ -288,6 +299,7 @@
         handleTabClick,
         handleTabChange,
         handleChangeRouteParams,
+        getOrderIdPropValue,
         getOrderPatternIdPropValue,
         getPrevOrderIdPropValue,
         getOrderDraftIdPropValue,

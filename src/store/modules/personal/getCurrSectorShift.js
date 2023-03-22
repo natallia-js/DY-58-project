@@ -18,6 +18,7 @@ import {
   LOAD_SHIFT_DATA_FOR_ECD_ACTION,
   LOAD_CURR_SECTORS_SHIFT_ACTION,
 } from '@/store/action-types';
+import compareStrings from '@/additional/compareStrings';
 
 
 function initialECDSectorsPersonalData(ecdSectors) {
@@ -121,6 +122,28 @@ export const getCurrSectorShift = {
     },
 
     /**
+     * Возвращает массив объектов (код станции, ее наименование, персонал станции) без повторения станций,
+     * если одна и та же станция входит сразу в несколько поездных участков.
+     */
+    getSectorStationsShiftNoDuplicate(state) {
+      return ({ sortByStationTitle = false }) => {
+        const arrayToReturn = [];
+        state.sectorPersonal?.sectorStationsShift?.forEach((trainSectorStationInfo) => {
+          if (!arrayToReturn.find((el) => el.stationId === trainSectorStationInfo.stationId)) {
+            arrayToReturn.push({
+              stationId: trainSectorStationInfo.stationId,
+              stationTitle: trainSectorStationInfo.stationTitle,
+              people: trainSectorStationInfo.people,
+            });
+          }
+        });
+        if (sortByStationTitle)
+          return arrayToReturn.sort((a, b) => compareStrings(a.stationTitle.toLowerCase(), b.stationTitle.toLowerCase()));
+        return arrayToReturn;
+      };
+    },
+
+    /**
      * Возвращает статус процесса получения информации о персонале (true - идет процесс загрузки данных
      * с сервера, false - процесс загрузки данных не идет).
      */
@@ -177,9 +200,9 @@ export const getCurrSectorShift = {
       if (!state.sectorPersonal) {
         state.sectorPersonal = {};
       }
-      state.sectorPersonal.DNCSectorsShift = shiftPersonal && shiftPersonal.DNCSectorsShift ? shiftPersonal.DNCSectorsShift : [];
-      state.sectorPersonal.ECDSectorsShift = shiftPersonal && shiftPersonal.ECDSectorsShift ? shiftPersonal.ECDSectorsShift : [];
-      state.sectorPersonal.sectorStationsShift = shiftPersonal && shiftPersonal.sectorStationsShift ? shiftPersonal.sectorStationsShift : [];
+      state.sectorPersonal.DNCSectorsShift = shiftPersonal?.DNCSectorsShift || [];
+      state.sectorPersonal.ECDSectorsShift = shiftPersonal?.ECDSectorsShift || [];
+      state.sectorPersonal.sectorStationsShift = shiftPersonal?.sectorStationsShift || [];
     },
   },
 

@@ -104,12 +104,15 @@ export const currWorkPoligonStructure = {
         return [];
       }
       const wpStructure = [];
+      // учитываем, что одна и та же станция может входить в несколько поездных участков
       if (getters.getSectorPersonal.sectorStationsShift) {
         getters.getSectorPersonal.sectorStationsShift.forEach((el) => {
-          wpStructure.push({
-            type: WORK_POLIGON_TYPES.STATION,
-            id: el.stationId,
-          });
+          if (!wpStructure.find((el) => el.type === WORK_POLIGON_TYPES.STATION && el.id === el.stationId)) {
+            wpStructure.push({
+              type: WORK_POLIGON_TYPES.STATION,
+              id: el.stationId,
+            });
+          }
         });
       }
       if (getters.getSectorPersonal.DNCSectorsShift) {

@@ -439,6 +439,11 @@
         type: Array,
         required: false,
       },
+      // true - применять к элементам шаблона значения по умолчанию, false - не применять
+      applyDefaultOrderPatternElementValues: {
+        type: Boolean,
+        required: true,
+      },
     },
 
     components: {
@@ -462,6 +467,11 @@
         if (!props.element) {
           return null;
         }
+        // Если значение по умолчанию применять не нужно, не делаем этого
+        if (!props.applyDefaultOrderPatternElementValues) {
+          return props.element.value;
+        }
+
         if (props.element.type === OrderPatternElementType.SELECT) {
           switch (props.element.ref) {
             case FILLED_ORDER_DROPDOWN_ELEMENTS.TAKE_DUTY:

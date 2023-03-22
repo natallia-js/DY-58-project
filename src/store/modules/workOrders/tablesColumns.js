@@ -1,11 +1,11 @@
 import { filterObj } from '@/additional/filterObject';
 
-// Условные наименования столбцов таблицы входящих уведомлений (названия столбцов должны
+// Условные наименования столбцов таблицы входящих документов (названия столбцов должны
 // соответствовать названию полей массива данных для корректного отображения информации)
 const InputMessTblColumnsTitles = Object.freeze({
   state: 'state',
   seqNum: 'seqNum',
-  time: 'time', // Время издания распоряжения
+  time: 'time', // Время создания документа
   orderNum: 'orderNum',
   extendedOrderTitle: 'extendedOrderTitle',
   orderText: 'shortOrderText', // Только для ДСП
@@ -14,12 +14,12 @@ const InputMessTblColumnsTitles = Object.freeze({
   fio: 'fio',
 });
 
-// Условные наименования столбцов таблицы рабочих распоряжений (названия столбцов должны
+// Условные наименования столбцов таблицы рабочих документов (названия столбцов должны
 // соответствовать названию полей массива данных для корректного отображения информации)
 const WorkMessTblColumnsTitles = Object.freeze({
   expander: 'expander',
   state: 'state',
-  timeSpan: 'timeSpan', // время действия распоряжения
+  timeSpan: 'timeSpan', // время действия документа
   orderNum: 'orderNum',
   extendedOrderTitle: 'extendedOrderTitle',
   orderReceiveStatus: 'orderReceiveStatus',
@@ -106,7 +106,7 @@ export const tablesColumns = {
       const tblCols = [
         { field: InputMessTblColumnsTitles.state, title: '', width: isDSP_or_DSPoperator ? '3%' : '3%', maxWidth: isDSP_or_DSPoperator ? '3%' : '3%', align: 'center' },
         { field: InputMessTblColumnsTitles.seqNum, title: '№ п/п', width: isDSP_or_DSPoperator ? '4%' : '4%', maxWidth: isDSP_or_DSPoperator ? '4%' : '4%', align: 'left' },
-        { field: InputMessTblColumnsTitles.time, title: 'Время издания', width: isDSP_or_DSPoperator ? '7%': '11%', maxWidth: isDSP_or_DSPoperator ? '7%': '11%', align: 'left' },
+        { field: InputMessTblColumnsTitles.time, title: 'Время создания', width: isDSP_or_DSPoperator ? '7%': '11%', maxWidth: isDSP_or_DSPoperator ? '7%': '11%', align: 'left' },
         { field: InputMessTblColumnsTitles.orderNum, title: 'Номер', width: isDSP_or_DSPoperator ? '5%' : '7%', maxWidth: isDSP_or_DSPoperator ? '5%' : '7%', align: 'left' },
         { field: InputMessTblColumnsTitles.extendedOrderTitle, title: 'Наименование', width: isDSP_or_DSPoperator ? '15%' : '30%', maxWidth: isDSP_or_DSPoperator ? '15%' : '30%', align: 'left' },
       ];
