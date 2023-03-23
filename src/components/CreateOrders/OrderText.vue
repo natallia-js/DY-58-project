@@ -196,8 +196,10 @@
             // Здесь берем именно editValue, а не value, т.к. значение может быть изменено пользователем;
             // к тому же, value презназначено для просмотра, а editValue - для редактирования и не содержит "лишних" символов,
             // которые используются в value для более удобного просмотра
-            state.orderPatternText[index].value =
-              getChildOrderPatternElementValueByParentElementValue(parentParam.type, parentParam.editValue, state.orderPatternText[index].type);
+            if (parentParam) {
+              state.orderPatternText[index].value = getChildOrderPatternElementValueByParentElementValue(
+                parentParam.type, parentParam.editValue, state.orderPatternText[index].type);
+            }
           }
         });
         // сюда попадем только в случае когда родительское и дочернее распоряжения - шаблонные

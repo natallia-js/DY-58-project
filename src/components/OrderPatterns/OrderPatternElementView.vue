@@ -69,7 +69,7 @@
   <div v-else-if="element.type === OrderPatternElementType.MULTIPLE_SELECT" v-tooltip="element.ref">
     <MultiSelect
       :style="{ width: getElementSizesCorrespondence[element.size] }"
-      :options="state.multipleValuesForSelection"
+      :options="multipleValuesForSelection"
       optionLabel="label"
       optionValue="value"
       dataKey="value"
@@ -82,7 +82,7 @@
           <InputText type="text" v-model="state.newMultipleValue" class="p-mr-2 p-col" />
           <Button
             type="button"
-            @click="addNewMultipleValue"
+            @click="addNewMultipleValue(state.newMultipleValue)"
             icon="pi pi-plus"
             v-tooltip="'Добавить элемент в список и выбрать его'"
             class="p-button-rounded p-button-secondary"
@@ -461,8 +461,21 @@
       const store = useStore();
       const confirm = useConfirm();
 
+      const multipleValuesForSelection = ref(props.selectMultipleValues ? [...props.selectMultipleValues] : []);
+
+      const addAdditionalValueInMultipleSelectList = (valueToAdd) => {
+        if (!valueToAdd) return;
+        if (!multipleValuesForSelection.value.find((el) => el.value === valueToAdd)) {
+          multipleValuesForSelection.value.push({
+            label: valueToAdd,
+            value: valueToAdd,
+          });
+        }
+      };
+
       // Значения элементов шаблонов распоряжений, которые они в соответствии
-      // со своим смысловым значением могут принимать по умолчанию
+      // со своим смысловым значением могут принимать по умолчанию.
+      // Эта же функция вызывается
       const getDefaultElementModelValue = () => {
         if (!props.element) {
           return null;
@@ -491,6 +504,7 @@
               return props.element.value;
           }
         } else if (props.element.type === OrderPatternElementType.MULTIPLE_SELECT) {
+          props.element.value?.forEach((el) => addAdditionalValueInMultipleSelectList(el));
           return props.element.value || [];
         } else if (props.element.type === OrderPatternElementType.DATETIME) {
           switch (props.element.ref) {
@@ -523,22 +537,27 @@
 
       const state = reactive({
         elementModelValue: getDefaultElementModelValue(),
-        multipleValuesForSelection: props.selectMultipleValues ? [...props.selectMultipleValues] : [],
         newMultipleValue: null,
       });
 
-      watch(() => props.selectMultipleValues, (value) => state.multipleValuesForSelection = value ? [...value] : []);
+      // Реагируем на изменение списка из вне. При этом необходимо учесть тот факт, что в предыдущий список
+      // в функции addNewMultipleValue могли быть добавлены значения, которых нет в новом списке.
+      watch(() => props.selectMultipleValues, (value) => {
+        // ищем значения предыдущего списка, которых нет в новом списке
+        const diffValues = multipleValuesForSelection.value.filter((el) => !value?.find((item) => item.value === el.value)) || [];
+        multipleValuesForSelection.value = value ? [...value, ...diffValues] : [...diffValues];
+      });
 
-      const addNewMultipleValue = () => {
-        if (state.newMultipleValue && !state.multipleValuesForSelection.find((el) => el.value === state.newMultipleValue)) {
-          state.multipleValuesForSelection.push({
-            label: state.newMultipleValue,
-            value: state.newMultipleValue,
-          });
-          if (!state.elementModelValue)
-            state.elementModelValue = [{ 0: state.newMultipleValue }];
-          else
-            state.elementModelValue[Object.keys(state.elementModelValue).length] = state.newMultipleValue;
+      const addNewMultipleValue = (valueToAdd) => {
+        // значения нет в списке -> добавляем его туда
+        addAdditionalValueInMultipleSelectList(valueToAdd);
+        // выделяем указанное значение, если оно еще не выделено
+        if (!state.elementModelValue)
+          state.elementModelValue = [{ 0: valueToAdd }];
+        else {
+          if (!state.elementModelValue.includes(valueToAdd)) {
+            state.elementModelValue[Object.keys(state.elementModelValue).length] = valueToAdd;
+          }
         }
       };
 
@@ -546,8 +565,19 @@
       // (это происходит, в частности, при автоматическом заполнении полей шаблона распоряжения по
       // значениям соответствующих полей связанного распоряжения)
       watch(() => props.element.value, (newVal) => {
-        if (JSON.stringify(state.elementModelValue) !== JSON.stringify(newVal)) {
-          state.elementModelValue = newVal;
+        switch (props.element.type) {
+          case OrderPatternElementType.SELECT:
+            // чтобы значение успешно применилось, оно должно быть в списке выбора
+            if (state.elementModelValue !== newVal && props.dropdownValues?.find((el) => el.value === newVal?.value))
+              state.elementModelValue = newVal;
+            break;
+          case OrderPatternElementType.MULTIPLE_SELECT:
+            newVal?.forEach((el) => addNewMultipleValue(el));
+            break;
+          default:
+            if (JSON.stringify(state.elementModelValue) !== JSON.stringify(newVal))
+              state.elementModelValue = newVal;
+            break;
         }
       });
 
@@ -555,12 +585,13 @@
       // в связи с чем могут оказаться незаполненными данными некоторые поля (например, при перезагрузке
       // циркулярного распоряжения)
       const watchedRawWorkingOrders = ref(false);
-      const stopWatchingRawWorkingOrders = watch(() => store.getters.ifAllDataLoadedOnApplicationReload/*getRawWorkingOrders*/, () => {
-        if (watchedRawWorkingOrders.value === false && !state.elementModelValue) {
-          watchedRawWorkingOrders.value = true;
-          state.elementModelValue = getDefaultElementModelValue();
-        }
-      });
+      const stopWatchingRawWorkingOrders =
+        watch(() => store.getters.ifAllDataLoadedOnApplicationReload, () => {
+          if (watchedRawWorkingOrders.value === false && !state.elementModelValue) {
+            watchedRawWorkingOrders.value = true;
+            state.elementModelValue = getDefaultElementModelValue();
+          }
+        });
       watch(watchedRawWorkingOrders, (newVal) => {
         if (newVal === true) {
           stopWatchingRawWorkingOrders();
@@ -1032,7 +1063,7 @@
           `${stationTitles[1]} ${stationsSeparator} ${stationTitles[0]}`;
 
         // Редактируем при помощи нового наименования перегона состояние компонента
-        state.multipleValuesForSelection = state.multipleValuesForSelection.map((el) => {
+        multipleValuesForSelection.value = multipleValuesForSelection.value.map((el) => {
           if (el.value !== blockTitle) return el;
           return { label: reversedBlockTitle, value: reversedBlockTitle};
         });
@@ -1046,6 +1077,7 @@
       };
 
       return {
+        multipleValuesForSelection,
         state,
         selectedDRTableRecord,
         menu,

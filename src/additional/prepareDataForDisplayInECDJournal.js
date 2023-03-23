@@ -89,12 +89,19 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
         includePost: false,
       });
 
+      const isTYOrder = order.specialTrainCategories?.includes(SPECIAL_TELECONTROL_ORDER_SIGN);
+
       let toWhomString = orderTextData.toWhom;
       if (orderTextData.toWhomCopy) {
         if (toWhomString) {
           toWhomString += '<br/><br/>';
         }
         toWhomString += orderTextData.toWhomCopy;
+      }
+      // Если поле "Кому" пусто и документ имеет особую отметку "ТУ", то эта отметка проставляется в поле "Кому"
+      // (вместо адресатов)
+      if (!toWhomString && isTYOrder) {
+        toWhomString = SPECIAL_TELECONTROL_ORDER_SIGN;
       }
 
       // Создатель документа
@@ -131,7 +138,7 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
           // для ряда приказов ЭЦД указывается особая отметка ТУ (для приказов, формируемых на
           // отключение/включение коммутационного аппарата по телеуправлению); эту отметку необходимо
           // отобразить в журнале в графе "Кто принял"
-          isTYOrder: order.specialTrainCategories && order.specialTrainCategories.includes(SPECIAL_TELECONTROL_ORDER_SIGN),
+          isTYOrder,
         }),
         orderSender,
         // время уведомления (на приказ/запрещение) - из связанного распоряжения
