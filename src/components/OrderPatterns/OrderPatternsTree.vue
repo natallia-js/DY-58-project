@@ -21,6 +21,7 @@
         v-model:selectionKeys="selectedNode"
         :filter="true"
         filterMode="lenient"
+        scrollHeight="60vh"
         @nodeSelect="handleTreeNodeSelect"
         @nodeUnselect="handleTreeNodeUnselect"
         @nodeExpand="expandAll"
