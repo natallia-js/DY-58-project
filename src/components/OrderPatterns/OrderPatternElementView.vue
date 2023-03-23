@@ -568,7 +568,7 @@
         switch (props.element.type) {
           case OrderPatternElementType.SELECT:
             // чтобы значение успешно применилось, оно должно быть в списке выбора
-            if (state.elementModelValue !== newVal && props.dropdownValues?.find((el) => el.value === newVal?.value))
+            if (state.elementModelValue !== newVal && props.dropdownValues?.find((el) => el.value === newVal))
               state.elementModelValue = newVal;
             break;
           case OrderPatternElementType.MULTIPLE_SELECT:
