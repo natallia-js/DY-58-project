@@ -4,14 +4,14 @@ import { makeServerRequest } from './common';
 export const applyForRegistration = async (props) => {
   const {
     login, password, name, fatherName, surname, post, contactData,
-    service, roles, stations, dncSectors, ecdSectors,
+    service, userService, roles, stations, dncSectors, ecdSectors,
   } = props;
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.applyForRegistration,
     method: 'POST',
     params: {
       login, password, name, fatherName, surname, post, contactData,
-      service, roles, stations, dncSectors, ecdSectors,
+      service, userService, roles, stations, dncSectors, ecdSectors,
     },
   });
   return response.data;

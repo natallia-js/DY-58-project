@@ -79,7 +79,7 @@ export const orderPatterns = {
     getCurrentUserOrderCategories(state, getters) {
       const orderCategories = [];
       state.patterns
-        .filter((pattern) => pattern.service === getters.getUserService)
+        .filter((pattern) => pattern.service === getters.getUserOrderPatternsService)
         .forEach((pattern) => {
           if (!orderCategories.find((item) => item.orderType === pattern.type && item.category === pattern.category)) {
             orderCategories.push({ orderType: pattern.type, category: pattern.category });

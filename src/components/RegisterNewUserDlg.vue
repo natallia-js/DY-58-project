@@ -127,17 +127,44 @@
         </small>
       </div>
 
-      <!-- СЛУЖБА -->
+      <!-- СЛУЖБА, КОТОРОЙ ПРИНАДЛЕЖИТ ПОЛЬЗОВАТЕЛЬ -->
 
-      <div class="p-field p-col-3 p-d-flex p-flex-column p-m-0">
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label
           for="new-user-service"
-          :class="{'p-error':(v$.service.$invalid && submitted) || state.fieldsErrorsFromServer.service}"
+          :class="{'p-error':(v$.userService.$invalid && submitted) || state.fieldsErrorsFromServer.userService}"
         >
           <span class="p-text-bold"><span class="dy58-required-field">*</span> Служба</span>
         </label>
         <Dropdown
           id="new-user-service"
+          v-model="v$.userService.$model"
+          :options="state.allServices"
+          optionLabel="title"
+          optionValue="title"
+          dataKey="id"
+          :class="{'p-invalid':(v$.userService.$invalid && submitted) || state.fieldsErrorsFromServer.userService}"
+          :loading="state.loadingServices"
+        />
+        <small
+          v-if="(v$.userService.$invalid && submitted) || v$.userService.$pending.$response || state.fieldsErrorsFromServer.userService"
+          class="p-error"
+        >
+          {{ state.fieldsErrorsFromServer.userService || 'Не определена служба' }}
+        </small>
+      </div>
+
+      <!-- СЛУЖБА, ШАБЛОНАМИ ДОКУМЕНТОВ КОТОРОЙ БУДЕТ ПОЛЬЗОВАТЬСЯ ПОЛЬЗОВАТЕЛЬ -->
+
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
+        <label
+          for="new-order-patterns-service"
+          :class="{'p-error':(v$.service.$invalid && submitted) || state.fieldsErrorsFromServer.service}"
+        >
+          <span class="p-text-bold">Служба шаблонов документов</span>
+        </label>
+        <Dropdown
+          id="new-order-patterns-service"
           v-model="v$.service.$model"
           :options="state.allServices"
           optionLabel="title"
@@ -156,7 +183,7 @@
 
      <!-- ДОЛЖНОСТЬ -->
 
-      <div class="p-field p-col-3 p-d-flex p-flex-column p-m-0">
+      <div class="p-field p-col-6 p-d-flex p-flex-column p-m-0">
         <label
           for="new-user-post"
           :class="{'p-error':(v$.post.$invalid && submitted) || state.fieldsErrorsFromServer.post}"
@@ -402,6 +429,7 @@
         fatherName: null,
         surname: '',
         service: '',
+        userService: '',
         post: '',
         contactData: null,
         roles: [],
@@ -565,6 +593,7 @@
         fatherName: {},
         surname: { required },
         service: { required },
+        userService: {},
         post: { required },
         contactData: {},
         roles: {},
@@ -603,6 +632,7 @@
               post: state.post,
               contactData: state.contactData,
               service: state.service,
+              userService: state.userService,
               roles: state.roles,
               stations: state.stations,
               dncSectors: state.dncSectors,
@@ -634,6 +664,7 @@
         state.fatherName = null;
         state.surname = '';
         state.service = '';
+        state.userService = '';
         state.post = '';
         state.contactData = null;
         state.roles = [];

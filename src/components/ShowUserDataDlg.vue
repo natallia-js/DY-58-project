@@ -14,6 +14,7 @@
     <p><span class="p-text-bold">Отчество:</span> &#160; {{ getUserFatherName || '?' }}</p>
     <p><span class="p-text-bold">Должность:</span> &#160; {{ getUserPost || '?' }}</p>
     <p><span class="p-text-bold">Служба:</span> &#160; {{ getUserService || '?' }}</p>
+    <p><span class="p-text-bold">Служба шаблонов документов:</span> &#160; {{ getUserOrderPatternsService || '?' }}</p>
     <p><span class="p-text-bold">Полномочие:</span> &#160; {{ getUserCredential || '?' }}</p>
     <p>
       <span class="p-text-bold">Рабочий полигон:</span> &#160;
@@ -62,6 +63,7 @@
         'getUserSurname',
         'getUserFatherName',
         'getUserService',
+        'getUserOrderPatternsService',
         'getUserCredential',
         'getUserWorkPoligon',
         'getUserWorkPoligonName',

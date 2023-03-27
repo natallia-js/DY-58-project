@@ -175,7 +175,8 @@ export const currUser = {
     fatherName: '',   // отчество
     surname: '',      // фамилия
     post: '',         // должность
-    service: '',      // принадлежность службе
+    service: '',      // служба, шаблоны документов которой пользователь использует в работе
+    userService: '',  // принадлежность пользователя службе
     token: null,      // token пользователя
     loginDateTime: null, // время входа в систему (время, когда в системе вызывается метод login)
     lastTakeDutyTime: null, // время последнего принятия дежурства
@@ -216,6 +217,9 @@ export const currUser = {
       return state.post;
     },
     getUserService(state) {
+      return state.userService;
+    },
+    getUserOrderPatternsService(state) {
       return state.service;
     },
     /**
@@ -441,6 +445,7 @@ export const currUser = {
       state.fatherName = userInfo.fatherName || '';
       state.post = userInfo.post;
       state.service = userInfo.service;
+      state.userService = userInfo.userService;
       state.possibleCredentialsWithPoligons = userCredsWithPoligons; // именно все возможные полномочия в данном приложении!
       state.credential = userCredential;
       state.workPoligon = userWorkPoligon;
@@ -494,6 +499,7 @@ export const currUser = {
       state.fatherName = '';
       state.post = '';
       state.service = '';
+      state.userService = '';
       state.possibleCredentialsWithPoligons = null;
       state.credential = null;
       state.workPoligon = null;

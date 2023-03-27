@@ -100,7 +100,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
         id: order._id,
         type: order.type,
         seqNum: getOrderSeqNumberFunction(index),
-        // дата-время создания и утверждения распоряжения
+        // дата-время создания и утверждения документа
         assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
           order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
         number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',

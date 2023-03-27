@@ -164,7 +164,7 @@
       const { showSuccessMessage, showErrMessage } = showMessage();
 
       const state = reactive({
-        service: computed(() => store.state.currUser.service),
+        service: computed(() => store.state.currUser.userService),
         orderType: '',
         orderCategory: '',
         orderTitle: '',
