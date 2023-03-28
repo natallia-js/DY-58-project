@@ -523,7 +523,7 @@ export const currWorkPoligonStructure = {
      * Для полигона управления, являющегося участком ЭЦД, возвращает его структурные подразделения.
      */
     getStructuralDivisions(state) {
-      if (!state.sector || !state.sector.TECDStructuralDivisions || !state.sector.TECDStructuralDivisions.length) {
+      if (!state.sector?.TECDStructuralDivisions?.length) {
         return [];
       }
       return state.sector.TECDStructuralDivisions.map((division) => {

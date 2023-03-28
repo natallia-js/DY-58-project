@@ -43,7 +43,6 @@
         :disabled="getDispatchOrdersBeingProcessedNumber >= 1"
       />
       <Button label="Закрыть" @click="closeDialog" class="p-button-secondary" />
-
     </template>
   </Dialog>
 </template>

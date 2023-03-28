@@ -7,7 +7,6 @@ import {
   SET_GET_ORDER_STATUS_TO_DEFINIT_DNC_SECTOR,
   SET_GET_ORDER_STATUS_TO_DEFINIT_ECD_SECTOR,
   SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
-  REWRITE_OTHER_GET_ORDER_RECORD,
   ADD_OTHER_GET_ORDER_RECORD,
 } from '@/store/mutation-types';
 import { APPLY_PERSONAL_FOR_SENDING_DATA_ACTION } from '@/store/action-types';
@@ -132,21 +131,10 @@ export const useWatchAllAppDataLoad = (inputVals) => {
 
       // Если в документе, подлежащем редактированию, есть список иных адресатов, подгружаем их
       orderToEdit?.otherToSend.forEach((addressee) => {
-        let otherId;
-        if (addressee.additionalId >= 0) {
-          const person = store.getters.getStructuralDivisions.find((el) => el.additionalId === addressee.additionalId);
-          if (person) {
-            store.commit(REWRITE_OTHER_GET_ORDER_RECORD, { ...person, existingStructuralDivision: true });
-            otherId = store.getters.getOtherPersonId(person.placeTitle, person.additionalId);
-          }
-        } else {
-          store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...addressee });
-          otherId = store.getters.getNewOtherPersonId({ placeTitle: addressee.placeTitle, post: addressee.post, fio: addressee.fio });
-        }
-        if (otherId) {
-          store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
-            { otherId, getOrderStatus: getDY58OriginalFlag(addressee.sendOriginal) });
-        }
+        // для документа, который ранее был издан, у каждого его иного адресата уже есть поле _id
+        store.commit(ADD_OTHER_GET_ORDER_RECORD, { ...addressee });
+        store.commit(SET_GET_ORDER_STATUS_TO_DEFINIT_OTHER_SHIFT,
+          { otherId: addressee._id, getOrderStatus: getDY58OriginalFlag(addressee.sendOriginal) });
       });
     }
 

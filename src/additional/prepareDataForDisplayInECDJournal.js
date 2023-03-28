@@ -20,41 +20,21 @@ export default function prepareDataForDisplayInECDJournal(responseData, getOrder
     return [];
   }
   const userWorkPoligon = store.getters.getUserWorkPoligon;
+  const getAddresseeObject = (addressee) => ({
+    ...addressee,
+    confirmDateTime: !addressee.confirmDateTime ? null : new Date(addressee.confirmDateTime),
+    editDateTime: !addressee.editDateTime ? null : new Date(addressee.editDateTime),
+  });
   return responseData
     .map((order) => ({
       ...order,
-      dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
+      dncToSend: !order.dncToSend ? [] : order.dncToSend.map((el) => getAddresseeObject(el)),
+      dspToSend: !order.dspToSend ? [] : order.dspToSend.map((el) => getAddresseeObject(el)),
+      ecdToSend: !order.ecdToSend ? [] : order.ecdToSend.map((el) => getAddresseeObject(el)),
+      otherToSend: !order.otherToSend ? [] : order.otherToSend.map((el) => getAddresseeObject(el)),
       // Исключаем главных ДСП (они будут в списке dspToSend)
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
-        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
-          .map((el) => ({
-            ...el,
-            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-          })),
+        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId).map((el) => getAddresseeObject(el)),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :

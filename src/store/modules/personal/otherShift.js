@@ -127,6 +127,7 @@ export const otherShift = {
      * existingStructuralDivision - true - указывает на то, что запись относится к реально существующему в БД структурному
      *   подразделению (актуально для записей без значений в полях post, fio в случае группировки структурных подразделений
      *   у ЭЦД)
+     * _id
      */
     [ADD_OTHER_GET_ORDER_RECORD] (state, props) {
       const {
@@ -137,6 +138,7 @@ export const otherShift = {
         fio,
         sendOriginal = CurrShiftGetOrderStatus.doNotSend,
         existingStructuralDivision = false,
+        _id,
       } = props;
 
       if (!state.sectorPersonal) {
@@ -148,12 +150,15 @@ export const otherShift = {
 
       // Если в списке "иных" присутствует аналогичная запись, но ее статус sendOriginal отличен от
       // передаваемого, то редактируем существующую запись
-      const theSameRec = state.sectorPersonal.otherShift.find((el) => el.additionalId === additionalId);
-      if (additionalId > 0 && theSameRec) {
-        if (theSameRec.sendOriginal !== sendOriginal) {
-          theSameRec.sendOriginal = sendOriginal;
+      if (additionalId > 0) {
+        const theSameRec = state.sectorPersonal.otherShift.find((el) => el.additionalId === additionalId);
+        if (theSameRec) {
+          if (_id && theSameRec._id !==_id)
+            theSameRec._id = _id;
+          if (theSameRec.sendOriginal !== sendOriginal)
+            theSameRec.sendOriginal = sendOriginal;
+          return;
         }
-        return;
       }
       const trimmedPlaceTitle = placeTitle ? placeTitle.trim() : '';
       const theSamePlaceTitleElementSD = state.sectorPersonal.otherShift.find((el) =>
@@ -162,6 +167,7 @@ export const otherShift = {
 
       // Объект для добавления
       const objectToAdd = {
+        _id: _id || objectId(),
         position,
         additionalId: additionalId || -1, // называть 'id' нельзя (id структурного подразделения в БД)
         placeTitle: trimmedPlaceTitle,
@@ -181,7 +187,10 @@ export const otherShift = {
       // Если у objectToAdd отсутствуют значения post и fio, то при наличии в списке иных адресатов записи со значением
       // placeTitle как у objectToAdd новую запись не добавляем
       if (!objectToAdd.post && !objectToAdd.fio) {
-        if (state.sectorPersonal.otherShift.find((el) => el.placeTitle === objectToAdd.placeTitle)) {
+        const recordWithTheSamePlaceTitle = state.sectorPersonal.otherShift.find((el) => el.placeTitle === objectToAdd.placeTitle);
+        if (recordWithTheSamePlaceTitle) {
+          if (_id && recordWithTheSamePlaceTitle._id !== _id)
+            recordWithTheSamePlaceTitle._id = _id;
           return;
         }
       }
@@ -190,14 +199,10 @@ export const otherShift = {
         el.placeTitle === objectToAdd.placeTitle && !el.post && !el.fio);
       // Если такая запись есть, то новую не создаем: редактируем найденную запись
       if (emptyRecordTheSamePlaceTitleIndex >= 0) {
-        state.sectorPersonal.otherShift = [
-          ...state.sectorPersonal.otherShift.slice(0, emptyRecordTheSamePlaceTitleIndex),
-          {
-            ...state.sectorPersonal.otherShift[emptyRecordTheSamePlaceTitleIndex],
-            ...objectToAdd,
-          },
-          ...state.sectorPersonal.otherShift.slice(emptyRecordTheSamePlaceTitleIndex + 1),
-        ];
+        state.sectorPersonal.otherShift[emptyRecordTheSamePlaceTitleIndex] = {
+          ...state.sectorPersonal.otherShift[emptyRecordTheSamePlaceTitleIndex],
+          ...objectToAdd,
+        };
         return;
       }
 
@@ -217,13 +222,7 @@ export const otherShift = {
       if (theSameObject) {
         return;
       }
-      state.sectorPersonal.otherShift = [
-        ...state.sectorPersonal.otherShift,
-        {
-          _id: objectId(),
-          ...objectToAdd,
-        },
-      ];
+      state.sectorPersonal.otherShift.push(objectToAdd);
     },
 
     /**
@@ -231,6 +230,7 @@ export const otherShift = {
      */
     [REWRITE_OTHER_GET_ORDER_RECORD] (state, props) {
       const {
+        _id,
         position = -1,
         additionalId = -1,
         placeTitle,
@@ -245,15 +245,14 @@ export const otherShift = {
           ...state.sectorPersonal.otherShift.slice(0, existingPlaceTitleIndex),
           {
             ...state.sectorPersonal.otherShift[existingPlaceTitleIndex],
-            ...{
-              position,
-              additionalId,
-              placeTitle,
-              post,
-              fio,
-              sendOriginal,
-              existingStructuralDivision,
-            },
+            _id: _id || objectId(),
+            position,
+            additionalId,
+            placeTitle,
+            post,
+            fio,
+            sendOriginal,
+            existingStructuralDivision,
           },
           ...state.sectorPersonal.otherShift.slice(existingPlaceTitleIndex + 1),
         ];

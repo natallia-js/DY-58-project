@@ -2,7 +2,7 @@ import { watch } from 'vue';
 import { SET_ALLOW_APPLICATION_NAVIGATION, SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION } from '@/store/mutation-types';
 import isEqual from '@/additional/isEqual';
 
-// Модуль отслеживания изменений при формировании информации по распоряжению.
+// Модуль отслеживания изменений при формировании информации по документу.
 export const useWatchOrderDataChanges = ({ state, store, initialOrderData }) => {
   watch([() => state.orderPlace,
          () => state.timeSpan,

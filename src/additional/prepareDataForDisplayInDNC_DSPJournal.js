@@ -20,6 +20,7 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     return [];
   }
   const userWorkPoligon = store.getters.getUserWorkPoligon;
+  // формирует строку с датой-временем утверждения заданного документа
   const orderCreateAssertDateTimeString = (order) => {
     let displayString = '';
     const orderCreateDateString = order.createDateTime ? getLocaleDateString(order.createDateTime) : '';
@@ -33,54 +34,28 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
     }
     return displayString;
   };
+  const getAddresseeObject = (addressee) => ({
+    ...addressee,
+    confirmDateTime: !addressee.confirmDateTime ? null : new Date(addressee.confirmDateTime),
+    editDateTime: !addressee.editDateTime ? null : new Date(addressee.editDateTime),
+  });
   const isStationWorkPoligon = store.getters.isStationWorkPoligon;
-  const isDSP = store.getters.isDSP;
   return responseData
     .map((order) => ({
       ...order,
       createDateTime: order.createDateTime ? new Date(order.createDateTime) : null,
       assertDateTime: order.assertDateTime ? new Date(order.assertDateTime) : null,
-      dncToSend: !order.dncToSend ? [] :
-        order.dncToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      dspToSend: !order.dspToSend ? [] :
-        order.dspToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      ecdToSend: !order.ecdToSend ? [] :
-        order.ecdToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
-      otherToSend: !order.otherToSend ? [] :
-        order.otherToSend.map((el) => ({
-          ...el,
-          confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-          editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-        })),
+      dncToSend: !order.dncToSend ? [] : order.dncToSend.map((el) => getAddresseeObject(el)),
+      dspToSend: !order.dspToSend ? [] : order.dspToSend.map((el) => getAddresseeObject(el)),
+      ecdToSend: !order.ecdToSend ? [] : order.ecdToSend.map((el) => getAddresseeObject(el)),
+      otherToSend: !order.otherToSend ? [] : order.otherToSend.map((el) => getAddresseeObject(el)),
       // ДСП нужна информация лишь по своей станции, ДНЦ - по всем станциям
       stationWorkPlacesToSend: !order.stationWorkPlacesToSend ? [] :
         !isStationWorkPoligon ?
         // Исключаем главных ДСП (они будут в списке dspToSend)
-        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId)
-          .map((el) => ({
-            ...el,
-            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-          })) :
+        order.stationWorkPlacesToSend.filter((el) => el.workPlaceId).map((el) => getAddresseeObject(el)) :
         // Выбираем только работников текущей станции
-        order.stationWorkPlacesToSend.filter((el) => el.id === userWorkPoligon.code)
-          .map((el) => ({
-            ...el,
-            confirmDateTime: !el.confirmDateTime ? null : new Date(el.confirmDateTime),
-            editDateTime: !el.editDateTime ? null : new Date(el.editDateTime),
-          })),
+        order.stationWorkPlacesToSend.filter((el) => el.id === userWorkPoligon.code).map((el) => getAddresseeObject(el)),
       orderText: !order.orderText ? null : {
         ...order.orderText,
         orderText: !order.orderText.orderText ? null :
@@ -98,12 +73,16 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
       return {
         // dataKey в таблице
         id: order._id,
+        // тип документа
         type: order.type,
+        // № п/п документа
         seqNum: getOrderSeqNumberFunction(index),
         // дата-время создания и утверждения документа
         assertDateTime: order.type === ORDER_PATTERN_TYPES.ORDER ? orderCreateAssertDateTimeString(order) :
           order.assertDateTime ? `${getLocaleDateString(order.assertDateTime)}<br/>${getLocaleTimeString(order.assertDateTime)}` : '',
+        // номер документа
         number: order.type !== ORDER_PATTERN_TYPES.CONTROL ? order.number : '',
+        // содержание документа (текст)
         orderContent: getExtendedOrderTitle(order) + '<br/>' +
           formOrderText({
             orderTextArray: order.orderText.orderText,
@@ -114,22 +93,35 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
             insertEmptyLineBeforeText: true,
           }) + '<br/>Передал: ' +
           `${order.creator.post} ${order.creator.fio} ${order.createdOnBehalfOf ? ` (от имени ${order.createdOnBehalfOf})` : ''} ${order.workPoligon?.title || order.senderWorkPoligon?.title}`,
+        // кто принял документ
         orderAcceptor: formAcceptorsStrings({
-          // ДСП нужна информация только по своей станции,
+          // ДСП нужна информация только по адресатам в рамках своей станции в случае ВХОДЯЩЕГО документа,
+          // для ИСХОДЯЩЕГО документа ДСП нужна информация по всем адресатам;
           // ДНЦ в случае ВХОДЯЩЕГО документа нужна информация только по тому лицу в рамках своего участка ДНЦ,
-          // который подтвердил этот документ
-          dncToSend: isStationWorkPoligon
-            ? []
-            : (
-                orderWasCreatedOnThisWorkPoligon
-                  ? order.dncToSend
-                  : order.dncToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
-              ),
-          dspToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.dspToSend,
-          ecdToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.ecdToSend,
-          otherToSend: (isStationWorkPoligon || !orderWasCreatedOnThisWorkPoligon) ? [] : order.otherToSend,
-          stationWorkPlacesToSend: (isStationWorkPoligon || orderWasCreatedOnThisWorkPoligon) ? order.stationWorkPlacesToSend : [],
-          additionallyInformedPeople: isDSP ? order.additionallyInformedPeople : null,
+          // который подтвердил этот документ;
+          // для ИСХОДЯЩЕГО документа ДНЦ нужна информация по всем адресатам;
+          dncToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.dncToSend // для исходящего документа
+            : isStationWorkPoligon // для входящего документа
+              ? []
+              : order.dncToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code),
+          dspToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.dspToSend // для исходящего документа
+            : isStationWorkPoligon // для входящего документа
+              ? order.dspToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
+              : [],
+          ecdToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.ecdToSend // для исходящего документа
+            : [], // для входящего документа
+          otherToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.otherToSend // для исходящего документа
+            : [], // для входящего документа
+          stationWorkPlacesToSend: orderWasCreatedOnThisWorkPoligon
+            ? order.stationWorkPlacesToSend // для исходящего документа
+            : isStationWorkPoligon // для входящего документа
+              ? order.stationWorkPlacesToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
+              : [],
+          additionallyInformedPeople: isStationWorkPoligon ? order.additionallyInformedPeople : null,
         }),
         // true - оригинал распоряжения, false - его копия; для распоряжения, изданного на данном рабочем
         // полигоне, экземпляр этого распоряжения - всегда оригинал; для распоряжения, пришедшего из вне,

@@ -132,7 +132,7 @@ export const leftMenuItems = {
             command: createSpecialTrainCategoryItemCommand({ specialOrderPatterns, specialOrdersSign: SPECIAL_CIRCULAR_ORDER_SIGN, itemsCommandCallback: createOrderOfGivenType }),
           });
         }
-
+/*
         // Текущее распоряжение ДНЦ о приеме-сдаче дежурства
         const existingDNCTakeDutyOrder = getters.getExistingDNC_ECDTakeDutyOrder;
 
@@ -156,6 +156,7 @@ export const leftMenuItems = {
             },
           });
         }
+*/
       }
       items.push(...getters.getCommonLeftMenuItemsAtTheBeginning);
       specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_DR_ORDER_SIGN]);
@@ -224,7 +225,7 @@ export const leftMenuItems = {
         // Текущее распоряжение ЭЦД о приеме-сдаче дежурства
         const existingECDTakeDutyOrder = getters.getExistingDNC_ECDTakeDutyOrder;
 
-        // Редактировать распоряжение о приеме-сдаче дежурства может лишь его создатель
+        // Редактировать документ о приеме-сдаче дежурства может лишь его создатель
         if (existingECDTakeDutyOrder?.creator && existingECDTakeDutyOrder.creator.id === getters.getUserId) {
           items.push({
             label: 'Редактировать приказ о приеме/сдаче дежурства',
