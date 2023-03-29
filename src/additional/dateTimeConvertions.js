@@ -53,13 +53,13 @@ export function getLocaleDateTimeString(date, showSeconds = true) {
 
 /**
  * Позволяет для данного объекта timeSpan получить его строковое представление в зависимости от
- * типа соответствующего распоряжения.
+ * типа соответствующего документа.
  *
- * @param {String} orderType - тип распоряжения
+ * @param {String} orderType - тип документа
  * @param {Object} timeSpan - объект с полями start, end, tillCancellation
  * @param {boolean} isECD - true (строку необходимо сформировать для ЭЦД) или
  * false (строку необходимо сформировать не для ЭЦД)
- * @param {Array} specialOrderCategories - массив строк, определяющих особые отметки распоряжения
+ * @param {Array} specialOrderCategories - массив строк, определяющих особые отметки документа
  * @returns строковое представление объекта timeSpan
  */
 export function getTimeSpanString(orderType, timeSpan, isECD, specialOrderCategories = null) {

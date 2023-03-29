@@ -1,7 +1,7 @@
 import { store } from '@/store';
 
 /**
- * Возвращает true, если распоряжение были издано на текущем рабочем полигоне, false - в противном случае.
+ * Возвращает true, если документ были издан на текущем рабочем полигоне, false - в противном случае.
  */
 const isOrderDispatchedOnCurrentWorkPoligon = (orderSenderWorkPoligon, considerWorkPlace = false) => {
   const currentUserWorkPoligon = store.getters.getUserWorkPoligon;

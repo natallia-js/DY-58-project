@@ -9,10 +9,10 @@ function ifOrderBelongsToThisSector(order) {
   const userWorkPoligon = store.getters.getUserWorkPoligon;
   if (!order || !userWorkPoligon)
     return false;
-  // проверяем, было ли распоряжение издано на данном рабочем полигоне
+  // проверяем, был ли документ издан на данном рабочем полигоне
   if (orderDispatchedOnThisWorkPoligon(order)) {
     return true;}
-  // проверяем, было ли распоряжение адресовано данному рабочему полигону
+  // проверяем, был ли документ адресован данному рабочему полигону
   switch (userWorkPoligon.type) {
     case WORK_POLIGON_TYPES.STATION:
       if (order.dspToSend) {

@@ -134,7 +134,7 @@
           for="new-user-service"
           :class="{'p-error':(v$.userService.$invalid && submitted) || state.fieldsErrorsFromServer.userService}"
         >
-          <span class="p-text-bold"><span class="dy58-required-field">*</span> Служба</span>
+          <span class="p-text-bold">Служба</span>
         </label>
         <Dropdown
           id="new-user-service"
@@ -253,15 +253,13 @@
           for="new-user-stations"
           :class="{'p-error':(v$.stations.$invalid && submitted) || state.fieldsErrorsFromServer.stations}"
         >
-          <span class="p-text-bold">Станции</span>
+          <span class="p-text-bold p-mr-2">Станции</span>
+          <Button
+            label="Включить рабочие места Руководителей работ всех станций"
+            class="p-mt-2 p-button-secondary p-button-outlined"
+            @click="includeAllWorkManagerWorkPlaces"
+          />
         </label>
-        <div>
-        <Button
-          label="Включить рабочие места Руководителей работ всех станций"
-          class="p-mt-2 p-button-secondary p-button-outlined"
-          @click="includeAllWorkManagerWorkPlaces"
-        />
-        </div>
         <MultiSelect
           id="new-user-stations"
           v-model="v$.stations.$model"

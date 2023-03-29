@@ -4,7 +4,7 @@ import ifOrderBelongsToThisSector from '@/additional/ifOrderBelongsToThisSector'
 
 // название БД приложения в IndexedDB
 const DB_NAME = 'dy58DB';
-// название хранилища объектов распоряжений в IndexedDB
+// название хранилища объектов документов в IndexedDB
 const ORDERS_STORE_NAME = 'dy58Orders';
 // название хранилища информации о рабочем полигоне в IndexedDB
 const WORK_POLIGON_STORE_NAME = 'workPoligon';
@@ -14,16 +14,16 @@ const WORK_POLIGON_PERSONAL_STORE_NAME = 'workPoligonPersonal';
 const OBJECT_KEY = '_id';
 
 /**
- * Класс, позволяющий хранить НСИ последнего пользователя и массив объектов распоряжений в IndexedDB,
- * а также поддерживать содержимое локальной базы объектов распоряжений в "актуальном" состоянии.
+ * Класс, позволяющий хранить НСИ последнего пользователя и массив объектов документов в IndexedDB,
+ * а также поддерживать содержимое локальной базы объектов документов в "актуальном" состоянии.
  */
 class LocalStoreServer {
   constructor(maxTimeStoreDataInLocalDB) {
-    // "выдержка" данных из хранилища распоряжений IndexedDB (основные - оперативные - данные, которые
+    // "выдержка" данных из хранилища документов IndexedDB (основные - оперативные - данные, которые
     // позволят поддерживать хранилище в актуальном состоянии без необходимости к нему обращаться, если
     // данные не изменились)
     this.lastOrdersShortData = [];
-    // максимальное время хранения объектов распоряжений в IndexedDB (в миллисекундах)
+    // максимальное время хранения объектов документов в IndexedDB (в миллисекундах)
     this.maxTimeStoreDataInLocalDB = maxTimeStoreDataInLocalDB;
     // ссылка на NoSQL-базу данных браузера (IndexedDB)
     this.db = null;
@@ -31,7 +31,7 @@ class LocalStoreServer {
     this.createStoreError = null;
     // ошибка чтения хранилища
     this.readStoreError = null;
-    // ошибка записи в хранилище информации о распоряжениях
+    // ошибка записи в хранилище информации о документах
     this.writeStoreOrdersError = null;
     // ошибка записи в хранилище информации о рабочем полигоне
     this.writeStoreWorkPoligonDataError = null;
@@ -48,7 +48,7 @@ class LocalStoreServer {
     openRequest.onupgradeneeded = function(event) {
       // сохраняем ссылку на базу данных
       localStoreServerObject.db = event.target.result;
-      // создадим хранилище объектов распоряжений, если его нет (ключ данных в хранилище - поле OBJECT_KEY)
+      // создадим хранилище объектов документов, если его нет (ключ данных в хранилище - поле OBJECT_KEY)
       if (!localStoreServerObject.db.objectStoreNames.contains(ORDERS_STORE_NAME)) {
         localStoreServerObject.db.createObjectStore(ORDERS_STORE_NAME, { keyPath: OBJECT_KEY });
       }
@@ -70,18 +70,18 @@ class LocalStoreServer {
       // получаем и сохраняем ссылку на БД
       localStoreServerObject.db = event.target.result;
 
-      // Далее, из IndexedDB извлекаем "оперативные" данных всех объектов распоряжений и сохраняем их в оперативной памяти.
-      // В дальнейшем эти данные понадобятся для отслеживания изменений в массиве объектов распоряжений, чтобы
-      // поддерживать хранилище распоряжений IndexedDB в актуальном состоянии.
+      // Далее, из IndexedDB извлекаем "оперативные" данных всех объектов документов и сохраняем их в оперативной памяти.
+      // В дальнейшем эти данные понадобятся для отслеживания изменений в массиве объектов документов, чтобы
+      // поддерживать хранилище документов IndexedDB в актуальном состоянии.
       const transaction = localStoreServerObject.db.transaction([ORDERS_STORE_NAME], 'readonly');
-      // Получаем хранилище объектов распоряжений из транзакции
+      // Получаем хранилище объектов документов из транзакции
       const store = transaction.objectStore(ORDERS_STORE_NAME);
-      // Извлекаем из хранилища все распоряжения
+      // Извлекаем из хранилища все документы
       const request = store.getAll();
 
       request.onsuccess = function() {
         if (request.result) {
-          // если в хранилище есть распоряжения, то сохраняем в памяти их базовые данные
+          // если в хранилище есть документы, то сохраняем в памяти их базовые данные
           localStoreServerObject.lastOrdersShortData = request.result.map((order) => ({
             _id: order._id,
             hash: order.hash,
@@ -92,7 +92,7 @@ class LocalStoreServer {
 
       request.onerror = function(event) {
         localStoreServerObject.readStoreError =
-          `Ошибка чтения хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+          `Ошибка чтения хранилища объектов документов в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
       };
     };
   }
@@ -146,11 +146,11 @@ class LocalStoreServer {
   }
 
   /**
-   * Проверяет, есть ли среди входных объектов-распоряжений такой, которого нет в БД либо значение которого
+   * Проверяет, есть ли среди входных объектов-документов такой, которого нет в БД либо значение которого
    * изменилось. Если да, то обновляет данные в локальной БД.
-   * При обновлении данных в БД также проводится проверка хранящихся в ней распоряжений на "актуальность":
-   * "просроченые" распоряжения удаляются.
-   * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) распоряжений (тех, с которыми работает пользователь).
+   * При обновлении данных в БД также проводится проверка хранящихся в ней документов на "актуальность":
+   * "просроченые" документы удаляются.
+   * Полагаем, что data - массив АКТУАЛЬНЫХ (рабочих) документов (тех, с которыми работает пользователь).
    */
   async checkAndSaveOrdersIfNecessary(data) {
     if (!this.db) return;
@@ -174,7 +174,7 @@ class LocalStoreServer {
     // сюда поместим данные, которые заменят текущие данные в БД
     let newDBData = [];
 
-    // id всех рабочих распоряжений
+    // id всех рабочих документов
     const activeOrdersIds = data.map((el) => el._id);
     const localStoreServerObject = this;
 
@@ -182,9 +182,9 @@ class LocalStoreServer {
       localStoreServerObject.writeStoreOrdersError = null;
 
       if (request.result) {
-        // удаляю неактуальные данные (неактуальное распоряжение - такое, которое:
-        // 1) было издано на рабочем полигоне, отличном от текущего, и не было адресовано текущему рабочему полигону,
-        // 2) было издано более maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет в массиве рабочих распоряжений data)
+        // удаляю неактуальные данные (неактуальный документ - такой, который:
+        // 1) был издан на рабочем полигоне, отличном от текущего, и не был адресован текущему рабочему полигону,
+        // 2) был издан более maxTimeStoreDataInLocalDB миллисекунд назад, при этом его нет в массиве рабочих документов data)
         newDBData = request.result.filter((el) =>
           ifOrderBelongsToThisSector(JSON.parse(el.serializedData)) &&
           (
@@ -208,14 +208,14 @@ class LocalStoreServer {
       // сохранена в БД; применяем ее, предварительно очистив хранилище в БД
       store.clear();
       newDBData.forEach((order) => {
-        // Добавляем распоряжение в хранилище объектов
+        // добавляем документ в хранилище объектов
         store.add(order);
       });
     };
 
     request.onerror = function(event) {
       localStoreServerObject.writeStoreOrdersError =
-        `Ошибка обновления хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+        `Ошибка обновления хранилища объектов документов в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
     };
 
     // Когда все эти запросы будут завершены, завершится и транзакция.
@@ -333,7 +333,7 @@ class LocalStoreServer {
 
       request.onerror = function(event) {
         localStoreServerObject.readStoreError =
-          `Ошибка чтения хранилища объектов распоряжений в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
+          `Ошибка чтения хранилища объектов документов в IndexedDB. Код ошибки ${event?.target?.errorCode || '?'}. Ошибка: ${request.error}`;
         reject(new Error(localStoreServerObject.readStoreError));
       };
     });

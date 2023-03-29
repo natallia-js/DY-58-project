@@ -341,13 +341,13 @@
     <div class="dy58-create-order-subblock">
       <p class="p-mb-2">
         <label for="addressees" :class="{'p-error': submitted && v$.allAddressees.$invalid}">
-          <span class="p-text-bold p-mr-2">
+          <span class="p-text-bold">
             <span v-if="!isECD && !(isDNC && orderType === ORDER_PATTERN_TYPES.NOTIFICATION)" class="dy58-required-field">*</span>
             Кому адресовать
           </span>
           <Button
             icon="pi pi-times"
-            class="p-button-secondary p-button-sm dy58-order-action-button p-m-1"
+            class="p-button-secondary p-button-sm dy58-order-action-button p-ml-1"
             v-tooltip="'Очистить список'"
             @click="handleClearOrderAddressesLists"
           />

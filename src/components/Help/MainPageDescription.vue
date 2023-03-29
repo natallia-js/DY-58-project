@@ -76,7 +76,7 @@
       на данной форме отображается список всех созданных черновиков документов, с группировкой их по
       типам документов; при выделении записи в списке появляются кнопки действий, которые можны совершить
       по отношению к выделенному черновику документа:
-      <Button icon="pi pi-file" class="p-button-success p-button-sm dy58-order-action-button p-mr-2" /> -
+      <Button icon="pi pi-file" class="p-button-success p-button-sm dy58-order-action-button" /> -
       редактировать черновик либо издать на его основе документ,
       <Button icon="pi pi-times" class="p-button-secondary p-button-sm dy58-order-action-button" /> -
       удалить выбранный черновик

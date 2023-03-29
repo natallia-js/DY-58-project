@@ -21,7 +21,7 @@
       <to-help-start-block />
       <journal-page-description />
       <to-help-start-block />
-      <work-poligon-page-description />
+      <work-poligon-page-description id="work-poligon-description" />
       <to-help-start-block />
       <personal-page-description />
       <to-help-start-block />
