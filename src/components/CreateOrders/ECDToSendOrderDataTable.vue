@@ -213,7 +213,7 @@
       },
 
       sendCopyToAll() {
-        this.$store.commit('setGetOrderStatusToAllECDSectors',
+        this.$store.commit(SET_GET_ORDER_STATUS_TO_ALL_ECD_SECTORS,
           { getOrderStatus: CurrShiftGetOrderStatus.sendCopy });
       },
 

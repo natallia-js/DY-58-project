@@ -12,6 +12,8 @@ export const useWatchOrderDataChanges = ({ state, store, initialOrderData }) => 
          () => state.ecdSectorsToSendOrder,
          () => state.otherSectorsToSendOrder],
     () => {
+      if (state.orderDispatchedSuccessfully)
+        return;
       if (
         !isEqual(state.orderPlace, initialOrderData.orderPlace) ||
         !isEqual(state.timeSpan, initialOrderData.timeSpan) ||

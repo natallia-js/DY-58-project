@@ -66,8 +66,9 @@ export const common = {
 
   mutations: {
     [SET_ALLOW_APPLICATION_NAVIGATION] (state) {
-      if (!state.allowApplicationNavigation)
+      if (!state.allowApplicationNavigation) {
         state.allowApplicationNavigation = true;
+      }
     },
 
     [SET_DO_NOT_ALLOW_APPLICATION_NAVIGATION] (state) {
@@ -75,8 +76,9 @@ export const common = {
       // и уточнения у пользователя, действительно ли он хочет покинуть текущую страницу
       if (store.getters.isECD)
         return;
-      if (state.allowApplicationNavigation)
+      if (state.allowApplicationNavigation) {
         state.allowApplicationNavigation = false;
+      }
     },
 
     [SET_ALL_DATA_LOADED_ON_APP_RELOAD] (state) {
