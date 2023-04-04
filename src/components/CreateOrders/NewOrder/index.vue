@@ -622,7 +622,7 @@
         getSectorBlocks,
       } = useStoreData({ store, relatedOrderObject });
 
-      const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */, isECD });
+      const { rules } = useNewOrderValidationRules({ state, props /*, relatedOrderObject */, isECD, isDNC });
 
       const submitted = ref(false);
       // Код { $scope: false } нужен для того чтобы (цитата из справочника):
@@ -735,7 +735,11 @@
       const handleSubmit = (isFormValid) => {
         submitted.value = true;
         if (!isFormValid) {
-          showErrMessage('Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля');
+          let errMessage = 'Не могу отправить созданный документ на сервер: не заполнены / неверно заполнены его поля';
+          for (let err of v$.value.$silentErrors || [])
+            if (err.$message)
+              errMessage = err.$message;
+          showErrMessage(errMessage);
           return;
         }
         state.showPreviewNewOrderDlg = true;
