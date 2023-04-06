@@ -117,9 +117,22 @@ export default function prepareDataForDisplayInDNC_DSPJournal(responseData, getO
             ? order.otherToSend // для исходящего документа
             : [], // для входящего документа
           stationWorkPlacesToSend: orderWasCreatedOnThisWorkPoligon
-            ? order.stationWorkPlacesToSend // для исходящего документа
-            : isStationWorkPoligon // для входящего документа
-              ? order.stationWorkPlacesToSend.filter((el) => el.type === userWorkPoligon.type && el.id === userWorkPoligon.code)
+            // для исходящего документа (исключаем дублирование информации в массивах dspToSend и stationWorkPlacesToSend:
+            // исключаем из stationWorkPlacesToSend записи, которые есть в dspToSend)
+            ? order.stationWorkPlacesToSend.filter((el) =>
+                el.workPlaceId ||
+                !order.dspToSend.find((item) => item.type === el.type && item.id === el.id)
+              )
+            // для входящего документа (исключаем дублирование информации в массивах dspToSend и stationWorkPlacesToSend:
+            // исключаем из stationWorkPlacesToSend записи, которые есть в dspToSend)
+            : isStationWorkPoligon
+              ? order.stationWorkPlacesToSend.filter((el) =>
+                  el.type === userWorkPoligon.type && el.id === userWorkPoligon.code &&
+                  (
+                    el.workPlaceId ||
+                    !order.dspToSend.find((item) => item.type === el.type && item.id === el.id)
+                  )
+                )
               : [],
           additionallyInformedPeople: isStationWorkPoligon ? order.additionallyInformedPeople : null,
         }),
