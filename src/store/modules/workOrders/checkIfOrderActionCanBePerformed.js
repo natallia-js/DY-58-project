@@ -91,10 +91,7 @@ export const checkIfOrderActionCanBePerformed = {
      * Если распоряжение издается вне станции и станция - его адресат, то подтвердить за все
      * рабочие места на станции может лишь ДСП.
      * Если распоряжение издается на рабочем месте на станции, то подтвердить за все рабочие места
-     * на станции можно лишь с того рабочего места, на котором распоряжение было издано - это справедливо
-     * только в отношении рабочих мест ДСП и Операторов при ДСП.
-     * Если документ издается Руководителем работ на станции, то подтвердить за адресатов документа
-     * в рамках станции может только ДСП.
+     * на станции можно лишь с того рабочего места, на котором распоряжение было издано.
      * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
      * за других в рамках станции.
      */
@@ -108,21 +105,12 @@ export const checkIfOrderActionCanBePerformed = {
           return false;
         }
         const orderDispatchedOnCurrentWorkPoligon = getters.orderDispatchedOnCurrentWorkPoligon(order);
-        const orderDispatchedOnCurrentStation = getters.orderDispatchedOnCurrentStation(order);
         return (
-          // проверяем, издан ли документ на данном рабочем месте станции и является ли текущий пользователь
-          // ДСП либо Оператором при ДСП
-          (
-            orderDispatchedOnCurrentWorkPoligon && getters.isDSP_or_DSPoperator
-          ) ||
-          // проверяем, издан ли документ на текущей станции и является ли текущий пользователь ДСП
-          (
-            orderDispatchedOnCurrentStation && getters.isDSP
-          ) ||
+          // проверяем, издан ли документ на данном рабочем месте станции
+          orderDispatchedOnCurrentWorkPoligon ||
           // если распоряжение не издано на текущем полигоне управления, то оно должно быть адресовано текущему
           // глобальному полигону (станции), а текущий пользователь должен быть именно ДСП (не Оператор!)
           (
-            !orderDispatchedOnCurrentWorkPoligon &&
             getters.isDSP && order?.receivers && userWorkPoligon && order.receivers.find((el) =>
               (el.type === userWorkPoligon.type) &&
               (String(el.id) === String(userWorkPoligon.code))
