@@ -69,9 +69,11 @@ export const dsp = {
     /**
      * Возвращает массив с информацией обо всех ДСП и Операторах при ДСП текущего полигона управления "Станция".
      * В выборку не включаются пользователи рабочего места текущего пользователя.
-     * Например, на некоторой станции есть рабочее место ДСП, рабочее место оператора при ДСП №1 и
-     * рабочее место оператора при ДСП №2. Если зашел пользователь с рабочего места оператора при ДСП №1,
-     * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места оператора при ДСП №2.
+     * И не включаются иные пользователи рабочего полигона "Станция" (в т.ч. руководители работ) - только те, кто имеют
+     * полномочия ДСП и Оператора при ДСП.
+     * Например, на некоторой станции есть рабочее место ДСП, рабочее место Оператора при ДСП №1 и
+     * рабочее место Оператора при ДСП №2. Если зашел пользователь с рабочего места оператора при ДСП №1,
+     * то данный метод вернет пользователей рабочего места ДСП и пользователей рабочего места Оператора при ДСП №2.
      * Возвращаемая информация группируется по принадлежности пользователей к конкретному рабочему месту.
      */
     getCurrStationDSPandOperatorUsersThatDoNotBelongToCurrWorkPlace(state, getters) {
@@ -83,7 +85,7 @@ export const dsp = {
       const stationWithPersonal = state.sectorPersonal.sectorStationsShift.find((item) =>
         String(item.stationId) === String(getters.getUserWorkPoligonData.St_ID)
       );
-      if (!stationWithPersonal || !stationWithPersonal.people || !stationWithPersonal.people.length) {
+      if (!stationWithPersonal?.people?.length) {
         return [];
       }
       const groupedPeople = [];
@@ -97,10 +99,14 @@ export const dsp = {
       };
       stationWithPersonal.people
         .filter((item) =>
+          // человек с правами ДСП либо Оператора при ДСП
           (
             item.appsCredentials.includes(APP_CREDENTIALS.DSP_FULL) ||
             item.appsCredentials.includes(APP_CREDENTIALS.DSP_Operator)
           ) &&
+          // его рабочее место - рабочее место ДСП либо Оператора при ДСП
+          getters.isDSPorDSPOperatorWorkPlace(item.stationId, item.stationWorkPlaceId) &&
+          // рабочее место человека не совпадает с текущим рабочим местом
           (
             (!userWorkPoligon.subCode && item.stationWorkPlaceId) ||
             (userWorkPoligon.subCode && !item.stationWorkPlaceId) ||

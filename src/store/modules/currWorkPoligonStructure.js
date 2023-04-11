@@ -38,6 +38,7 @@ import {
 } from '@/serverRequests/ecdSectors.requests';
 import formErrorMessageInCatchBlock from '@/additional/formErrorMessageInCatchBlock';
 import wait from '@/additional/wait';
+import { STATION_WORKPLACE_TYPES } from '@/constants/appCredentials';
 
 
 export const currWorkPoligonStructure = {
@@ -150,6 +151,22 @@ export const currWorkPoligonStructure = {
           return null;
         }
         return stationWorkPlace.SWP_Name || null;
+      };
+    },
+
+    isDSPorDSPOperatorWorkPlace(state, getters) {
+      return (stationId, stationWorkPlaceId) => {
+        // Информация о текущем рабочем полигоне
+        const workPoligon = getters.getUserWorkPoligon;
+        // Если текущий рабочий полигон - не станция либо ее код не совпадает с переданным значением
+        if (!workPoligon || workPoligon.type !== WORK_POLIGON_TYPES.STATION || workPoligon.code !== stationId)
+          return false;
+        // Если текущий рабочий полигон - станция и рабочее место совпадает с переданным значением
+        if ((!workPoligon.subCode && !stationWorkPlaceId) || (workPoligon.subCode === stationWorkPlaceId))
+          return true;
+        // На текущем рабочем полигоне Станция ищу рабочее место с указанным id, интересует только рабочее место оператора
+        return Boolean(state?.station?.TStationWorkPlaces.find((wp) =>
+          wp.SWP_ID === stationWorkPlaceId && wp.SWP_Type === STATION_WORKPLACE_TYPES.OPERATOR));
       };
     },
 

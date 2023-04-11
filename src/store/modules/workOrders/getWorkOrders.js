@@ -234,6 +234,32 @@ export const getWorkOrders = {
           return 0;
         })
         .map((item) => {
+
+          const getItemStationReceivers = () => {
+            let stationReceivers = item.stationWorkPlacesToSend;
+            // Руководителю работ отображаем только главного по станции (ДСП)
+            if (getters.isStationWorksManager)
+              stationReceivers = stationReceivers.filter((el) => !el.workPlaceId);
+            return stationReceivers.map((el) => {
+              // Должность и ФИО лица, находящегося на смене на рабочем месте станции, которому адресована копия
+              // распоряжения, берем из последнего распоряжения о приеме/сдаче дежурства.
+              // Но только в том случае, если на данном рабочем месте распоряжение еще не подтверждено.
+              let { post, fio } = !el.confirmDateTime
+                ? getters.getWorkPlacePostFIOFromExistingDSPTakeDutyOrder(el.workPlaceId)
+                : { post: el.post, fio: el.fio };
+              return {
+                id: el.id,
+                type: el.type,
+                workPlaceId: el.workPlaceId,
+                place: el.placeTitle,
+                post,
+                fio,
+                deliverDateTime: el.deliverDateTime,
+                confirmDateTime: el.confirmDateTime,
+              };
+            });
+          };
+
           return {
             id: item._id,
             type: item.type,
@@ -300,24 +326,7 @@ export const getWorkOrders = {
                 };
               })),
             ],
-            stationReceivers: item.stationWorkPlacesToSend.map((item) => {
-              // Должность и ФИО лица, находящегося на смене на рабочем месте станции, которому адресована копия
-              // распоряжения, берем из последнего распоряжения о приеме/сдаче дежурства.
-              // Но только в том случае, если на данном рабочем месте распоряжение еще не подтверждено.
-              let { post, fio } = !item.confirmDateTime
-                ? getters.getWorkPlacePostFIOFromExistingDSPTakeDutyOrder(item.workPlaceId)
-                : { post: item.post, fio: item.fio };
-              return {
-                id: item.id,
-                type: item.type,
-                workPlaceId: item.workPlaceId,
-                place: item.placeTitle,
-                post,
-                fio,
-                deliverDateTime: item.deliverDateTime,
-                confirmDateTime: item.confirmDateTime,
-              };
-            }),
+            stationReceivers: getItemStationReceivers(),
             otherReceivers: item.otherToSend || [],
             assertDateTime: item.assertDateTime ? getLocaleDateTimeString(item.assertDateTime, false) : null,
             invalid: item.invalid,

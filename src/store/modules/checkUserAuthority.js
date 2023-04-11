@@ -20,21 +20,21 @@ export const checkUserAuthority = {
 
     /**
      * Пользователь, принявший дежурство, может уведомлять о доставке распоряжений на его рабочий полигон
-     * если этот пользователь - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * если этот пользователь - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserReportOnOrdersDelivery(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD || getters.isStationWorksManager) &&
         getters.isUserOnDuty ? true : false;
     },
 
     /**
      * Пользователь, принявший дежурство, может подтвержать приходящие ему распоряжения,
-     * если этот пользователь - ДНЦ, ЭЦД, ДСП либо Оператор при ДСП.
+     * если этот пользователь - ДНЦ, ЭЦД, ДСП, Оператор при ДСП либо Руководитель работ на станции.
      */
     canUserConfirmOrder(_state, getters) {
       return getters.canUserWorkWithSystem &&
-        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD) &&
+        (getters.isDSP_or_DSPoperator || getters.isDNC || getters.isECD || getters.isStationWorksManager) &&
         getters.isUserOnDuty ? true : false;
     },
 

@@ -1,3 +1,5 @@
+import { WORK_POLIGON_TYPES } from "@/constants/appCredentials";
+
 /**
  * Обеспечивает проверку возможности выполнения действий над конкретным распоряжением.
  * Не учитывает полномочия пользователя на работу с данным распоряжением (должны быть
@@ -34,13 +36,25 @@ export const checkIfOrderActionCanBePerformed = {
       return (order) => {
         const userWorkPoligon = getters.getUserWorkPoligon;
         return (
-          order && order.senderWorkPoligon && userWorkPoligon &&
+          order?.senderWorkPoligon && userWorkPoligon &&
           (order.senderWorkPoligon.type === userWorkPoligon.type) &&
           (String(order.senderWorkPoligon.id) === String(userWorkPoligon.code)) &&
           (
             (!order.senderWorkPoligon.workPlaceId && !userWorkPoligon.subCode) ||
             (order.senderWorkPoligon.workPlaceId && userWorkPoligon.subCode && String(order.senderWorkPoligon.workPlaceId) === String(userWorkPoligon.subCode))
           )
+        ) ? true : false;
+      };
+    },
+
+    orderDispatchedOnCurrentStation(_state, getters) {
+      return (order) => {
+        const userWorkPoligon = getters.getUserWorkPoligon;
+        if (userWorkPoligon?.type !== WORK_POLIGON_TYPES.STATION)
+          return false;
+        return (
+          order?.senderWorkPoligon && (order.senderWorkPoligon.type === userWorkPoligon.type) &&
+          (String(order.senderWorkPoligon.id) === String(userWorkPoligon.code))
         ) ? true : false;
       };
     },
@@ -77,7 +91,10 @@ export const checkIfOrderActionCanBePerformed = {
      * Если распоряжение издается вне станции и станция - его адресат, то подтвердить за все
      * рабочие места на станции может лишь ДСП.
      * Если распоряжение издается на рабочем месте на станции, то подтвердить за все рабочие места
-     * на станции можно лишь с того рабочего места, на котором распоряжение было издано.
+     * на станции можно лишь с того рабочего места, на котором распоряжение было издано - это справедливо
+     * только в отношении рабочих мест ДСП и Операторов при ДСП.
+     * Если документ издается Руководителем работ на станции, то подтвердить за адресатов документа
+     * в рамках станции может только ДСП.
      * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
      * за других в рамках станции.
      */
@@ -87,13 +104,26 @@ export const checkIfOrderActionCanBePerformed = {
           return false;
         }
         const userWorkPoligon = getters.getUserWorkPoligon;
+        if (userWorkPoligon.type !== WORK_POLIGON_TYPES.STATION) {
+          return false;
+        }
+        const orderDispatchedOnCurrentWorkPoligon = getters.orderDispatchedOnCurrentWorkPoligon(order);
+        const orderDispatchedOnCurrentStation = getters.orderDispatchedOnCurrentStation(order);
         return (
-          // проверка рабочего полигона (издано ли распоряжение на данном рабочем полигоне?)
-          getters.orderCanBeConfirmedFor(order) ||
+          // проверяем, издан ли документ на данном рабочем месте станции и является ли текущий пользователь
+          // ДСП либо Оператором при ДСП
+          (
+            orderDispatchedOnCurrentWorkPoligon && getters.isDSP_or_DSPoperator
+          ) ||
+          // проверяем, издан ли документ на текущей станции и является ли текущий пользователь ДСП
+          (
+            orderDispatchedOnCurrentStation && getters.isDSP
+          ) ||
           // если распоряжение не издано на текущем полигоне управления, то оно должно быть адресовано текущему
           // глобальному полигону (станции), а текущий пользователь должен быть именно ДСП (не Оператор!)
           (
-            getters.isDSP && order && order.receivers && userWorkPoligon && order.receivers.find((el) =>
+            !orderDispatchedOnCurrentWorkPoligon &&
+            getters.isDSP && order?.receivers && userWorkPoligon && order.receivers.find((el) =>
               (el.type === userWorkPoligon.type) &&
               (String(el.id) === String(userWorkPoligon.code))
             )
@@ -143,7 +173,9 @@ export const checkIfOrderActionCanBePerformed = {
      * адресатов на станции может только ДСП.
      * Если распоряжение издается на станции, то удалить рабочее место из списка адресатов на станции
      * может только его издатель (т.е. это возможно сделать только с того рабочего места, на котором
-     * данное распоряжение было издано).
+     * данное распоряжение было издано) - это справедливо только в отношении рабочих мест Операторов при ДСП.
+     * Если документ издается Руководителем работ на станции, то удалить адресатов документа в рамках станции
+     * может только ДСП.
      */
     orderStationWorkPlaceReceiverCanBeDeleted(_state, getters) {
       return (order) => {
@@ -151,9 +183,21 @@ export const checkIfOrderActionCanBePerformed = {
           return false;
         }
         const userWorkPoligon = getters.getUserWorkPoligon;
+        if (userWorkPoligon.type !== WORK_POLIGON_TYPES.STATION) {
+          return false;
+        }
+        const orderDispatchedOnCurrentWorkPoligon = getters.orderDispatchedOnCurrentWorkPoligon(order);
+        const orderDispatchedOnCurrentStation = getters.orderDispatchedOnCurrentStation(order);
         return (
-          // проверка рабочего полигона (издано ли распоряжение на данном рабочем полигоне?)
-          getters.orderCanBeConfirmedFor(order) ||
+          // проверяем, издан ли документ на данном рабочем месте станции и является ли текущий пользователь
+          // ДСП либо Оператором при ДСП
+          (
+            orderDispatchedOnCurrentWorkPoligon && getters.isDSP_or_DSPoperator
+          ) ||
+          // проверяем, издан ли документ на текущей станции и является ли текущий пользователь ДСП
+          (
+            orderDispatchedOnCurrentStation && getters.isDSP
+          ) ||
           // если распоряжение не издано на текущем полигоне управления, то оно должно быть адресовано текущему
           // глобальному полигону (станции), а текущий пользователь должен быть именно ДСП (не Оператор!)
           (

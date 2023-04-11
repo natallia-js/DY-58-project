@@ -455,29 +455,31 @@
 
       /**
        * Пользователи на всех рабочих местах операторов при ДСП станции (информация, которая была получена от сервера).
+       * Параметр time - время приема/сдачи дежурства (у всех пользователей в таблице выбора оно одинаково).
        */
-      const defaultWorkPlacesUsers = () => store.getters.getCurrStationDSPandOperatorUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
-        ...item,
-        items: item.items.map((el) => ({
-          key: el.key,
-          workPlaceId: el.workPlaceId, // обязательно! (понадобится в дальнейшем для формирования списка получателей всех действующих распоряжений на станции)
-          placeTitle: store.getters.getCurrStationWorkPlaceNameById(el.workPlaceId),
-          userId: el.userId,
-          post: el.post, // обязательно! (-//-)
-          name: el.name, // обязательно! (-//-)
-          fatherName: el.fatherName, // обязательно! (-//-)
-          surname: el.surname, // обязательно! (-//-)
-          userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
-          takeOrPassDutyTime: null,
-        })),
-      }));
+      const defaultWorkPlacesUsers = (time) =>
+        store.getters.getCurrStationDSPandOperatorUsersThatDoNotBelongToCurrWorkPlace.map((item) => ({
+          ...item,
+          items: item.items.map((el) => ({
+            key: el.key,
+            workPlaceId: el.workPlaceId, // обязательно! (понадобится в дальнейшем для формирования списка получателей всех действующих распоряжений на станции)
+            placeTitle: store.getters.getCurrStationWorkPlaceNameById(el.workPlaceId),
+            userId: el.userId,
+            post: el.post, // обязательно! (-//-)
+            name: el.name, // обязательно! (-//-)
+            fatherName: el.fatherName, // обязательно! (-//-)
+            surname: el.surname, // обязательно! (-//-)
+            userPostFIO: getUserPostFIOString({ post: el.post, name: el.name, fatherName: el.fatherName, surname: el.surname }),
+            takeOrPassDutyTime: time,
+          })),
+        }));
 
       const initTakeAndPassDutyStationShift = () => {
         // В первую очередь(!), устанавливаем весь персонал станции (всех рабочих мест, кроме текущего) -
         // делаем 2 копии массива (для определения тех лиц, которые принимают дежурство, и тех,
         // которые дежурство сдают)
-        const defaultTakeDutyUsers = defaultWorkPlacesUsers();
-        const defaultPassDutyUsers = defaultWorkPlacesUsers();
+        const defaultTakeDutyUsers = defaultWorkPlacesUsers(state.takeDutyDateTime);
+        const defaultPassDutyUsers = defaultWorkPlacesUsers(state.passDutyDateTime);
         state.usersThatTakeDuty = defaultTakeDutyUsers;
         state.usersThatPassDuty = defaultPassDutyUsers;
 
@@ -517,7 +519,7 @@
         // извлечь и установить ранее определенную информацию о персонале, который принимает и сдает дежурство
         if (editExistingTakeDutyOrder.value && existingDSPTakeDutyOrder.value) {
           // Устанавливаем персонал, который принимает дежурство
-          if (prevTakeDutyPersonal && prevTakeDutyPersonal instanceof Array) {
+          if (prevTakeDutyPersonal instanceof Array) {
             prevTakeDutyPersonal.forEach((item) => {
               const existingUserObject = getTakeOrPassDutyUserObject(defaultTakeDutyUsers, item.userId, item.workPlaceId);
               if (existingUserObject) {
@@ -530,7 +532,7 @@
           }
           const prevPassDutyPersonal = getOrderTextParamValue(DSP_TAKE_ORDER_TEXT_ELEMENTS_REFS.PASS_DUTY_PERSONAL, existingDSPTakeDutyOrder.value.orderText.orderText);
           // Устанавливаем персонал, который сдает дежурство
-          if (prevPassDutyPersonal && prevPassDutyPersonal instanceof Array) {
+          if (prevPassDutyPersonal instanceof Array) {
             prevPassDutyPersonal.forEach((item) => {
               const existingUserObject = getTakeOrPassDutyUserObject(defaultPassDutyUsers, item.userId, item.workPlaceId);
               if (existingUserObject) {
