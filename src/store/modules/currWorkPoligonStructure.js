@@ -161,13 +161,29 @@ export const currWorkPoligonStructure = {
         // Если текущий рабочий полигон - не станция либо ее код не совпадает с переданным значением
         if (!workPoligon || workPoligon.type !== WORK_POLIGON_TYPES.STATION || workPoligon.code !== stationId)
           return false;
-        // Если текущий рабочий полигон - станция и рабочее место совпадает с переданным значением
-        if ((!workPoligon.subCode && !stationWorkPlaceId) || (workPoligon.subCode === stationWorkPlaceId))
+        // Если текущий рабочий полигон - станция и рабочее место - ДСП (главного на станции)
+        if (!stationWorkPlaceId)
           return true;
-        // На текущем рабочем полигоне Станция ищу рабочее место с указанным id, интересует только рабочее место оператора
+        // На текущем рабочем полигоне "Станция" ищу рабочее место с указанным id, интересует только рабочее место Оператора при ДСП
         return Boolean(state?.station?.TStationWorkPlaces.find((wp) =>
           wp.SWP_ID === stationWorkPlaceId && wp.SWP_Type === STATION_WORKPLACE_TYPES.OPERATOR));
       };
+    },
+
+    isStationWorksManagerWorkPlace(state, getters) {
+      return (stationId, stationWorkPlaceId) => {
+        // Информация о текущем рабочем полигоне
+        const workPoligon = getters.getUserWorkPoligon;
+        // Если текущий рабочий полигон - не станция либо ее код не совпадает с переданным значением
+        if (!workPoligon || workPoligon.type !== WORK_POLIGON_TYPES.STATION || workPoligon.code !== stationId)
+          return false;
+        // Если текущий рабочий полигон - станция и рабочее место - ДСП (главного на станции)
+        if (!stationWorkPlaceId)
+          return false;
+        // На текущем рабочем полигоне "Станция" ищу рабочее место с указанным id, интересует только рабочее место Руководителя работ
+        return Boolean(state?.station?.TStationWorkPlaces.find((wp) =>
+          wp.SWP_ID === stationWorkPlaceId && wp.SWP_Type === STATION_WORKPLACE_TYPES.WORKS_MANAGER));
+      }
     },
 
     /**

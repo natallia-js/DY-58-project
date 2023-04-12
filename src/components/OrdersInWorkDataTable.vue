@@ -312,7 +312,7 @@
                         удалить адресата возможно только в том случае, если он не успел подтвердить данное распоряжение -->
                         <div v-else class="p-d-flex p-flex-row p-flex-wrap">
                           <Button
-                            v-if="canOrderBeConfirmedForOnStation(slotProps.data)"
+                            v-if="canOrderBeConfirmedForOnStationWorkPlace(slotProps.data, slotProps3.data.workPlaceId)"
                             icon="pi pi-check"
                             class="p-button-info p-button-sm dy58-order-action-button p-m-1"
                             v-tooltip="'Подтвердить'"
@@ -336,12 +336,12 @@
                     </template>
                   </Column>
                 </DataTable>
-                <!-- Если распоряжение не может быть подтверждено за всех его неподтвержденных адресатов
+                <!-- Если распоряжение не может быть подтверждено ЗА ВСЕХ его неподтвержденных адресатов
                 на станции ввиду его "занятости", отображаем состояние прогресса -->
                 <div v-if="!canUserPerformAnyActionOnOrder(slotProps.data.id)" style="text-align:right">
                   <i class="pi pi-spin pi-spinner"></i>
                 </div>
-                <!-- Отображаем кнопку подтверждения распоряжения за всех на станции, если есть хотя бы
+                <!-- Отображаем кнопку подтверждения распоряжения ЗА ВСЕХ на станции, если есть хотя бы
                 одна неподтвержденная запись в таблице -->
                 <div v-else-if="canOrderBeConfirmedForOnStation(slotProps.data) &&
                   getOrderUnconfirmedStationWorkPoligons(slotProps.data.stationReceivers).length"
@@ -754,6 +754,7 @@
         canForcelyCloseOrderChain: computed(() => store.getters.canForcelyCloseOrderChain),
         canDispatchOrdersConnectedToGivenOrder: computed(() => store.getters.canDispatchOrdersConnectedToGivenOrder),
         canOrderBeConfirmedFor: computed(() => store.getters.canOrderBeConfirmedFor),
+        canOrderBeConfirmedForOnStationWorkPlace: computed(() => store.getters.canOrderBeConfirmedForOnStationWorkPlace),
         canOrderBeConfirmedForOnStation: computed(() => store.getters.canOrderBeConfirmedForOnStation),
         canOrderBeDeletedStationWorkPlaceReceiver: computed(() => store.getters.canOrderBeDeletedStationWorkPlaceReceiver),
         canMarkOrderAsInvalid: computed(() => store.getters.canMarkOrderAsInvalid),

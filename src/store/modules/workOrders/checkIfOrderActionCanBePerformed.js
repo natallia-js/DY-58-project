@@ -86,12 +86,15 @@ export const checkIfOrderActionCanBePerformed = {
     },
 
     /**
-     * Возвращает true, если пользователь может подтвердить распоряжение за его адресатов
+     * Возвращает true, если пользователь может подтвердить документ (в целом) за его адресатов
      * в рамках станции (т.е. подтвердить за конкретные рабочие места на станции).
      * Если распоряжение издается вне станции и станция - его адресат, то подтвердить за все
      * рабочие места на станции может лишь ДСП.
-     * Если распоряжение издается на рабочем месте на станции, то подтвердить за все рабочие места
-     * на станции можно лишь с того рабочего места, на котором распоряжение было издано.
+     * Если распоряжение издается на рабочем месте станции, то подтвердить за все рабочие места
+     * на станции можно лишь с того рабочего места, на котором распоряжение было издано - это справедливо
+     * только в отношении рабочих мест Операторов при ДСП.
+     * Если документ издается Руководителем работ на станции, то подтвердить за адресатов документа в рамках станции
+     * может только ДСП.
      * Возвращает false, если текущий пользователь не имеет права подтверждать распоряжение
      * за других в рамках станции.
      */
@@ -105,9 +108,17 @@ export const checkIfOrderActionCanBePerformed = {
           return false;
         }
         const orderDispatchedOnCurrentWorkPoligon = getters.orderDispatchedOnCurrentWorkPoligon(order);
+        const orderDispatchedOnCurrentStation = getters.orderDispatchedOnCurrentStation(order);
         return (
-          // проверяем, издан ли документ на данном рабочем месте станции
-          orderDispatchedOnCurrentWorkPoligon ||
+          // проверяем, издан ли документ на данном рабочем месте станции и является ли текущий пользователь
+          // ДСП либо Оператором при ДСП
+          (
+            orderDispatchedOnCurrentWorkPoligon && getters.isDSP_or_DSPoperator
+          ) ||
+          // проверяем, издан ли документ на текущей станции и является ли текущий пользователь ДСП
+          (
+            orderDispatchedOnCurrentStation && getters.isDSP
+          ) ||
           // если распоряжение не издано на текущем полигоне управления, то оно должно быть адресовано текущему
           // глобальному полигону (станции), а текущий пользователь должен быть именно ДСП (не Оператор!)
           (
@@ -133,6 +144,48 @@ export const checkIfOrderActionCanBePerformed = {
         getters.canUserConfirmOrdersForOthersOnStationWorkPlaces &&
         getters.orderCanBeConfirmedForOnStation(order)
       ) ? true : false;
+    },
+
+    /**
+     * Проверка возможности подтвердить документ за другое рабочее место в рамках того же самого рабочего
+     * полигона "Станция", на котором работает текущий пользователь.
+     * Это право имеет ДСП в отношении всех рабочих мест в случае документа, пришедшего на станцию с другого рабочего полигона.
+     * Это право есть у ДСП / Оператора при ДСП в отношении всех рабочих мест в случае документа, изданного на рабочем месте
+     * этого ДСП / Оператора при ДСП.
+     * Это право есть у ДСП в отношении всех рабочих мест в случае документа, изданного на данном рабочем полигоне "Станция"
+     * на рабочем месте Руководителя работ.
+     * Это право есть у Руководителя работ в отношении только рабочего места ДСП в случае документа, изданного на данном
+     * рабочем месте Руководителя работ.
+     */
+    canOrderBeConfirmedForOnStationWorkPlace(_state, getters) {
+      return (order, stationWorkPlaceId) => {
+        const userWorkPoligon = getters.getUserWorkPoligon;
+        if (userWorkPoligon.type !== WORK_POLIGON_TYPES.STATION) {
+          return false;
+        }
+        if (!order || !getters.canUserPerformAnyActionOnOrder(order.id) || !getters.canUserConfirmOrdersForOthersOnStationWorkPlaces)
+          return false;
+        // Документ издан на текущем рабочем месте рабочего полигона "Станция"
+        if (getters.orderDispatchedOnCurrentWorkPoligon(order)) {
+          if (getters.isDSP_or_DSPoperator)
+            return true;
+          if (getters.isStationWorksManager && !stationWorkPlaceId)
+            return true;
+        // Документ издан на текущем рабочем полигоне "Станция"
+        } else if (getters.orderDispatchedOnCurrentStation(order)) {
+          if (getters.isDSP && stationWorkPlaceId)
+            return true;
+        // Документ издан на рабочем полигоне, отличном от текущего
+        } else {
+          return (
+            getters.isDSP && order?.receivers && userWorkPoligon && order.receivers.find((el) =>
+              (el.type === userWorkPoligon.type) &&
+              (String(el.id) === String(userWorkPoligon.code))
+            )
+          );
+        }
+        return false;
+      };
     },
 
     /**

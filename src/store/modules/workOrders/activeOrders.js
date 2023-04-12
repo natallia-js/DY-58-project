@@ -24,11 +24,14 @@ import { getUserFIOString } from '@/store/modules/personal/transformUserData';
  *     ДСП             Распоряжение на закрытие перегона        Заявка, Уведомление
  *     ЭЦД             Распоряжение на закрытие перегона        Запрещение
  *     ДНЦ             Действующее распоряжение (действует      Распоряжение, Заявка, Уведомление
- *                     до отмены)
+ *                     до отмены) - кроме распоряжения о
+ *                     приеме-сдаче дежурства
  *     ДСП             Действующее распоряжение (действует      Заявка, Уведомление
- *                     до отмены)
+ *                     до отмены) - кроме распоряжения о
+ *                     приеме-сдаче дежурства
  *     ЭЦД             Действующее распоряжение (действует      Приказ, Запрещение, Уведомление / отмена запрещения ЭЦД
- *                     до отмены)
+ *                     до отмены) - кроме распоряжения о
+ *                     приеме-сдаче дежурства
  *     ДНЦ             Заявка (ДСП)                             Распоряжение, Заявка, Уведомление
  *     ДСП, руково-    Заявка (ДСП)                             Заявка, Уведомление
  *     дитель работ
@@ -47,7 +50,7 @@ const POSSIBLE_DOCS_CONNECTIONS = [
   {
     initialDocType: ORDER_PATTERN_TYPES.ORDER,
     initialDocSpecialMarks: [SPECIAL_CLOSE_BLOCK_ORDER_SIGN],
-    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN],
+    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN],
     newDocsInfo: [
       {
         userCredentials: [APP_CREDENTIALS.DNC_FULL],
@@ -65,7 +68,7 @@ const POSSIBLE_DOCS_CONNECTIONS = [
   },
   {
     initialDocType: ORDER_PATTERN_TYPES.ORDER,
-    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN],
+    excludeInitialDocSpecialMarks: [SPECIAL_CIRCULAR_ORDER_SIGN, SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN],
     newDocsInfo: [
       {
         userCredentials: [APP_CREDENTIALS.DNC_FULL],
