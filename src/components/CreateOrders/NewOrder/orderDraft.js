@@ -68,7 +68,7 @@ export const useOrderDraft = (inputVals) => {
         (naryadDopuskOrRequestFromText ? ' ' + naryadDopuskOrRequestFromText : '') +
         (specialNumberFromText ? ' ' + specialNumberFromText : '')
       :
-      formShortOrderInfo(state.orderText.orderText, true, false, state.otherSectorsToSendOrder);
+      formShortOrderInfo(state.orderText.orderText, true, false, true, state.otherSectorsToSendOrder);
 
     confirm.require({
       target: event.currentTarget,

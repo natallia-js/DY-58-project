@@ -272,8 +272,8 @@ export const getWorkOrders = {
             extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,
             shortOrderInfo:
-              (getters.isDNC || getters.isECD)
-              ?  formShortOrderInfo(item.orderText.orderText, getters.isDNC, getters.isECD, item.otherToSend)
+              (getters.isDNC || getters.isECD || getters.isDSP_or_DSPoperator)
+              ?  formShortOrderInfo(item.orderText.orderText, getters.isDNC, getters.isECD, getters.isDSP_or_DSPoperator, item.otherToSend)
               : '',
             orderPatternId: item.orderText.patternId,
             orderText: formOrderText({

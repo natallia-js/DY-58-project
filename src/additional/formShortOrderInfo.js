@@ -27,8 +27,8 @@ function elementValueIsNotEmpty(value) {
  * Дополнительно к указанной выше информации для ЭЦД указывается информация об "иных" адресатах. А именно:
  * место, куда отправлен документ.
  */
-export function formShortOrderInfo(orderTextArray, isDNC, isECD, otherToSend) {
-  if (!orderTextArray?.length || (!isDNC && !isECD))
+export function formShortOrderInfo(orderTextArray, isDNC, isECD, isDSP_or_DSPoperator, otherToSend) {
+  if (!orderTextArray?.length || (!isDNC && !isECD && !isDSP_or_DSPoperator))
     return '';
 
   const additionalInfoArray = [];
@@ -45,7 +45,13 @@ export function formShortOrderInfo(orderTextArray, isDNC, isECD, otherToSend) {
         }
         break;
       case OrderPatternElementType.SELECT:
-        if ([FILLED_ORDER_DROPDOWN_ELEMENTS.STATION, FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+        if ([FILLED_ORDER_DROPDOWN_ELEMENTS.STATION,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.ARR_STATION,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE,
+             FILLED_ORDER_DROPDOWN_ELEMENTS.DPT_STATION_BLOCK,
              FILLED_ORDER_DROPDOWN_ELEMENTS.NARYAD_DOPUSK_REQUEST_REF].includes(el.ref) && el.value) {
           additionalInfoArray.push(el.value);
         }

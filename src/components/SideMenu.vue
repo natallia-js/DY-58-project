@@ -123,8 +123,6 @@
         orderDrafts: store.getters.getGroupedOrderDrafts,
       });
 
-      console.log(state.orderDrafts)
-
       watch(() => store.getters.getAllOrderDrafts, () => {
         state.orderDrafts = store.getters.getGroupedOrderDrafts;
       });
