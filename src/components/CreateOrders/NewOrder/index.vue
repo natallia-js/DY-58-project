@@ -324,7 +324,7 @@
               />
             </div>
             <div class="p-col-12">
-              <Button v-if="isECD"
+              <Button v-if="isECD || isDNC"
                 label="Сохранить черновик"
                 class="p-button-secondary"
                 @click="handleSaveOrderDraft($event)"
@@ -590,6 +590,7 @@
         state,
         props,
         isECD,
+        isDNC,
         getOrderDraftsOfGivenType,
         showOnGIDOptions,
         defineOrderTimeSpanOptions,
@@ -676,7 +677,7 @@
       const {
         currentOrderDraft,
         handleSaveOrderDraft,
-      } = useOrderDraft({ state, props, store, confirm, getOrderPatternElementValue });
+      } = useOrderDraft({ state, props, store, confirm, getOrderPatternElementValue, isECD });
 
       const { applySelectedOrderDraft } =
         useWatchOrderDrafts({ state, store, props, emit, currentOrderDraft, defineOrderTimeSpanOptions,

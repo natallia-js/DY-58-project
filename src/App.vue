@@ -18,7 +18,7 @@
   import FooterBar from '@/components/FooterBar';
   import ShowBeforeLogoutDlg from '@/components/ShowBeforeLogoutDlg';
   import useWebSocket from '@/hooks/useWebSocket.hook';
-    import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
+  import incomingOrderSound from '@/assets/sounds/incomingOrder.mp3';
   import {
     DETERMINE_LOGOUT_ITEM_ACTION,
     DEL_CURR_LAST_ORDERS_PARAMS,
@@ -243,7 +243,7 @@
         if (workPoligonDataNew) {
           await store.dispatch(LOAD_CURR_SECTORS_SHIFT_ACTION);
           await store.dispatch(LOAD_LAST_ORDERS_PARAMS_ACTION);
-          if (store.getters.isECD)
+          if (store.getters.isECD || store.getters.isDNC)
             await store.dispatch(LOAD_ORDER_DRAFTS_ACTION);
           await store.dispatch(LOAD_WORK_ORDERS_ACTION);
           store.commit(SET_ALL_DATA_LOADED_ON_APP_RELOAD);

@@ -159,6 +159,16 @@ export const leftMenuItems = {
 */
       }
       items.push(...getters.getCommonLeftMenuItemsAtTheBeginning);
+      if (getters.canUserDispatchOrders) {
+        items.push({
+          label: 'Черновики документов',
+          info: getters.getAllOrderDraftsNumber,
+          imgURL: require('@/assets/img/drafts.png'),
+          command: (event) => {
+            store.commit(SHOW_ORDER_DRAFTS, { show: !store.getters.orderDraftsPanelVisible, target: event });
+          },
+        });
+      }
       specialOrderPatterns = getters.getOrderPatternsReferringSpecialTrainCategories([SPECIAL_DR_ORDER_SIGN]);
       if (specialOrderPatterns.length > 0) {
         items.push({

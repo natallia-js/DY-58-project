@@ -13,12 +13,13 @@ import {
   OrderPatternElementType,
   ORDER_PATTERN_TYPES,
 } from '@/constants/orderPatterns';
+import { formShortOrderInfo } from '@/additional/formShortOrderInfo';
 
 /**
  * Данный модуль предназначен для работы с черновиком распоряжения.
  */
 export const useOrderDraft = (inputVals) => {
-  const { state, props, store, confirm, getOrderPatternElementValue } = inputVals;
+  const { state, props, store, confirm, getOrderPatternElementValue, isECD } = inputVals;
 
   // Объект текущего черновика распоряжения (объект либо null)
   const currentOrderDraft = computed(() =>
@@ -50,20 +51,24 @@ export const useOrderDraft = (inputVals) => {
     const specialNumberFromText = getOrderPatternElementValue({ elTypesRefs: [
       [OrderPatternElementType.INPUT, FILLED_ORDER_INPUT_ELEMENTS.SPECIAL_NUMBER_REF],
     ] });
+
     // Название черновика документа (которое позволит этот черновик в последующем быстро найти)
     const fullOrderTitle =
       // для запрещений ЭЦД в начале строки идет информация по адресатам на станциях, для всех остальных типов документов -
       // информация об иных адресатах
-      (
-        (props.orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)
-          ? `${state.dspSectorsToSendOrder?.length ? state.dspSectorsToSendOrder.map(val => 'ДСП ' + store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: val.id, addStationUNMC: false }) || '?').join(', ') + '. ' : ''}`
-          : `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') + '. ' : ''}`
-      ) +
-      (orderPlaceFromText ? orderPlaceFromText + '. ' : '') +
-      (orderTrackFromText ? 'Путь ' + orderTrackFromText + '. ' : '' ) +
-      state.orderText.orderTitle + '.' +
-      (naryadDopuskOrRequestFromText ? ' ' + naryadDopuskOrRequestFromText : '') +
-      (specialNumberFromText ? ' ' + specialNumberFromText : '');
+      isECD
+      ? (
+          (props.orderType === ORDER_PATTERN_TYPES.ECD_PROHIBITION)
+            ? `${state.dspSectorsToSendOrder?.length ? state.dspSectorsToSendOrder.map(val => 'ДСП ' + store.getters.getSectorStationOrBlockTitleById({ placeType: ORDER_PLACE_VALUES.station, id: val.id, addStationUNMC: false }) || '?').join(', ') + '. ' : ''}`
+            : `${state.otherSectorsToSendOrder?.length ? state.otherSectorsToSendOrder.map(val => val.placeTitle).join(', ') + '. ' : ''}`
+        ) +
+        (orderPlaceFromText ? orderPlaceFromText + '. ' : '') +
+        (orderTrackFromText ? 'Путь ' + orderTrackFromText + '. ' : '' ) +
+        state.orderText.orderTitle + '.' +
+        (naryadDopuskOrRequestFromText ? ' ' + naryadDopuskOrRequestFromText : '') +
+        (specialNumberFromText ? ' ' + specialNumberFromText : '')
+      :
+      formShortOrderInfo(state.orderText.orderText, true, false, state.otherSectorsToSendOrder);
 
     confirm.require({
       target: event.currentTarget,

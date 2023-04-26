@@ -61,6 +61,7 @@
         </span>
         <span>
           {{ slotProps.option.displayTitle }}
+          {{  }}
         </span>
       </template>
     </Listbox>
@@ -121,6 +122,8 @@
         selectedOrderDraft: null,
         orderDrafts: store.getters.getGroupedOrderDrafts,
       });
+
+      console.log(state.orderDrafts)
 
       watch(() => store.getters.getAllOrderDrafts, () => {
         state.orderDrafts = store.getters.getGroupedOrderDrafts;

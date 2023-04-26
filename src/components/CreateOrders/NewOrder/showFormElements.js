@@ -14,12 +14,12 @@ import {
  */
  export const useShowFormElements = (inputVals) => {
   const {
-    state, props, isECD, getOrderDraftsOfGivenType, showOnGIDOptions, defineOrderTimeSpanOptions,
+    state, props, isECD, isDNC, getOrderDraftsOfGivenType, showOnGIDOptions, defineOrderTimeSpanOptions,
   } = inputVals;
 
   // показывать ли список черновиков документов текущего типа (если false, то соответствующий элемент
   // будет отсутствовать в DOM)
-  const showOrderDrafts = computed(() => Boolean(isECD.value && getOrderDraftsOfGivenType.value.length));
+  const showOrderDrafts = computed(() => Boolean((isECD.value || isDNC.value) && getOrderDraftsOfGivenType.value.length));
 
   // показывать ли поля выбора связанного распоряжения (если false, то соответствующий элемент
   // будет отсутствовать в DOM)
