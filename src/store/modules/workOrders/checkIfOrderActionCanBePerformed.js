@@ -47,6 +47,23 @@ export const checkIfOrderActionCanBePerformed = {
       };
     },
 
+    /**
+     * Возвращает true, если распоряжение было издано на текущем ГЛОБАЛЬНОМ рабочем полигоне (участок ДНЦ/ЭЦД либо станция),
+     * false - в противном случае.
+     * В случае ДСП и иного работника станции - в частности, Оператора при ДСП этой же станции - их ГЛОБАЛЬНЫЙ рабочий полигон -
+     * один и тот же: станция.
+     */
+    orderDispatchedOnCurrentGlobalWorkPoligon(_state, getters) {
+      return (order) => {
+        const userWorkPoligon = getters.getUserWorkPoligon;
+        return (
+          order?.senderWorkPoligon && userWorkPoligon &&
+          (order.senderWorkPoligon.type === userWorkPoligon.type) &&
+          (String(order.senderWorkPoligon.id) === String(userWorkPoligon.code))
+        ) ? true : false;
+      };
+    },
+
     orderDispatchedOnCurrentStation(_state, getters) {
       return (order) => {
         const userWorkPoligon = getters.getUserWorkPoligon;
@@ -326,7 +343,10 @@ export const checkIfOrderActionCanBePerformed = {
      * Проверка возможности запуска процесса принудительного завершения цепочки, которой принадлежит заданное распоряжение, в БД.
      * Возвращает true, если пользователь может это сделать.
      * Это возможно в том случае, если:
-     *   - распоряжение было издано на том рабочем полигоне, на котором работает пользователь,
+     *   - распоряжение было издано на том ГЛОБАЛЬНОМ рабочем полигоне, на котором работает пользователь (под ГЛОБАЛЬНЫМ рабочим
+     *     полигоном понимается участок ДНЦ/ЭЦД либо станция; не является глобальным рабочим полигоном некоторое рабочее место
+     *     со своим id в рамках глобального рабочего полигона, в частности, рабочее место руководителя работ либо оператора при
+     *     ДСП - не глобальные рабочие места, соответствующее им глобальное рабочее место - станция),
      *   - это распоряжение не является помеченным как недействительное,
      *   - цепочка, которой принадлежит распоряжение, не должна иметь даты окончания действия,
      *   - пользователь должен быть на дежурстве и обладать соответствующими правами.
@@ -336,7 +356,7 @@ export const checkIfOrderActionCanBePerformed = {
       return (order) => (
         getters.canUserPerformAnyActionOnOrder(order.id) &&
         getters.canUserForcelyCloseOrOpenOrdersChain &&
-        getters.orderDispatchedOnCurrentWorkPoligon(order) &&
+        getters.orderDispatchedOnCurrentGlobalWorkPoligon(order) &&
         !order.orderChainEndDateTime &&
         getters.isOrderValid(order.id)
       ) ? true : false;

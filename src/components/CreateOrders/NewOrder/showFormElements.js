@@ -2,6 +2,8 @@ import { computed } from 'vue';
 import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CIRCULAR_ORDER_SIGN,
+  SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  SPECIAL_OPEN_BLOCK_ORDER_SIGN,
 } from '@/constants/orderPatterns';
 import {
   FILLED_ORDER_DROPDOWN_ELEMENTS,
@@ -56,10 +58,24 @@ import {
     const isElementWithOrderPlaceMarker = (element) =>
       element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.STATION_ACTION_PLACE ||
       element.ref === FILLED_ORDER_DROPDOWN_ELEMENTS.BLOCK_ACTION_PLACE;
-    return state.orderText?.orderText?.find((el) => isElementWithOrderPlaceMarker(el) ) != null
+    return state.orderText?.orderText?.find((el) => isElementWithOrderPlaceMarker(el)) != null
       ? showOnGIDOptions[1]
       : showOnGIDOptions[0];
   });
+
+  // Флаг необходимости отображения издаваемого документа на ГИД
+  const getShowOnGidFlag = computed(() =>
+    // отображению подлежат только Распоряжения ДНЦ "О закрытии (пути) станции/перегона", "Об открытии (пути) станции/перегона"
+    props.orderType === ORDER_PATTERN_TYPES.ORDER &&
+    (
+      state.specialTrainCategories?.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) ||
+      state.specialTrainCategories?.includes(SPECIAL_OPEN_BLOCK_ORDER_SIGN)
+    )
+    // это должен быть шаблонный документ, в тексте которого должен содержаться элемент с указанием места действия
+    ? getUserDutyToDefineOrderPlace.value
+    // в противном случае документ отображению на ГИД не подлежит
+    : showOnGIDOptions[0]
+  );
 
   // Отображать ли флаг выбора временного промежутка действия распоряжения.
   // Для всех распоряжений ДНЦ эти поля будут отсутствовать. Если их необходимо будет включить,
@@ -94,7 +110,7 @@ import {
     showConnectedOrderFields,
     showDisplayOnGIDFlag,
     showDisplayOnGIDFields,
-    getUserDutyToDefineOrderPlace,
+    getShowOnGidFlag,
     showDisplayOrderTimespanFlag,
     showDisplayOrderTimespan,
     getUserDutyToDefineOrderTimeSpan,

@@ -110,6 +110,11 @@
                     @click="showOrderInfo(slotProps.data)"
                   />
                 </div>
+                <!--DEL:{{canOrdersChainBeDeleted({
+                  orderId: slotProps.data.id,
+                  orderChainId: slotProps.data.orderChainId,
+                  orderChainEndDateTime: slotProps.data.orderChainEndDateTime,
+                })}}-->
                 <!-- удалить распоряжение / цепочку распоряжений -->
                 <div v-if="canOrdersChainBeDeleted({
                   orderId: slotProps.data.id,
@@ -123,8 +128,10 @@
                     @click="deleteOrdersChain(slotProps.data.orderChainId)"
                   />
                 </div>
+                <!--CREATE:{{canDispatchOrdersConnectedToGivenOrder(slotProps.data.id)}}-->
                 <!-- создать распоряжение, связанное с текущим -->
-                <div v-if="canDispatchOrdersConnectedToGivenOrder(slotProps.data.id) &&
+                <div v-if="/*(!slotProps.data.end || slotProps.data.end >= getCurrDateTime) &&*/
+                  canDispatchOrdersConnectedToGivenOrder(slotProps.data.id) &&
                   createRelativeOrderContextMenuItems(slotProps.data.id).length"
                 >
                   <TieredMenu
@@ -785,6 +792,7 @@
         handleSaveAdditionallyInformedPeopleInfo,
         handleCancelEditAdditionallyInformedPeopleInfo,
         handleCheckAdditionallyInformedPeopleDataChanged,
+        //getCurrDateTime: computed(() => store.getters.getCurrDateTime),
       };
     },
   }

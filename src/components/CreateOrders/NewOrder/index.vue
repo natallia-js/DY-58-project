@@ -582,7 +582,7 @@
         showConnectedOrderFields,
         showDisplayOnGIDFlag,
         showDisplayOnGIDFields,
-        getUserDutyToDefineOrderPlace,
+        getShowOnGidFlag,
         showDisplayOrderTimespanFlag,
         showDisplayOrderTimespan,
         getUserDutyToDefineOrderTimeSpan,
@@ -690,7 +690,7 @@
 
       useWatchOrderPatterns({
         state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
-        getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
+        getShowOnGidFlag, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
       });
 
       useWatchRelatedOrder({
@@ -698,6 +698,7 @@
       });
 
       const { refreshOknas } = useOkna({ store, state, setRequestOrderTextFields, selectedOkno });
+
 
       /**
        * Монтирование компонента.
@@ -707,7 +708,7 @@
         state.prevRelatedOrder = props.prevOrderId ? { [props.prevOrderId]: true } : null;
         state.orderText = initialOrderText();
         // флаг необходимости указывать место действия документа
-        state.showOnGID = getUserDutyToDefineOrderPlace.value;
+        state.showOnGID = getShowOnGidFlag.value;
         // флаг необходимости явно определить время действия документа
         state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
         // Удаляем (если есть) выбранное "окно"

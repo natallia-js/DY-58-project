@@ -16,14 +16,22 @@
   text-align: center;
 }
 
-.dy58-table-header-cell-class {
-  position: relative;
-  text-align: left !important;
+@mixin dy58-table-header() {
+  position: relative !important;
   vertical-align: middle !important;
-  background: var(--bluegray-200) !important;
   color: var(--text-color) !important;
   padding: 5px !important;
   overflow: hidden;
+}
+
+.dy58-table-header-cell-class {
+  @include dy58-table-header();
+  background: var(--bluegray-200) !important;
+}
+
+.dy58-print-table-header-cell-class {
+  @include dy58-table-header();
+  background: #fff !important;
 }
 
 @mixin dy58-table-content-cell() {

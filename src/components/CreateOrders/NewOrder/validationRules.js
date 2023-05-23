@@ -188,7 +188,7 @@ export const useNewOrderValidationRules = ({ state, props /*, relatedOrderObject
   }
 
   watch(() => state.showOnGID, (newVal) => {
-    rules.orderPlace = newVal.value ? placeRules : {};
+    rules.orderPlace = newVal?.value ? placeRules : {};
     if (state.resetValueOnWatchChanges === true) {
       state.orderPlace = { place: null, value: null };
     }

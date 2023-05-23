@@ -268,6 +268,8 @@ export const getWorkOrders = {
             state: '',
             time: getLocaleDateTimeString(item.createDateTime, false),
             timeSpan: getTimeSpanString(item.type, item.timeSpan, getters.isECD, item.specialTrainCategories),
+            start: item.timeSpan.start,
+            end: item.timeSpan.end,
             orderNum: item.number,
             extendedOrderTitle: getExtendedOrderTitle(item),
             orderTitle: item.orderText.orderTitle,

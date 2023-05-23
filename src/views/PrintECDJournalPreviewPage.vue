@@ -1,12 +1,12 @@
 <template>
   <div class="p-m-2 dy58-print-data-container">
-    <h2 class="p-text-center p-m-2">
+    <h2 class="p-text-center p-m-2 .dy58-print-header">
       Оперативный журнал ЭЦД
     </h2>
-    <h3 class="p-text-center p-m-2">
+    <h3 class="p-text-center p-m-2 .dy58-print-header">
       Рабочий полигон {{ getUserWorkPoligonName() }}
     </h3>
-    <h3 v-if="startDisplayDate" class="p-text-center p-m-2">
+    <h3 v-if="startDisplayDate" class="p-text-center p-m-2 .dy58-print-header">
       период c {{ startDisplayDate }} по {{ endDisplayDate || 'настоящее время'}}
     </h3>
     <Button
@@ -17,7 +17,7 @@
     <DataTable
       :value="data"
       dataKey="id"
-      class="p-datatable-gridlines p-datatable-sm"
+      class="p-datatable-gridlines p-datatable-sm dy58-print-data-table"
       :rowHover="false"
       :scrollable="false"
       :loading="searchInProgress"
@@ -35,7 +35,7 @@
         :key="col.field"
         :header="col.title"
         :style="{ width: col.width, textAlign: col.align }"
-        headerClass="dy58-table-header-cell-class"
+        headerClass="dy58-print-table-header-cell-class"
         bodyClass="dy58-table-top-content-cell-class"
       >
         <template #body="slotProps">
@@ -194,8 +194,21 @@
     td    { page-break-inside: avoid; page-break-after: auto }
     thead { display: table-header-group }
     tfoot { display: table-footer-group }
+    @mixin set-print-font-family {
+      font-family: var(--font-family-print-doc) !important;
+    }
     /* Чтобы сохранить цвет ячеек внутри таблицы */
-    .dy58-print-data-container { -webkit-print-color-adjust: exact; color-adjust: exact; }
+    .dy58-print-data-container {
+      -webkit-print-color-adjust: exact;
+      color-adjust: exact;
+    }
+    .dy58-print-header {
+      @include set-print-font-family;
+    }
+    .dy58-print-data-table {
+      @include set-print-font-family;
+      font-size: 0.9rem;
+    }
     /* Убираем со страницы ненужные на печатном экземпляре элементы */
     .print-btn { display: none }
   }

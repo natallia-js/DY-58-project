@@ -4,7 +4,7 @@ import { watch } from 'vue';
 export const useWatchOrderPatterns = (inputVals) => {
   const {
     state, store, props, initialOrderText, setRelatedOrderNumberInOrderText,
-    getUserDutyToDefineOrderPlace, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
+    getShowOnGidFlag, getUserDutyToDefineOrderTimeSpan, setRequestOrderTextFields,
   } = inputVals;
 
   // Сюда попадаем (в частности) при перезагрузке страницы, когда не сразу доступны шаблоны распоряжений
@@ -32,7 +32,7 @@ export const useWatchOrderPatterns = (inputVals) => {
       state.specialTrainCategories = store.getters.getOrderPatternSpecialTrainCategories(newVal);
     }
     // флаг необходимости указывать место действия документа
-    state.showOnGID = getUserDutyToDefineOrderPlace.value;
+    state.showOnGID = getShowOnGidFlag.value;
     // флаг необходимости указывать время действия документа
     state.defineOrderTimeSpan = getUserDutyToDefineOrderTimeSpan.value;
     // Установка номера связанного документа в тексте создаваемого шаблонного распоряжения
