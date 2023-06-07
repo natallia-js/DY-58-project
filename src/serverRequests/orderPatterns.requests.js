@@ -55,8 +55,8 @@ export const createNewOrderPattern = async (params) => {
     specialTrainCategories,
     elements,
     isPersonalPattern,
-    workPoligonType,
-    workPoligonId,
+    //workPoligonType,
+    //workPoligonId,
   } = params;
   const response = await makeServerRequest({
     url: AUTH_SERVER_ACTIONS_PATHS.createOrderPattern,
@@ -69,8 +69,8 @@ export const createNewOrderPattern = async (params) => {
       specialTrainCategories,
       elements,
       isPersonalPattern,
-      workPoligonType,
-      workPoligonId,
+      //workPoligonType,
+      //workPoligonId,
     },
   });
   return response.data;

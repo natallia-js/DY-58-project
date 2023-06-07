@@ -2,6 +2,7 @@ import { getLocaleDateTimeString } from '@/additional/dateTimeConvertions';
 import {
   ORDER_PATTERN_TYPES,
   SPECIAL_CLOSE_BLOCK_ORDER_SIGN,
+  SPECIAL_OPEN_BLOCK_ORDER_SIGN,
   SPECIAL_ORDER_DSP_TAKE_DUTY_SIGN,
   SPECIAL_CIRCULAR_ORDER_SIGN,
 } from '@/constants/orderPatterns';
@@ -139,15 +140,18 @@ export const activeOrders = {
      * Если дополнительно указан параметр considerOrderId, то при поиске следующего распоряжения
      * необходимо учитывать его непосредственную взаимосвязь с текущим распоряжением: у искомого
      * распоряжения должна быть ссылка (dispatchedOnOrder) на id текущего распоряжения.
+     * Если дополнительно указан параметр specialTrainCategory (строка), то следующее распоряжение
+     * должно иметь специальную отметку specialTrainCategory.
      */
     isOrderFollowedByOrderOfGivenType(state) {
-      return ({ followerOrderType, order, considerOrderId = false }) => {
+      return ({ followerOrderType, order, considerOrderId = false, specialTrainCategory = null }) => {
         return state.data.find((item) =>
           !item.invalid &&
           item.orderChainId === order.orderChainId &&
           item.createDateTime > order.createDateTime &&
           item.type === followerOrderType &&
-          (!considerOrderId || item.dispatchedOnOrder === order._id)
+          (!considerOrderId || item.dispatchedOnOrder === order._id) &&
+          (!specialTrainCategory || (item.specialTrainCategories && item.specialTrainCategories.includes(specialTrainCategory)))
         ) ? true : false;
       };
     },
@@ -199,6 +203,11 @@ export const activeOrders = {
      * - если речь идет о распоряжении ДНЦ, то в рамках цепочки распоряжений только последнее
      *   распоряжение ДНЦ может рассматриваться как действующее / недействующее, все же предшествующие
      *   ему распоряжения ДНЦ автоматически становятся недействующими,
+     * - если речь идет о распоряжении ДНЦ, то в рамках цепочки распоряжений только распоряжение на закрытие перегона
+     *   считается действующим, если за ним в рамках этой же цепочки не следует ссылающееся на него распоряжение об открытии
+     *   перегона, для всех остальных типов распоряжений ДНЦ действует правило: в рамках цепочки распоряжений только последнее
+     *   распоряжение ДНЦ может рассматриваться как действующее / недействующее, все предшествующие ему распоряжения ДНЦ
+     *   автоматически становятся недействующими,
      * - приказ ЭЦД / запрещение ЭЦД, за которым следует валидное уведомление, ссылающееся именно на этого приказ /
      *   запрещение, считается недействующим,
      * - уведомление (отмена запрещения) ЭЦД может рассматриваться как действующие при условии, что
@@ -221,7 +230,14 @@ export const activeOrders = {
           ((item.type === ORDER_PATTERN_TYPES.NOTIFICATION) && getters.isOrderLastInChain(item)) ||
           (
             (item.type === ORDER_PATTERN_TYPES.ORDER) &&
-            !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ORDER, order: item })
+            (
+              (
+                item.specialTrainCategories.includes(SPECIAL_CLOSE_BLOCK_ORDER_SIGN) &&
+                !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ORDER, order: item,
+                  specialTrainCategory: SPECIAL_OPEN_BLOCK_ORDER_SIGN })
+              ) ||
+              !getters.isOrderFollowedByOrderOfGivenType({ followerOrderType: ORDER_PATTERN_TYPES.ORDER, order: item })
+            )
           ) ||
           (
             (item.type === ORDER_PATTERN_TYPES.ECD_ORDER || item.type === ORDER_PATTERN_TYPES.ECD_PROHIBITION) &&

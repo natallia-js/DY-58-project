@@ -416,13 +416,18 @@
             />
           </div>
           <!-- Принудительно завершить цепочку распоряжений -->
-          <div v-if="canForcelyCloseOrderChain(slotProps.data)" class="p-mt-2 p-d-inline-block">
+          <div v-if="canForcelyCloseOrderChain(slotProps.data)" class="p-mr-2 p-mt-2 p-d-inline-block">
             <Button
               icon="pi pi-pause"
               class="p-button-primary p-button dy58-order-action-button"
               v-tooltip.bottom="'Принудительно завершить цепочку'"
               @click="forcelyCloseOrdersChain(slotProps.data.orderChainId)"
             />
+          </div>
+          <div class="p-mr-2 p-mt-2 p-d-inline-block dy58-order-ids-block">
+            id цепочки = {{slotProps.data.orderChainId}},
+            id документа = {{slotProps.data.id}},
+            время окончания действия цепочки: {{getDateTimeString(slotProps.data.orderChainEndDateTime)}}
           </div>
         </div>
       </template>

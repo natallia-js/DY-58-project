@@ -700,8 +700,8 @@ export const orderPatterns = {
           specialTrainCategories,
           elements,
           isPersonalPattern: true,
-          workPoligonType: workPoligon.type,
-          workPoligonId: workPoligon.code,
+          //workPoligonType: workPoligon.type,
+          //workPoligonId: workPoligon.code,
         });
         context.commit(SET_CREATE_ORDER_PATTERN_RESULT, { error: false, message: responseData.message });
         context.commit(SET_SYSTEM_MESSAGE, { error: false, datetime: new Date(), message: responseData.message });
