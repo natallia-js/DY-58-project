@@ -96,7 +96,7 @@ export const orderPatterns = {
      * Группы распоряжений сортируются по наименованию соответствующей категории.
      */
     getOrderPatternsToDisplayInTreeSelect(state) {
-      return (patternsType) => {
+      return (patternsType, searchSubstring) => {
         // data is grouped by order category
         const orders = state.patterns
           .filter((pattern) => pattern.type === patternsType)
@@ -122,6 +122,8 @@ export const orderPatterns = {
         const groupedOrders = [];
         orders.forEach((order) => {
           const categoryGroup = groupedOrders.find((group) => group.key === order.category);
+          if (searchSubstring && order.title.toLowerCase().indexOf(searchSubstring.toLowerCase()) < 0)
+            return;
           const childItem = { key: order._id, label: order.title, data: order };
           if (!categoryGroup) {
             groupedOrders.push({

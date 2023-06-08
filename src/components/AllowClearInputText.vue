@@ -3,10 +3,11 @@
     <i class="pi pi-times" @click="handleClearInputTextValue" />
     <InputText
       type="text"
-      style="width:100%"
       :value="value"
       @input="handleChangeInputTextValue"
       :class="inputClass"
+      :placeholder="placeholder"
+      :style="style || 'width:100%'"
     />
   </span>
 </template>
@@ -26,6 +27,9 @@
       },
       inputClass: {
         type: Object,
+      },
+      placeholder: {
+        type: String,
       },
     },
 

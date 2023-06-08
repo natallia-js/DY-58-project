@@ -1,6 +1,6 @@
 <template>
   <div class="p-grid">
-    <div class="p-inputgroup p-col-12">
+    <div class="p-inputgroup p-col-12 p-d-flex p-flex-row p-flex-nowrap">
       <span class="p-inputgroup-addon">
         <RadioButton
           class="dy58-addon-button"
@@ -16,6 +16,13 @@
         style="width:100%"
         @show="handleFocusDropdown"
         @change="handleChooseOrderPattern"
+      />
+      <allow-clear-input-text
+        :value="state.searchTextInOrderPatterns"
+        @input="state.searchTextInOrderPatterns = $event"
+        v-tooltip="'Введите текст для поиска в наименованиях шаблонов'"
+        placeholder="Найти шаблон"
+        style="width:200px"
       />
     </div>
     <div class="p-inputgroup p-col-12">
@@ -62,12 +69,14 @@
   import { OrderPatternElementType, PossibleElementSizes } from '@/constants/orderPatterns';
   import { ORDER_TEXT_SOURCE, FILLED_ORDER_DROPDOWN_ELEMENTS } from '@/constants/orders';
   import getChildOrderPatternElementValueByParentElementValue from '@/additional/getChildOrderPatternElementValueByParentElementValue';
+  import AllowClearInputText from '@/components/AllowClearInputText';
 
   export default {
     name: 'dy58-order-text',
 
     components: {
       OrderPatternText,
+      AllowClearInputText,
     },
 
     emits: ['input'],
@@ -103,6 +112,8 @@
         // 2) для распоряжения без шаблона
         orderTitle: '',
         orderText: '',
+
+        searchTextInOrderPatterns: null,
       });
 
       watch(() => props.value, (newVal) => {
@@ -161,7 +172,7 @@
       });
 
       // список шаблонов распоряжений для отображения
-      const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType));
+      const getOrderPatterns = computed(() => store.getters.getOrderPatternsToDisplayInTreeSelect(props.orderType, state.searchTextInOrderPatterns));
 
       // возвращает объект выбранного из списка шаблона распоряжения
       const getSelectedOrderPattern = computed(() =>
