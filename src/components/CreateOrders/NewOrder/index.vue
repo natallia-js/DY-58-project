@@ -160,10 +160,11 @@
             <span v-else class="p-text-bold">На документ</span>
           </label>
           <TreeSelect
-            placeholder="Выберите действующий документ"
+            placeholder="Выбранный действующий документ"
             v-model="v$.prevRelatedOrder.$model"
             :options="getActiveOrdersToDisplayInTreeSelect"
             style="width:100%"
+            disabled="true"
           />
           <div v-if="relatedOrderObject" class="p-mt-2">
             <p v-if="getSectorStationOrBlockTitleById">
